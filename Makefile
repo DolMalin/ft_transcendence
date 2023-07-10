@@ -1,13 +1,13 @@
 all: build up
 
 up:
-	docker compose up
+	sudo docker compose up
 
 build:
-	docker compose build
+	sudo docker compose build
 
 down:
-	docker compose down
+	sudo docker compose down
 
 clean:
-	docker system prune -a -f --volumes
+	sudo docker system prune -a -f --volumes
