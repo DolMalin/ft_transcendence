@@ -1,13 +1,55 @@
-all: build up
+NAME = ft_malaise
+DOCKER = sudo docker
+COMPOSE = $(DOCKER) compose -p ${NAME} -f srcs/docker-compose.yml
+# MARIADB_VOLUME = ${HOME}/data/mariadb
+# WORDPRESS_VOLUME = ${HOME}/data/wordpress
+# DEPENDENCIES = $(MARIADB_VOLUME) $(WORDPRESS_VOLUME)
 
-up:
-	sudo docker compose up
 
-build:
-	sudo docker compose build
+all: up
+
+# $(MARIADB_VOLUME):
+# 	mkdir -p $(MARIADB_VOLUME)
+
+# $(WORDPRESS_VOLUME):
+# 	mkdir -p $(WORDPRESS_VOLUME)
+
+ps:
+	$(COMPOSE) ps
+
+images:
+	$(COMPOSE) images
+
+volumes:
+	$(DOCKER) volume ls
+
+networks:
+	$(DOCKER) network ls
+
+start: $(DEPENDENCIES)
+	$(COMPOSE) start
+
+stop:
+	$(COMPOSE) stop
+
+restart: $(DEPENDENCIES)
+	$(COMPOSE) restart
+
+up: $(DEPENDENCIES)
+	$(COMPOSE) up --detach --build
 
 down:
-	sudo docker compose down
+	$(COMPOSE) down
 
 clean:
-	sudo docker system prune -a -f --volumes
+	$(COMPOSE) down --rmi all --volumes
+
+fclean: clean
+	sudo $(RM) -r ${HOME}/data/*
+
+prune: down fclean
+	$(DOCKER) system prune -a -f
+
+re: fclean all
+
+.PHONY: all ps images volumes networks start stop restart up down clean fclean prune re
