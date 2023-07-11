@@ -1,20 +1,22 @@
 version: '3.8'
 
 services:
-  # app:
-  #   container_name: app
-  #   build:
-  #     context: ./app
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8080:8080"
+  app:
+    container_name: app
+    build:
+      context: ./app
+      args:
+        APP_PORT: ${APP_PORT}
+    restart: unless-stopped
+    ports:
+      - ${APP_PORT}:${APP_PORT}
 
-    server:
-      container_name: server
-      build:
-        context: ./server
-      restart: unless-stopped
-      ports:
-        - "3000:3000"
-    
-
+  server:
+    container_name: server
+    build:
+      context: ./server
+      args:
+        SERVER_PORT: ${SERVER_PORT}
+    restart: unless-stopped
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
