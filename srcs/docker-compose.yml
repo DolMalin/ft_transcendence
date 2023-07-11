@@ -1,22 +1,52 @@
 version: '3.8'
 
+networks:
+  transcendance:
+    name: transcendance
+    driver: bridge
+
 services:
+
   client:
     container_name: client
     build:
       context: ./client
       args:
         CLIENT_PORT: ${CLIENT_PORT}
-    restart: unless-stopped
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
+    restart: unless-stopped
 
   server:
     container_name: server
+    networks:
+      - transcendance
     build:
       context: ./server
       args:
         SERVER_PORT: ${SERVER_PORT}
-    restart: unless-stopped
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - ./.env
+    volumes:
+      - ./server:/usr/src/app
+    restart: unless-stopped
+
+  database:
+    container_name: database
+    networks:
+      - transcendance
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+      PGDATA: ${PGDATA}
+    volumes:
+      - database-volume:${PGDATA}
+    restart: unless-stopped
+
+volumes:
+  database-volume:
+    driver: local
