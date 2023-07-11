@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  app:
-    container_name: app
+  client:
+    container_name: client
     build:
-      context: ./app
+      context: ./client
       args:
-        APP_PORT: ${APP_PORT}
+        CLIENT_PORT: ${CLIENT_PORT}
     restart: unless-stopped
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - ${CLIENT_PORT}:${CLIENT_PORT}
 
   server:
     container_name: server
