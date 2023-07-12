@@ -1,18 +1,8 @@
 NAME = ft_malaise
 DOCKER = sudo docker
 COMPOSE = $(DOCKER) compose -p ${NAME} -f srcs/docker-compose.yml
-# MARIADB_VOLUME = ${HOME}/data/mariadb
-# WORDPRESS_VOLUME = ${HOME}/data/wordpress
-# DEPENDENCIES = $(MARIADB_VOLUME) $(WORDPRESS_VOLUME)
-
 
 all: up
-
-# $(MARIADB_VOLUME):
-# 	mkdir -p $(MARIADB_VOLUME)
-
-# $(WORDPRESS_VOLUME):
-# 	mkdir -p $(WORDPRESS_VOLUME)
 
 ps:
 	$(COMPOSE) ps
