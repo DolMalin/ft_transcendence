@@ -1,8 +1,8 @@
 version: '3.8'
 
 networks:
-  transcendance:
-    name: transcendance
+  transcendence:
+    name: transcendence
     driver: bridge
 
 services:
@@ -20,7 +20,7 @@ services:
   server:
     container_name: server
     networks:
-      - transcendance
+      - transcendence
     build:
       context: ./server
       args:
@@ -36,7 +36,7 @@ services:
   database:
     container_name: database
     networks:
-      - transcendance
+      - transcendence
     image: postgres
     environment:
       POSTGRES_USER: ${DATABASE_USER}
