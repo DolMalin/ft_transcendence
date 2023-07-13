@@ -31,8 +31,8 @@ up: $(DEPENDENCIES)
 down:
 	$(COMPOSE) down
 
-clean:
-	$(COMPOSE) down --rmi all --volumes
+# clean:
+# 	$(COMPOSE) down --rmi all --volumes
 
 fclean: clean
 	sudo $(RM) -r ${HOME}/data/*

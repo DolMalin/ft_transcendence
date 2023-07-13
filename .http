@@ -3,11 +3,25 @@ GET http://127.0.0.1:4545/users/
 ###
 
 POST http://127.0.0.1:4545/users
-content-type: application/json
 
+content-type: application/json
 {
     "firstName": "Corentin"
 }
 
+
+# GET THE AUTH URL
 ### 
 GET http://127.0.0.1:4545/auth/redirect
+
+
+###
+POST http://127.0.0.1:4545/auth/token
+
+content-type: application/json
+{
+    "truc":"bidule"
+}
+
+###
+GET http://127.0.0.1:4545/auth/token

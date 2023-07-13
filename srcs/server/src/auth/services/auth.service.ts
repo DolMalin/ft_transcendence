@@ -7,9 +7,15 @@ export class AuthService {
 
   
   buildRedirectUrl(): string {
-    return (
-      `${process.env.OAUTH_URL}/?client_id=${process.env.CLIENT_ID}&redirect_uri=${encodeURI(process.env.REDIRECT_URL)}&response_type=code`
-      )
+    let url = new URL( '/oauth/authorize', process.env.OAUTH_URL)
+    url.searchParams.set('client_id', process.env.CLIENT_ID)
+    url.searchParams.set('redirect_uri', process.env.REDIRECT_URL)
+    url.searchParams.set('response_type', 'code')
+    return (url.toString())
+  }
+
+  getToken() {
+    return "hello"
   }
 
   create(createAuthDto: CreateAuthDto) {
