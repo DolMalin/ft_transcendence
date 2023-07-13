@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { UpdateAuthDto } from '../dto/update-auth.dto';
+import axios from 'axios'
 
 @Injectable()
 export class AuthService {
@@ -14,8 +15,28 @@ export class AuthService {
     return (url.toString())
   }
 
-  getToken() {
-    return "hello"
+  async get42Token(code: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        axios.post(
+          "https://api.intra.42.fr/oauth/token",
+          {
+            grant_type: 'authorization_code',
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.SECRET,
+            code: code,
+            redirect_uri: process.env.REDIRECT_URL
+          },
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        ).then((response) => {
+          resolve(response.data as string)
+        }, (err) => {
+          reject(err)
+        })
+    })
   }
 
   create(createAuthDto: CreateAuthDto) {
