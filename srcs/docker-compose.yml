@@ -16,6 +16,8 @@ services:
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
     restart: unless-stopped
+    volumes:
+      - ./client:/usr/src/client
 
   server:
     container_name: server
