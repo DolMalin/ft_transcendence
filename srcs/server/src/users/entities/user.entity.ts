@@ -5,7 +5,6 @@ export class User {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column()
-	firstName: string;
-
+	@Column({type: 'int', default: -1})
+	ftId: number;
 }

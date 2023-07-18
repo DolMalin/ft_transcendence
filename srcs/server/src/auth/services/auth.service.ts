@@ -21,7 +21,7 @@ export class AuthService {
     return (url.toString())
   }
 
-  async get42Token(code: string): Promise<string> {
+  async getFtToken(code: string): Promise<string> {
     return new Promise((resolve, reject) => {
 
         const bodyParameters = {
@@ -51,7 +51,7 @@ export class AuthService {
     })
   }
 
-  async get42Id(token: string): Promise<string> {
+  async getFtId(token: string): Promise<number> {
     return new Promise((resolve, reject) => {
 
       const config = {
@@ -64,11 +64,11 @@ export class AuthService {
         "https://api.intra.42.fr/v2/me",
         config
       ).then((response) => {
-        resolve(response.data.id as string)
+        resolve(response.data.id as number)
       }, (err) => {
         reject(err)
       })
-      
+
     })
   }
 
