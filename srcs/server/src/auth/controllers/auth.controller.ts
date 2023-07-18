@@ -13,8 +13,8 @@ export class AuthController {
 
     @Get('callback')
     async token(@Body() body:any, @Req() req:any) {
-      const token = await this.authService.get42Token(req.query.code)
-      const login = await this.authService.get42Id(token)
+      const token = await this.authService.getFtToken(req.query.code)
+      const login = await this.authService.getFtId(token)
       console.log(login)
     }
 

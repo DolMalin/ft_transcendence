@@ -23,16 +23,16 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.userRepository.findOneBy({ id })
   } 
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = this.findOne(id)
     return this.userRepository.save({...user, ...updateUserDto})
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     const user = await this.findOne(id)
     return this.userRepository.remove(user)
   }
