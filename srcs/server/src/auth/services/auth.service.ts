@@ -1,41 +1,74 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { UpdateAuthDto } from '../dto/update-auth.dto';
+import { UsersService } from 'src/users/services/users.service';
 import axios from 'axios'
 
 @Injectable()
 export class AuthService {
+  constructor(private usersService: UsersService) { }
 
-  
+  // async validateUser(username: string): Promise<any> {
+  //   const user = await this.usersService.findOne()
+  // }
+
+
   buildRedirectUrl(): string {
     let url = new URL( '/oauth/authorize', process.env.OAUTH_URL)
     url.searchParams.set('client_id', process.env.CLIENT_ID)
-    url.searchParams.set('redirect_uri', process.env.REDIRECT_URL)
+    url.searchParams.set('redirect_uri', process.env.CALLBACK_URL)
     url.searchParams.set('response_type', 'code')
     return (url.toString())
   }
 
   async get42Token(code: string): Promise<string> {
     return new Promise((resolve, reject) => {
+
+        const bodyParameters = {
+          grant_type: 'authorization_code',
+          client_id: process.env.CLIENT_ID,
+          client_secret: process.env.SECRET,
+          code: code,
+          redirect_uri: process.env.CALLBACK_URL
+        }
+
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+
         axios.post(
           "https://api.intra.42.fr/oauth/token",
-          {
-            grant_type: 'authorization_code',
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.SECRET,
-            code: code,
-            redirect_uri: process.env.REDIRECT_URL
-          },
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          }
+          bodyParameters,
+          config
         ).then((response) => {
-          resolve(response.data as string)
+          resolve(response.data.access_token as string)
         }, (err) => {
           reject(err)
         })
+
+    })
+  }
+
+  async get42Id(token: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+
+      axios.get(
+        "https://api.intra.42.fr/v2/me",
+        config
+      ).then((response) => {
+        resolve(response.data.id as string)
+      }, (err) => {
+        reject(err)
+      })
+      
     })
   }
 
