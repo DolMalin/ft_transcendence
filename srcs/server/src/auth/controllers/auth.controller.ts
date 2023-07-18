@@ -11,7 +11,7 @@ export class AuthController {
       return this.authService.buildRedirectUrl()
     }
 
-    @Get('token')
+    @Get('callback')
     async token(@Body() body:any, @Req() req:any) {
       const token = await this.authService.get42Token(req.query.code)
       const login = await this.authService.get42Id(token)
