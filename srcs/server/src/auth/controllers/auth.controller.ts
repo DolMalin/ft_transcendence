@@ -1,9 +1,8 @@
-import { Controller, Get, Req, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Req, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity'
-
-
+import { LocalAuthGuard } from '../guards/local.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -17,21 +16,9 @@ export class AuthController {
       return this.authService.buildRedirectUrl()
     }
 
+    
+    @UseGuards(LocalAuthGuard)
     @Get('callback')
-    async token(@Body() body:any, @Req() req:any) {
-      const token = await this.authService.getFtToken(req.query.code)
-      const ftId = await this.authService.getFtId(token)
-
-      const user: User | null = await this.usersService.findOne(ftId)
-      if (user) {
-        console.log("login")
-      } else {
-        const newUser = await this.usersService.create({
-          ftId: ftId
-        })
-        console.log("user created!")
-      }
-
-    }
+    async login() { }
 
 }

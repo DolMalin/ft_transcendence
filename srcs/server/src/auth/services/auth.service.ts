@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger} from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { UpdateAuthDto } from '../dto/update-auth.dto';
 import { UsersService } from 'src/users/services/users.service';
+import { User } from 'src/users/entities/user.entity';
+
 import axios from 'axios'
+
 
 @Injectable()
 export class AuthService {
@@ -45,11 +48,12 @@ export class AuthService {
         ).then((response) => {
           resolve(response.data.access_token as string)
         }, (err) => {
-          reject(err)
+          resolve(null)
         })
 
     })
   }
+
 
   async getFtId(token: string): Promise<number> {
     return new Promise((resolve, reject) => {
@@ -66,10 +70,23 @@ export class AuthService {
       ).then((response) => {
         resolve(response.data.id as number)
       }, (err) => {
-        reject(err)
+        resolve(null)
       })
-
     })
+  }
+
+  /**
+   * @description Check the validity of a user from his given `ftId`, and then return him if it exists, or creates a new one
+   */
+  async validateUser(ftId: number): Promise<User> {
+    const user = await this.usersService.findOne(ftId)
+    if (user) {
+      Logger.log(`User #${ftId} logged`)
+      return user
+    }
+    const newUser = await this.usersService.create({ftId: ftId})
+    Logger.log(`User ${ftId} created`)
+    return newUser
   }
 
   create(createAuthDto: CreateAuthDto) {
