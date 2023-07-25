@@ -14,26 +14,27 @@ export class UsersService {
 		private userRepository: Repository<User>
 	) { }
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+    
 		const newUser = this.userRepository.create(createUserDto)
-		return this.userRepository.save(newUser)
+		return await this.userRepository.save(newUser)
   }
 
   findAll() {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return this.userRepository.findOneBy({ id })
+  findOne(ftId: number) {
+    return this.userRepository.findOneBy({ ftId })
   } 
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = this.findOne(id)
+  async update(ftId: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(ftId)
     return this.userRepository.save({...user, ...updateUserDto})
   }
 
-  async remove(id: number) {
-    const user = await this.findOne(id)
+  async remove(ftId: number) {
+    const user = await this.findOne(ftId)
     return this.userRepository.remove(user)
   }
 }
