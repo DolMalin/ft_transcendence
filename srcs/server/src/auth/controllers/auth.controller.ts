@@ -18,7 +18,9 @@ export class AuthController {
 
     
     @UseGuards(LocalAuthGuard)
-    @Get('callback')
-    async login() { }
+    @Get('login')
+    async login(@Req() req) {
+      return await this.authService.createJwt({sub: req.user.ftId})
+    }
 
 }

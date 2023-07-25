@@ -5,11 +5,15 @@ import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
 import axios from 'axios'
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) { }
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService
+    ) { }
 
   // async validateUser(username: string): Promise<any> {
   //   const user = await this.usersService.findOne()
@@ -87,6 +91,13 @@ export class AuthService {
     const newUser = await this.usersService.create({ftId: ftId})
     Logger.log(`User ${ftId} created`)
     return newUser
+  }
+
+  // @TODO
+  // payload type
+  // output type jwt
+  async createJwt(payload: any) {
+    return await this.jwtService.signAsync(payload)
   }
 
   create(createAuthDto: CreateAuthDto) {

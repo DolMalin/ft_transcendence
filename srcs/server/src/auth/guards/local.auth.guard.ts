@@ -16,10 +16,7 @@ export class LocalAuthGuard implements CanActivate {
 		if (!ftId)
 			throw new UnauthorizedException()
 
-		const user = await this.authService.validateUser(ftId)
-
-		//TODO
-		// CREATE AND SEND JWT TOKEN
-		return user
+		req.user = await this.authService.validateUser(ftId)
+		return true
 	}
 }
