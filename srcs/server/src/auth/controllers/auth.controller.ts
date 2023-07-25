@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req,Res, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity'
@@ -19,8 +19,9 @@ export class AuthController {
     
     @UseGuards(LocalAuthGuard)
     @Get('login')
-    async login(@Req() req) {
-      return await this.authService.createJwt({sub: req.user.ftId})
+    async login(@Req() req, @Res() res) {
+      res.cookie('access_token', await this.authService.createJwt({sub: req.user.ftId}))
+      res.send("authorized")
     }
 
 }
