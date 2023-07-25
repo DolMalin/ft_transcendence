@@ -5,6 +5,7 @@ import { FtAuthService } from '../services/ft.auth.service';
 @Injectable()
 export class FtAuthGuard implements CanActivate {
 	constructor(private ftAuthService: FtAuthService) { }
+
 	async canActivate(context: ExecutionContext  ): Promise<any>{
 		const req = context.switchToHttp().getRequest()
 

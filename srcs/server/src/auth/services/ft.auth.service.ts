@@ -15,11 +15,11 @@ export class FtAuthService {
     private jwtService: JwtService
     ) { }
 
-  // async validateUser(username: string): Promise<any> {
-  //   const user = await this.usersService.findOne()
-  // }
-
-
+  
+  /**
+   * 
+   * @description Build the url that redirects to the 42 auth app
+   */
   buildRedirectUrl(): string {
     let url = new URL( '/oauth/authorize', process.env.OAUTH_URL)
     url.searchParams.set('client_id', process.env.CLIENT_ID)
@@ -28,6 +28,11 @@ export class FtAuthService {
     return (url.toString())
   }
 
+
+  /**
+   * 
+   * @description Send a post request to the 42 api with the `callback code` and fetch the 42 auth `token` 
+   */
   async getFtToken(code: string): Promise<string> {
     return new Promise((resolve, reject) => {
 
@@ -59,6 +64,10 @@ export class FtAuthService {
   }
 
 
+  /**
+   * 
+   * @description  Send a get request to the 42 api with the `42 token` and fetch the token owner `ftId`
+   */
   async getFtId(token: string): Promise<number> {
     return new Promise((resolve, reject) => {
 
@@ -79,6 +88,7 @@ export class FtAuthService {
     })
   }
 
+
   /**
    * @description Check the validity of a user from his given `ftId`, and then return him if it exists, or creates a new one
    */
@@ -93,10 +103,12 @@ export class FtAuthService {
     return newUser
   }
 
-  // @TODO
-  // payload type
-  // output type jwt
-  async createJwt(payload: any) {
+
+  /**
+   * 
+   * @description Creates a `jwt` from the given `payload`
+   */
+  async createJwt(payload: {sub: Number}): Promise<string> {
     return await this.jwtService.signAsync(payload)
   }
 
