@@ -18,7 +18,7 @@ export class AuthController {
     @UseGuards(FtAuthGuard)
     @Get('login')
     async login(@Req() req: any, @Res() res: any) {
-      res.cookie('access_token', await this.authService.createJwt({sub: req.user.ftId}))
+      res.cookie('access_token', await this.authService.createJwt({id: req.user.id}))
       res.send("authorized")
     }
 

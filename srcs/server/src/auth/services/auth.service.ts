@@ -104,12 +104,11 @@ export class AuthService {
     return newUser
   }
 
-
   /**
    * 
    * @description Creates a `jwt` from the given `payload`
    */
-  async createJwt(payload: {sub: Number}): Promise<string> {
+  async createJwt(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload)
   }
 

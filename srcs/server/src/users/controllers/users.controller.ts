@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -27,12 +27,13 @@ export class UsersController {
     return this.usersService.findOneById(id);
   }
 
-  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  @Patch()
   update(
-    @Param('id') id: string,
+    @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
   @Delete(':id')

@@ -20,7 +20,6 @@ export class FtAuthGuard implements CanActivate {
 		req.user = await this.authService.validateUser(ftId)
 		if (!req.user)
 			throw new InternalServerErrorException()
-
 		return true
 	}
 }
