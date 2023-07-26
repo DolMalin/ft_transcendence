@@ -96,11 +96,11 @@ export class AuthService {
   async validateUser(ftId: number): Promise<User> {
     const user = await this.usersService.findOneByFtId(ftId)
     if (user) {
-      Logger.log(`User #${ftId} logged`)
+      Logger.log(`User #${user.id} logged`)
       return user
     }
     const newUser = await this.usersService.create({ftId: ftId})
-    Logger.log(`User ${ftId} created`)
+    Logger.log(`User ${newUser.id} created`)
     return newUser
   }
 
