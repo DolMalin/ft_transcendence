@@ -3,6 +3,7 @@ import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -15,6 +16,7 @@ export class UsersController {
   // }
   //
   
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();

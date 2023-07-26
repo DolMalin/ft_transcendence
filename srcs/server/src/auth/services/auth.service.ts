@@ -1,8 +1,9 @@
-import { Injectable, Logger} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException} from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { UpdateAuthDto } from '../dto/update-auth.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { Request } from 'express';
 
 import axios from 'axios'
 import { JwtService } from '@nestjs/jwt';
@@ -54,8 +55,8 @@ export class AuthService {
           "https://api.intra.42.fr/oauth/token",
           bodyParameters,
           config
-        ).then((response) => {
-          resolve(response.data.access_token as string)
+        ).then((res) => {
+          resolve(res.data.access_token as string)
         }, (err) => {
           resolve(null)
         })
@@ -80,8 +81,8 @@ export class AuthService {
       axios.get(
         "https://api.intra.42.fr/v2/me",
         config
-      ).then((response) => {
-        resolve(response.data.id as number)
+      ).then((res) => {
+        resolve(res.data.id as number)
       }, (err) => {
         resolve(null)
       })
@@ -111,6 +112,24 @@ export class AuthService {
   async createJwt(payload: {sub: Number}): Promise<string> {
     return await this.jwtService.signAsync(payload)
   }
+
+  /**
+   * 
+   * @description Check the validity of a given `jwt`, and returns its `payload`
+   */
+  async validateJwt(token: string): Promise<any> {
+      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_SECRET})
+      return payload
+  }
+
+  /**
+   * 
+   * @description extract the token from the request header, or send undefined
+   */
+  extractTokenFromHeader(req: Request): string | undefined {
+		const [type, token] = req.headers.authorization?.split(' ') ?? [];
+		return type === 'Bearer' ? token : undefined;
+	}
 
   create(createAuthDto: CreateAuthDto) {
     return 'This action adds a new auth'
