@@ -94,7 +94,7 @@ export class AuthService {
    * @description Check the validity of a user from his given `ftId`, and then return him if it exists, or creates a new one
    */
   async validateUser(ftId: number): Promise<User> {
-    const user = await this.usersService.findOne(ftId)
+    const user = await this.usersService.findOneByFtId(ftId)
     if (user) {
       Logger.log(`User #${ftId} logged`)
       return user

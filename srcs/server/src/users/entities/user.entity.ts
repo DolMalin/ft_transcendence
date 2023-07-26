@@ -1,10 +1,15 @@
+import { Field } from '@nestjs/graphql';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
-	@PrimaryGeneratedColumn()
-	id: number;
+	@PrimaryGeneratedColumn('uuid')
+	id: string
 
-	@Column({type: 'int', default: -1})
-	ftId: number;
+	@Column({type: 'int', unique: true})
+	ftId: number
+
+	@Column({type: 'varchar', length: 20, nullable: true})
+	@Field(() => String, {})
+	username: string
 }
