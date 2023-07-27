@@ -1,9 +1,6 @@
-import { Injectable, Logger, UnauthorizedException} from '@nestjs/common';
-import { CreateAuthDto } from '../dto/create-auth.dto';
-import { UpdateAuthDto } from '../dto/update-auth.dto';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
-import { Request } from 'express';
 
 import axios from 'axios'
 import { JwtService } from '@nestjs/jwt';
@@ -15,23 +12,21 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService
     ) { }
-
   
+
   /**
-   * 
    * @description Build the url that redirects to the 42 auth app
    */
-  buildRedirectUrl(): string {
+  buildRedirectUrl(): object {
     let url = new URL( '/oauth/authorize', process.env.OAUTH_URL)
     url.searchParams.set('client_id', process.env.CLIENT_ID)
     url.searchParams.set('redirect_uri', process.env.CALLBACK_URL)
     url.searchParams.set('response_type', 'code')
-    return (url.toString())
+    return ({url: url.toString()})
   }
 
 
   /**
-   * 
    * @description Send a post request to the 42 api with the `callback code` and fetch the 42 auth `token` 
    */
   async getFtToken(code: string): Promise<string> {
@@ -66,7 +61,6 @@ export class AuthService {
 
 
   /**
-   * 
    * @description  Send a get request to the 42 api with the `42 token` and fetch the token owner `ftId`
    */
   async getFtId(token: string): Promise<number> {
@@ -104,16 +98,16 @@ export class AuthService {
     return newUser
   }
 
+
   /**
-   * 
    * @description Creates a `jwt` from the given `payload`
    */
   async createJwt(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload)
   }
 
+
   /**
-   * 
    * @description Check the validity of a given `jwt`, and returns its `payload`
    */
   async validateJwt(token: string): Promise<any> {
@@ -121,32 +115,30 @@ export class AuthService {
       return payload
   }
 
+
   /**
-   * 
-   * @description extract the token from the request header, or send undefined
+   * @description Login user by creating a jwt and store it in user's cookies
    */
-  extractTokenFromHeader(req: Request): string | undefined {
-		const [type, token] = req.headers.authorization?.split(' ') ?? [];
-		return type === 'Bearer' ? token : undefined;
-	}
-
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth'
+  login(req: any, res: any) {
+    try {
+      res
+      .cookie('access_token', this.createJwt({id: req.user.id}))
+      .status(HttpStatus.OK)
+      .end()
+    } catch {
+      throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`
+  /** 
+   * @description Logout user by clearing its jwt in cookies
+   */
+  logout(@Req() req: any, @Res() res: any) {
+    try {
+      res.clearCookie("access_token").end()
+    } catch {
+      throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
+    }
   }
 }
