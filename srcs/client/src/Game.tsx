@@ -1,20 +1,38 @@
-import React from 'react';
-import './App.css';
-import Konva from 'konva';
-import { Stage, Layer, Text, Star } from 'react-konva';
+import React from 'react'
+import Phaser from 'phaser'
+import MainScene from './Game/MainScene'
 
-export function Game() {
+type AppProps = {}
+type AppState = {}
 
-  
-  return (
-    <div className='w-1'>
-      <Stage width={window.innerWidth / 2} height={window.innerHeight / 2} color={'blue'}>
-        <Layer>
-          
-        </Layer>
-      </Stage>
-    </div>
-  );
-};
+class Game extends React.Component<AppProps, AppState> {
+    constructor(props: AppProps) {
+        super(props)
+        const game = new Phaser.Game({
+            parent: 'game-root',
+            type: Phaser.AUTO,
+            width:600,
+            height:1000,
+            scene: [MainScene],
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: {
+                        y: 0,
+                        x: 0
+                    },
+                    // debug: true
+                }
+            }
+        })
+    }
 
-export default Game;
+    render () {
+        return (<>
+        <div id='game-root'></div>
+        This is React
+        </>)
+    }
+}
+
+export default Game
