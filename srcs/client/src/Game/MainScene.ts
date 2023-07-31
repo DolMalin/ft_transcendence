@@ -14,16 +14,17 @@ type Pos = {
 };
 
 class Player {
-    // paddle  : Phaser.Physics.Arcade.Image
-    // paddlePos : {x: number, y:number}
-    // PowerUp : [{
-    //     name    : string,
-    //     id      : number
-    // }]
-    // score   : number[]
+    paddle  : Phaser.Physics.Arcade.Image
+    paddlePos : {x: number, y:number}
+    PowerUp : [{}]
+    score   : number[]
 
-    // constructor() {
-    // }
+    constructor(paddleImage : Phaser.Physics.Arcade.Image, bounce : number, sceneDim : Dim, playerPos : Pos) {
+        this.paddle = paddleImage;
+        this.paddlePos = playerPos;
+        this.PowerUp = [{}];
+        this.score = 0;
+    }
 }
 
 class Ball extends Phaser.Scene {

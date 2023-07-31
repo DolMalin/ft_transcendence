@@ -9,7 +9,7 @@ class Game extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props)
         const game = new Phaser.Game({
-            parent: 'game-root',
+            parent: 'game',
             type: Phaser.AUTO,
             width:600,
             height:1000,
@@ -29,8 +29,7 @@ class Game extends React.Component<AppProps, AppState> {
 
     render () {
         return (<>
-        <div id='game-root'></div>
-        This is React
+        <div id='game'></div>
         </>)
     }
 }
