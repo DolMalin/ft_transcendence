@@ -17,7 +17,7 @@ class Player {
     paddle  : Phaser.Physics.Arcade.Image
     paddlePos : {x: number, y:number}
     PowerUp : [{}]
-    score   : number[]
+    score   : number
 
     constructor(paddleImage : Phaser.Physics.Arcade.Image, bounce : number, sceneDim : Dim, playerPos : Pos) {
         this.paddle = paddleImage;
@@ -81,23 +81,27 @@ class MainScene extends Phaser.Scene {
         // this.paddle[0].setVelocity(0)
         // this.paddle[1].setVelocity(0)
 
-        if (this.paddle[0].getBottomCenter().y >= height / 2)
-            this.firstHalfReached = true;
-        else
-            this.firstHalfReached = false;
-        if (this.cursor.down.isDown && !this.firstHalfReached)
-                this.paddle[0].setVelocityY(200)
-        else if (this.cursor.up.isDown)
+        if (this.paddle[0].getBottomCenter().y >= height / 2 && !this.cursor.up.isDown)
+            this.paddle[0].setVelocityY(0)
+        else if (this.cursor.down.isDown && !this.cursor.up.isDown)
+        {
+            this.paddle[0].setVelocityY(200)
+        }
+        else if (this.cursor.up.isDown && !this.cursor.down.isDown)
             this.paddle[0].setVelocityY(-200)
         else if (this.cursor.up.isUp && this.cursor.down.isUp)
             this.paddle[0].setVelocityY(0)
+        else
+            this.firstHalfReached = false;
         // else if (this.cursor.up.isUp)
         //     this.paddle[0].setVelocityY(0)
 
         if (this.cursor.left.isDown)
-            this.paddle[0].setVelocityX(-200)
+            this.paddle[0].setVelocityX(-(width / 2))
         else if (this.cursor.right.isDown)
-            this.paddle[0].setVelocityX(200)
+            this.paddle[0].setVelocityX((width / 2))
+        else if (this.cursor.left.isUp && this.cursor.right.isUp)
+            this.paddle[0].setVelocityX(0)
     }
 }
 
