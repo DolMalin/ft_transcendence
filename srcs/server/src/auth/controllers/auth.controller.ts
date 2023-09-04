@@ -16,10 +16,10 @@ export class AuthController {
     }
 
     @UseGuards(FtAuthGuard)
-    @Get('login')
+    @Get('login/:code')
     async login(@Req() req: any, @Res() res: any) {
-      res.status(301).redirect(process.env.CLIENT_URL)
-      this.authService.login(req, res)
+      const jwt = await this.authService.login(req, res)
+      res.send(jwt)
     }
 
     // @UseGuards(JwtAuthGuard)
@@ -27,5 +27,4 @@ export class AuthController {
     logout(@Req() req: any, @Res() res: any) {
       return this.authService.logout(req, res)
     }
-
 }

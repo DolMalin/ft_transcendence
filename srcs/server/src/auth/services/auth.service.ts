@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -31,13 +31,12 @@ export class AuthService {
    */
   async getFtToken(code: string): Promise<string> {
     return new Promise((resolve, reject) => {
-
         const bodyParameters = {
           grant_type: 'authorization_code',
           client_id: process.env.CLIENT_ID,
-          client_secret: process.env.SECRET,
           code: code,
-          redirect_uri: process.env.CALLBACK_URL
+          client_secret: process.env.SECRET,
+          redirect_uri: process.env.CLIENT_URL
         }
 
         const config = {
@@ -55,7 +54,6 @@ export class AuthService {
         }, (err) => {
           resolve(null)
         })
-
     })
   }
 
@@ -119,15 +117,10 @@ export class AuthService {
   /**
    * @description Login user by creating a jwt and store it in user's cookies
    */
-  login(req: any, res: any) {
-    try {
-      res
-      .cookie('access_token', this.createJwt({id: req.user.id}))
-      .status(HttpStatus.OK)
-      .end()
-    } catch {
-      throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
-    }
+  async login(req: any, res: any) {
+    const jwt = await this.createJwt({id: req.user.id})
+    return jwt
+
   }
 
 
