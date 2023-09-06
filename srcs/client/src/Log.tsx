@@ -32,9 +32,10 @@ class Log extends Component {
 			return false
 		
 		try {
-			const jwt:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`)
-			Cookies.set('token', jwt.data, {expires:7})
-			console.log(jwt.data)
+			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`)
+			Cookies.set('token', res.data.jwt, {httpOnly:true})
+			console.log(res.data)
+			
 			this.setStateAsync({isLogged:true})
 			
 		} catch (err) {

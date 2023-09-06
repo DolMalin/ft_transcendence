@@ -19,7 +19,7 @@ export class AuthController {
     @Get('login/:code')
     async login(@Req() req: any, @Res() res: any) {
       const jwt = await this.authService.login(req, res)
-      res.send(jwt)
+      res.cookie('jwt', jwt, {httpOnly: true, secure: true, domain:"localhost"}).send({status: 'ok'})
     }
 
     // @UseGuards(JwtAuthGuard)
