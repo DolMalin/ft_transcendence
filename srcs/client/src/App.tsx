@@ -3,6 +3,7 @@ import logo from './logo.svg';
 
 import './App.css';
 import Log from './Log';
+import Protect from './Protect';
 import {CookiesProvider, useCookies}  from 'react-cookie';
 
 function App() {
@@ -17,7 +18,8 @@ function App() {
             <div>Hello, world!</div>
           ) : (
             <Log />
-          )}
+            )}
+            <Protect />
         </div>
 
   );

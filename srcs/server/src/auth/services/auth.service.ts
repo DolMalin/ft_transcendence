@@ -52,6 +52,7 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
+          console.log(err)
           resolve(null)
         })
     })
@@ -129,7 +130,7 @@ export class AuthService {
    */
   logout(@Req() req: any, @Res() res: any) {
     try {
-      res.clearCookie("access_token").end()
+      res.clearCookie("jwt").end()
     } catch {
       throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
     }
