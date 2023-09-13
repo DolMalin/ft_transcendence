@@ -120,8 +120,7 @@ export class AuthService {
    */
   async login(req: any, res: any) {
     const jwt = await this.createJwt({id: req.user.id})
-    return jwt
-
+    res.cookie('jwt', jwt, {httpOnly: true, secure: true, domain:"127.0.0.1", sameSite: "none", maxAge: 1000 * 60 * 60 * 24, path: '/'}).send({status: 'ok'})
   }
 
 

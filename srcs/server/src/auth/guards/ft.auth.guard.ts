@@ -13,12 +13,12 @@ export class FtAuthGuard implements CanActivate {
 		if (!code?.length)
 			return false
 
-			const token = await this.authService.getFtToken(code)
-			if (!token)
+		const token = await this.authService.getFtToken(code)
+		if (!token)
 			throw new UnauthorizedException()
 
-			const ftId = await this.authService.getFtId(token)
-			if (!ftId)
+		const ftId = await this.authService.getFtId(token)
+		if (!ftId)
 			throw new UnauthorizedException()
 
 		req.user = await this.authService.validateUser(ftId)

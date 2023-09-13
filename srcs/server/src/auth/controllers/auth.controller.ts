@@ -20,8 +20,7 @@ export class AuthController {
     @UseGuards(FtAuthGuard)
     @Get('login/:code')
     async login(@Req() req: any, @Res() res: any) {
-      const jwt = await this.authService.login(req, res)
-      res.cookie('jwt', jwt, {httpOnly: true, secure: true, domain:"127.0.0.1", sameSite: "none", maxAge: 1000 * 60 * 60 * 24, path: '/'}).send({status: 'ok'})
+      return await this.authService.login(req, res)
     }
 
     @UseGuards(JwtAuthGuard)
