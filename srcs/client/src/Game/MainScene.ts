@@ -143,7 +143,7 @@ class Ball extends Phaser.Scene {
         this.randomX < 0.5 ? this.randomX *= -1 : this.randomX *= 1;
         this.randomY < 0.5 ? this.randomY *= -1 : this.randomY *= 1;
 
-        this.obj.setVelocity(this.randomX * sceneDim.height / 1.8, this.randomY * sceneDim.height / 1.8);
+        this.obj.setVelocity(this.randomX * sceneDim.height / 1.5, this.randomY * sceneDim.height / 1.5);
         this.obj.setCollideWorldBounds(true)
     }
     sleep = (ms : number) => new Promise(r => setTimeout(r, ms));
