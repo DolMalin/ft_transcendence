@@ -29,9 +29,11 @@ class Player {
     id : number
     score   : number
     playerInput : Phaser.Input.Keyboard.Key []
+    startingPos : Pos;
+    isAtStartingPos : boolean;
 
     private scene : Phaser.Scene
-    private cursor : Phaser.Types.Input.Keyboard.CursorKeys;
+    private cursor : Phaser.Types.Input.Keyboard.CursorKeys
 
     constructor(paddleImage : Phaser.Physics.Arcade.Image, sceneRef : Phaser.Scene, identifier : number
         ) {
@@ -40,6 +42,12 @@ class Player {
         this.score = 0;
         this.scene = sceneRef;
         this.id = identifier;
+        this.isAtStartingPos = true;
+
+        if (this.id === 1)
+            this.startingPos = {x : this.scene.sys.game.canvas.width / 2, y : 0}
+        else if (this.id === 2)
+            this.startingPos = {x : this.scene.sys.game.canvas.width / 2, y : this.scene.sys.game.canvas.height}
 
         this.paddle.setCollideWorldBounds(true);
 
@@ -61,7 +69,12 @@ class Player {
             ]
         }
     }
-    update(time: number, delta: number): void {
+
+    /**
+    * @description take a guess
+    */
+    handleMovement()
+    {
         if (this.id === 1 && this.paddle.getBottomCenter().y > this.scene.sys.game.canvas.height / 2 - (this.paddle.height / 2) && !this.playerInput[0].isDown)
             this.paddle.setVelocityY(0)
         else if (this.id === 2 && this.paddle.getTopCenter().y < this.scene.sys.game.canvas.height / 2 + (this.paddle.height / 2) && !this.playerInput[2].isDown)
@@ -74,7 +87,7 @@ class Player {
             this.paddle.setVelocityY(-300)
         else if (this.playerInput[0].isUp && this.playerInput[2].isUp)
             this.paddle.setVelocityY(0)
-
+    
         if (this.playerInput[1].isDown)
             this.paddle.setVelocityX(-(this.scene.sys.game.canvas.width / 1.4))
         else if (this.playerInput[3].isDown)
@@ -82,12 +95,18 @@ class Player {
         else if (this.playerInput[1].isUp && this.playerInput[3].isUp)
             this.paddle.setVelocityX(0)
     }
+
+    update(time: number, delta: number): void {
+        this.handleMovement();
+        if (JSON.stringify({x : this.paddle.x, y : this.paddle.y}) !== JSON.stringify(this.startingPos))
+            this.isAtStartingPos = false;
+        else
+            this.isAtStartingPos = true;
+    }
     resetPos() {
         if (this.id === 1)
         {
-            let dirX = this.paddle.x - this.scene.sys.game.canvas.width;
-            let dirY = 0 - this.paddle.y;
-            this.paddle.setVelocity(dirX, dirY)
+            this.paddle.setPosition(this.scene.sys.game.canvas.width / 2, 0 + this.paddle.height / 2)
         }
         if (this.id === 2)
             this.paddle.setPosition(this.scene.sys.game.canvas.width / 2, this.scene.sys.game.canvas.height - (this.paddle.height / 2))
@@ -99,22 +118,23 @@ class Ball extends Phaser.Scene {
     startingPos: Pos
     type: string
     dim : Dim
+    pOneRef : Player
+    pTwoRef : Player
     
-    private sceneRef : Phaser.Scene
     private randomX : number
     private randomY : number
 
-    constructor(scene : Phaser.Scene, ballSprite : Phaser.Physics.Arcade.Sprite, bounce : number, sceneDim : Dim, startPos : Pos, ballType : string) {
+    constructor(player1 : Player, player2 : Player, ballSprite : Phaser.Physics.Arcade.Sprite, bounce : number, sceneDim : Dim, startPos : Pos, ballType : string) {
         super();
-        this.sceneRef = scene;
         this.type = ballType;
         this.startingPos = startPos;
         this.obj = ballSprite;
         this.dim = sceneDim;
         this.randomX = 0;
+        this.pOneRef = player1;
+        this.pTwoRef = player2;
         
         // let {width, height} = this.sys.game.canvas;
-
         this.obj.setMaxVelocity(sceneDim.width, sceneDim.height);
         this.obj.setBounce(bounce, bounce).setScale(0.5).setDepth(1).setAngularAcceleration(1000).setCircle(this.obj.width / 2);
 
@@ -128,38 +148,39 @@ class Ball extends Phaser.Scene {
     }
     sleep = (ms : number) => new Promise(r => setTimeout(r, ms));
     update(time: number, delta: number): number {
-        
-        if (this.obj.y <= this.obj.height / 2)
-        {
-            if (this.type === 'temp')
-                return (2);
-            this.randomX = Math.random();
-            this.randomY = Math.random();
-            this.randomX < 0.5 ? this.randomX *= -1 : this.randomX *= 1;
-            this.randomY < 0.5 ? this.randomY *= -1 : this.randomY *= 1;
-            this.randomY > 0.95 ? this.randomY -= 0.10 : this.randomY += 0;
-            this.randomY < 0.05 ? this.randomY += 0.10 : this.randomY += 0;
-            
-            this.obj.setPosition(this.startingPos.x, this.startingPos.y);
-            this.obj.setVelocity(this.randomX * this.dim.height / 1.8, this.randomY * this.dim.height / 1.8);
-            return (2);
-        }
-        if (this.obj.y >= this.dim.height - this.obj.height / 2)
-        {
-            if (this.type === 'temp')
-                return (1);
-            this.randomX = Math.random();
-            this.randomY = Math.random();
-            this.randomX < 0.5 ? this.randomX *= -1 : this.randomX *= 1;
-            this.randomY < 0.5 ? this.randomY *= -1 : this.randomY *= 1;
-            this.randomY > 0.95 ? this.randomY -= 0.10 : this.randomY += 0;
-            this.randomY < 0.05 ? this.randomY += 0.10 : this.randomY += 0;
+            if (this.obj.y <= this.obj.height / 2)
+            {
+                if (this.type === 'temp')
+                    return (2);
 
-            this.obj.setPosition(this.startingPos.x, this.startingPos.y);
-            this.obj.setVelocity(this.randomX * this.dim.height / 1.8, this.randomY * this.dim.height / 1.8);
-            return (1);
-        }
-        return(0);
+                this.randomX = Math.random();
+                this.randomY = Math.random();
+                this.randomX < 0.5 ? this.randomX *= -1 : this.randomX *= 1;
+                this.randomY < 0.5 ? this.randomY *= -1 : this.randomY *= 1;
+                this.randomY >= 0.90 ? this.randomY -= 0.10 : this.randomY += 0;
+                this.randomY <= 0.10 ? this.randomY += 0.10 : this.randomY += 0;
+                
+                this.obj.setPosition(this.startingPos.x, this.startingPos.y);
+                this.obj.setVelocity(this.randomX * (this.dim.height / 1.5), this.randomY * (this.dim.height / 1.5));
+                return (2);
+            }
+            if (this.obj.y >= this.dim.height - this.obj.height / 2)
+            {
+                if (this.type === 'temp')
+                    return (1);
+
+                this.randomX = Math.random();
+                this.randomY = Math.random();
+                this.randomX < 0.5 ? this.randomX *= -1 : this.randomX *= 1;
+                this.randomY < 0.5 ? this.randomY *= -1 : this.randomY *= 1;
+                this.randomY > 0.95 ? this.randomY -= 0.10 : this.randomY += 0;
+                this.randomY < 0.05 ? this.randomY += 0.10 : this.randomY += 0;
+                
+                this.obj.setPosition(this.startingPos.x, this.startingPos.y);
+                this.obj.setVelocity(this.randomX * this.dim.height / 1.8, this.randomY * this.dim.height / 1.8);
+                return (1);
+            }
+            return(0);
     }
 }
 
@@ -169,15 +190,18 @@ class MainScene extends Phaser.Scene {
     }
 
     ball :  Ball;
-    scores1 : Phaser.GameObjects.Image[] = [];
-    scores2 : Phaser.GameObjects.Image[] = [];
+    scores1 : Phaser.GameObjects.Image;
+    scores2 : Phaser.GameObjects.Image;
+    scoreToReach : number = 10;
     cursor1 : Phaser.Types.Input.Keyboard.CursorKeys;
     player1 : Player;
     player2 : Player;
+    newGameButton : Phaser.GameObjects.Image;
 
     preload() {
         this.load.image('ball', 'game-assets/ball.png');
         this.load.image('paddle', 'game-assets/testPaddle.png');
+        this.load.image('play', 'game-assets/play.png');
         this.load.image('1', 'game-assets/1.png');
         this.load.image('2', 'game-assets/2.png');
         this.load.image('3', 'game-assets/3.png');
@@ -192,10 +216,11 @@ class MainScene extends Phaser.Scene {
     create ()
     {
         let {width, height} = this.sys.game.canvas;
-        this.ball = new Ball(this, this.physics.add.sprite(width / 2, height / 2, 'ball'), 3, {width, height}, {x : width / 2, y : height / 2}, 'vanilla')
-
+        
         this.player1 = new Player(this.physics.add.image(width / 2, 0, 'paddle').setDepth(1), this, 1);
         this.player2 = new Player(this.physics.add.image(width / 2, height, 'paddle').setDepth(1), this, 2);
+
+        this.ball = new Ball(this.player1, this.player2, this.physics.add.sprite(width / 2, height / 2, 'ball'), 3, {width, height}, {x : width / 2, y : height / 2}, 'vanilla')
 
         this.cursor1 = this.input.keyboard.createCursorKeys();
         this.cameras.main.setBackgroundColor(0xbababa);
@@ -212,22 +237,16 @@ class MainScene extends Phaser.Scene {
         if (playerId === 1 && playerScore <= 10)
         {
             if (playerScore > 1)
-            {
-                this.scores1[0].destroy(true);
-                this.scores1.shift();
-            }
+                this.scores1.destroy(true);
 
-
-            this.scores1.push(this.add.image(width / 2, height / 4, keys[playerScore - 1]));
+            this.scores1 = this.add.image(width / 2, height / 4, keys[playerScore - 1]);
         }
         if (playerId === 2 && playerScore <= 10)
         {
             if (playerScore > 1)
-            {
-                this.scores2[0].destroy(true);
-                this.scores2.shift();
-            }
-            this.scores2.push(this.add.image(width / 2, (height - (height / 4)), keys[playerScore - 1]));
+                this.scores2.destroy(true);
+
+            this.scores2 = this.add.image(width / 2, (height - (height / 4)), keys[playerScore - 1]);
         }
     }
 
@@ -257,9 +276,15 @@ class MainScene extends Phaser.Scene {
             default:
                 break;
         }
-        if (this.player1.score >= 10 || this.player2.score >= 10)
+        if (this.player1.score >= 2 || this.player2.score >= 2)
         {
-            this.scene.pause();
+            this.ball.obj.destroy();
+            this.player1.resetPos();
+            this.player2.resetPos();
+
+            this.newGameButton = this.add.image(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, 'play').setDepth(2);
+            this.newGameButton.setInteractive({userHandCursor : true});
+            this.newGameButton.on('pointerdown', () => {this.scene.restart()});
         }
     }
 }
