@@ -2,7 +2,7 @@ import { Controller, Get, Req,Res,Headers, Body, UseGuards } from '@nestjs/commo
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
-import { JwtAuthGuard } from '../guards/jwt.auth.guard';
+import { JwtAuthGuard } from '../guards/accessToken.auth.guard';
 import { read } from 'fs';
 
 @Controller('auth')

@@ -2,7 +2,6 @@ import { Controller, Get, Post, Req, Body, Patch, Param, Delete, UseGuards } fro
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +14,6 @@ export class UsersController {
   // }
   //
   
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -26,7 +24,6 @@ export class UsersController {
     return this.usersService.findOneById(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch()
   update(
     @Req() req:any,
