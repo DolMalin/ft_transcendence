@@ -3,7 +3,8 @@ import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
 import axios from 'axios'
-import { JwtService } from '@nestjs/jwt';
+import * as argon2 from 'argon2'
+import { JwtService } from '@nestjs/jwt'
 
 
 @Injectable()
@@ -101,10 +102,35 @@ export class AuthService {
   /**
    * @description Creates a `jwt` from the given `payload`
    */
-  async createJwt(payload: {id: string}): Promise<string> {
-    return await this.jwtService.signAsync(payload)
+  // async createJwt(payload: {id: string}): Promise<string> {
+  //   return await this.jwtService.signAsync(payload)
+  // }
+
+  async createAccessToken(payload: {id: string}): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn:'5min'
+    })
   }
 
+
+  async createRefreshToken(payload: {id: string}): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn:'7d'
+    })
+  }
+
+  async updateRefreshToken(id: string, refreshToken: string) {
+    const hash = await this.hash(refreshToken)
+    await this.usersService.update(id, {
+      refreshToken: await this.hash(refreshToken)
+    })
+  }
+
+  async hash(data: string): Promise<string> {
+    return argon2.hash(data)
+  }
 
   /**
    * @description Check the validity of a given `jwt`, and returns its `payload`
@@ -119,8 +145,19 @@ export class AuthService {
    * @description Login user by creating a jwt and store it in user's cookies
    */
   async login(req: any, res: any) {
-    const jwt = await this.createJwt({id: req.user.id})
-    res.cookie('jwt', jwt, {httpOnly: true, secure: true, domain:"127.0.0.1", sameSite: "none", maxAge: 1000 * 60 * 60 * 24, path: '/'}).send({status: 'ok'})
+    const refreshToken = await this.createRefreshToken({id: req.user.id})
+    const accessToken = await this.createAccessToken({id: req.user.id})
+
+    await this.updateRefreshToken(req.user.id, refreshToken)
+    
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      .send({accessToken: accessToken})
+
   }
 
 
@@ -134,4 +171,5 @@ export class AuthService {
       throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
     }
   }
+
 }

@@ -7,4 +7,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	// @Field({nullable: true})
 	
 	username?: string
+	refreshToken?: string
 }

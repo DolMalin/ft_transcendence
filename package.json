@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "class-validator": "^0.14.0",
-    "dotenv": "^16.3.1",
-    "js-cookie": "^3.0.5"
-  }
-}

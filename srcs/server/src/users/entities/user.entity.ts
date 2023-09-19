@@ -12,4 +12,11 @@ export class User {
 	@Column({type: 'varchar', length: 20, nullable: true})
 	@Field(() => String, {})
 	username: string
+
+
+	@Column({type: 'varchar', nullable: true})
+	@Field(() => String, {})
+	refreshToken: string
+
+
 }
