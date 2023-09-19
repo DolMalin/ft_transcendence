@@ -6,6 +6,8 @@ import { User } from './users/entities/user.entity';
 
 // Entities
 import { UsersModule } from './users/users.module';
+import { ChatGateway } from './chat/chat.gateway';
+import { GameGateway } from './game/game.gateway';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -21,6 +23,6 @@ import { UsersModule } from './users/users.module';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway, GameGateway],
 })
 export class AppModule {}
