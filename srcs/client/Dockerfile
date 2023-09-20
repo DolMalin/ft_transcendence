@@ -8,11 +8,9 @@ ENV PATH /usr/src/client/node_modules/.bin:$PATH
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install
-# RUN npm install react-scripts@5.0.1 -g
-# RUN npm install --save typescript
+# RUN npm install
 
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}
 ENV PORT=${CLIENT_PORT}
-CMD npm run start ; npm install --save react-scripts@5.0.1 -g ; npm install --save typescript
+CMD  npm install ; npm i react-scripts ; npm i typescript ; npm run start
