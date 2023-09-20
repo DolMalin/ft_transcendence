@@ -276,7 +276,7 @@ class MainScene extends Phaser.Scene {
             default:
                 break;
         }
-        if (this.player1.score >= 2 || this.player2.score >= 2)
+        if (this.player1.score >= this.scoreToReach || this.player2.score >= this.scoreToReach)
         {
             this.ball.obj.destroy();
             this.player1.resetPos();
