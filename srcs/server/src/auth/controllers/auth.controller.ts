@@ -2,7 +2,7 @@ import { Controller, Get, Req,Res,Headers, Body, UseGuards } from '@nestjs/commo
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
-import { JwtAuthGuard } from '../guards/accessToken.auth.guard';
+import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
 import { read } from 'fs';
 
 @Controller('auth')
@@ -23,22 +23,23 @@ export class AuthController {
       return await this.authService.login(req, res)
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
       return this.authService.logout(req, res)
     }
     
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(AccessTokenGuard)
     @Get('protected')
     protected(@Req() req: any, @Res() res: any, @Headers() headers: any) {
       console.log("prout")
       res.send('ok')
     }
 
-    @Get('test')
-    test(@Req() req: any, @Res() res: any) {
-      res.send("coucou biloute")
+    @UseGuards(AccessTokenGuard)
+    @Get('validate')
+    validate(@Req() req: any, @Res() res: any) {
+      res.send('ok')
     }
 
 
