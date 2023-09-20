@@ -36,7 +36,6 @@ clean:
 	$(COMPOSE_SKEWL) down --rmi all --volumes
 
 fclean: clean
-	sudo $(RM) -r ${HOME}/data/*
 
 prune: down fclean
 	$(DOCKER) system prune -a -f
