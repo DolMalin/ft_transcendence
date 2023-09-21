@@ -38,13 +38,6 @@ export class AuthController {
       return this.authService.logout(req, res)
     }
 
-    
-    @UseGuards(AccessTokenGuard)
-    @Get('protected')
-    protected(@Req() req: any, @Res() res: any, @Headers() headers: any) {
-      console.log("prout")
-      res.send('ok')
-    }
 
     @UseGuards(AccessTokenGuard)
     @Get('validate')
