@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
 import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
+import { RefreshTokenGuard } from '../guards/refreshToken.auth.guard';
 import { read } from 'fs';
 
 @Controller('auth')
@@ -23,11 +24,20 @@ export class AuthController {
       return await this.authService.login(req, res)
     }
 
+    
+    @UseGuards(RefreshTokenGuard)
+    @Get('refresh')
+    refresh(@Req() req: any, @Res() res: any) {
+      return this.authService.login(req, res)
+    }
+
+
     @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
       return this.authService.logout(req, res)
     }
+
     
     @UseGuards(AccessTokenGuard)
     @Get('protected')
@@ -41,6 +51,5 @@ export class AuthController {
     validate(@Req() req: any, @Res() res: any) {
       res.send('ok')
     }
-
 
 }

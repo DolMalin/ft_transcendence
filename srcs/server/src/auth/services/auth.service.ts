@@ -102,9 +102,7 @@ export class AuthService {
   /**
    * @description Creates a `jwt` from the given `payload`
    */
-  // async createJwt(payload: {id: string}): Promise<string> {
-  //   return await this.jwtService.signAsync(payload)
-  // }
+
 
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
@@ -161,6 +159,7 @@ export class AuthService {
   }
 
 
+  // @TODO: remove refresh token from db
   /** 
    * @description Logout user by clearing its jwt in cookies
    */
@@ -171,5 +170,7 @@ export class AuthService {
       throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
     }
   }
+
+
 
 }
