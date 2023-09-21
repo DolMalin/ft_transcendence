@@ -28,7 +28,7 @@ export class AuthController {
     @UseGuards(RefreshTokenGuard)
     @Get('refresh')
     refresh(@Req() req: any, @Res() res: any) {
-      return this.authService.login(req, res)
+      return this.authService.refresh(req, res)
     }
 
 

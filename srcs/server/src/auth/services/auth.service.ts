@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -120,7 +120,6 @@ export class AuthService {
   }
 
   async updateRefreshToken(id: string, refreshToken: string) {
-    const hash = await this.hash(refreshToken)
     await this.usersService.update(id, {
       refreshToken: await this.hash(refreshToken)
     })
@@ -146,7 +145,7 @@ export class AuthService {
     const refreshToken = await this.createRefreshToken({id: req.user.id})
     const accessToken = await this.createAccessToken({id: req.user.id})
 
-    await this.updateRefreshToken(req.user.id, refreshToken)
+    await this.updateRefreshToken(req.user.id, await this.hash(refreshToken))
     
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -158,6 +157,29 @@ export class AuthService {
 
   }
 
+  async refresh(req: any, res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('access denied')
+
+    if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
+      throw new ForbiddenException('access denied')
+
+    
+    const refreshToken = await this.createRefreshToken({id: req.user.id})
+    const accessToken = await this.createAccessToken({id: req.user.id})
+
+    await this.updateRefreshToken(req.user.id, refreshToken)
+    
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      .send({accessToken: accessToken})
+  }
 
   // @TODO: remove refresh token from db
   /** 
