@@ -6,7 +6,6 @@ import { User } from './users/entities/user.entity';
 
 // Entities
 import { UsersModule } from './users/users.module';
-import { ChatGateway } from './chat/chat.gateway';
 import { GameGateway } from './game/game.gateway';
 @Module({
   imports: [
@@ -23,6 +22,6 @@ import { GameGateway } from './game/game.gateway';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway, GameGateway],
+  providers: [AppService, GameGateway],
 })
 export class AppModule {}
