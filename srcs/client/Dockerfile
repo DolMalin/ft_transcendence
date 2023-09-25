@@ -13,4 +13,4 @@ COPY package-lock.json .
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}
 ENV PORT=${CLIENT_PORT}
-CMD  npm install ; npm i react-scripts ; npm i typescript ; npm run start
+CMD  npm install ; npm i typescript react-scripts @nestjs/websockets socket.io; npm run start
