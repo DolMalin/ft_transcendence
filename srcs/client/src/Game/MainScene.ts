@@ -24,7 +24,7 @@ type Pos = {
  * - score
  */
 class Player {
-    paddle  : Phaser.Physics.Arcade.Image
+    paddle  : Phaser.Physics.Arcade.Sprite
     PowerUp : [{}]
     id : number
     score   : number
@@ -35,7 +35,7 @@ class Player {
     private scene : Phaser.Scene
     private cursor : Phaser.Types.Input.Keyboard.CursorKeys
 
-    constructor(paddleImage : Phaser.Physics.Arcade.Image, sceneRef : Phaser.Scene, identifier : number
+    constructor(paddleImage : Phaser.Physics.Arcade.Sprite, sceneRef : Phaser.Scene, identifier : number
         ) {
         this.paddle = paddleImage;
         this.PowerUp = [{}];
@@ -57,7 +57,8 @@ class Player {
             this.playerInput = [sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
                 sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
                 sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
             ]
         }
         if (this.id === 1)
@@ -65,7 +66,8 @@ class Player {
             this.playerInput = [sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
                 sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
                 sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
-                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
+                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+                sceneRef.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO)
             ]
         }
     }
@@ -96,8 +98,24 @@ class Player {
             this.paddle.setVelocityX(0)
     }
 
+    takeShot(){
+        if (this.playerInput[4].isDown && this.id == 1)
+        {
+        let test : Phaser.Types.Physics.Arcade.ArcadeBodyBounds;
+        test = {x : 0, y : 0, bottom : 0, right : 0};
+        console.log('before :', this.paddle.body.getBounds(test));
+        console.log('after :', this.paddle.body.getBounds(test));
+
+        }
+        else 
+        {
+            this.paddle.setAngle(0);
+        }
+    }
+
     update(time: number, delta: number): void {
         this.handleMovement();
+        this.takeShot();
         if (JSON.stringify({x : this.paddle.x, y : this.paddle.y}) !== JSON.stringify(this.startingPos))
             this.isAtStartingPos = false;
         else
@@ -216,9 +234,9 @@ class MainScene extends Phaser.Scene {
     create ()
     {
         let {width, height} = this.sys.game.canvas;
-        
-        this.player1 = new Player(this.physics.add.image(width / 2, 0, 'paddle').setDepth(1), this, 1);
-        this.player2 = new Player(this.physics.add.image(width / 2, height, 'paddle').setDepth(1), this, 2);
+
+        this.player1 = new Player(this.physics.add.sprite(width / 2, 0, 'paddle').setDepth(1), this, 1);
+        this.player2 = new Player(this.physics.add.sprite(width / 2, height, 'paddle').setDepth(1), this, 2);
 
         this.ball = new Ball(this.player1, this.player2, this.physics.add.sprite(width / 2, height / 2, 'ball'), 3, {width, height}, {x : width / 2, y : height / 2}, 'vanilla')
 
