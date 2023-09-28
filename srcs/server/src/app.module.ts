@@ -7,6 +7,8 @@ import { User } from './users/entities/user.entity';
 // Entities
 import { UsersModule } from './users/users.module';
 import { GameGateway } from './game/game.gateway';
+import { GameModule } from './game/game.module';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -20,6 +22,7 @@ import { GameGateway } from './game/game.gateway';
       synchronize: true,
     }),
     UsersModule,
+    GameModule
   ],
   controllers: [AppController],
   providers: [AppService, GameGateway],
