@@ -1,6 +1,7 @@
 import React from 'react'
 import Phaser from 'phaser'
-import MainScene from './Game/MainScene'
+import { MainScene } from './Game/MainScene'
+import { io } from 'socket.io-client'
 
 type AppProps = {}
 type AppState = {}
@@ -28,6 +29,7 @@ class Game extends React.Component<AppProps, AppState> {
     }
 
     render () {
+        
         return (<>
         <div id='game'></div>
         </>)
