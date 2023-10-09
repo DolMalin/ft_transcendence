@@ -5,6 +5,17 @@ import { Socket, Server } from 'socket.io'
 import { io } from 'socket.io-client';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 
+class PlayerDTO {
+  room : string;
+  playerIdInRoom : number;
+}
+
+class GameServDTO {
+  clientsNumber : number = 0;
+  clientsId : string[] = [];
+  rooms : string[] = [];
+}
+
 /**
  * @description generate string of lenght size, without ever recreating
  * one that is identical to one of the keys from the map passed as argument
@@ -33,46 +44,77 @@ function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
   },
 } )
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  // @SubscribeMessage('message')
-  // handleMessage(client: any, payload: any): string {
-  //   return 'Hello world!';
-  // }
-  players : string[] = [];
-  roomNames : string[] = [];
 
+  playerDTO : Map<string, PlayerDTO> = new Map<string, PlayerDTO>;
+  gameServDto : GameServDTO = new GameServDTO;
+  
   @WebSocketServer()
   server : Server;
 
+  /**
+ * @description make the client join a room if there are some waiting for players,
+ * otherwise create its own
+ * also send to player if he is player 1 or 2
+ */
   handleConnection(client: Socket) {
-    this.players.push(client.id);
-    console.log(client.id);
+    this.gameServDto.clientsId.push(client.id)
+    this.gameServDto.clientsNumber ++;
+    this.playerDTO.set(client.id, new PlayerDTO);
+
+    console.log('client id in connec: ' + client.id)
     if (this.server.sockets.adapter.rooms.size === 0)
     {
       let roomName = roomNameGenerator(10, this.server.sockets.adapter.rooms);
-      this.roomNames.push(roomName);
+      this.gameServDto.rooms.push(roomName);
+      this.playerDTO.get(client.id).playerIdInRoom = 1;
+      this.playerDTO.get(client.id).room = roomName;
       client.join(roomName);
-      this.roomNames.forEach((value, i, array) => (console.log("room name : ", value)));
+      client.emit('playerId', 1);
+      console.log('1. room name: ', roomName)
       return;
     }
 
     let it = this.server.sockets.adapter.rooms;
-    for (let i = 0; i < this.roomNames.length ; i ++)
+    for (let i = 0; i < this.gameServDto.rooms.length ; i ++)
     {
-      if (this.server.sockets.adapter.rooms.get(this.roomNames[i]).size && this.server.sockets.adapter.rooms.get(this.roomNames[i]).size < 2)
+      if (this.server.sockets.adapter.rooms.get(this.gameServDto.rooms[i]) &&
+        this.server.sockets.adapter.rooms.get(this.gameServDto.rooms[i]).size < 2)
       {
-        client.join(this.roomNames[i]);
-      this.roomNames.forEach((value, i, array) => (console.log("room name : ", value)));
+        client.join(this.gameServDto.rooms[i]);
+        this.playerDTO.get(client.id).playerIdInRoom = 1;
+        this.playerDTO.get(client.id).room = this.gameServDto.rooms[i];
+        client.emit('playerId', 2);
+        console.log("2. room name: ", this.gameServDto.rooms[i], ' sockID: ' + client.id);
         return ;
       }
     }
     let roomName = roomNameGenerator(10, this.server.sockets.adapter.rooms);
-    this.roomNames.push(roomName);
+    this.gameServDto.rooms.push(roomName);
     client.join(roomName);
-    this.roomNames.forEach((value, i, array) => (console.log("room name : ", value)));
+    this.playerDTO.get(client.id).playerIdInRoom = 1;
+    this.playerDTO.get(client.id).room = roomName;
+    client.emit('playerId', 1);
+    console.log('3. room name:', roomName)
 
   }
+
   handleDisconnect(client: Socket){
-  
+    this.gameServDto.clientsNumber --;
+    client.rooms.forEach((value, key, map) => {console.log('disoc :', key); client.leave(key);})
+  }
+
+  @SubscribeMessage('playerMove')
+  playerMove(@MessageBody() data : {x: number, y : number, playerId : number}, @ConnectedSocket() client: Socket) {
+    if (client.rooms.size > 0) {
+      this.server.to(this.playerDTO.get(client.id).room).emit('playerMove', data);
+    }
+  }
+
+  @SubscribeMessage('ballMove')
+  ballMove(@MessageBody() data : {x: number, y : number, playerId : number}, @ConnectedSocket() client: Socket) {
+    if (client.rooms.size > 0) {
+      this.server.to(this.playerDTO.get(client.id).room).emit('ballMove', data);
+    }
   }
 
   @SubscribeMessage('message')

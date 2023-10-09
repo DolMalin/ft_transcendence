@@ -61,9 +61,7 @@ class Player {
         else if (this.id === 2 && this.paddle.getTopCenter().y < this.scene.sys.game.canvas.height / 2 + (this.paddle.height / 2) && !this.playerInput[2].isDown)
             this.paddle.setVelocityY(0)
         else if (this.playerInput[2].isDown && !this.playerInput[0].isDown)
-        {
             this.paddle.setVelocityY(300)
-        }
         else if (this.playerInput[0].isDown && !this.playerInput[2].isDown)
             this.paddle.setVelocityY(-300)
         else if (this.playerInput[0].isUp && this.playerInput[2].isUp)

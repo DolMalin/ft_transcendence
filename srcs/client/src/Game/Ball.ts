@@ -6,23 +6,20 @@ class Ball extends Phaser.Scene {
     startingPos: Pos
     type: string
     dim : Dim
-    pOneRef : Player
-    pTwoRef : Player
+    sock : any
     
     private randomX : number
     private randomY : number
 
-    constructor(player1 : Player, player2 : Player, ballSprite : Phaser.Physics.Arcade.Sprite, bounce : number, sceneDim : Dim, startPos : Pos, ballType : string) {
+    constructor(sock : any, ballSprite : Phaser.Physics.Arcade.Sprite, bounce : number, sceneDim : Dim, startPos : Pos, ballType : string) {
         super();
         this.type = ballType;
         this.startingPos = startPos;
         this.obj = ballSprite;
         this.dim = sceneDim;
         this.randomX = 0;
-        this.pOneRef = player1;
-        this.pTwoRef = player2;
-        
-        // let {width, height} = this.sys.game.canvas;
+        this.sock = sock;
+
         this.obj.setMaxVelocity(sceneDim.width, sceneDim.height);
         this.obj.setBounce(bounce, bounce).setScale(0.5).setDepth(1).setAngularAcceleration(1000).setCircle(this.obj.width / 2);
 
@@ -34,7 +31,7 @@ class Ball extends Phaser.Scene {
         this.obj.setVelocity(this.randomX * sceneDim.height / 1.5, this.randomY * sceneDim.height / 1.5);
         this.obj.setCollideWorldBounds(true)
     }
-    sleep = (ms : number) => new Promise(r => setTimeout(r, ms));
+    
     update(time: number, delta: number): number {
             if (this.obj.y <= this.obj.height / 2)
             {

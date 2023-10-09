@@ -3,6 +3,8 @@ import Phaser from 'phaser'
 import io from 'socket.io-client'
 import Player from './Player'
 import Ball from './Ball';
+import { Socket } from 'socket.io';
+
 
 /**
  * @description a wdith and a height
@@ -36,10 +38,11 @@ class MainScene extends Phaser.Scene {
     scores1 : Phaser.GameObjects.Image;
     scores2 : Phaser.GameObjects.Image;
     scoreToReach : number = 10;
-    cursor1 : Phaser.Types.Input.Keyboard.CursorKeys;
-    player1 : Player;
-    player2 : Player;
+    player : Player;
+    adversaryPaddle : Phaser.GameObjects.Image;
+    id : number;
     newGameButton : Phaser.GameObjects.Image;
+    sock : any;
 
     preload() {
         this.load.image('ball', 'game-assets/ball.png');
@@ -58,17 +61,31 @@ class MainScene extends Phaser.Scene {
     }
     create ()
     {
+        this.sock =  io('http://localhost:4545');
+
         let {width, height} = this.sys.game.canvas;
 
-        this.player1 = new Player(this.physics.add.sprite(width / 2, 0, 'paddle').setDepth(1), this, 1);
-        this.player2 = new Player(this.physics.add.sprite(width / 2, height, 'paddle').setDepth(1), this, 2);
+        this.sock.once('playerId', (playerId : number) => {
+            this.id = playerId;
+            console.log('player id: ' + this.id)
+            if (this.id === 1)
+            {
+                console.log('test 1');
+                this.player = new Player(this.physics.add.sprite(width / 2, 0, 'paddle').setDepth(1), this, 1);
+                this.adversaryPaddle = this.physics.add.sprite(width / 2, height - this.player.paddle.height / 2, 'paddle')
+            }
+            else if (this.id === 2)
+            {
+                console.log('test 2');
 
-        this.ball = new Ball(this.player1, this.player2, this.physics.add.sprite(width / 2, height / 2, 'ball'), 3, {width, height}, {x : width / 2, y : height / 2}, 'vanilla')
+                this.player = new Player(this.physics.add.sprite(width / 2, height, 'paddle').setDepth(1), this, 2);
+                this.adversaryPaddle = this.physics.add.sprite(width / 2, 0, 'paddle')
+            }
+        });
 
-        this.cursor1 = this.input.keyboard.createCursorKeys();
+        this.ball = new Ball(this.sock, this.physics.add.sprite(width / 2, height / 2, 'ball'), 3, {width, height}, {x : width / 2, y : height / 2}, 'vanilla')
+
         this.cameras.main.setBackgroundColor(0xbababa);
-
-        let sock = io();
     }
     /**
      * @description :
@@ -86,7 +103,7 @@ class MainScene extends Phaser.Scene {
 
             this.scores1 = this.add.image(width / 2, height / 4, keys[playerScore - 1]);
         }
-        if (playerId === 2 && playerScore <= 10)
+        else if (playerId === 2 && playerScore <= 10)
         {
             if (playerScore > 1)
                 this.scores2.destroy(true);
@@ -96,36 +113,46 @@ class MainScene extends Phaser.Scene {
     }
 
     update(time: number, delta: number): void {
-        this.physics.add.collider(this.player1.paddle, this.ball.obj)
-        this.physics.add.collider(this.player2.paddle, this.ball.obj)
+        if (this.id === undefined)
+            return;
 
-        this.player1.update(time, delta);
-        this.player2.update(time, delta);
+        this.physics.add.collider(this.player.paddle, this.ball.obj)
+        this.physics.add.collider(this.adversaryPaddle, this.ball.obj)
+
+        this.player.update(time, delta);
+        this.sock.emit('playerMove', {x : this.player.paddle.x, y : this.player.paddle.y, playerId : this.id})
+        this.sock.on('playerMove', (data : any) => {
+            // console.log('x: ' +data.x, 'y: ' +data.y)
+            if(this.id === 1 && data.playerId === 2)
+                this.adversaryPaddle.setPosition(data.x, data.y)
+            else if (this.id === 2 && data.playerId === 1)
+                this.adversaryPaddle.setPosition(data.x, data.y)
+            
+        })
+        this.sock.emit('ballMove', {x : this.ball.obj.x, y : this.ball.obj.y, playerId : this.id});
+        this.sock.on('ballMove', (data : any) => {
+        if(this.id === 1 && data.playerId === 2)    
+            this.ball.obj.setPosition(data.x, data.y);
+        else if (this.id === 2 && data.playerId === 1)
+            this.ball.obj.setPosition(data.x, data.y);
+        })
 
         switch (this.ball.update(time, delta))
         {
             case 0 :
                 break;
             case 1 :
-                this.player1.score ++;
-                this.displayScore(1, this.player1.score);
-                this.player1.resetPos()
-                this.player2.resetPos()
-                break;
-            case 2 :
-                this.player2.score ++;
-                this.displayScore(2, this.player2.score);
-                this.player1.resetPos()
-                this.player2.resetPos()
+                this.player.score ++;
+                this.displayScore(1, this.player.score);
+                // this.player.resetPos()
                 break;
             default:
                 break;
         }
-        if (this.player1.score >= this.scoreToReach || this.player2.score >= this.scoreToReach)
+        if (this.player.score >= this.scoreToReach)
         {
             this.ball.obj.destroy();
-            this.player1.resetPos();
-            this.player2.resetPos();
+            // this.player.resetPos();
 
             this.newGameButton = this.add.image(this.sys.game.canvas.width / 2, this.sys.game.canvas.height / 2, 'play').setDepth(2);
             this.newGameButton.setInteractive({userHandCursor : true});
