@@ -14,4 +14,4 @@ RUN npm install react-scripts@3.4.1 -g
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}
 ENV PORT=${CLIENT_PORT}
-CMD [ "npm", "run", "start"]
+CMD npm install ; npm i @nestjs/websockets socket.io @nestjs/platform-socket.io socket.io-client ; npm run start

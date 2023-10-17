@@ -7,6 +7,8 @@ import { User } from './users/entities/user.entity';
 // Entities
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ChatGateway } from './chat/chat.gateway';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -23,6 +25,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {}
