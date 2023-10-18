@@ -3,10 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { NestModule } from '@nestjs/common';
 
 // Entities
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { AsyncLocalStorage } from 'async_hooks';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -25,4 +28,6 @@ import { AuthModule } from './auth/auth.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+
+export class AppModule { }
+

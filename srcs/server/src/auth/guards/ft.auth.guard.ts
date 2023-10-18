@@ -1,23 +1,29 @@
 
-import { Injectable, ExecutionContext, CanActivate, UnauthorizedException} from '@nestjs/common'
-import { FtAuthService } from '../services/ft.auth.service';
+import { Injectable, ExecutionContext, CanActivate, UnauthorizedException, InternalServerErrorException} from '@nestjs/common'
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class FtAuthGuard implements CanActivate {
-	constructor(private ftAuthService: FtAuthService) { }
+	constructor(private authService: AuthService) { }
 
 	async canActivate(context: ExecutionContext  ): Promise<any>{
 		const req = context.switchToHttp().getRequest()
+		const code = req.params.code
 
-		const token = await this.ftAuthService.getFtToken(req.query.code)
+		if (!code?.length)
+			return false
+
+		const token = await this.authService.getFtToken(code)
 		if (!token)
 			throw new UnauthorizedException()
 
-      	const ftId = await this.ftAuthService.getFtId(token)
+		const ftId = await this.authService.getFtId(token)
 		if (!ftId)
 			throw new UnauthorizedException()
 
-		req.user = await this.ftAuthService.validateUser(ftId)
+		req.user = await this.authService.validateUser(ftId)
+		if (!req.user)
+			throw new InternalServerErrorException()
 		return true
 	}
 }

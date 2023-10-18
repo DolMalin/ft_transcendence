@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 
@@ -21,20 +20,22 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<User> {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string): Promise<User> {
+    return this.usersService.findOneById(id);
   }
 
-  @Patch(':id')
+  @Patch()
   update(
-    @Param('id') id: number,
+    @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
+  
+
   @Delete(':id')
-  remove(@Param('id') id: number): Promise<User> {
+  remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);
   }
 }
