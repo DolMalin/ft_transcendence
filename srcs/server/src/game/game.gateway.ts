@@ -1,19 +1,28 @@
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage,
-WebSocketGateway, WebSocketServer,
-MessageBody, ConnectedSocket} from '@nestjs/websockets';
+import { OnGatewayConnection,
+OnGatewayDisconnect,
+SubscribeMessage,
+WebSocketGateway,
+WebSocketServer,
+MessageBody, 
+ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
-import { io } from 'socket.io-client';
-import { IoAdapter } from '@nestjs/platform-socket.io';
+import { MatchmakingService } from './game.service';
 
-class PlayerDTO {
-  room : string;
-  playerIdInRoom : number;
-}
+// import { KeyboardEvent } from 'react'
 
-class GameServDTO {
+let DOWN = 's';
+let UP = 'w';
+let LEFT = 'a';
+let RIGHT = 'd';
+
+export class GameServDTO {
   clientsNumber : number = 0;
   clientsId : string[] = [];
-  rooms : string[] = [];
+  rooms : {
+    name : string
+    clients : string[],
+    gameType :string | string []
+  }[] = [];
 }
 
 /**
@@ -21,102 +30,87 @@ class GameServDTO {
  * one that is identical to one of the keys from the map passed as argument
  */
 
-function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
-{
-  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-  let str = '';
-  const charactersLength = characters.length;
-    for (let i = 0; i < lenght; i ++)
-    {
-      str += characters.charAt(Math.floor(Math.random() * charactersLength));
-      if (i === lenght - 1 && map.has(str))
-      {
-        str = '';
-        i = 0;
-      }
-    }
-      return (str);
-}
 
 @WebSocketGateway( {cors: {
-    origin : '*'
+  // TO DO : remove dat shit
+    origin : 'http://localhost:4343'
   },
 } )
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
-  playerDTO : Map<string, PlayerDTO> = new Map<string, PlayerDTO>;
   gameServDto : GameServDTO = new GameServDTO;
+  
+  constructor(private readonly matchmakingService: MatchmakingService) {}
   
   @WebSocketServer()
   server : Server;
-
   /**
- * @description make the client join a room if there are some waiting for players,
- * otherwise create its own
- * also send to player if he is player 1 or 2
- */
-  handleConnection(client: Socket) {
-    this.gameServDto.clientsId.push(client.id)
+   * @description make the client join a room if there are some waiting for players,
+   * otherwise create its own
+   * also send to player if he is player 1 or 2
+  */
+ handleConnection(client: Socket) {
     this.gameServDto.clientsNumber ++;
-    this.playerDTO.set(client.id, new PlayerDTO);
+    this.gameServDto.clientsId.push(client.id)
 
-    console.log('client id in connec: ' + client.id)
-    if (this.server.sockets.adapter.rooms.size === 0)
-    {
-      let roomName = roomNameGenerator(10, this.server.sockets.adapter.rooms);
-      this.gameServDto.rooms.push(roomName);
-      this.playerDTO.get(client.id).playerIdInRoom = 1;
-      this.playerDTO.get(client.id).room = roomName;
-      client.join(roomName);
-      client.emit('playerId', 1);
-      console.log('1. room name: ', roomName)
-      return;
-    }
-
-    let it = this.server.sockets.adapter.rooms;
-    for (let i = 0; i < this.gameServDto.rooms.length ; i ++)
-    {
-      if (this.server.sockets.adapter.rooms.get(this.gameServDto.rooms[i]) &&
-        this.server.sockets.adapter.rooms.get(this.gameServDto.rooms[i]).size < 2)
-      {
-        client.join(this.gameServDto.rooms[i]);
-        this.playerDTO.get(client.id).playerIdInRoom = 1;
-        this.playerDTO.get(client.id).room = this.gameServDto.rooms[i];
-        client.emit('playerId', 2);
-        console.log("2. room name: ", this.gameServDto.rooms[i], ' sockID: ' + client.id);
-        return ;
-      }
-    }
-    let roomName = roomNameGenerator(10, this.server.sockets.adapter.rooms);
-    this.gameServDto.rooms.push(roomName);
-    client.join(roomName);
-    this.playerDTO.get(client.id).playerIdInRoom = 1;
-    this.playerDTO.get(client.id).room = roomName;
-    client.emit('playerId', 1);
-    console.log('3. room name:', roomName)
-
+  console.log("IN HANDLE CO : " + client.rooms)
+  }
+  
+  handleDisconnect(client: Socket){
+    this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
   }
 
-  handleDisconnect(client: Socket){
-    this.gameServDto.clientsNumber --;
-    client.rooms.forEach((value, key, map) => {console.log('disoc :', key); client.leave(key);})
+  @SubscribeMessage('createGame')
+  createGame(@MessageBody() data : string, @ConnectedSocket() client: Socket) {
+
+    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, data);
+  }
+
+  @SubscribeMessage('leaveGame')
+  leaveGame(@MessageBody() data : undefined, @ConnectedSocket() client: Socket) {
+
+    this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
   }
 
   @SubscribeMessage('playerMove')
-  playerMove(@MessageBody() data : {x: number, y : number, playerId : number}, @ConnectedSocket() client: Socket) {
-    if (client.rooms.size > 0) {
-      this.server.to(this.playerDTO.get(client.id).room).emit('playerMove', data);
+  playerMove(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+
+    function test (x, y) {
+      client.rooms.forEach((value, key, map) => {
+          if (key !== client.id)
+            client.to(key).emit('adversaryMoves', x, y)
+        });
+    }
+
+    switch (data)
+    {
+      case UP :
+        client.emit('myMoves', 0, -4);
+        test(0, 4);
+        break ;
+      case DOWN :
+        client.emit('myMoves', 0, 4);
+        test(0, -4);
+        break ;
+      case RIGHT :
+        client.emit('myMoves', 4, 0);
+        test(-4, 0);
+        break ;
+      case LEFT :
+        client.emit('myMoves', -4, 0);
+        test(4, 0);
+        break ;
+      default :
+        break;
     }
   }
 
   @SubscribeMessage('ballMove')
   ballMove(@MessageBody() data : {x: number, y : number, playerId : number}, @ConnectedSocket() client: Socket) {
-    if (client.rooms.size > 0) {
-      this.server.to(this.playerDTO.get(client.id).room).emit('ballMove', data);
-    }
+  
   }
-
+  
   @SubscribeMessage('message')
   handleMessage(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
     // Handle received message
@@ -126,5 +120,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('eventtt')
   eventtt(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
     // console.log(data, client.id);
+    // console.log('ca passe par eeeventtt :' + client.id);
   }
 }
