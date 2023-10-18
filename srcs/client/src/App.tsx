@@ -4,7 +4,7 @@ import logo from './logo.svg';
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
 import { BrowserRouter, Routes, Route } from "react-router-dom"
-import Auth from "./Auth"
+import Auth from "./auth/Auth"
 import Profile from "./Profile"
 
 function App() {

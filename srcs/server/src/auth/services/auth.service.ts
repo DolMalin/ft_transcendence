@@ -99,11 +99,6 @@ export class AuthService {
   }
 
 
-  /**
-   * @description Creates a `jwt` from the given `payload`
-   */
-
-
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
@@ -119,15 +114,18 @@ export class AuthService {
     })
   }
 
+
   async updateRefreshToken(id: string, refreshToken: string) {
     await this.usersService.update(id, {
       refreshToken: await this.hash(refreshToken)
     })
   }
 
+
   async hash(data: string): Promise<string> {
     return argon2.hash(data)
   }
+
 
   /**
    * @description Check the validity of a given `jwt`, and returns its `payload`
@@ -157,6 +155,7 @@ export class AuthService {
 
   }
 
+
   async refresh(req: any, res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
 
@@ -180,6 +179,7 @@ export class AuthService {
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
       .send({accessToken: accessToken})
   }
+
 
   // @TODO: remove refresh token from db
   /** 

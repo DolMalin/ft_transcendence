@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React, { Component, useEffect, useState} from 'react'
-import AuthService from './auth.service'
+import AuthService from './auth/auth.service'
 import { Navigate } from "react-router-dom"
 
 class Profile extends Component {
