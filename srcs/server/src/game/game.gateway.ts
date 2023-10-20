@@ -7,13 +7,9 @@ MessageBody,
 ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
 import { MatchmakingService } from './game.service';
+import * as Constants from './const'
 
 // import { KeyboardEvent } from 'react'
-
-let DOWN = 's';
-let UP = 'w';
-let LEFT = 'a';
-let RIGHT = 'd';
 
 export class GameServDTO {
   clientsNumber : number = 0;
@@ -21,8 +17,31 @@ export class GameServDTO {
   rooms : {
     name : string
     clients : string[],
-    gameType :string | string []
+    gameType :string | string [],
   }[] = [];
+}
+
+export interface Paddle {
+  x : number,
+  y : number,
+  width : number,
+  height : number,
+}
+
+export interface Ball {
+  x : number,
+  y : number,
+  directionalVector : {x : number, y : number},
+  speed : number
+}
+
+export interface Game {
+  clientOne : string,
+  clientTwo : string,
+  gameType  : string,
+  paddleOne : Paddle,
+  paddleTwo : Paddle,
+  ball : Ball
 }
 
 /**
@@ -40,6 +59,7 @@ export class GameServDTO {
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   gameServDto : GameServDTO = new GameServDTO;
+  gamesMap : Map<string, Game>;
   
   constructor(private readonly matchmakingService: MatchmakingService) {}
   
@@ -52,7 +72,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   */
  handleConnection(client: Socket) {
     this.gameServDto.clientsNumber ++;
-    this.gameServDto.clientsId.push(client.id)
+    this.gameServDto.clientsId.push(client.id);
 
   console.log("IN HANDLE CO : " + client.rooms)
   }
@@ -61,10 +81,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
   }
 
-  @SubscribeMessage('createGame')
-  createGame(@MessageBody() data : string, @ConnectedSocket() client: Socket) {
+  @SubscribeMessage('joinGame')
+  joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, data);
+    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, this.gamesMap, gameType);
   }
 
   @SubscribeMessage('leaveGame')
@@ -76,7 +96,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('playerMove')
   playerMove(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
 
-    function test (x, y) {
+    function adversaryMoves (x, y) {
       client.rooms.forEach((value, key, map) => {
           if (key !== client.id)
             client.to(key).emit('adversaryMoves', x, y)
@@ -85,21 +105,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     switch (data)
     {
-      case UP :
-        client.emit('myMoves', 0, -4);
-        test(0, 4);
+      case Constants.UP :
+        client.emit('myMoves', 0, -(Constants.PADDLE_SPEED));
+        adversaryMoves(0, Constants.PADDLE_SPEED);
         break ;
-      case DOWN :
-        client.emit('myMoves', 0, 4);
-        test(0, -4);
+      case Constants.DOWN :
+        client.emit('myMoves', 0, Constants.PADDLE_SPEED);
+        adversaryMoves(0, -(Constants.PADDLE_SPEED));
         break ;
-      case RIGHT :
-        client.emit('myMoves', 4, 0);
-        test(-4, 0);
+      case Constants.RIGHT :
+        client.emit('myMoves', Constants.PADDLE_SPEED, 0);
+        adversaryMoves(-(Constants.PADDLE_SPEED), 0);
         break ;
-      case LEFT :
-        client.emit('myMoves', -4, 0);
-        test(4, 0);
+      case Constants.LEFT :
+        client.emit('myMoves', -(Constants.PADDLE_SPEED), 0);
+        adversaryMoves(Constants.PADDLE_SPEED, 0);
         break ;
       default :
         break;

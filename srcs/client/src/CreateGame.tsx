@@ -7,22 +7,46 @@ ButtonGroup,
 Radio,
 RadioGroup,
 CloseButton,
-Stack } from '@chakra-ui/react';
+Stack,
+Spinner,
+defineStyle,
+defineStyleConfig,
+Text } from '@chakra-ui/react';
 import Game from './Game';
-import { Socket, io } from 'socket.io-client'
+import { Socket, io } from 'socket.io-client';
+import * as Constants from './const';
+
+const xxl = defineStyle({
+    height: 100,
+    width: 100,
+  });
+  export const spinnerTheme = defineStyleConfig({
+    sizes: { xxl },
+  })
 
 function CreateGameButton(props : any) {
     const buttonRef = useRef(null);
+    const [playButtonVisible, setPlayButtonVisible] = useState(true);
     const [formVisible, setFormVisible] = useState(false);
     const [gameVisible, setGameVisible] = useState(false);
     const [selectedGameType, setSelectedGameType] = useState('');
+    const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
+    const [preGameCDVisible, setPreGameCDVisible] = useState(false);
+    const [preGameCD, setPreGameCD] = useState(Constants.LAUNCH_CD);
     const sock : Socket = props.sock;
     
     const toggleForm = () => {
         if(formVisible == false)
+        {
+            setPlayButtonVisible(false);
             setFormVisible(true);
+        }
         else
+        {
             setFormVisible(false);
+            if (!gameVisible)
+                setPlayButtonVisible(true);
+        }
     }
 
     
@@ -31,25 +55,74 @@ function CreateGameButton(props : any) {
         {
             sock.emit('leaveGame', undefined);
             setGameVisible(false);
+            setPlayButtonVisible(true);
         }
         else
         {
-            toggleForm()
             setGameVisible(true);
+            setFormVisible(false);
+            setPlayButtonVisible(false);
         }
     }
 
     async function handleMatchmaking (gameType : string) {
-        console.log(gameType);
         if (gameType.length != 0)
         {
-            sock.emit("createGame", gameType);
+            sock.emit("joinGame", selectedGameType);
+            setFormVisible(false);
+            setWaitingScreenVisible(true);
             sock.on('roomFilled', () => {
-                toggleGame();
+                console.log('test');
+                setWaitingScreenVisible(false);
+                setPreGameCDVisible(true);
             })
         }
     }
 
+    function WaitingScreen() {
+        const [dot, setDot] = useState('.');
+        useEffect(() => {
+            const dotdotdot = setInterval(() => {
+              switch (dot) {
+                case '.':
+                  setDot('..');
+                  break;
+                case '..':
+                  setDot('...');
+                  break;
+                case '...':
+                  setDot('.');
+                  break;
+                default:
+                  break;
+              }
+            }, 1000);
+        
+            return () => clearInterval(dotdotdot); // Clear the interval on unmount
+          }, [dot]);
+        return (
+            <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
+                Looking for game <Text>{dot}</Text>
+            </Text>
+        )
+    }
+
+    function WaitingForLaunch() {
+        const countdownInterval = setInterval(() => {
+            if (preGameCD > 0) {
+                setPreGameCD(preGameCD - 1);
+            } else {
+                setPreGameCDVisible(false);
+                clearInterval(countdownInterval);
+                toggleGame();
+            }
+        }, 1000);
+        return(
+            <div className='waitingScreen'>
+                 <Text fontSize="2xl" textAlign="center" >GAME LAUNCH IN {preGameCD} !!!</Text>
+            </div>
+        )
+    }
     
     function Form() {
         const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +130,11 @@ function CreateGameButton(props : any) {
     };
     
     return(
-            <RadioGroup>
+            <RadioGroup borderWidth={'2px'} 
+                borderColor={'blackAlpha.500'} 
+                borderStyle={'solid'}
+                padding={10}
+                backgroundColor={'pink.100'}>
                 <CloseButton onClick={toggleForm} alignItems={'right'}></CloseButton>
                 <Stack direction='column'>
                     <Radio value='1' checked={selectedGameType === '1'} onChange={handleChange}> type de game 1 </Radio>
@@ -71,9 +148,11 @@ function CreateGameButton(props : any) {
     }
     
     return (<>
-        {!gameVisible && <Button onClick={toggleForm}> Play</Button>}
+        {playButtonVisible && <Button onClick={toggleForm}> Play</Button>}
         {formVisible && <Form />}
-        {gameVisible && <Game width={window.innerWidth / 2} height={window.innerHeight / 2} gameType={selectedGameType} sock={sock}/> }
+        {WaitingScreenVisible && <WaitingScreen />}
+        {preGameCDVisible && <WaitingForLaunch />}
+        {gameVisible && <Game gameType={selectedGameType} sock={sock}/> }
         {gameVisible && <Button onClick={toggleGame}> Leave </Button>}
     </>);
 }

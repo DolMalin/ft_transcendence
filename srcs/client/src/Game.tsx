@@ -2,16 +2,9 @@ import React from 'react'
 import { useRef, useEffect, useState, KeyboardEvent } from 'react'
 import { Socket, io } from 'socket.io-client'
 import { Stage, Layer, Rect, Text } from 'react-konva';
+import * as Constants from './const'
 
-const GAME_TYPE_ONE = "1";
-const GAME_TYPE_TWO = "2";
-const GAME_TYPE_THREE = "3";
-const FPS = 60;
-const FRAME_RATE = 1000 / FPS;
-let DOWN = 's';
-let UP = 'w';
-let LEFT = 'a';
-let RIGHT = 'd';
+
 
 
 
@@ -23,45 +16,73 @@ let RIGHT = 'd';
  * - width
  * - height
 */
+interface Paddle {
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+  }
 
 function Game(props : any) {
     const canvasRef = useRef(null);
-    const [gamePaused, setPause] = useState(true);
+
     let   playerId : number;
     let   paddle = {
+        width : 10,
+        height : 100,
         x : 0,
-        y : 300
+        y : 300 - 50
     };
-    let   adversaryPaddle = {
-        x : 890,
-        y : 300
+    let   adversaryPaddle : Paddle = {
+        width : 10,
+        height : 100,
+        x : 900 - 10,
+        y : 300 - 50
     };
-    // let gameBoard = {
-    //     width :
-    // }
-
+    let gameBoard = {
+        x : window.innerWidth / 3,
+        y : window.innerHeight / 3,
+        width : 900,
+        height : 600,
+        
+    }
+    
     useEffect(() => {
         const sock : Socket = props.sock;
-        console.log(props.gameType)
-        // sock.emit('createGame', props.gameType)
         
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
+
+        // TO DO : Emit event to give canvas info to back and do so everytime the windows is resized
         
         sock.on('playerId', (data) => {
             playerId = data;
         })
         sock.on('adversaryMoves', (x, y) => {
             // move ennemy paddle
-            console.log(adversaryPaddle.x,' | ', adversaryPaddle.y)
             adversaryPaddle.x += x;
             adversaryPaddle.y += y;
+
+            if (adversaryPaddle.x > gameBoard.width - adversaryPaddle.width)
+                adversaryPaddle.x = gameBoard.width - adversaryPaddle.width;
+            if (adversaryPaddle.y < 0)
+                adversaryPaddle.y = 0;
+            else if (adversaryPaddle.y > gameBoard.height - adversaryPaddle.height)
+                adversaryPaddle.y = gameBoard.height - adversaryPaddle.height;
         });
         sock.on('myMoves', (x, y) => {
             //get new display data from the server for my paddle
             paddle.x += x;
             paddle.y += y;
-            // if (paddle.x)
+
+            if (paddle.x < 0)
+                paddle.x = 0;
+            if (paddle.y < 0)
+                paddle.y = 0;
+            else if (paddle.y > gameBoard.height - paddle.height)
+                paddle.y = gameBoard.height - paddle.height;
+            console.log ('paddle x : ',paddle.x,'paddle.y : ', paddle.y);
+            
         })
         sock.on('ballPosition', () => {
             //receive ball pos to display it
@@ -72,11 +93,11 @@ function Game(props : any) {
         
         function drawPaddle() {
             context.fillStyle = 'white';
-            context.fillRect(paddle.x, paddle.y, 10, 100);
+            context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
             context.fillStyle = 'white';
-            context.fillRect(adversaryPaddle.x, adversaryPaddle.y, 10, 100);
+            context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
         function drawBoard() {
             context.fillStyle = 'black';
@@ -87,10 +108,10 @@ function Game(props : any) {
             const keyname = event.key; 
             switch (keyname)
             {
-                case UP   :
-                case DOWN :
-                case LEFT :
-                case RIGHT:
+                case Constants.UP   :
+                case Constants.DOWN :
+                case Constants.LEFT :
+                case Constants.RIGHT:
                     console.log('emiting player move')
                     sock.emit('playerMove', keyname);
                     break ;
@@ -106,13 +127,13 @@ function Game(props : any) {
       
         switch (props.gameType)
         {
-            case GAME_TYPE_ONE :
+            case Constants.GAME_TYPE_ONE :
                 context.fillStyle = 'red';
                 break;
-            case GAME_TYPE_TWO :
+            case Constants.GAME_TYPE_TWO :
                 context.fillStyle = 'green';
                 break;
-            case GAME_TYPE_THREE :
+            case Constants.GAME_TYPE_THREE :
                 context.fillStyle = 'blue';
                 break;
             default :
@@ -123,7 +144,7 @@ function Game(props : any) {
 
         setInterval(() => {
             update();
-        }, FRAME_RATE);
+        }, Constants.FRAME_RATE);
 
         return () => {
             sock.off('playerId');
@@ -137,7 +158,7 @@ function Game(props : any) {
 
 
     return (<>
-    <canvas ref={canvasRef} width={900} height={600}> feur </canvas>
+    <canvas ref={canvasRef} width={900} height={600} > feur </canvas>
     </>)
 }
 

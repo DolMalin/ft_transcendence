@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GameServDTO } from './game.gateway';
+import { GameServDTO, Game } from './game.gateway';
 import { Socket, Server } from 'socket.io';
 
 function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
@@ -47,7 +47,7 @@ export class MatchmakingService {
       
       }
 
-    gameCreation (server : Server, client : Socket, gameServDto : GameServDTO, gameType : string) {
+    gameCreation (server : Server, client : Socket, gameServDto : GameServDTO, gamesMap : Map <string, Game>,gameType : string) {
                 
         if (client.rooms.size >= 2)
         {
@@ -75,8 +75,34 @@ export class MatchmakingService {
         // If no accessible room were found, create one
 
         let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
+        // let newGame : Game;
+
+        // newGame = {
+        //   clientOne: client.id,
+        //   clientTwo : '',
+        //   gameType : gameType,
+        //   paddleOne : {
+        //     width : 10,
+        //     height : 100,
+        //     x : 0,
+        //     y : 300 - 50,
+        //   },
+        //   paddleTwo : {
+        //     width : 10,
+        //     height : 100,
+        //     x : 900,
+        //     y : 300 - 50,
+        //   },
+        //   ball : {
+        //     x : 450,
+        //     y : 300,
+        //     directionalVector : {x : 450, y : 300},
+        //     speed : 6,
+        //   },
+        // }
         
         this.createRoom(gameServDto, roomName, client, gameType)
+        // gamesMap.set(roomName, newGame)
         client.emit('playerId', 1);
         console.log("CONNECT : "); 
         console.log(gameServDto);

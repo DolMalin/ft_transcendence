@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, createContext } from 'react';
 import './App.css';
 import Game from './Game'
 import CreateGameButton from './CreateGame';
 import { ChakraProvider, Button, ButtonGroup } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
+
 
 const gameSock = io('http://localhost:4545')
 
@@ -21,7 +22,11 @@ function App() {
     <div>
       <header>
         <ChakraProvider>
-          <CreateGameButton sock={gameSock}/>
+          <div className='sideBar'>
+          </div>
+          <div className='decor'>
+            <CreateGameButton sock={gameSock}/>
+          </div>
         </ChakraProvider>
       </header>
     </div>
