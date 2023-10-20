@@ -3,6 +3,8 @@ FROM node:buster
 ARG SERVER_PORT
 
 WORKDIR /usr/src/app
+ENV PATH /usr/src/server/node_modules/.bin:$PATH
+
 # COPY package*.json ./
 # RUN npm install
 

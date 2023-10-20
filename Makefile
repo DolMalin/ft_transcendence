@@ -1,5 +1,5 @@
 NAME = ft_malaise
-DOCKER = sudo docker
+DOCKER =  docker
 COMPOSE = $(DOCKER) compose -p ${NAME} -f srcs/docker-compose.yml
 
 all: up
@@ -35,7 +35,7 @@ down:
 # 	$(COMPOSE) down --rmi all --volumes
 
 fclean: clean
-	sudo $(RM) -r ${HOME}/data/*
+	 $(RM) -r ${HOME}/data/*
 
 prune: down fclean
 	$(DOCKER) system prune -a -f

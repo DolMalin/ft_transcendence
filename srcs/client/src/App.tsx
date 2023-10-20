@@ -1,25 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import {ChakraProvider} from '@chakra-ui/react'
 import logo from './logo.svg';
 import './App.css';
-import {io, Socket} from 'socket.io-client'
+import {io} from 'socket.io-client';
+import { Chatbox } from './chat/Chatbox';
+import { ConnectedUserList } from './chat/connectedUserList';
+
+const socket = io('http://localhost:4545');
 
 function App() {
-  const sock = io('http://localhost:4545')
+//   useEffect(() => {
+//   socket.on('connect', () => {
+//     console.log('Connected to server');
+//   });
+
+//   socket.on('disconnect', () => {
+//     console.log('Disconnected from server');
+//   });
+//   return () => {
+//     socket.disconnect();
+//   };
+  
+// }, []);
+  socket.on("DM", (message) => {console.log(message)});
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit AHAHAHHAHH <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <ChakraProvider>
+          <ConnectedUserList socket={socket}/>
+          <Chatbox socket={socket}/>
+        </ChakraProvider>
       </header>
     </div>
   );

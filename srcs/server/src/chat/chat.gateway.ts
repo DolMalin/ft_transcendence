@@ -1,18 +1,41 @@
-import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
+class ChatDTO {
+  clientID: string[] = [];
+}
+
+@WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
-handleConnection (client : any) {
-  console.log('feur');
-}
+  chatDTO: ChatDTO = new ChatDTO;
 
-handleDisconnect(client: any) {
-    console.log('adios')
-}
+  @WebSocketServer()
+  server : Server;
+
+  // private server : Server;
+
+  // afterInit(server: Server){
+  //   this.server = server;
+  // }
+
+  handleConnection (client : any) {
+    console.log("Connection of socket ID : " + client.id);
+    this.chatDTO.clientID.push(client.id);
+  }
+
+  handleDisconnect(client: any) {
+  console.log("Disonnection of socket ID : " + client.id);
+  }
 
   @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!';
+  message(@MessageBody() data: { message : string, target : Socket}, @ConnectedSocket() client : Socket): void {
+    client.to(data.target.id).emit("DM", data.message);
+  }
+
+  @SubscribeMessage('getClients')
+  getClients(@ConnectedSocket() client : Socket): void {
+    console.log(this.chatDTO.clientID);
+    client.emit("clientList", this.chatDTO.clientID);
   }
 }
