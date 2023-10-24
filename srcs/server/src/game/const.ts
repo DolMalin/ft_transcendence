@@ -7,4 +7,4 @@ export const DOWN = 's';
 export const UP = 'w';
 export const LEFT = 'a';
 export const RIGHT = 'd';
-export const PADDLE_SPEED = 6;
+export const PADDLE_SPEED = 0.0083; // crossing bord in 2 sec

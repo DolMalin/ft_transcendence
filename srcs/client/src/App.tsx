@@ -4,6 +4,7 @@ import Game from './Game'
 import CreateGameButton from './CreateGame';
 import { ChakraProvider, Button, ButtonGroup } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
+import * as Constants from './const'
 
 
 const gameSock = io('http://localhost:4545')
@@ -24,7 +25,7 @@ function App() {
         <ChakraProvider>
           <div className='sideBar'>
           </div>
-          <div className='decor'>
+          <div className='decor' id={Constants.GAME_ZONE}>
             <CreateGameButton sock={gameSock}/>
           </div>
         </ChakraProvider>
