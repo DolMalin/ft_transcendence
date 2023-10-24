@@ -8,6 +8,7 @@ import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -21,7 +22,8 @@ import { GameModule } from './game/game.module';
       synchronize: true,
     }),
     UsersModule,
-    GameModule
+    GameModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, GameModule],
