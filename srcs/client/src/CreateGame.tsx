@@ -33,6 +33,9 @@ function CreateGameButton(props : any) {
     const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
     const [preGameCDVisible, setPreGameCDVisible] = useState(false);
     const [preGameCD, setPreGameCD] = useState(Constants.LAUNCH_CD);
+    const [playerSide, setPlayerSide] = useState("left");
+    const [gameRoom, setGameRoom] = useState('');
+
     const sock : Socket = props.sock;
     
     const toggleForm = () => {
@@ -48,7 +51,6 @@ function CreateGameButton(props : any) {
                 setPlayButtonVisible(true);
         }
     }
-
     
     const toggleGame = () => {
         if (gameVisible)
@@ -72,9 +74,19 @@ function CreateGameButton(props : any) {
             setFormVisible(false);
             setWaitingScreenVisible(true);
             sock.on('roomFilled', () => {
-                console.log('test');
                 setWaitingScreenVisible(false);
                 setPreGameCDVisible(true);
+            })
+            sock.on('playerSide', (side) => {
+                setPlayerSide(side);
+            })
+            sock.on('roomName', (roomName) => {
+                setGameRoom(roomName);
+            })
+            return (() => {
+                sock.off('roomFilled');
+                sock.off('roomName');
+                sock.off('playerSide');
             })
         }
     }
@@ -102,7 +114,7 @@ function CreateGameButton(props : any) {
           }, [dot]);
         return (
             <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
-                Looking for game <Text>{dot}</Text>
+                Looking for game {dot}
             </Text>
         )
     }
@@ -152,7 +164,7 @@ function CreateGameButton(props : any) {
         {formVisible && <Form />}
         {WaitingScreenVisible && <WaitingScreen />}
         {preGameCDVisible && <WaitingForLaunch />}
-        {gameVisible && <Game gameType={selectedGameType} sock={sock}/> }
+        {gameVisible && <Game gameType={selectedGameType} sock={sock} playerSide={playerSide} gameRoom={gameRoom}/>}
         {gameVisible && <Button onClick={toggleGame}> Leave </Button>}
     </>);
 }

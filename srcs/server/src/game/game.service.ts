@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { GameServDTO, Game } from './game.gateway';
+import { GameServDTO} from './game.gateway';
 import { Socket, Server } from 'socket.io';
+import {
+  Game,
+  GameInfo,
+  Ball
+} from './interfaces'
 
 function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
 {
@@ -32,7 +37,6 @@ export class MatchmakingService {
         gameServDto.rooms[index].clients.push(client.id);
         gameServDto.rooms[index].gameType = gameType
         client.join(roomName);
-        console.log("ROOMS IN ADD CLIENT:", client.rooms)
       }
 
     /**
@@ -41,13 +45,11 @@ export class MatchmakingService {
     createRoom(gameServDto : GameServDTO, roomName : string, client : Socket, gameType : string | string []) {
         
         gameServDto.rooms.push({name : roomName, clients : [client.id], gameType : gameType})
-        console.log('room name before join :' + roomName, "ROOMS IN ADD ROOM BEFORE JOIN:", client.rooms)
         client.join(roomName);
-        console.log("ROOMS IN ADD ROOM:", client.rooms)
       
       }
 
-    gameCreation (server : Server, client : Socket, gameServDto : GameServDTO, gamesMap : Map <string, Game>,gameType : string) {
+    gameCreation (server : Server, client : Socket, gameServDto : GameServDTO, gameType : string) {
                 
         if (client.rooms.size >= 2)
         {
@@ -66,46 +68,66 @@ export class MatchmakingService {
     
             this.addClientToRoom(gameServDto, i, gameServDto.rooms[i].name, client, gameType)
             server.to(gameServDto.rooms[i].name).emit('roomFilled');
-            console.log("CONNECT : "); 
-            console.log(gameServDto);
+            client.emit('roomName', gameServDto.rooms[i].name);
+            client.emit('playerSide', 'left');
             return ;
           }
         }
+
+        //  if none exist, create one
         
-        // If no accessible room were found, create one
-
         let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
-        // let newGame : Game;
-
-        // newGame = {
-        //   clientOne: client.id,
-        //   clientTwo : '',
-        //   gameType : gameType,
-        //   paddleOne : {
-        //     width : 10,
-        //     height : 100,
-        //     x : 0,
-        //     y : 300 - 50,
-        //   },
-        //   paddleTwo : {
-        //     width : 10,
-        //     height : 100,
-        //     x : 900,
-        //     y : 300 - 50,
-        //   },
-        //   ball : {
-        //     x : 450,
-        //     y : 300,
-        //     directionalVector : {x : 450, y : 300},
-        //     speed : 6,
-        //   },
-        // }
         
         this.createRoom(gameServDto, roomName, client, gameType)
-        // gamesMap.set(roomName, newGame)
-        client.emit('playerId', 1);
-        console.log("CONNECT : "); 
-        console.log(gameServDto);
+        client.emit('roomName', roomName);
+        client.emit('playerSide', 'right');
+    }
+
+    launchGame (server : Server, gamesMap : Map<string, Game>, client : Socket,data : GameInfo) {
+         
+    //TO DO : find better solution to get clients room
+    console.log(data.roomName)
+    console.log(gamesMap);
+
+    let paddleWidth = 0.02;
+    let paddleHeight = 0.15;
+    let ballSize = 0.1;
+
+    if (data.playerSide === "left")
+    {
+      let game : Game = {
+        clientOne : client.id,
+        clientTwo : '',
+        gameType  : data.gameType,
+        paddleOne : {
+          x : 0,
+          y : 0.5,
+          width : paddleWidth,
+          height : paddleHeight,
+        },
+        paddleTwo : {
+          x : 1,
+          y : 0.5,
+          width : paddleWidth,
+          height : paddleHeight,
+        },
+        ball : {
+          x : 0.5,
+          y : 0.5,
+          size : ballSize,
+          color : 'white',
+          directionalVector : {x : 0.5, y : 0.5},
+          speed : 0.5,
+        }
+      }
+      gamesMap.set(data.roomName, game);
+    }
+    else if (data.playerSide === 'right')
+    {
+      // let tmp = gamesMap.get(data.roomName);
+      // if (tmp)
+      gamesMap.get(data.roomName).clientTwo = client.id;
+    }
     }
 
     leaveGame(server : Server, client : Socket, gameServDto : GameServDTO) {
@@ -119,6 +141,5 @@ export class MatchmakingService {
         gameServDto.clientsNumber --;
         gameServDto.clientsId = gameServDto.clientsId.filter((id) => id != client.id);
         gameServDto.rooms = gameServDto.rooms.filter((room) => server.sockets.adapter.rooms.get(room.name) != undefined);
-        console.log('client ID :' + client.id + "DISCONNECT : ", gameServDto);
     }
 }

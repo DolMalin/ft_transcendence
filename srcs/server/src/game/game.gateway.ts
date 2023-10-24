@@ -8,6 +8,11 @@ ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
 import { MatchmakingService } from './game.service';
 import * as Constants from './const'
+import {
+  Game,
+  GameInfo,
+  Ball
+} from './interfaces'
 
 // import { KeyboardEvent } from 'react'
 
@@ -21,28 +26,6 @@ export class GameServDTO {
   }[] = [];
 }
 
-export interface Paddle {
-  x : number,
-  y : number,
-  width : number,
-  height : number,
-}
-
-export interface Ball {
-  x : number,
-  y : number,
-  directionalVector : {x : number, y : number},
-  speed : number
-}
-
-export interface Game {
-  clientOne : string,
-  clientTwo : string,
-  gameType  : string,
-  paddleOne : Paddle,
-  paddleTwo : Paddle,
-  ball : Ball
-}
 
 /**
  * @description generate string of lenght size, without ever recreating
@@ -59,7 +42,7 @@ export interface Game {
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   gameServDto : GameServDTO = new GameServDTO;
-  gamesMap : Map<string, Game>;
+  gamesMap : Map<string, Game> = new Map();
   
   constructor(private readonly matchmakingService: MatchmakingService) {}
   
@@ -84,41 +67,47 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, this.gamesMap, gameType);
+    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, gameType);
+  }
+
+  @SubscribeMessage('gameStart')
+  gameStart(@MessageBody() data : GameInfo, @ConnectedSocket() client : Socket) {
+    console.log('in game start : ', data)
+
+    this.matchmakingService.launchGame(this.server, this.gamesMap, client, data);
   }
 
   @SubscribeMessage('leaveGame')
-  leaveGame(@MessageBody() data : undefined, @ConnectedSocket() client: Socket) {
+  leaveGame(@ConnectedSocket() client: Socket) {
 
     this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
   }
 
   @SubscribeMessage('playerMove')
-  playerMove(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+  playerMove(@MessageBody() data: {key : string, room : string}, @ConnectedSocket() client: Socket) {
 
     function adversaryMoves (x, y) {
-      client.rooms.forEach((value, key, map) => {
-          if (key !== client.id)
-            client.to(key).emit('adversaryMoves', x, y)
-        });
+            client.to(data.room).emit('adversaryMoves', x, y);
     }
 
-    switch (data)
+    const game = this.gamesMap.get(data.room);
+
+    switch (data.key)
     {
       case Constants.UP :
-        client.emit('myMoves', 0, -(Constants.PADDLE_SPEED));
+        client.emit('myMoves', 0, game.paddleOne.y - Constants.PADDLE_SPEED);
         adversaryMoves(0, Constants.PADDLE_SPEED);
         break ;
       case Constants.DOWN :
-        client.emit('myMoves', 0, Constants.PADDLE_SPEED);
+        client.emit('myMoves', 0, game.paddleOne.y + Constants.PADDLE_SPEED);
         adversaryMoves(0, -(Constants.PADDLE_SPEED));
         break ;
       case Constants.RIGHT :
-        client.emit('myMoves', Constants.PADDLE_SPEED, 0);
+        client.emit('myMoves', game.paddleOne.x + Constants.PADDLE_SPEED, 0);
         adversaryMoves(-(Constants.PADDLE_SPEED), 0);
         break ;
       case Constants.LEFT :
-        client.emit('myMoves', -(Constants.PADDLE_SPEED), 0);
+        client.emit('myMoves', game.paddleOne.x - Constants.PADDLE_SPEED, 0);
         adversaryMoves(Constants.PADDLE_SPEED, 0);
         break ;
       default :

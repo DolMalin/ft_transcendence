@@ -23,10 +23,24 @@ interface Paddle {
     y: number;
   }
 
-function Game(props : any) {
-    const canvasRef = useRef(null);
+interface GameProps {
+    gameType : string,
+    sock : Socket,
+    playerSide : string,
+    gameRoom : string
+}
 
-    let   playerId : number;
+interface GameInfo {
+    gameType : string,
+    playerSide : string,
+    roomName : string
+}
+
+function Game(props : GameProps) {
+    const canvasRef = useRef(null);
+    const sock : Socket = props.sock;
+    const gameZone : HTMLElement = document.getElementById(Constants.GAME_ZONE);
+    
     let   paddle = {
         width : 10,
         height : 100,
@@ -42,22 +56,28 @@ function Game(props : any) {
     let gameBoard = {
         x : window.innerWidth / 3,
         y : window.innerHeight / 3,
-        width : 900,
-        height : 600,
+        width : gameZone.clientWidth * 0.8,
+        height : gameZone.clientHeight * 0.6,
         
     }
     
-    useEffect(() => {
-        const sock : Socket = props.sock;
+    
+    useEffect (function sendStartingInfosToServer() {
+            console.log('game room', props.gameRoom)
+            const gameInfo : GameInfo = {
+                gameType : props.gameType,
+                playerSide : props.playerSide,
+                roomName : props.gameRoom
+            }
+            console.log('side : ', gameInfo.playerSide)
+            sock.emit('gameStart', gameInfo);
+        }, [props]);
         
+    useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
-
-        // TO DO : Emit event to give canvas info to back and do so everytime the windows is resized
         
-        sock.on('playerId', (data) => {
-            playerId = data;
-        })
+        // TO DO : Emit event to give canvas info to back and do so everytime the windows is resized
         sock.on('adversaryMoves', (x, y) => {
             // move ennemy paddle
             adversaryPaddle.x += x;
@@ -72,8 +92,9 @@ function Game(props : any) {
         });
         sock.on('myMoves', (x, y) => {
             //get new display data from the server for my paddle
-            paddle.x += x;
-            paddle.y += y;
+            paddle.x = gameZone.clientWidth * x;
+            paddle.y = gameZone.clientHeight * y;
+            console.log ('paddle x : ',paddle.x,'paddle.y : ', paddle.y);
 
             if (paddle.x < 0)
                 paddle.x = 0;
@@ -81,7 +102,6 @@ function Game(props : any) {
                 paddle.y = 0;
             else if (paddle.y > gameBoard.height - paddle.height)
                 paddle.y = gameBoard.height - paddle.height;
-            console.log ('paddle x : ',paddle.x,'paddle.y : ', paddle.y);
             
         })
         sock.on('ballPosition', () => {
@@ -113,7 +133,7 @@ function Game(props : any) {
                 case Constants.LEFT :
                 case Constants.RIGHT:
                     console.log('emiting player move')
-                    sock.emit('playerMove', keyname);
+                    sock.emit('playerMove', {key : keyname, room : props.gameRoom});
                     break ;
                 default :
                     break ;
@@ -158,7 +178,7 @@ function Game(props : any) {
 
 
     return (<>
-    <canvas ref={canvasRef} width={900} height={600} > feur </canvas>
+    <canvas ref={canvasRef} width={gameBoard.width} height={gameBoard.height} > feur </canvas>
     </>)
 }
 
