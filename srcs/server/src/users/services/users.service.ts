@@ -24,17 +24,25 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  findOne(ftId: number) {
-    return this.userRepository.findOneBy({ ftId })
-  } 
-
-  async update(ftId: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(ftId)
-    return this.userRepository.save({...user, ...updateUserDto})
+  findOneById(id: string) {
+    return this.userRepository.findOneBy({ id })
   }
 
-  async remove(ftId: number) {
-    const user = await this.findOne(ftId)
+  findOneByFtId(ftId: number) {
+    return this.userRepository.findOneBy({ ftId })
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    await this.userRepository.update(id, updateUserDto)
+    const newUser = await this.findOneById(id)
+    if (newUser)
+      return newUser
+    throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+  }
+
+
+  async remove(id: string) {
+    const user = await this.findOneById(id)
     return this.userRepository.remove(user)
   }
 }
