@@ -85,9 +85,8 @@ export class MatchmakingService {
 
     launchGame (server : Server, gamesMap : Map<string, Game>, client : Socket,data : GameInfo) {
          
-    //TO DO : find better solution to get clients room
-    console.log(data.roomName)
-    console.log(gamesMap);
+    // console.log(data.roomName)
+    // console.log(gamesMap);
 
     let paddleWidth = 0.02;
     let paddleHeight = 0.15;

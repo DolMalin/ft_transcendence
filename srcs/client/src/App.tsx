@@ -11,7 +11,7 @@ import { Socket, io } from 'socket.io-client'
 import * as Constants from './const'
 import * as dotenv from 'dotenv'
 
-console.log(process.env.SERVER_URL)
+const gameSock = io('http://localhost:4545')
 
 function Game(props : {socket : Socket}) {
   return (
@@ -28,7 +28,6 @@ function Game(props : {socket : Socket}) {
 
 function App() {
   
-  const gameSock = io(process.env.SERVER_URL)
   const [cookies, setCookie] = useCookies(["access_token"])
 
 

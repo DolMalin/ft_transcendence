@@ -54,10 +54,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * also send to player if he is player 1 or 2
   */
  handleConnection(client: Socket) {
+
     this.gameServDto.clientsNumber ++;
     this.gameServDto.clientsId.push(client.id);
-
-  console.log("IN HANDLE CO : " + client.rooms)
   }
   
   handleDisconnect(client: Socket){
@@ -67,13 +66,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
 
-    console.log ("JOIN GAME")
     this.matchmakingService.gameCreation(this.server, client, this.gameServDto, gameType);
   }
 
   @SubscribeMessage('gameStart')
   gameStart(@MessageBody() data : GameInfo, @ConnectedSocket() client : Socket) {
-    console.log('in game start : ', data)
 
     this.matchmakingService.launchGame(this.server, this.gamesMap, client, data);
   }
