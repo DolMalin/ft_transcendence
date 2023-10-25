@@ -16,14 +16,6 @@ import Game from './Game';
 import { Socket, io } from 'socket.io-client';
 import * as Constants from './const';
 
-const xxl = defineStyle({
-    height: 100,
-    width: 100,
-  });
-  export const spinnerTheme = defineStyleConfig({
-    sizes: { xxl },
-  })
-
 function CreateGameButton(props : any) {
     const buttonRef = useRef(null);
     const [playButtonVisible, setPlayButtonVisible] = useState(true);
