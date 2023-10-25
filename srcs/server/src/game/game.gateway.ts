@@ -36,7 +36,7 @@ export class GameServDTO {
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
-    origin : 'http://localhost:4343'
+    origin : process.env.CLIENT_URL
   },
 } )
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -67,6 +67,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
 
+    console.log ("JOIN GAME")
     this.matchmakingService.gameCreation(this.server, client, this.gameServDto, gameType);
   }
 
@@ -86,6 +87,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('playerMove')
   playerMove(@MessageBody() data: {key : string, room : string}, @ConnectedSocket() client: Socket) {
 
+    client.handshake.headers.authorization
     function adversaryMoves (x, y) {
             client.to(data.room).emit('adversaryMoves', x, y);
     }

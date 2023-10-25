@@ -1,14 +1,17 @@
+const path = require('path');
+const Dotenv = require('dotenv-webpack');
+
 module.exports = {
     mode: process.env.NODE_ENV === "production" ? "production" : "development",
     devtool: "inline-source-map",
     entry: "./src/index.tsx",
     output: {
-      path: __dirname + "/build",
+      path: path.resolve(__dirname, "build"),
       filename: "bundle.js",
     },
     devServer: {
       static: "./client",
-      port: 3000,
+      port: 4545,
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js"],
@@ -20,5 +23,7 @@ module.exports = {
         { test: /\.css$/, use: ["style-loader", "css-loader"] },
       ],
     },
-    plugins: [],
-  };
+    plugins: [
+      new Dotenv() // This will load the .env file
+    ],
+};

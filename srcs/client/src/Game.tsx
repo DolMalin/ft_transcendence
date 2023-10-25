@@ -71,7 +71,7 @@ function Game(props : GameProps) {
             }
             console.log('side : ', gameInfo.playerSide)
             sock.emit('gameStart', gameInfo);
-        }, [props]);
+        });
         
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -173,7 +173,7 @@ function Game(props : GameProps) {
             sock.off('scoreChange');
             sock.off('myMove');
         };
-    }, []);
+    });
 
 
 

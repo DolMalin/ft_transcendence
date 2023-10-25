@@ -70,6 +70,7 @@ function CreateGameButton(props : any) {
     async function handleMatchmaking (gameType : string) {
         if (gameType.length != 0)
         {
+            console.log("FEUR PUTAIN FEUR : ", selectedGameType);
             sock.emit("joinGame", selectedGameType);
             setFormVisible(false);
             setWaitingScreenVisible(true);
