@@ -23,117 +23,127 @@ interface Paddle {
     y: number;
   }
 
+  interface Ball {
+    x : number,
+    y : number,
+    size : number,
+    color : string,
+    directionalVector : {x : number, y : number},
+    speed : number
+  }
+
 interface GameProps {
     gameType : string,
     sock : Socket,
-    playerSide : string,
+    playerId : string,
     gameRoom : string
 }
 
 interface GameInfo {
     gameType : string,
-    playerSide : string,
+    playerId : string,
     roomName : string
 }
 
 function Game(props : GameProps) {
     const canvasRef = useRef(null);
     const sock : Socket = props.sock;
-    const gameZone : HTMLElement = document.getElementById(Constants.GAME_ZONE);
+    const [startingInfosSent, setStartingInfosSent] = useState(false);
+    const gameZone = document.getElementById(Constants.GAME_ZONE);
     
-    let   paddle = {
-        width : 10,
-        height : 100,
-        x : 0,
-        y : 300 - 50
-    };
-    let   adversaryPaddle : Paddle = {
-        width : 10,
-        height : 100,
-        x : 900 - 10,
-        y : 300 - 50
-    };
-    let gameBoard = {
-        x : window.innerWidth / 3,
-        y : window.innerHeight / 3,
-        width : gameZone.clientWidth * 0.8,
-        height : gameZone.clientHeight * 0.6,
-        
-    }
     
     
     useEffect (function sendStartingInfosToServer() {
-            console.log('game room', props.gameRoom)
-            const gameInfo : GameInfo = {
+        const gameInfo : GameInfo = {
                 gameType : props.gameType,
-                playerSide : props.playerSide,
+                playerId : props.playerId,
                 roomName : props.gameRoom
             }
-            console.log('side : ', gameInfo.playerSide)
             sock.emit('gameStart', gameInfo);
-        });
-        
+            sock.emit('ballMove', gameInfo);
+            // sock.emit()
+        setStartingInfosSent(true);
+        console.log('change');
+    }, [startingInfosSent]);
+    
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
+        const canvasBounding = canvas.getBoundingClientRect();
+        let   paddle = {
+            width : canvasBounding.width * 0.15,
+            height : canvasBounding.height * 0.02,
+            x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
+            y : canvasBounding.height,
+        };
+        let   adversaryPaddle : Paddle = {
+            width : canvasBounding.width * 0.15,
+            height : canvasBounding.height * 0.02,
+            x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
+            y : 0,
+        };
+        let ball : Ball = {
+            x : 0.5,
+            y : 0.5,
+            size : canvasBounding.width * 0.1,
+            color : 'white',
+            directionalVector : {x : 0, y : 0},
+            speed : 0
+        }
         
-        // TO DO : Emit event to give canvas info to back and do so everytime the windows is resized
         sock.on('adversaryMoves', (x, y) => {
-            // move ennemy paddle
-            adversaryPaddle.x += x;
-            adversaryPaddle.y += y;
-
-            if (adversaryPaddle.x > gameBoard.width - adversaryPaddle.width)
-                adversaryPaddle.x = gameBoard.width - adversaryPaddle.width;
-            if (adversaryPaddle.y < 0)
-                adversaryPaddle.y = 0;
-            else if (adversaryPaddle.y > gameBoard.height - adversaryPaddle.height)
-                adversaryPaddle.y = gameBoard.height - adversaryPaddle.height;
+            adversaryPaddle.x = canvasBounding.width * x;
+            adversaryPaddle.y = canvasBounding.height * y;
         });
         sock.on('myMoves', (x, y) => {
-            //get new display data from the server for my paddle
-            paddle.x = gameZone.clientWidth * x;
-            paddle.y = gameZone.clientHeight * y;
-            console.log ('paddle x : ',paddle.x,'paddle.y : ', paddle.y);
+            console.log('x : ', x, ' | y : ', y,  ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
+            paddle.x = canvasBounding.width * x;
+            paddle.y = canvasBounding.height * y;
+        })
+        sock.on('ballDirection', (directionalVector : {x : number, y : number}, speed : number ) => {
 
-            if (paddle.x < 0)
-                paddle.x = 0;
-            if (paddle.y < 0)
-                paddle.y = 0;
-            else if (paddle.y > gameBoard.height - paddle.height)
-                paddle.y = gameBoard.height - paddle.height;
-            
         })
-        sock.on('ballPosition', () => {
-            //receive ball pos to display it
-        })
-        sock.on('scoreChange', () => {
+        sock.on('scoreChange', ({x, y}) => {
             // display score
         })
         
         function drawPaddle() {
             context.fillStyle = 'white';
+            
+            // console.log('my paddle x : ', paddle.x, ' y : ', paddle.y, ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
             context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
             context.fillStyle = 'white';
+
+            // console.log('ennemy paddle x : ', adversaryPaddle.x, ' y : ', adversaryPaddle.y, ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
+
             context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
         function drawBoard() {
             context.fillStyle = 'black';
-            context.fillRect(0, 0, 900, 600);
+            context.fillRect(0, 0, canvasBounding.width, canvasBounding.height);
+        }
+
+        function drawBall() {
+            context.fillStyle = ball.color;
+
+            context.beginPath();
+            context.arc(ball.x * canvasBounding.width, ball.y * canvasBounding.height, 50, 0, 2 * Math.PI);
+            context.stroke();
+            console.log(ball.x * canvasBounding.width);
         }
 
         document.addEventListener("keydown", (event) => {
             const keyname = event.key; 
             switch (keyname)
             {
-                case Constants.UP   :
-                case Constants.DOWN :
+                // case Constants.UP   :
+                // case Constants.DOWN :
                 case Constants.LEFT :
                 case Constants.RIGHT:
-                    console.log('emiting player move')
-                    sock.emit('playerMove', {key : keyname, room : props.gameRoom});
+                    console.log('emiting player move | id : ', props.playerId);
+                    sock.emit('playerMove', {key : keyname, playerId : props.playerId,room : props.gameRoom});
                     break ;
                 default :
                     break ;
@@ -143,6 +153,7 @@ function Game(props : GameProps) {
             drawBoard();
             drawAdversaryPaddle();
             drawPaddle();
+            drawBall();
         }
       
         switch (props.gameType)
@@ -162,7 +173,7 @@ function Game(props : GameProps) {
         }
         // context.fillRect(0, 0, props.width / 0.5, props.height / 2);
 
-        setInterval(() => {
+        const interval = setInterval(() => {
             update();
         }, Constants.FRAME_RATE);
 
@@ -172,13 +183,14 @@ function Game(props : GameProps) {
             sock.off('ballPosition');
             sock.off('scoreChange');
             sock.off('myMove');
+            clearInterval(interval);
         };
-    });
+    }, []);
 
 
 
     return (<>
-    <canvas ref={canvasRef} width={gameBoard.width} height={gameBoard.height} > feur </canvas>
+    <canvas ref={canvasRef} width={Math.floor(gameZone.clientWidth * 0.8)} height={Math.floor(gameZone.clientHeight * 0.6)} ></canvas>
     </>)
 }
 

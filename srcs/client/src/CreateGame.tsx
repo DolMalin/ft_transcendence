@@ -25,7 +25,7 @@ function CreateGameButton(props : any) {
     const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
     const [preGameCDVisible, setPreGameCDVisible] = useState(false);
     const [preGameCD, setPreGameCD] = useState(Constants.LAUNCH_CD);
-    const [playerSide, setPlayerSide] = useState("left");
+    const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
 
     const sock : Socket = props.sock;
@@ -62,7 +62,6 @@ function CreateGameButton(props : any) {
     async function handleMatchmaking (gameType : string) {
         if (gameType.length != 0)
         {
-            console.log("FEUR PUTAIN FEUR : ", selectedGameType);
             sock.emit("joinGame", selectedGameType);
             setFormVisible(false);
             setWaitingScreenVisible(true);
@@ -70,8 +69,8 @@ function CreateGameButton(props : any) {
                 setWaitingScreenVisible(false);
                 setPreGameCDVisible(true);
             })
-            sock.on('playerSide', (side) => {
-                setPlayerSide(side);
+            sock.on('playerId', (side) => {
+                setPlayerId(side);
             })
             sock.on('roomName', (roomName) => {
                 setGameRoom(roomName);
@@ -79,7 +78,7 @@ function CreateGameButton(props : any) {
             return (() => {
                 sock.off('roomFilled');
                 sock.off('roomName');
-                sock.off('playerSide');
+                sock.off('playerId');
             })
         }
     }
@@ -157,7 +156,7 @@ function CreateGameButton(props : any) {
         {formVisible && <Form />}
         {WaitingScreenVisible && <WaitingScreen />}
         {preGameCDVisible && <WaitingForLaunch />}
-        {gameVisible && <Game gameType={selectedGameType} sock={sock} playerSide={playerSide} gameRoom={gameRoom}/>}
+        {gameVisible && <Game gameType={selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
         {gameVisible && <Button onClick={toggleGame}> Leave </Button>}
     </>);
 }

@@ -25,6 +25,6 @@ export interface Paddle {
   
   export interface GameInfo {
     gameType : string,
-    playerSide : string,
+    playerId : string,
     roomName : string
   }

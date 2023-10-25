@@ -1,5 +1,5 @@
 NAME = ft_malaise
-DOCKER = sudo docker
+DOCKER = docker
 COMPOSE = sudo docker compose -p ${NAME} -f srcs/docker-compose.yml
 COMPOSE_SKEWL = docker compose -p ${NAME} -f srcs/docker-compose.yml
 
