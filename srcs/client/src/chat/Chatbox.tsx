@@ -1,15 +1,15 @@
 import React,  {useState, KeyboardEvent} from "react";
 import * as Chakra from '@chakra-ui/react'
+import { ConnectedUserList } from "./connectedUserList";
 
-export function Chatbox(props: any) {
+export function Chatbox(props : any) {
+    console.log('from chatbox :', props.id)
     const [message, setMessage] = useState("");
-    console.log(message);
     const [sentMessage, setSentMessage] = useState("");
     const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === "Enter")
         {
-            console.log('socket :', props.socket);
-            props.socket.emit("message", message);
+            props.socket.emit("message", {message : message, targetId : props.id});
         }
     }
     return (<>

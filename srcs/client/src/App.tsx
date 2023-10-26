@@ -1,10 +1,8 @@
+import './App.css';
 import React, { useEffect } from 'react';
 import {ChakraProvider} from '@chakra-ui/react'
-import logo from './logo.svg';
-import './App.css';
 import {io} from 'socket.io-client';
-import { Chatbox } from './chat/Chatbox';
-import { ConnectedUserList } from './chat/connectedUserList';
+import { Chat } from './chat/Chat';
 
 const socket = io('http://localhost:4545');
 
@@ -27,8 +25,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <ChakraProvider>
-          <ConnectedUserList socket={socket}/>
-          <Chatbox socket={socket}/>
+          <Chat socket={socket}/>
         </ChakraProvider>
       </header>
     </div>
