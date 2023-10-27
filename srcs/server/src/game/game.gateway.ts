@@ -15,6 +15,8 @@ import {
   Ball,
   Paddle
 } from './interfaces'
+import { clearInterval } from 'timers';
+import { delay } from 'rxjs';
 
 // import { KeyboardEvent } from 'react'
 
@@ -63,7 +65,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   
   handleDisconnect(client: Socket){
-    this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
+
+    this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
   }
 
   @SubscribeMessage('joinGame')
@@ -79,9 +82,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('leaveGame')
-  leaveGame(@ConnectedSocket() client: Socket) {
+  leaveGame(@MessageBody() gameRoom : string, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.leaveGame(this.server, client, this.gameServDto);
+    clearInterval(this.gamesMap.get(gameRoom).ballRefreshInterval);
+    this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
   }
 
   @SubscribeMessage('playerMove')
@@ -95,35 +99,108 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('ballMove')
   ballMove(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
     const game = this.gamesMap.get(data.roomName);
-
-    game.ball.directionalVector = {x : game.ball.x + Math.random() / 2, y : game.ball.x + Math.random() / 2}
-    this.server.to(data.roomName).emit('ballDirection', game.ball.directionalVector, game.ball.speed);
-    const ballCollideWithWall = (ball : Ball) => {
-      if (ball.x >= 1 || ball.x <= 0)
-        return (true)
-      else if (ball.y >= 1 || ball.y <= 0)
-        return (true)
-      else
-        return (false);
-    } 
-
     if (game === undefined)
       return ; // TO DO : emit something saying game crashed
+    
+    this.server.to(data.roomName).emit('ballInfos', game.ball);
+    
+    function ballRelaunch(ball : Ball) {
+      ball.angle = Math.floor(Math.random() * 360);
+      ball.speed =  0.4 / 60;
+    }
 
-    const int = setInterval(() => {
-        if (ballCollideWithWall(game.ball))
+    function ballReset(ball : Ball) {
+      ball.x = 0.5;
+      ball.y = 0.5;
+      ball.angle = 0;
+      ball.speed = 0;
+    }
+
+    const goal = (ball : Ball) => {
+      if (ball.y >= 1 || ball.y <= 0)
+      {
+        ball.y >= 1 ? ball.y = 1 : ball.y = 0;
+        return (true)
+      }
+      else
+        return (false)
+    }
+    
+    const ballCollideWithPaddle = (ball : Ball) => {
+
+      console.log('ball top y : ', ball.y - ball.size,  )
+      if (ball.y - ball.size <= game.paddleTwo.y + game.paddleTwo.height
+        && ball.x - ball.size >= game.paddleTwo.x
+        && ball.x + ball.size <= game.paddleTwo.x)
+      {
+        console.log('hit paddle 1')
+        if (ball.angle > 180)
+          ball.angle -= 180;
+        else if (ball.angle < 180)
+          ball.angle += 180;
+      }
+      if (ball.y + ball.size >= game.paddleOne.y
+        && ball.x - ball.size >= game.paddleOne.x
+        && ball.x + ball.size <= game.paddleOne.x)
+      {
+        console.log('hit paddle 2')
+
+        if (ball.angle > 180)
+        ball.angle -= 180;
+        else if (ball.angle < 180)
+          ball.angle += 180;
+      }
+    }
+
+    const ballCollideWithWall = (ball : Ball) => {
+        if (ball.x >= 1 || ball.x <= 0)
         {
-          // change ball direction
+          ball.x >= 1 ? ball.x = 1 : ball.x = 0;
+          // TO DO : change angle calculation
+          if (game.ball.angle > 180)
+            game.ball.angle -= 180;
+          else if (game.ball.angle < 180)
+            game.ball.angle += 180;
+          this.server.to(data.roomName).emit('ballInfos', ball);
+          return (true);
         }
-      return (
-        clearInterval(int)
-      );
-    }, 1000 / 60)
-  }
-  
-  @SubscribeMessage('message')
-  handleMessage(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-    // Handle received message
-    this.server.emit('message', data); // Broadcast the message to all connected clients
-  }
+        else
+        return (false);
+      }
+      
+    const pauseBetweenPoints = (ball : Ball) => {
+      
+      let ct = 2;
+      const int = setInterval(() =>{
+        ct --
+        if (ct === 0)
+        {
+          clearInterval(int)
+          ballRelaunch(ball)
+          this.server.to(data.roomName).emit('ballInfos', ball);
+          return ;
+        }
+      }, 1000);
+    }
+      
+    game.ballRefreshInterval = setInterval(() => {
+        
+        ballCollideWithPaddle(game.ball);
+        ballCollideWithWall(game.ball);
+        if (goal(game.ball))
+        {
+          ballReset(game.ball);
+          this.server.to(data.roomName).emit('pointScored', game.ball)
+          this.server.to(data.roomName).emit('ballInfos', game.ball);
+          pauseBetweenPoints(game.ball);
+        }
+        let Vx = game.ball.speed * Math.cos(game.ball.angle);
+        let Vy = game.ball.speed * Math.sin(game.ball.angle)
+        
+        game.ball.x += Vx;
+        game.ball.y += Vy;
+        if (client.rooms.size === 0) //TO DO Changer cette immondice
+          return (clearInterval(game.ballRefreshInterval))
+      }, 1000 / 60);
+    }
 }

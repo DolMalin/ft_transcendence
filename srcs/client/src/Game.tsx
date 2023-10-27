@@ -29,6 +29,7 @@ interface Paddle {
     size : number,
     color : string,
     directionalVector : {x : number, y : number},
+    angle : number,
     speed : number
   }
 
@@ -50,25 +51,30 @@ function Game(props : GameProps) {
     const sock : Socket = props.sock;
     const [startingInfosSent, setStartingInfosSent] = useState(false);
     const gameZone = document.getElementById(Constants.GAME_ZONE);
+    const gameInfo : GameInfo = {
+            gameType : props.gameType,
+            playerId : props.playerId,
+            roomName : props.gameRoom
+        }
     
     
     
     useEffect (function sendStartingInfosToServer() {
-        const gameInfo : GameInfo = {
-                gameType : props.gameType,
-                playerId : props.playerId,
-                roomName : props.gameRoom
-            }
             sock.emit('gameStart', gameInfo);
-            sock.emit('ballMove', gameInfo);
+            if (props.playerId === '1')
+            {
+                console.log('emit ball move');
+                sock.emit('ballMove', gameInfo);
+            }
             // sock.emit()
         setStartingInfosSent(true);
-        console.log('change');
-    }, [startingInfosSent]);
+    }, []);
     
     useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext('2d');
+
+        console.log("client ID : ", props.playerId);
+        const canvas : HTMLCanvasElement = canvasRef.current;
+        const context : CanvasRenderingContext2D = canvas.getContext('2d');
         const canvasBounding = canvas.getBoundingClientRect();
         let   paddle = {
             width : canvasBounding.width * 0.15,
@@ -85,43 +91,57 @@ function Game(props : GameProps) {
         let ball : Ball = {
             x : 0.5,
             y : 0.5,
-            size : canvasBounding.width * 0.1,
+            size : 0.020,
             color : 'white',
             directionalVector : {x : 0, y : 0},
+            angle : 0,
             speed : 0
         }
         
         sock.on('adversaryMoves', (x, y) => {
+            x = 1 - x - 0.15;
+            y = 0;
             adversaryPaddle.x = canvasBounding.width * x;
             adversaryPaddle.y = canvasBounding.height * y;
         });
+
         sock.on('myMoves', (x, y) => {
-            console.log('x : ', x, ' | y : ', y,  ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
+            if (props.playerId === '2')
+            {
+                // x = 1 - x;
+                y = 1 - 0.02;
+            }
             paddle.x = canvasBounding.width * x;
             paddle.y = canvasBounding.height * y;
-        })
-        sock.on('ballDirection', (directionalVector : {x : number, y : number}, speed : number ) => {
+        });
 
-        })
+        sock.on('ballInfos', (serverBall : Ball) => {
+            ball = serverBall;
+            console.log("BALL MOVE TRIGGERED SPEED :", ball.speed)
+        });
+
         sock.on('scoreChange', ({x, y}) => {
             // display score
-        })
+        });
+
+        sock.on('pointScored', () => {
+            console.log('point scored')
+            // TO DO display timer
+        });
         
         function drawPaddle() {
             context.fillStyle = 'white';
             
-            // console.log('my paddle x : ', paddle.x, ' y : ', paddle.y, ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
             context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
             context.fillStyle = 'white';
 
-            // console.log('ennemy paddle x : ', adversaryPaddle.x, ' y : ', adversaryPaddle.y, ' width :', canvasBounding.width, ' height : ', canvasBounding.height);
-
             context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
         function drawBoard() {
             context.fillStyle = 'black';
+
             context.fillRect(0, 0, canvasBounding.width, canvasBounding.height);
         }
 
@@ -129,9 +149,52 @@ function Game(props : GameProps) {
             context.fillStyle = ball.color;
 
             context.beginPath();
-            context.arc(ball.x * canvasBounding.width, ball.y * canvasBounding.height, 50, 0, 2 * Math.PI);
+            context.arc(ball.x * canvasBounding.width, ball.y * canvasBounding.height, canvasBounding.width * ball.size, 0, 2 * Math.PI);
             context.stroke();
-            console.log(ball.x * canvasBounding.width);
+            context.fill();
+        }
+
+        function moveBall() {
+
+            let Vx = ball.speed * Math.cos(ball.angle);
+            let Vy = ball.speed * Math.sin(ball.angle)
+            
+            ball.x += Vx;
+            ball.y += Vy;
+
+            if (ball.x > 1)
+            {
+                ball.x = 1;
+                if (ball.angle > 180)
+                    ball.angle -= 180;
+                else
+                    ball.angle += 180
+            }
+            if (ball.x < 0)
+            {
+                ball.x = 0;
+                if (ball.angle > 180)
+                    ball.angle -= 180;
+                else
+                    ball.angle += 180
+            }
+            // if (ball.y > 1)
+            // {
+            //     ball.y = 1;
+            //     if (ball.angle > 180)
+            //         ball.angle -= 180;
+            //     else
+            //         ball.angle += 180
+            // }
+            // if (ball.y < 0)
+            // {
+            //     ball.y = 0;
+            //     if (ball.angle > 180)
+            //         ball.angle -= 180;
+            //     else
+            //         ball.angle += 180
+            // }
+            // console.log(ball.angle);
         }
 
         document.addEventListener("keydown", (event) => {
@@ -142,17 +205,19 @@ function Game(props : GameProps) {
                 // case Constants.DOWN :
                 case Constants.LEFT :
                 case Constants.RIGHT:
-                    console.log('emiting player move | id : ', props.playerId);
+                    // console.log('emiting player move | id : ', props.playerId);
                     sock.emit('playerMove', {key : keyname, playerId : props.playerId,room : props.gameRoom});
                     break ;
                 default :
                     break ;
             }
         })
+
         function update() {
             drawBoard();
             drawAdversaryPaddle();
             drawPaddle();
+            moveBall();
             drawBall();
         }
       
@@ -171,7 +236,6 @@ function Game(props : GameProps) {
                 context.fillStyle = 'pink';
                 break ;
         }
-        // context.fillRect(0, 0, props.width / 0.5, props.height / 2);
 
         const interval = setInterval(() => {
             update();
@@ -183,6 +247,7 @@ function Game(props : GameProps) {
             sock.off('ballPosition');
             sock.off('scoreChange');
             sock.off('myMove');
+            sock.off('ballInfos');
             clearInterval(interval);
         };
     }, []);

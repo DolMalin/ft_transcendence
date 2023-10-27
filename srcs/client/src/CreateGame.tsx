@@ -47,7 +47,8 @@ function CreateGameButton(props : any) {
     const toggleGame = () => {
         if (gameVisible)
         {
-            sock.emit('leaveGame', undefined);
+            console.log('FEUR');
+            sock.emit('leaveGame', gameRoom);
             setGameVisible(false);
             setPlayButtonVisible(true);
         }
@@ -123,7 +124,7 @@ function CreateGameButton(props : any) {
         }, 1000);
         return(
             <div className='waitingScreen'>
-                 <Text fontSize="2xl" textAlign="center" >GAME LAUNCH IN {preGameCD} !!!</Text>
+                <Text fontSize="2xl" textAlign="center"> GAME LAUNCH IN {preGameCD} !!!</Text>
             </div>
         )
     }

@@ -92,7 +92,6 @@ export class MatchmakingService {
 
     let paddleWidth = 0.15;
     let paddleHeight = 0.02;
-    let ballSize = 0.1;
 
     if (data.playerId === "1")
     {
@@ -115,11 +114,13 @@ export class MatchmakingService {
         ball : {
           x : 0.5,
           y : 0.5,
-          size : ballSize,
+          size : 0.020,
           color : 'white',
           directionalVector : {x : 0.5, y : 0.5},
-          speed : 0.4,
-        }
+          angle : Math.floor(Math.random() * 360),
+          speed : 0.4 / 60,
+        },
+        ballRefreshInterval : undefined,
       }
       gamesMap.set(data.roomName, game);
     }
@@ -131,17 +132,13 @@ export class MatchmakingService {
     }
     }
 
-    leaveGame(server : Server, client : Socket, gameServDto : GameServDTO) {
+    leaveGame(server : Server, client : Socket, gameServDto : GameServDTO, gamesMap : Map <string, Game>) {
 
-        // disconnect user from rooms, he supposedly only joined one but who knows
+      // remove the user and empty rooms from the DTO
 
-        client.rooms.forEach((value, key, map) => {console.log('disco :', key); client.leave(key);});
-
-        // remove the user and empty rooms from the DTO
-
-        gameServDto.clientsNumber --;
-        gameServDto.clientsId = gameServDto.clientsId.filter((id) => id != client.id);
-        gameServDto.rooms = gameServDto.rooms.filter((room) => server.sockets.adapter.rooms.get(room.name) != undefined);
+      gameServDto.clientsNumber --;
+      gameServDto.clientsId = gameServDto.clientsId.filter((id) => id != client.id);
+      gameServDto.rooms = gameServDto.rooms.filter((room) => server.sockets.adapter.rooms.get(room.name) != undefined);
     }
 }
 
