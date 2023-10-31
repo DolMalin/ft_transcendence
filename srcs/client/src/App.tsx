@@ -7,19 +7,7 @@ import { Chat } from './chat/Chat';
 const socket = io('http://localhost:4545');
 
 function App() {
-//   useEffect(() => {
-//   socket.on('connect', () => {
-//     console.log('Connected to server');
-//   });
-
-//   socket.on('disconnect', () => {
-//     console.log('Disconnected from server');
-//   });
-//   return () => {
-//     socket.disconnect();
-//   };
   
-// }, []);
   socket.on("DM", (message) => {console.log(message)});
   return (
     <div className="App">

@@ -17,25 +17,14 @@ const DynamicList = (data : {list : string[], setId : any}) => {
     </ul>
   );
 };
-//TO DO reparer cette merde qui refresh l'useEffect en BALLE
 export function ConnectedUserList(props : any){
 
   const [list, setList] = useState<string[]>([])
   useEffect(() => {
-    const handleClientList = (clientList: string[]) => {
-      // Use a callback function to update the state based on the previous state
-      setList(prevList => [...clientList]);
-    };
-
-    console.log('feur')
-    props.socket.emit('getClients');
-    props.socket.on('clientList', handleClientList);
-
-    // Cleanup function to remove the event listener when the component is unmounted
-    return () => {
-      props.socket.off('clientList', handleClientList);
-    };
-  }, []); // <-- Empty dependency array
+    props.socket.on("clientList", (clientList : string[]) => {
+      setList(clientList);
+    });
+  }, []);
 
   return (<>
     <div>

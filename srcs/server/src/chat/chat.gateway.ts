@@ -22,20 +22,30 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   handleConnection (client : any) {
     console.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);
+    this.server.emit("clientList", this.chatDTO.clientID);
   }
 
   handleDisconnect(client: any) {
   console.log("Disonnection of socket ID : " + client.id);
   this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
-  }
+  this.server.emit("clientList", this.chatDTO.clientID);
+}
 
   @SubscribeMessage('message')
   message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {
     client.to(data.targetId).emit("DM", data.message);
   }
-
-  @SubscribeMessage('getClients')
-  getClients(@ConnectedSocket() client : Socket): void {
-    client.emit("clientList", this.chatDTO.clientID);
+  
+  @SubscribeMessage('joinRoom')
+  joinRoom(@MessageBody() room, @ConnectedSocket() client : Socket): void {
+    client.join(room)
+    console.log(`User with ID: ${client.id} joined room ${room}`)
+  }  
+  
+  @SubscribeMessage('sendMessage')
+  sendMessage(@MessageBody() data: { room: string, author: string, message: string, time: string | number | Date}, @ConnectedSocket() client : Socket): void {
+    client.to(data.room).emit("receiveMessage", data);
+    console.log(data)
   }
 }
+
