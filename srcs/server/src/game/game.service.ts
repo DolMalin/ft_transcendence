@@ -90,7 +90,7 @@ export class MatchmakingService {
     // console.log(data.roomName)
     // console.log(gamesMap);
 
-    let paddleWidth = 0.15;
+    let paddleWidth = 0.20;
     let paddleHeight = 0.02;
 
     if (data.playerId === "1")
@@ -117,7 +117,8 @@ export class MatchmakingService {
           size : 0.020,
           color : 'white',
           directionalVector : {x : 0.5, y : 0.5},
-          angle : Math.floor(Math.random() * 360),
+          //angle of motion is in RADIANTS
+          angle : Math.floor(Math.random() * 360) * (Math.PI / 180),
           speed : 0.4 / 60,
         },
         ballRefreshInterval : undefined,

@@ -77,13 +77,13 @@ function Game(props : GameProps) {
         const context : CanvasRenderingContext2D = canvas.getContext('2d');
         const canvasBounding = canvas.getBoundingClientRect();
         let   paddle = {
-            width : canvasBounding.width * 0.15,
+            width : canvasBounding.width * 0.20,
             height : canvasBounding.height * 0.02,
             x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
             y : canvasBounding.height,
         };
         let   adversaryPaddle : Paddle = {
-            width : canvasBounding.width * 0.15,
+            width : canvasBounding.width * 0.20,
             height : canvasBounding.height * 0.02,
             x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
             y : 0,
@@ -99,24 +99,29 @@ function Game(props : GameProps) {
         }
         
         sock.on('adversaryMoves', (x, y) => {
-            x = 1 - x - 0.15;
-            y = 0;
+            // x = 1 - x - 0.15;
+            // y = 0;
             adversaryPaddle.x = canvasBounding.width * x;
             adversaryPaddle.y = canvasBounding.height * y;
         });
 
         sock.on('myMoves', (x, y) => {
-            if (props.playerId === '2')
-            {
+            // if (props.playerId === '2')
+            // {
                 // x = 1 - x;
-                y = 1 - 0.02;
-            }
+            //     y = 1 - 0.02;
+            // }
             paddle.x = canvasBounding.width * x;
             paddle.y = canvasBounding.height * y;
         });
 
         sock.on('ballInfos', (serverBall : Ball) => {
             ball = serverBall;
+            // if (props.playerId === '2')
+            // {
+            //     ball.x = 1 - ball.x;
+            //     ball.y = 1 - ball.y;
+            // }
             console.log("BALL MOVE TRIGGERED SPEED :", ball.speed)
         });
 
@@ -130,12 +135,12 @@ function Game(props : GameProps) {
         });
         
         function drawPaddle() {
-            context.fillStyle = 'white';
+            context.fillStyle = 'blue';
             
             context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
-            context.fillStyle = 'white';
+            context.fillStyle = 'red';
 
             context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
@@ -161,6 +166,12 @@ function Game(props : GameProps) {
             
             ball.x += Vx;
             ball.y += Vy;
+
+            // if (props.playerId === '2')
+            // {
+            //     ball.x = 1 - ball.x;
+            //     ball.y = 1 - ball.y;
+            // }
 
             if (ball.x > 1)
             {
@@ -217,7 +228,7 @@ function Game(props : GameProps) {
             drawBoard();
             drawAdversaryPaddle();
             drawPaddle();
-            moveBall();
+            // moveBall();
             drawBall();
         }
       

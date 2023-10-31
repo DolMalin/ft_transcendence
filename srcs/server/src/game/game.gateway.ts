@@ -105,7 +105,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(data.roomName).emit('ballInfos', game.ball);
     
     function ballRelaunch(ball : Ball) {
-      ball.angle = Math.floor(Math.random() * 360);
+      ball.angle = Math.floor(Math.random() * 360) *  (Math.PI / 180);
       ball.speed =  0.4 / 60;
     }
 
@@ -125,49 +125,36 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       else
         return (false)
     }
-    
-    const ballCollideWithPaddle = (ball : Ball) => {
 
-      console.log('ball top y : ', ball.y - ball.size,  )
-      if (ball.y - ball.size <= game.paddleTwo.y + game.paddleTwo.height
-        && ball.x - ball.size >= game.paddleTwo.x
-        && ball.x + ball.size <= game.paddleTwo.x)
-      {
-        console.log('hit paddle 1')
-        if (ball.angle > 180)
-          ball.angle -= 180;
-        else if (ball.angle < 180)
-          ball.angle += 180;
-      }
-      if (ball.y + ball.size >= game.paddleOne.y
-        && ball.x - ball.size >= game.paddleOne.x
-        && ball.x + ball.size <= game.paddleOne.x)
-      {
-        console.log('hit paddle 2')
+    const VerticalCollisionAngle = (ball : Ball) => {
 
-        if (ball.angle > 180)
-        ball.angle -= 180;
-        else if (ball.angle < 180)
-          ball.angle += 180;
-      }
+      ball.angle = Math.PI - ball.angle;
+      if (ball.angle < 0)
+        ball.angle = 2 * Math.PI + ball.angle;
     }
 
-    const ballCollideWithWall = (ball : Ball) => {
-        if (ball.x >= 1 || ball.x <= 0)
-        {
-          ball.x >= 1 ? ball.x = 1 : ball.x = 0;
-          // TO DO : change angle calculation
-          if (game.ball.angle > 180)
-            game.ball.angle -= 180;
-          else if (game.ball.angle < 180)
-            game.ball.angle += 180;
-          this.server.to(data.roomName).emit('ballInfos', ball);
-          return (true);
-        }
+    const HorizontalCollisionsAngle = (ball : Ball, paddle : Paddle, paddleId : number) => {
+      ball.angle = Math.PI - ball.angle;
+
+      const distanceToPaddleCenter = Math.abs(ball.x - (paddle.x + paddle.width / 2))
+      const mitigator = Math.PI / 2 * ( 1 -(distanceToPaddleCenter / ( paddle.width / 2)));
+      if (paddleId === 2)
+      {
+        if (ball.angle * (180 / Math.PI) < 90)
+          ball.angle += mitigator;
         else
-        return (false);
+          ball.angle -= mitigator;
       }
-      
+      else if ( paddleId === 1)
+      {
+        if (ball.angle * (180 / Math.PI) < 270)
+          ball.angle += mitigator;
+        else
+          ball.angle -= mitigator;
+      }
+    }
+    
+    
     const pauseBetweenPoints = (ball : Ball) => {
       
       let ct = 2;
@@ -182,23 +169,126 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }, 1000);
     }
-      
+
+    const willBallCollideWithWall = (ball : Ball, vX : number, vY) => {
+      console.log('wall');
+        const futureBallX = ball.x + vX;
+        if (futureBallX + ball.size >= 1 || futureBallX - ball.size <= 0)
+        {
+          futureBallX >= 1 ? ball.x = 1 - ball.size - 0.001 : ball.x = 0 + ball.size + 0.001;
+          // adjust BallY so it scale with vX diminution
+          // futureBallX >= 1 ? ball.y  = (Math.abs(futureBallX - 1) / vX * vY) : ball.y  = (Math.abs(0 - futureBallX) / vX * vY)
+          VerticalCollisionAngle(ball);
+
+          // this.server.to(data.roomName).emit('ballInfos', ball);
+          console.log('wall colide return true')
+          return (true);
+        }
+        console.log('WallCollide false')
+        return (false);
+      }
+    
+    const willBallOverlapPaddleOne = (ball : Ball, paddle : Paddle,vx : number, vy : number) => {
+      const futureBallX = ball.x + vx;
+      const futureBallY = ball.y + vy;
+      console.log('pad1');
+
+      // will ball overlap paddleOne (bottom) next step while comming from above ?
+      if (futureBallX - ball.size >= paddle.x && futureBallX - ball.size <= paddle.x + paddle.width
+        || futureBallX + ball.size >= paddle.x && futureBallX + ball.size <= paddle.x + paddle.width)
+      {
+        if (futureBallY >= paddle.y)
+        {
+          ball.y = paddle.y - ball.size;
+          HorizontalCollisionsAngle(ball, paddle, 2);
+          console.log('padOne 1')
+          return (true);
+        }
+        console.log('test')
+      }
+      // will it overlap coming from the left side ?
+      else if (futureBallY >= paddle.y && futureBallX + ball.size >= paddle.x)
+      {
+        ball.x = paddle.x - ball.size;
+        VerticalCollisionAngle(ball);
+        console.log('padOne 2')
+        return (true);
+      }
+      // will it overlap coming from the right side ?
+      else if (futureBallY >= paddle.y && futureBallX - ball.size <= paddle.x + paddle.width)
+      {
+        ball.x = paddle.x + paddle.width + ball.size;
+        VerticalCollisionAngle(ball);
+        console.log('padOne 3')
+        return (true);
+      }
+      console.log('paddOne')
+      return (false);
+    }
+
+    const willBallOverlapPaddleTwo = (ball : Ball, paddle : Paddle,vx : number, vy : number) => {
+      const futureBallX = ball.x + vx;
+      const futureBallY = ball.y + vy;
+      console.log('pad2');
+
+
+
+      // will ball overlap paddleTwo (Top) next step while comming from underneath ?
+      if (futureBallX - ball.size >= paddle.x && futureBallX - ball.size <= paddle.x + paddle.width
+        || futureBallX + ball.size >= paddle.x && futureBallX + ball.size <= paddle.x + paddle.width)
+      {
+        if (futureBallY <= paddle.y + paddle.height)
+        {
+          ball.y = paddle.y + paddle.height + ball.size;
+          HorizontalCollisionsAngle(ball, paddle, 2);
+          console.log('padTwo 1')
+          return (true);
+        }
+      }
+      // will it overlap coming from the left side ?
+      else if (futureBallY <= paddle.y + paddle.height && futureBallX + ball.size >= paddle.x)
+      {
+        ball.x = paddle.x - ball.size;
+        VerticalCollisionAngle(ball);
+        console.log('padTwo 2')
+        return (true);
+      }
+      // will it overlap coming from the right side ?
+      else if (futureBallY <= paddle.y + paddle.height && futureBallX - ball.size <= paddle.x + paddle.width)
+      {
+        ball.x = paddle.x + paddle.width + ball.size;
+        VerticalCollisionAngle(ball);
+        console.log('padTwo 3')
+        return (true);
+      }
+      console.log('CollidePaddTwo false')
+      return (false);
+    }
+
     game.ballRefreshInterval = setInterval(() => {
         
-        ballCollideWithPaddle(game.ball);
-        ballCollideWithWall(game.ball);
-        if (goal(game.ball))
+      // console.log('angle : ', game.ball.angle)
+      if (goal(game.ball))
         {
           ballReset(game.ball);
           this.server.to(data.roomName).emit('pointScored', game.ball)
           this.server.to(data.roomName).emit('ballInfos', game.ball);
           pauseBetweenPoints(game.ball);
         }
-        let Vx = game.ball.speed * Math.cos(game.ball.angle);
-        let Vy = game.ball.speed * Math.sin(game.ball.angle)
         
-        game.ball.x += Vx;
-        game.ball.y += Vy;
+        let vX = game.ball.speed * Math.cos(game.ball.angle);
+        let vY = game.ball.speed * Math.sin(game.ball.angle)
+
+        if (willBallOverlapPaddleOne(game.ball, game.paddleOne, vX, vY) === false &&
+          willBallOverlapPaddleTwo(game.ball, game.paddleTwo, vX, vY) === false &&
+          willBallCollideWithWall(game.ball, vX, vY) === false)
+        {
+          game.ball.x += vX;
+          game.ball.y += vY;
+        }
+
+        this.server.to(data.roomName).emit('ballInfos', game.ball);
+
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))
       }, 1000 / 60);
