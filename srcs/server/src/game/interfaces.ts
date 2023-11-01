@@ -8,11 +8,8 @@ export interface Paddle {
   export interface Ball {
     x : number,
     y : number,
-    // topLeftX : number,
-    // topLeftY : number,
     size : number,
     color : string,
-    directionalVector : {x : number, y : number},
     angle : number,
     speed : number
   }

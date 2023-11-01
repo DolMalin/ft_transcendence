@@ -4,11 +4,6 @@ import { Socket, io } from 'socket.io-client'
 import { Stage, Layer, Rect, Text } from 'react-konva';
 import * as Constants from './const'
 
-
-
-
-
-
 /**
  * @description 
  * props are :
@@ -212,11 +207,8 @@ function Game(props : GameProps) {
             const keyname = event.key; 
             switch (keyname)
             {
-                // case Constants.UP   :
-                // case Constants.DOWN :
                 case Constants.LEFT :
                 case Constants.RIGHT:
-                    // console.log('emiting player move | id : ', props.playerId);
                     sock.emit('playerMove', {key : keyname, playerId : props.playerId,room : props.gameRoom});
                     break ;
                 default :

@@ -6,11 +6,20 @@ import {
   GameInfo,
   Ball,
   Paddle,
-} from './interfaces'
+  } from './interfaces'
+import { 
+  willBallCollideWithWall,
+  willBallOverlapPaddleOne,
+  willBallOverlapPaddleTwo,
+  goal,
+  ballReset,
+  pauseBetweenPoints,
+  randomizeBallAngle,
+  } from './BallMoves';
 import * as Constants from './const'
 
-function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
-{
+function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
+
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
   let str = '';
@@ -26,6 +35,7 @@ function roomNameGenerator(lenght : number, map : Map<string, Set<string>>)
     }
       return (str);
 }
+
 
 @Injectable()
 export class MatchmakingService {
@@ -90,6 +100,8 @@ export class MatchmakingService {
     // console.log(data.roomName)
     // console.log(gamesMap);
 
+
+
     let paddleWidth = 0.20;
     let paddleHeight = 0.02;
 
@@ -116,10 +128,9 @@ export class MatchmakingService {
           y : 0.5,
           size : 0.020,
           color : 'white',
-          directionalVector : {x : 0.5, y : 0.5},
           //angle of motion is in RADIANTS
-          angle : Math.floor(Math.random() * 360) * (Math.PI / 180),
-          speed : 0.4 / 60,
+          angle : randomizeBallAngle(),
+          speed : Constants.BALL_SPEED,
         },
         ballRefreshInterval : undefined,
       }
@@ -148,6 +159,8 @@ export class GamePlayService {
 
   handlePaddleMovement(game : Game, data: {key : string, playerId : string, room : string}, client : Socket) {
     
+  // ********************************* PADDLE ********************************* //
+
     function MoveY(paddle : Paddle, difY : number) {
       paddle.y += difY;
       paddle.y > 1 - paddle.height ? paddle.y = 1 : paddle.y;
@@ -183,4 +196,39 @@ export class GamePlayService {
         break;
     }
   }
+
+  // ********************************* BALL ********************************* //
+
+  handleBallMovement (game : Game, data: GameInfo, client : Socket, server : Server) {
+
+    game.ballRefreshInterval = setInterval(() => {
+        
+        if (goal(game.ball))
+        {
+          ballReset(game.ball);
+          server.to(data.roomName).emit('pointScored', game.ball)
+          server.to(data.roomName).emit('ballInfos', game.ball);
+          pauseBetweenPoints(game.ball, server, data.roomName);
+        }
+        
+        let vX = game.ball.speed * Math.cos(game.ball.angle);
+        let vY = game.ball.speed * Math.sin(game.ball.angle)
+
+        if (willBallOverlapPaddleOne(game.ball, game.paddleOne, vX, vY) === false &&
+          willBallOverlapPaddleTwo(game.ball, game.paddleTwo, vX, vY) === false &&
+          willBallCollideWithWall(game.ball, vX, vY) === false)
+        {
+          game.ball.x += vX;
+          game.ball.y += vY;
+        }
+        else {
+          server.to(data.roomName).emit('ballInfos', game.ball);
+        }
+        server.to(data.roomName).emit('ballInfos', game.ball);
+
+        if (client.rooms.size === 0) //TO DO Changer cette immondice
+          return (clearInterval(game.ballRefreshInterval))
+      }, Constants.FRAME_RATE);
+    }
 }
+
