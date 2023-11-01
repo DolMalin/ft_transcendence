@@ -187,7 +187,8 @@ export class AuthService {
    */
   logout(@Req() req: any, @Res() res: any) {
     try {
-      res.clearCookie("jwt").end()
+      console.log("ICI")
+      res.clearCookie("refreshToken").sendStatus(200)
     } catch {
       throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
     }

@@ -32,9 +32,10 @@ export class AuthController {
     }
 
 
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(RefreshTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
+      console.log("PIPI")
       return this.authService.logout(req, res)
     }
 

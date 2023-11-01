@@ -2,6 +2,7 @@ import axios from 'axios'
 import React, { Component, useEffect, useState} from 'react'
 import AuthService from './auth/auth.service'
 import { Navigate } from "react-router-dom"
+import authService from './auth/auth.service'
 
 class Profile extends Component {
 	
@@ -29,7 +30,7 @@ class Profile extends Component {
 		}
 		return (
 			<div className="Log">
-				Hello !
+				<button onClick={authService.logout}>Logout</button>
 			</div>
 		)
 	

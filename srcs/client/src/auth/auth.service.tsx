@@ -8,6 +8,7 @@ class AuthService {
 			return false
 		
 		try {
+			
 			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`, {withCredentials:true})
 			localStorage.setItem("accessToken", res.data.accessToken)	
 		} catch (err) {
@@ -18,8 +19,9 @@ class AuthService {
 	async logout() {
 		try {
 			const res:any = await axios.get(`http://127.0.0.1:4545/auth/logout`, {withCredentials:true})
+			localStorage.removeItem("accessToken")
 		} catch(err) {
-
+			console.error(err)
 		}
 	}
 
