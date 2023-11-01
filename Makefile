@@ -1,5 +1,5 @@
 NAME = ft_malaise
-DOCKER = sudo docker
+DOCKER = docker
 COMPOSE = $(DOCKER) compose -p ${NAME} -f srcs/docker-compose.yml
 
 all: up
