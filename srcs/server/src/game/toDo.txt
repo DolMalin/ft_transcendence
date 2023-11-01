@@ -1,0 +1,11 @@
+TO DO 2 / 11 / 2023 :
+
+-fix start timer bug
+
+- display score on each side 
+
+- display Player Names
+
+- Create DB TABLE for players and games
+
+- properly handle player leaving games
