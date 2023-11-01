@@ -8,11 +8,10 @@ class AuthService {
 			return false
 		
 		try {
-			
 			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`, {withCredentials:true})
 			localStorage.setItem("accessToken", res.data.accessToken)	
 		} catch (err) {
-			console.log("fail to auth")
+			console.error(err)
 		}
 	}
 
@@ -24,6 +23,16 @@ class AuthService {
 			console.error(err)
 		}
 	}
+
+	async refresh() {
+		try {
+			const res:any = await axios.get(`http://127.0.0.1:4545/auth/refresh`, {withCredentials:true})
+			localStorage.setItem("accessToken", res.data.accessToken)
+		} catch(err) {
+			console.error(err)
+		}
+	}
+
 
 	getAccessToken() {
 		return localStorage.getItem("accessToken")

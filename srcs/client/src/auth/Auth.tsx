@@ -69,7 +69,6 @@ import { Navigate } from "react-router-dom"
 function Auth() {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
-	const [redirect, setRedirect] = useState('')
 
 	const fetchAuthUrl = async () => {
 		try {
