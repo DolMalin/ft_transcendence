@@ -3,6 +3,7 @@ import { useRef, useEffect, useState, KeyboardEvent } from 'react'
 import { Socket, io } from 'socket.io-client'
 import { Stage, Layer, Rect, Text } from 'react-konva';
 import * as Constants from './const'
+import { useAnimationFrame } from 'framer-motion';
 
 /**
  * @description 
@@ -41,10 +42,120 @@ interface GameInfo {
     roomName : string
 }
 
+
+function DrawNumbers(context : CanvasRenderingContext2D, color : string,x : number, y : number, size : number, number : number[]) {
+
+    let height = size;
+    let width = size / 2;
+    let Spacing  = height / 10;
+    let rodWidth  = size / 10;
+    let HorizontalRodLenght = size / 2;
+    let VerticalRodLenght = size / 2 - Spacing * 2;
+
+    if (number === Constants.ONE)
+    {
+        x += width / 2 + rodWidth / 2;
+    }
+
+    context.fillStyle = color;
+    number.forEach((value, index) => {
+        switch (value)
+        {
+            case 1 :
+                context.fillRect(x + Spacing, y, HorizontalRodLenght, rodWidth)
+                break ;
+
+            case 2 :
+                context.fillRect(x, y + Spacing, rodWidth, VerticalRodLenght)
+                break ;
+                
+            case 3 :
+                context.fillRect(x + width + Spacing, y + Spacing, rodWidth, VerticalRodLenght)
+                break ;
+
+            case 4 :
+                context.fillRect(x + Spacing, y + height / 2 - Spacing, HorizontalRodLenght, rodWidth)
+                break ;
+
+            case 5 :
+                context.fillRect(x, y + height / 2, rodWidth, VerticalRodLenght);
+                break ;
+
+            case 6 :
+                context.fillRect(x + width + Spacing, y + height / 2, rodWidth, VerticalRodLenght);
+                break ;
+
+            case 7 :
+                context.fillRect(x + Spacing, y + height - Spacing * 2, HorizontalRodLenght, rodWidth);
+                break ;
+
+            default :
+                break ;
+        }
+    })
+    
+    // TO DO : Add triangle edges for a smoother rendering if times is not of the matter
+};
+
+function drawScore(playerScores : number, side : string, color : string, context : CanvasRenderingContext2D ,canvasBounding : DOMRect) {
+    
+    let numberSize = canvasBounding.width / 5;
+    let y : number;
+    let x = canvasBounding.width / 2 - numberSize * 0.5;
+    
+    if (side === "top")
+        y = 0.25 * canvasBounding.height - numberSize * 0.5;
+    if (side === "bottom")
+        y = 0.75 * canvasBounding.height - numberSize * 0.5;
+
+    switch (playerScores) {
+        case 0 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.ZERO);
+            break ;
+        case 1 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.ONE);
+            break ;
+        case 2 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.TWO);
+            break ;
+        case 3 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.THREE);
+            break ;
+        case 4 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.FOUR);
+            break ;
+        case 5 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.FIVE);
+            break ;
+        case 6 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.SIX);
+            break ;
+        case 7 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.SEVEN);
+            break ;
+        case 8 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.EIGHT);
+            break ;
+        case 9 :
+            DrawNumbers(context, color, x, y, numberSize, Constants.NINE);
+            break ;
+        default :
+            break ;
+    }
+}
+  
+
 function Game(props : GameProps) {
     const canvasRef = useRef(null);
     const sock : Socket = props.sock;
     const [startingInfosSent, setStartingInfosSent] = useState(false);
+
+    let midPointCT = 0;
+    let midPointCTOn = false;
+    let ctSizeModifier = 1;
+    let playerOneScore = 0;
+    let playerTwoScore = 0;
+
     const gameZone = document.getElementById(Constants.GAME_ZONE);
     const gameInfo : GameInfo = {
             gameType : props.gameType,
@@ -64,6 +175,27 @@ function Game(props : GameProps) {
             // sock.emit()
         setStartingInfosSent(true);
     }, []);
+
+    useEffect( () => {
+
+        sock.on('midPointCt', (ct : number) => {
+            midPointCTOn = true;
+            midPointCT = ct;
+            ctSizeModifier = 1;
+        });
+
+        sock.on('midPointCtEnd', () => {
+            console.log('END');
+            midPointCTOn = false;
+            midPointCT = 0;
+            ctSizeModifier = 1;
+        });
+
+        return (() => {
+            sock.off('midPointCt');
+            sock.off('midPointCtEnd');
+        })
+    }, [midPointCT, midPointCTOn])
     
     useEffect(() => {
 
@@ -94,48 +226,62 @@ function Game(props : GameProps) {
         }
         
         sock.on('adversaryMoves', (x, y) => {
-            // x = 1 - x - 0.15;
-            // y = 0;
-            adversaryPaddle.x = canvasBounding.width * x;
-            adversaryPaddle.y = canvasBounding.height * y;
+
+        adversaryPaddle.x = canvasBounding.width * x;
+        adversaryPaddle.y = canvasBounding.height * y;
         });
 
         sock.on('myMoves', (x, y) => {
-            // if (props.playerId === '2')
-            // {
-                // x = 1 - x;
-            //     y = 1 - 0.02;
-            // }
+
             paddle.x = canvasBounding.width * x;
             paddle.y = canvasBounding.height * y;
         });
 
         sock.on('ballInfos', (serverBall : Ball) => {
             ball = serverBall;
-            // if (props.playerId === '2')
-            // {
-            //     ball.x = 1 - ball.x;
-            //     ball.y = 1 - ball.y;
-            // }
-            console.log("BALL MOVE TRIGGERED SPEED :", ball.speed)
+
+            // console.log("BALL MOVE TRIGGERED SPEED :", ball.speed)
         });
 
-        sock.on('scoreChange', ({x, y}) => {
-            // display score
-        });
+        sock.on('pointScored', (playerId, newScore) => {
 
-        sock.on('pointScored', () => {
+            if (playerId === 1)
+                playerOneScore = newScore;
+            else if (playerId === 2)
+                playerTwoScore = newScore;
+                
             console.log('point scored')
             // TO DO display timer
         });
         
+        function DrawMidPointCt() {
+            let numberSize = canvasBounding.width / 6 * ctSizeModifier;
+            let x = canvasBounding.width / 2 - (numberSize * 0.5)
+            let y = canvasBounding.height / 2 - (numberSize * 0.5)
+            switch (midPointCT) 
+            {
+                case 3 :
+                    DrawNumbers(context, 'white', x, y, numberSize, Constants.THREE);
+                    break ;
+                case 2 :
+                    DrawNumbers(context, 'white', x, y, numberSize, Constants.TWO);
+                    break ;
+                case 1 :
+                    DrawNumbers(context, 'white', x, y, numberSize, Constants.ONE);
+                    break ;
+                default :
+                    break ;
+            }
+            ctSizeModifier -= 1 / 60;
+        }
+
         function drawPaddle() {
-            context.fillStyle = 'blue';
+            context.fillStyle = Constants.BLUE;
             
             context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
-            context.fillStyle = 'red';
+            context.fillStyle = Constants.RED;
 
             context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
@@ -217,11 +363,30 @@ function Game(props : GameProps) {
         })
 
         function update() {
+           
             drawBoard();
             drawAdversaryPaddle();
             drawPaddle();
+
+            if (props.playerId === '1')
+            {
+                drawScore(playerOneScore, 'bottom', Constants.LIGHT_BLUE, context, canvasBounding);
+                drawScore(playerTwoScore, 'top', Constants.LIGHT_RED, context, canvasBounding);
+            }
+
+            else if (props.playerId === '2')
+            {
+                drawScore(playerOneScore, 'bottom', Constants.LIGHT_RED, context, canvasBounding);
+                drawScore(playerTwoScore, 'top', Constants.LIGHT_BLUE, context, canvasBounding);
+            }
             // moveBall();
-            drawBall();
+
+            if (midPointCTOn)
+                DrawMidPointCt();
+
+            else
+                drawBall();
+
         }
       
         switch (props.gameType)

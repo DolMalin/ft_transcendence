@@ -110,6 +110,9 @@ export class MatchmakingService {
       let game : Game = {
         clientOne : client.id,
         clientTwo : '',
+        clientOneScore : 0,
+        clientTwoScore : 0,
+        Victor : '',
         gameType  : data.gameType,
         paddleOne : {
           x : 0.5 - paddleWidth / 2,
@@ -203,10 +206,9 @@ export class GamePlayService {
 
     game.ballRefreshInterval = setInterval(() => {
         
-        if (goal(game.ball))
+        if (goal(server, game,data.roomName, game.ball))
         {
           ballReset(game.ball);
-          server.to(data.roomName).emit('pointScored', game.ball)
           server.to(data.roomName).emit('ballInfos', game.ball);
           pauseBetweenPoints(game.ball, server, data.roomName);
         }
@@ -231,4 +233,3 @@ export class GamePlayService {
       }, Constants.FRAME_RATE);
     }
 }
-

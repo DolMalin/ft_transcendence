@@ -9,3 +9,8 @@ TO DO 2 / 11 / 2023 :
 - Create DB TABLE for players and games
 
 - properly handle player leaving games
+
+- Add triangle edges for a smoother rendering if times is not of the matter
+(number Drawer)
+
+-Check that every sock.on has a sock.off

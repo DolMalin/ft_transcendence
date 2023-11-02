@@ -111,17 +111,23 @@ function CreateGameButton(props : any) {
             </Text>
         )
     }
-
+    
     function WaitingForLaunch() {
-        const countdownInterval = setInterval(() => {
-            if (preGameCD > 0) {
-                setPreGameCD(preGameCD - 1);
-            } else {
-                setPreGameCDVisible(false);
-                clearInterval(countdownInterval);
-                toggleGame();
-            }
-        }, 1000);
+        useEffect(() => {
+
+                const countdownInterval = setInterval(() => {
+                    console.log('in Waiting for launch interval')
+                console.log('pre game cd : ', preGameCD);
+                if (preGameCD > 0) {
+                    setPreGameCD(preGameCD - 1);
+                } else {
+                    console.log('getting out of Waiting for launch interval')
+                    setPreGameCDVisible(false);
+                    clearInterval(countdownInterval);
+                    toggleGame();
+                }
+            }, 1000);
+        }, [])
         return(
             <div className='waitingScreen'>
                 <Text fontSize="2xl" textAlign="center"> GAME LAUNCH IN {preGameCD} !!!</Text>

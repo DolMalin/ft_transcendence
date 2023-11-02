@@ -19,7 +19,6 @@ export function randomizeBallAngle() {
       || angle > Math.PI * 0.75 && angle < Math.PI * 1.25 
       || angle > Math.PI * 1.75)
       {
-        console.log('test')
         angle = Math.floor(Math.random() * 360) * (Math.PI / 180);;
       }
     return (angle)
@@ -48,11 +47,18 @@ export function ballReset(ball : Ball) {
  * @description 
  * check if the ball as reached a goal zone
 */
-export const goal = (ball : Ball) => {
-    if (ball.y + ball.size >= 1 || ball.y - ball.size <= 0)
+export const goal = (server : Server, game : Game,roomName : string,ball : Ball) => {
+    if (ball.y + ball.size >= 1)
     {
-        // ball.y >= 1 ? ball.y = 1 : ball.y = 0;
+        game.clientOneScore ++;
+        server.to(roomName).emit('pointScored', 1, game.clientOneScore);
         return (true)
+    }
+    else if (ball.y - ball.size <= 0)
+    {
+        game.clientTwoScore ++;
+        server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
+        return (true);
     }
     else
         return (false)
@@ -109,16 +115,18 @@ export const HorizontalCollisionsAngle = (ball : Ball, paddle : Paddle) => {
 */
 export const pauseBetweenPoints = (ball : Ball, server : Server, roomName : string) => {
 
-    let ct = 2;
+    let ct = 3;
     const int = setInterval(() =>{
-        ct --
+        server.to(roomName).emit('midPointCt', ct);
         if (ct === 0)
         {
             clearInterval(int)
             ballRelaunch(ball)
             server.to(roomName).emit('ballInfos', ball);
+            server.to(roomName).emit('midPointCtEnd');
             return ;
         }
+        ct --
     }, 1000);
 }
 

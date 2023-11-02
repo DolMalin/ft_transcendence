@@ -17,6 +17,9 @@ export interface Paddle {
   export interface Game {
     clientOne : string,
     clientTwo : string,
+    clientOneScore : number,
+    clientTwoScore : number,
+    Victor : string,
     gameType  : string,
     paddleOne : Paddle,
     paddleTwo : Paddle,
