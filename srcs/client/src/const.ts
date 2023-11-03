@@ -26,3 +26,5 @@ export const LIGHT_BLUE = 'rgba(173, 216, 230, 0.5)';
 export const LIGHT_RED = 'rgba(255, 153, 153, 0.5)';
 export const BLUE = 'rgba(173, 216, 230)';
 export const RED = 'rgba(255, 153, 153)';
+export const DARKER_BLUE = 'rgba(160, 200, 255)';
+export const DARKER_RED = 'rgba(255, 100, 100)';

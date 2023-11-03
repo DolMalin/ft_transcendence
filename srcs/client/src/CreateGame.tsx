@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useRef, useEffect, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
 import { ChakraProvider,
@@ -67,6 +67,7 @@ function CreateGameButton(props : any) {
             setFormVisible(false);
             setWaitingScreenVisible(true);
             sock.on('roomFilled', () => {
+                console.log('Pathing through room filles callback')
                 setWaitingScreenVisible(false);
                 setPreGameCDVisible(true);
             })
@@ -87,6 +88,7 @@ function CreateGameButton(props : any) {
     function WaitingScreen() {
         const [dot, setDot] = useState('.');
         useEffect(() => {
+            console.log('waitingScreen Use effect')
             const dotdotdot = setInterval(() => {
               switch (dot) {
                 case '.':
@@ -112,22 +114,23 @@ function CreateGameButton(props : any) {
         )
     }
     
+    let cd = 5;
     function WaitingForLaunch() {
-        useEffect(() => {
+        
 
-                const countdownInterval = setInterval(() => {
-                    console.log('in Waiting for launch interval')
-                console.log('pre game cd : ', preGameCD);
-                if (preGameCD > 0) {
-                    setPreGameCD(preGameCD - 1);
-                } else {
-                    console.log('getting out of Waiting for launch interval')
+        useEffect(() => {
+            const timer = setInterval(() => {
+                setPreGameCD((prevCd) => (prevCd > 0 ? prevCd - 1 : 0));
+                console.log('cd : ',preGameCD)
+                if (preGameCD === 0)
+                {
                     setPreGameCDVisible(false);
-                    clearInterval(countdownInterval);
                     toggleGame();
+                    return ;
                 }
             }, 1000);
-        }, [])
+            return () => clearInterval(timer);
+        }, []);
         return(
             <div className='waitingScreen'>
                 <Text fontSize="2xl" textAlign="center"> GAME LAUNCH IN {preGameCD} !!!</Text>

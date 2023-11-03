@@ -88,8 +88,8 @@ export const HorizontalCollisionsAngle = (ball : Ball, paddle : Paddle) => {
     let bounceDirection = Math.PI * 0.5 * ((distanceToPaddleCenter / ( paddle.width / 2)));
 
     // following condition keep the ball to go in a 90 degree angle (therefor provoking an hard lock)
-    if (bounceDirection > Math.PI * 0.5 * 0.9)
-        bounceDirection = 0.9 * Math.PI * 0.5;
+    if (bounceDirection > Math.PI * 0.5 * 0.95)
+        bounceDirection = 0.95 * Math.PI * 0.5;
 
     // 1/4 of trig circle
     if (ball.angle <= 0.5 * Math.PI)

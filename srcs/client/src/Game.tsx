@@ -1,9 +1,12 @@
 import React from 'react'
 import { useRef, useEffect, useState, KeyboardEvent } from 'react'
 import { Socket, io } from 'socket.io-client'
-import { Stage, Layer, Rect, Text } from 'react-konva';
 import * as Constants from './const'
-import { useAnimationFrame } from 'framer-motion';
+import { 
+    Box,
+    Text,
+    Image
+    } from '@chakra-ui/react';
 
 /**
  * @description 
@@ -24,7 +27,6 @@ interface Paddle {
     y : number,
     size : number,
     color : string,
-    directionalVector : {x : number, y : number},
     angle : number,
     speed : number
   }
@@ -101,7 +103,7 @@ function drawScore(playerScores : number, side : string, color : string, context
     
     let numberSize = canvasBounding.width / 5;
     let y : number;
-    let x = canvasBounding.width / 2 - numberSize * 0.5;
+    let x = canvasBounding.width / 2 - numberSize * 0.25;
     
     if (side === "top")
         y = 0.25 * canvasBounding.height - numberSize * 0.5;
@@ -169,7 +171,6 @@ function Game(props : GameProps) {
             sock.emit('gameStart', gameInfo);
             if (props.playerId === '1')
             {
-                console.log('emit ball move');
                 sock.emit('ballMove', gameInfo);
             }
             // sock.emit()
@@ -185,7 +186,6 @@ function Game(props : GameProps) {
         });
 
         sock.on('midPointCtEnd', () => {
-            console.log('END');
             midPointCTOn = false;
             midPointCT = 0;
             ctSizeModifier = 1;
@@ -199,28 +199,27 @@ function Game(props : GameProps) {
     
     useEffect(() => {
 
-        console.log("client ID : ", props.playerId);
+        console.log('test');
         const canvas : HTMLCanvasElement = canvasRef.current;
         const context : CanvasRenderingContext2D = canvas.getContext('2d');
         const canvasBounding = canvas.getBoundingClientRect();
         let   paddle = {
             width : canvasBounding.width * 0.20,
             height : canvasBounding.height * 0.02,
-            x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
-            y : canvasBounding.height,
+            x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
+            y : 0/*props.playerId === '1' ? canvasBounding.height * 0.98 : 0*/,
         };
         let   adversaryPaddle : Paddle = {
             width : canvasBounding.width * 0.20,
             height : canvasBounding.height * 0.02,
-            x : canvasBounding.width / 2 - canvasBounding.width * 0.075,
-            y : 0,
+            x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
+            y : canvasBounding.height /*props.playerId === '1' ? 0 : canvasBounding.height * 0.98*/,
         };
         let ball : Ball = {
             x : 0.5,
             y : 0.5,
             size : 0.020,
             color : 'white',
-            directionalVector : {x : 0, y : 0},
             angle : 0,
             speed : 0
         }
@@ -239,8 +238,6 @@ function Game(props : GameProps) {
 
         sock.on('ballInfos', (serverBall : Ball) => {
             ball = serverBall;
-
-            // console.log("BALL MOVE TRIGGERED SPEED :", ball.speed)
         });
 
         sock.on('pointScored', (playerId, newScore) => {
@@ -249,9 +246,6 @@ function Game(props : GameProps) {
                 playerOneScore = newScore;
             else if (playerId === 2)
                 playerTwoScore = newScore;
-                
-            console.log('point scored')
-            // TO DO display timer
         });
         
         function DrawMidPointCt() {
@@ -277,11 +271,15 @@ function Game(props : GameProps) {
 
         function drawPaddle() {
             context.fillStyle = Constants.BLUE;
+
+            // console.log('my paddle :', paddle.x, ' | ', paddle.y);
             
             context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
         }
         function drawAdversaryPaddle() {
             context.fillStyle = Constants.RED;
+
+            // console.log('ad paddle :', adversaryPaddle.x, ' | ', adversaryPaddle.y);
 
             context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
         }
@@ -307,46 +305,6 @@ function Game(props : GameProps) {
             
             ball.x += Vx;
             ball.y += Vy;
-
-            // if (props.playerId === '2')
-            // {
-            //     ball.x = 1 - ball.x;
-            //     ball.y = 1 - ball.y;
-            // }
-
-            if (ball.x > 1)
-            {
-                ball.x = 1;
-                if (ball.angle > 180)
-                    ball.angle -= 180;
-                else
-                    ball.angle += 180
-            }
-            if (ball.x < 0)
-            {
-                ball.x = 0;
-                if (ball.angle > 180)
-                    ball.angle -= 180;
-                else
-                    ball.angle += 180
-            }
-            // if (ball.y > 1)
-            // {
-            //     ball.y = 1;
-            //     if (ball.angle > 180)
-            //         ball.angle -= 180;
-            //     else
-            //         ball.angle += 180
-            // }
-            // if (ball.y < 0)
-            // {
-            //     ball.y = 0;
-            //     if (ball.angle > 180)
-            //         ball.angle -= 180;
-            //     else
-            //         ball.angle += 180
-            // }
-            // console.log(ball.angle);
         }
 
         document.addEventListener("keydown", (event) => {
@@ -365,9 +323,7 @@ function Game(props : GameProps) {
         function update() {
            
             drawBoard();
-            drawAdversaryPaddle();
-            drawPaddle();
-
+            
             if (props.playerId === '1')
             {
                 drawScore(playerOneScore, 'bottom', Constants.LIGHT_BLUE, context, canvasBounding);
@@ -379,6 +335,8 @@ function Game(props : GameProps) {
                 drawScore(playerOneScore, 'bottom', Constants.LIGHT_RED, context, canvasBounding);
                 drawScore(playerTwoScore, 'top', Constants.LIGHT_BLUE, context, canvasBounding);
             }
+            drawAdversaryPaddle();
+            drawPaddle();
             // moveBall();
 
             if (midPointCTOn)
@@ -423,7 +381,37 @@ function Game(props : GameProps) {
 
 
     return (<>
-    <canvas ref={canvasRef} width={Math.floor(gameZone.clientWidth * 0.8)} height={Math.floor(gameZone.clientHeight * 0.6)} ></canvas>
+        <Box display={'flex'} flexDirection={'column'}>
+
+            <Box display={'flex'} flexDirection={'row'}
+                border={'2px solid black'}
+                borderTopLeftRadius={'20px'}
+                borderTopRightRadius={'20px'}
+                background={props.playerId === '2' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
+                padding={'2%'}
+                height={Math.floor(gameZone.clientHeight * 0.15)}
+                width={Math.floor(gameZone.clientWidth * 0.8)}
+            >
+                <Image borderRadius={'full'} src='https://bit.ly/dan-abramov'></Image>
+                <Text> Joueureuse 2 </Text>
+            </Box>
+            
+            <canvas ref={canvasRef} width={Math.floor(gameZone.clientWidth * 0.8)} height={Math.floor(gameZone.clientHeight * 0.6)} ></canvas>
+            
+            <Box display={'flex'} flexDirection={'row-reverse'}
+                border={'2px solid black'}
+                borderBottomLeftRadius={'20px'}
+                borderBottomRightRadius={'20px'}
+                background={props.playerId === '1' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
+                padding={'2%'}
+                height={Math.floor(gameZone.clientHeight * 0.15)}
+                width={Math.floor(gameZone.clientWidth * 0.8)}
+            >
+                <Image borderRadius={'full'} src='https://bit.ly/dan-abramov'></Image>
+                <Text> Joueureuse 1 </Text>
+            </Box>
+
+        </Box>
     </>)
 }
 

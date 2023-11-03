@@ -8,4 +8,4 @@ export const UP = 'w';
 export const LEFT = 'a';
 export const RIGHT = 'd';
 export const PADDLE_SPEED = 2 / 60; // crossing board in 1 sec
-export const BALL_SPEED = 0.8 / 60;
+export const BALL_SPEED = 0.4 / 60;
