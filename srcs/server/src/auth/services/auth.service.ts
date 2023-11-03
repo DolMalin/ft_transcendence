@@ -26,6 +26,13 @@ export class AuthService {
     return ({url: url.toString()})
   }
 
+  // /oauth/authorize/client_id/redirect/response_type=code
+
+  // -> url vers page de 42
+  // <+ 217.0.0.1/code=12398y1239821y3
+  // -> oauth/token
+  // <- token
+
 
   /**
    * @description Send a post request to the 42 api with the `callback code` and fetch the 42 auth `token` 
@@ -53,7 +60,6 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
-          console.log(err)
           resolve(null)
         })
     })

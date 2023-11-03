@@ -29,7 +29,7 @@ class Profile extends Component {
 		}
 		return (
 			<div className="Log">
-				Hello !
+				Hello you twat !
 			</div>
 		)
 	

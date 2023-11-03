@@ -81,8 +81,10 @@ function Auth() {
 			setRedirect('/profile')
 			setIsAuthenticated(true)
 		}
-		else
+		else {
 			setRedirect('/')
+			setIsAuthenticated(false)
+		}
 		
 	}
 
