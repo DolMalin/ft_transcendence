@@ -12,11 +12,8 @@ import * as Constants from './const'
 import {
   Game,
   GameInfo,
-  Ball,
-  Paddle
 } from './interfaces'
 import { clearInterval } from 'timers';
-import { delay } from 'rxjs';
 
 // import { KeyboardEvent } from 'react'
 
@@ -84,7 +81,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveGame')
   leaveGame(@MessageBody() gameRoom : string, @ConnectedSocket() client: Socket) {
 
-    clearInterval(this.gamesMap.get(gameRoom).ballRefreshInterval);
+    clearInterval(this.gamesMap.get(gameRoom)?.ballRefreshInterval);
     this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
   }
 

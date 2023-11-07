@@ -97,11 +97,6 @@ export class MatchmakingService {
 
     launchGame (server : Server, gamesMap : Map<string, Game>, client : Socket,data : GameInfo) {
          
-    // console.log(data.roomName)
-    // console.log(gamesMap);
-
-
-
     let paddleWidth = 0.20;
     let paddleHeight = 0.02;
 
@@ -178,11 +173,10 @@ export class GamePlayService {
       client.emit('myMoves', paddle);
       client.to(data.room).emit('adversaryMoves', paddle);
     }
-    console.log('FEUR')
+
     switch (data.key)
     {
       case Constants.UP :
-        console.log('id : ', data.playerId)
         data.playerId === '1' ? MoveY(game.paddleOne, -Constants.PADDLE_SPEED) : MoveY(game.paddleTwo, -Constants.PADDLE_SPEED)
         break ;
       case Constants.DOWN :
@@ -208,6 +202,13 @@ export class GamePlayService {
         
         if (goal(server, game,data.roomName, game.ball))
         {
+          if (game.clientOneScore >= 2 || game.clientTwoScore >= 2)
+          {
+            server.to(data.roomName).emit('gameOver',
+            client.id === game.clientOne ? game.clientOne : game.clientTwo);
+
+            return (clearInterval(game.ballRefreshInterval))
+          }
           ballReset(game.ball);
           server.to(data.roomName).emit('ballInfos', game.ball);
           pauseBetweenPoints(game.ball, server, data.roomName);
@@ -225,7 +226,7 @@ export class GamePlayService {
           server.to(data.roomName).emit('ballInfos', game.ball);
         }
         else {
-          console.log(game.ball);
+
           server.to(data.roomName).emit('ballInfos', game.ball);
         }
 

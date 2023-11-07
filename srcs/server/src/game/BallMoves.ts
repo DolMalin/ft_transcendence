@@ -50,14 +50,14 @@ export function ballReset(ball : Ball) {
 export const goal = (server : Server, game : Game,roomName : string,ball : Ball) => {
     if (ball.y + ball.size >= 1)
     {
-        game.clientOneScore ++;
-        server.to(roomName).emit('pointScored', 1, game.clientOneScore);
+        game.clientTwoScore ++;
+        server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
         return (true)
     }
     else if (ball.y - ball.size <= 0)
     {
-        game.clientTwoScore ++;
-        server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
+        game.clientOneScore ++;
+        server.to(roomName).emit('pointScored', 1, game.clientOneScore);
         return (true);
     }
     else
@@ -192,7 +192,6 @@ export const willBallOverlapPaddleOne = (ball : Ball, paddle : Paddle,vx : numbe
         if (futureBallY + ball.size > paddle.y)
         {
             ball.y = paddle.y - ball.size;
-            console.log('ball : ', ball.y + ball.size, '| paddle :', paddle.y)
             HorizontalCollisionsAngle(ball, paddle);
             return (true);
         }

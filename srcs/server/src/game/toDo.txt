@@ -2,7 +2,9 @@ TO DO 2 / 11 / 2023 :
 
 - move ball in front too
 
-- scale games elements when resizing window
+- maybe take care of the flickering ? 
+-   change canvas size ratio
+-   resize does't seems to work completly with inspector poping out ?
 
 - end game when a player win (need DB);
 
@@ -20,6 +22,3 @@ TO DO 2 / 11 / 2023 :
 - check angle redirection on paddle hit (2 / 4 ?)
 
 - COLLISON BUG BOTTONM PADDLE RIGHT 
-
-
-PUTAIN POURQUOI SA TAPE PAS SUR LES PADDLE LA CON DE SES MORTS KJDAKSJDASDKASLKNVSAVMVNALNS
