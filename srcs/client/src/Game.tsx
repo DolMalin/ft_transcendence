@@ -43,10 +43,19 @@ function Game(props : GameProps) {
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
 
-    const [myPaddle, setMyPaddleX] = useState(0.5);
+    const [myPaddle, setMyPaddle] = useState({
+        width : Constants.PADDLE_WIDTH,
+        height : Constants.PADDLE_HEIGHT,
+        x : 0.5 - Constants.PADDLE_WIDTH / 2,
+        y : props.playerId === '1' ? 1 - Constants.PADDLE_HEIGHT : 0,
+    });
 
-    const [adversaryPaddleX, setAdPaddleX] = useState(0.5);
-    const [adversaryPaddleWidth, setAdPaddleWidth] = useState(Constants.PADDLE_WIDTH);
+    const [adversaryPaddle, setAdPaddle] = useState({
+        width : Constants.PADDLE_WIDTH,
+        height :  Constants.PADDLE_HEIGHT,
+        x : 0.5 - Constants.PADDLE_WIDTH / 2,
+        y : props.playerId === '1' ? 0 : 1 - Constants.PADDLE_HEIGHT,
+    });
 
     const gameInfo : GameInfo = {
             gameType : props.gameType,
@@ -105,18 +114,18 @@ function Game(props : GameProps) {
         const canvas : HTMLCanvasElement = canvasRef.current;
         const context : CanvasRenderingContext2D = canvas.getContext('2d');
         const canvasBounding = canvas.getBoundingClientRect();
-        let   paddle = {
-            width : canvasBounding.width * 0.20,
-            height : canvasBounding.height * 0.02,
-            x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
-            y : props.playerId === '1' ? canvasBounding.height * 0.98 : 0,
-        };
-        let   adversaryPaddle : Paddle = {
-            width : canvasBounding.width * 0.20,
-            height : canvasBounding.height * 0.02,
-            x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
-            y : props.playerId === '1' ? 0 : canvasBounding.height * 0.98,
-        };
+        // let   paddle = {
+        //     width : canvasBounding.width * 0.20,
+        //     height : canvasBounding.height * 0.02,
+        //     x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
+        //     y : props.playerId === '1' ? canvasBounding.height * 0.98 : 0,
+        // };
+        // let   adversaryPaddle : Paddle = {
+        //     width : canvasBounding.width * 0.20,
+        //     height : canvasBounding.height * 0.02,
+        //     x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
+        //     y : props.playerId === '1' ? 0 : canvasBounding.height * 0.98,
+        // };
         let ball : Ball = {
             x : 0.5,
             y : 0.5,
@@ -126,16 +135,19 @@ function Game(props : GameProps) {
             speed : 0
         }
         
-        sock.on('adversaryMoves', (x, y) => {
+        sock.on('adversaryMoves', (paddle : Paddle) => {
 
-            adversaryPaddle.x = canvasBounding.width * x;
-            adversaryPaddle.y = canvasBounding.height * y;
+            setAdPaddle(paddle);
+
+            // adversaryPaddle.x = canvasBounding.width * x;
+            // adversaryPaddle.y = canvasBounding.height * y;
         });
 
-        sock.on('myMoves', (x, y) => {
+        sock.on('myMoves', (paddle : Paddle) => {
 
-            paddle.x = canvasBounding.width * x;
-            paddle.y = canvasBounding.height * y;
+            setMyPaddle(paddle)
+            // paddle.x = canvasBounding.width * x;
+            // paddle.y = canvasBounding.height * y;
         });
 
         sock.on('ballInfos', (serverBall : Ball) => {
@@ -214,8 +226,8 @@ function Game(props : GameProps) {
                 drawScore(playerOneScore, 'bottom', Constants.LIGHT_RED, context, canvasBounding);
                 drawScore(playerTwoScore, 'top', Constants.LIGHT_BLUE, context, canvasBounding);
             }
-            drawAdversaryPaddle(context, adversaryPaddle);
-            drawPaddle(context, paddle);
+            drawAdversaryPaddle(context, canvasBounding, adversaryPaddle);
+            drawPaddle(context, canvasBounding, myPaddle);
             // moveBall();
 
             if (midPointCTOn)
@@ -256,7 +268,7 @@ function Game(props : GameProps) {
             clearInterval(interval);
             document.removeEventListener('keydown', handleKeydown);
         };
-    }, [dimension, playerOneScore, playerTwoScore, midPointCT, midPointCTOn, ctSizeModifier]);
+    }, [dimension, playerOneScore, playerTwoScore, midPointCT, midPointCTOn, ctSizeModifier, myPaddle, adversaryPaddle]);
 
 
 

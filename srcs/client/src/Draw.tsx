@@ -107,16 +107,18 @@ export function drawScore(playerScores : number, side : string, color : string, 
     }
 }
 
-export function drawPaddle(context : CanvasRenderingContext2D, paddle : Paddle) {
+export function drawPaddle(context : CanvasRenderingContext2D, canvasBounding : DOMRect, paddle : Paddle) {
 
     context.fillStyle = Constants.BLUE;
-    context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    context.fillRect(paddle.x * canvasBounding.width, paddle.y * canvasBounding.height,
+        paddle.width * canvasBounding.width, paddle.height * canvasBounding.height);
 }
 
-export function drawAdversaryPaddle(context : CanvasRenderingContext2D, adversaryPaddle : Paddle) {
+export function drawAdversaryPaddle(context : CanvasRenderingContext2D, canvasBounding : DOMRect, adversaryPaddle : Paddle) {
 
     context.fillStyle = Constants.RED;
-    context.fillRect(adversaryPaddle.x, adversaryPaddle.y, adversaryPaddle.width, adversaryPaddle.height);
+    context.fillRect(adversaryPaddle.x * canvasBounding.width, adversaryPaddle.y * canvasBounding.height,
+        adversaryPaddle.width * canvasBounding.width, adversaryPaddle.height * canvasBounding.height);
 }
 
 export function drawBoard(context : CanvasRenderingContext2D, canvasBounding : DOMRect) {

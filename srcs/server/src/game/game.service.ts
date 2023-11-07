@@ -168,15 +168,15 @@ export class GamePlayService {
       paddle.y += difY;
       paddle.y > 1 - paddle.height ? paddle.y = 1 : paddle.y;
       paddle.y <= 0 ? paddle.y = 0 : paddle.y;
-      client.emit('myMoves', paddle.x, paddle.y);
-      client.to(data.room).emit('adversaryMoves', paddle.x, paddle.y);
+      client.emit('myMoves', paddle);
+      client.to(data.room).emit('adversaryMoves', paddle);
     }
     function MoveX(paddle : Paddle, difX : number) {
       paddle.x += difX;
       paddle.x >= 1 - paddle.width ? paddle.x = 1 - paddle.width : paddle.x;
       paddle.x <= 0 ? paddle.x = 0 : paddle.x;
-      client.emit('myMoves', paddle.x, paddle.y);
-      client.to(data.room).emit('adversaryMoves', paddle.x, paddle.y);
+      client.emit('myMoves', paddle);
+      client.to(data.room).emit('adversaryMoves', paddle);
     }
     console.log('FEUR')
     switch (data.key)
