@@ -178,7 +178,7 @@ export class GamePlayService {
       client.emit('myMoves', paddle.x, paddle.y);
       client.to(data.room).emit('adversaryMoves', paddle.x, paddle.y);
     }
-    
+    console.log('FEUR')
     switch (data.key)
     {
       case Constants.UP :
@@ -222,11 +222,12 @@ export class GamePlayService {
         {
           game.ball.x += vX;
           game.ball.y += vY;
-        }
-        else {
           server.to(data.roomName).emit('ballInfos', game.ball);
         }
-        server.to(data.roomName).emit('ballInfos', game.ball);
+        else {
+          console.log(game.ball);
+          server.to(data.roomName).emit('ballInfos', game.ball);
+        }
 
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))

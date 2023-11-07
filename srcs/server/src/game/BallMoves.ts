@@ -69,9 +69,21 @@ export const goal = (server : Server, game : Game,roomName : string,ball : Ball)
 */
 export const VerticalCollisionAngle = (ball : Ball) => {
 
-    ball.angle = Math.PI - ball.angle;
-    if (ball.angle < 0)
-        ball.angle = 2 * Math.PI + ball.angle;
+    // ball.angle = Math.PI - ball.angle;
+    // if (ball.angle < 0)
+    //     ball.angle = 2 * Math.PI + ball.angle;
+
+    if (ball.angle <= 0.5 * Math.PI)
+        ball.angle += Math.PI * 0.5;
+    // 2/4 of trig circle
+    else if (ball.angle <= Math.PI)
+        ball.angle -= Math.PI * 0.5;
+    // 3/4 of trig circle
+    else if (ball.angle <= 1.5 * Math.PI)
+        ball.angle += Math.PI * 0.5;
+    // 4/4 of trig circle
+    else if (ball.angle <= 2 * Math.PI)
+        ball.angle -= Math.PI * 0.5;
 }
 
 /**
@@ -176,10 +188,11 @@ export const willBallOverlapPaddleOne = (ball : Ball, paddle : Paddle,vx : numbe
     // will ball overlap next step while comming from above ?
     else if (futureBallX - ball.size > paddle.x && futureBallX - ball.size < paddle.x + paddle.width
         || futureBallX + ball.size > paddle.x && futureBallX + ball.size < paddle.x + paddle.width)
-    {
-        if (futureBallY + ball.size >= paddle.y)
+        {
+        if (futureBallY + ball.size > paddle.y)
         {
             ball.y = paddle.y - ball.size;
+            console.log('ball : ', ball.y + ball.size, '| paddle :', paddle.y)
             HorizontalCollisionsAngle(ball, paddle);
             return (true);
         }
