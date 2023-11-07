@@ -21,6 +21,18 @@ import {
     GameProps,
     } from './interfaces';
 
+
+function debounce(func : Function, ms : number) {
+    let timer : string | number | NodeJS.Timeout;
+
+    return ( function(...args : any) {
+        clearTimeout(timer);
+        timer = setTimeout( () => {
+            timer = null;
+            func.apply(this, args)
+        }, ms);
+    });
+} 
 /**
  * @description 
  * props are :
@@ -57,6 +69,10 @@ function Game(props : GameProps) {
         y : props.playerId === '1' ? 0 : 1 - Constants.PADDLE_HEIGHT,
     });
 
+    // const [canvas, setCanvas] = useState<HTMLCanvasElement>();
+    // const [context, setContext] = useState<CanvasRenderingContext2D>();
+    // const [canvasBounding, setCanvasBounding] = useState<DOMRect>();
+
     const gameInfo : GameInfo = {
             gameType : props.gameType,
             playerId : props.playerId,
@@ -64,17 +80,18 @@ function Game(props : GameProps) {
         }
 
     useEffect(() => {
-        function handleResize() {
+        const debouncedHandleResize = debounce (function handleResize() {
+
             setDimension({
                 height : gameZone.clientWidth,
                 width : gameZone.clientWidth
             });
-        }
+        }, 100);
         console.log('going through resize UE')
-        window.addEventListener("resize", handleResize);
+        window.addEventListener("resize", debouncedHandleResize);
         return (
             () => {
-                window.removeEventListener("resize", handleResize)
+                window.removeEventListener("resize", debouncedHandleResize)
             }
         )
     }, [dimension])
@@ -89,6 +106,7 @@ function Game(props : GameProps) {
 
     useEffect( () => {
 
+        // console.log('oppa')
         sock.on('midPointCt', (ct : number) => {
             setMidPointCTOn(true);
             setMidPointCT(ct);
@@ -105,27 +123,15 @@ function Game(props : GameProps) {
             sock.off('midPointCt');
             sock.off('midPointCtEnd');
         })
-    }, [midPointCT, midPointCTOn, ctSizeModifier])
+    }, [midPointCT, midPointCTOn])
     
     useEffect(() => {
 
-        console.log("RERENDERING")
-
+        // console.log('RERENDERING')
         const canvas : HTMLCanvasElement = canvasRef.current;
         const context : CanvasRenderingContext2D = canvas.getContext('2d');
-        const canvasBounding = canvas.getBoundingClientRect();
-        // let   paddle = {
-        //     width : canvasBounding.width * 0.20,
-        //     height : canvasBounding.height * 0.02,
-        //     x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
-        //     y : props.playerId === '1' ? canvasBounding.height * 0.98 : 0,
-        // };
-        // let   adversaryPaddle : Paddle = {
-        //     width : canvasBounding.width * 0.20,
-        //     height : canvasBounding.height * 0.02,
-        //     x : canvasBounding.width / 2 - canvasBounding.width * 0.1,
-        //     y : props.playerId === '1' ? 0 : canvasBounding.height * 0.98,
-        // };
+        const canvasBounding : DOMRect = canvas.getBoundingClientRect();
+
         let ball : Ball = {
             x : 0.5,
             y : 0.5,
@@ -138,31 +144,39 @@ function Game(props : GameProps) {
         sock.on('adversaryMoves', (paddle : Paddle) => {
 
             setAdPaddle(paddle);
-
-            // adversaryPaddle.x = canvasBounding.width * x;
-            // adversaryPaddle.y = canvasBounding.height * y;
         });
 
         sock.on('myMoves', (paddle : Paddle) => {
 
             setMyPaddle(paddle)
-            // paddle.x = canvasBounding.width * x;
-            // paddle.y = canvasBounding.height * y;
         });
 
         sock.on('ballInfos', (serverBall : Ball) => {
-            // console.log('BALL :', ball)
-            // console.log('SERVER BALL :', serverBall)
+
             ball = serverBall;
         });
 
         sock.on('pointScored', (playerId, newScore) => {
 
             if (playerId === 1)
+            {
+                console.log('1 scored, score : ', newScore)
                 setPlayerOneScore(newScore);
+            }
             else if (playerId === 2)
+            {
+                console.log('2 scored, score :', newScore)
                 setPlayerTwoScore(newScore);
+            }
         });
+
+        sock.on('gameOver', (winner) => {
+            console.log('game over');
+            // if (sock.id === winner)
+            // {
+                // clearInterval(interval);
+            // }
+        })
 
         function drawMidPointCt() {
             let numberSize = canvasBounding.width / 6 * ctSizeModifier;
@@ -182,7 +196,7 @@ function Game(props : GameProps) {
                 default :
                     break ;
             }
-            setCtSizeModifier((prevState) => {return (prevState - 1 / 60)});
+            setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
         }
 
         function moveBall() {
@@ -226,7 +240,7 @@ function Game(props : GameProps) {
             }
             drawAdversaryPaddle(context, canvasBounding, adversaryPaddle);
             drawPaddle(context, canvasBounding, myPaddle);
-            // moveBall();
+            moveBall();
 
             if (midPointCTOn)
                 drawMidPointCt();
@@ -234,22 +248,6 @@ function Game(props : GameProps) {
             else
                 drawBall(context, canvasBounding, ball);
 
-        }
-      
-        switch (props.gameType)
-        {
-            case Constants.GAME_TYPE_ONE :
-                context.fillStyle = 'red';
-                break;
-            case Constants.GAME_TYPE_TWO :
-                context.fillStyle = 'green';
-                break;
-            case Constants.GAME_TYPE_THREE :
-                context.fillStyle = 'blue';
-                break;
-            default :
-                context.fillStyle = 'pink';
-                break ;
         }
 
         const interval = setInterval(() => {

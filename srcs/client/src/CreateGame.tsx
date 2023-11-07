@@ -44,16 +44,21 @@ function CreateGameButton(props : any) {
         }
     }
     
-    const toggleGame = () => {
-        if (gameVisible)
+    /**
+    * @description 
+    * if toggle is true will toggle the game, if it is false it will untoggleit
+    */
+    const toggleGame = (toggle : boolean) => {
+        if (toggle === false)
         {
-            console.log('FEUR');
+            console.log('Game was toggled off');
             sock.emit('leaveGame', gameRoom);
             setGameVisible(false);
             setPlayButtonVisible(true);
         }
         else
         {
+            console.log('Game was toggled on');
             setGameVisible(true);
             setFormVisible(false);
             setPlayButtonVisible(false);
@@ -84,6 +89,16 @@ function CreateGameButton(props : any) {
             })
         }
     }
+
+    useEffect(() => {
+        sock.on('gameOver', (winner) => {
+            if (sock.id === winner)
+                console.log("YOU WON")
+            else
+                console.log('YOU LOST') 
+            toggleGame(false);
+        })
+    }, [])
 
     function WaitingScreen() {
         const [dot, setDot] = useState('.');
@@ -125,7 +140,7 @@ function CreateGameButton(props : any) {
                 if (preGameCD === 0)
                 {
                     setPreGameCDVisible(false);
-                    toggleGame();
+                    toggleGame(true);
                     return ;
                 }
             }, 1000);
@@ -167,7 +182,7 @@ function CreateGameButton(props : any) {
         {WaitingScreenVisible && <WaitingScreen />}
         {preGameCDVisible && <WaitingForLaunch />}
         {gameVisible && <Game gameType={selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
-        {gameVisible && <Button onClick={toggleGame}> Leave </Button>}
+        {gameVisible && <Button onClick={() => {toggleGame(false)}}> Leave </Button>}
     </>);
 }
 
