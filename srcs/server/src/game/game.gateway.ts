@@ -18,7 +18,6 @@ import { clearInterval } from 'timers';
 // import { KeyboardEvent } from 'react'
 
 export class GameServDTO {
-  clientsNumber : number = 0;
   clientsId : string[] = [];
   rooms : {
     name : string
@@ -57,7 +56,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   */
  handleConnection(client: Socket) {
 
-    this.gameServDto.clientsNumber ++;
     this.gameServDto.clientsId.push(client.id);
   }
   

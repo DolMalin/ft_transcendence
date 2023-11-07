@@ -147,7 +147,6 @@ export class MatchmakingService {
       // remove the user and empty rooms from the DTO
 
       console.log('before : ', gameServDto);
-      gameServDto.clientsNumber --;
       gameServDto.clientsId = gameServDto.clientsId.filter((id) => id != client.id);
       gameServDto.rooms = gameServDto.rooms.filter((room) => server.sockets.adapter.rooms.get(room.name) != undefined);
       console.log('after : ', gameServDto);

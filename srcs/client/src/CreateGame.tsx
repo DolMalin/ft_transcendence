@@ -73,6 +73,7 @@ function CreateGameButton(props : any) {
     useEffect (function matchMaking() {
         if (lookingForGame === true)
         {
+            console.log("TEST")
             sock.emit("joinGame", selectedGameType);
             setFormVisible(false);
             setWaitingScreenVisible(true);
@@ -189,12 +190,14 @@ function CreateGameButton(props : any) {
                 borderColor={'blackAlpha.500'} 
                 borderStyle={'solid'}
                 padding={10}
-                backgroundColor={'pink.100'}>
+                backgroundColor={'pink.100'}
+                onChange={setSelectedGameType}
+                value={selectedGameType}>
                 <CloseButton onClick={toggleForm} alignItems={'right'}></CloseButton>
                 <Stack direction='column'>
-                    <Radio value='1' checked={selectedGameType === '1'} onChange={handleChange}> type de game 1 </Radio>
-                    <Radio value='2' checked={selectedGameType === '2'} onChange={handleChange}> type de game 2 </Radio>
-                    <Radio value='3' checked={selectedGameType === '3'} onChange={handleChange}> type de game 3 </Radio>
+                    <Radio value='1'> type de game 1 </Radio>
+                    <Radio value='2'> type de game 2 </Radio>
+                    <Radio value='3'> type de game 3 </Radio>
     
                     <Button onClick={() => {setLookingForGame(true)}} alignItems={'center'}> Launch {selectedGameType} </Button>
                 </Stack>
