@@ -14,9 +14,7 @@ export function drawNumbers(context : CanvasRenderingContext2D, color : string,x
     let VerticalRodLenght = size / 2 - Spacing * 2;
 
     if (number === Constants.ONE)
-    {
         x += width / 2 + rodWidth / 2;
-    }
 
     context.fillStyle = color;
     number.forEach((value, index) => {

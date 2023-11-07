@@ -185,8 +185,6 @@ function Game(props : GameProps) {
             setCtSizeModifier((prevState) => {return (prevState - 1 / 60)});
         }
 
-
-
         function moveBall() {
 
             let Vx = ball.speed * Math.cos(ball.angle);
