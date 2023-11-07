@@ -82,6 +82,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   leaveGame(@MessageBody() gameRoom : string, @ConnectedSocket() client: Socket) {
 
     clearInterval(this.gamesMap.get(gameRoom)?.ballRefreshInterval);
+    client.leave(gameRoom);
     this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
   }
 

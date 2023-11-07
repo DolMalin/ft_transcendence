@@ -11,7 +11,8 @@ Stack,
 Spinner,
 defineStyle,
 defineStyleConfig,
-Text } from '@chakra-ui/react';
+Text, 
+Box} from '@chakra-ui/react';
 import Game from './Game';
 import { Socket, io } from 'socket.io-client';
 import * as Constants from './const';
@@ -27,6 +28,7 @@ function CreateGameButton(props : any) {
     const [preGameCD, setPreGameCD] = useState(Constants.LAUNCH_CD);
     const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
+    const [lookingForGame, setLookingForGame] = useState(false);
 
     const sock : Socket = props.sock;
     
@@ -49,6 +51,8 @@ function CreateGameButton(props : any) {
     * if toggle is true will toggle the game, if it is false it will untoggleit
     */
     const toggleGame = (toggle : boolean) => {
+        
+        setLookingForGame(false);
         if (toggle === false)
         {
             console.log('Game was toggled off');
@@ -65,30 +69,37 @@ function CreateGameButton(props : any) {
         }
     }
 
-    async function handleMatchmaking (gameType : string) {
-        if (gameType.length != 0)
+    
+    useEffect (function matchMaking() {
+        if (lookingForGame === true)
         {
             sock.emit("joinGame", selectedGameType);
             setFormVisible(false);
             setWaitingScreenVisible(true);
+
             sock.on('roomFilled', () => {
-                console.log('Pathing through room filles callback')
+
                 setWaitingScreenVisible(false);
                 setPreGameCDVisible(true);
             })
+
             sock.on('playerId', (side) => {
+
                 setPlayerId(side);
             })
+
             sock.on('roomName', (roomName) => {
+
                 setGameRoom(roomName);
             })
+
             return (() => {
                 sock.off('roomFilled');
                 sock.off('roomName');
                 sock.off('playerId');
             })
         }
-    }
+    }, [lookingForGame])
 
     useEffect(() => {
         sock.on('gameOver', (winner) => {
@@ -101,6 +112,14 @@ function CreateGameButton(props : any) {
     }, [])
 
     function WaitingScreen() {
+        
+        function leaveQueue() {
+            setLookingForGame(false);
+            sock.emit('leaveGame', props.roomName);
+            setWaitingScreenVisible(false);
+            setPlayButtonVisible(true);
+        }
+
         const [dot, setDot] = useState('.');
         useEffect(() => {
             console.log('waitingScreen Use effect')
@@ -123,22 +142,24 @@ function CreateGameButton(props : any) {
             return () => clearInterval(dotdotdot); // Clear the interval on unmount
           }, [dot]);
         return (
+        <Box className='waitingScreen'>
             <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
                 Looking for game {dot}
             </Text>
+            <Button onClick={leaveQueue} > Leave Queue</Button>
+        </Box>
         )
     }
     
-    let cd = 5;
     function WaitingForLaunch() {
-        
 
         useEffect(() => {
             const timer = setInterval(() => {
                 setPreGameCD((prevCd) => (prevCd > 0 ? prevCd - 1 : 0));
-                console.log('cd : ',preGameCD)
+                console.log('cd : ', preGameCD)
                 if (preGameCD === 0)
                 {
+                    setPreGameCD(Constants.LAUNCH_CD);
                     setPreGameCDVisible(false);
                     toggleGame(true);
                     return ;
@@ -154,11 +175,16 @@ function CreateGameButton(props : any) {
     }
     
     function Form() {
+
+        console.log('SELECTED TYPE : ', selectedGameType)
+        console.log('LOOKING FOR GAME ', lookingForGame)
+        
         const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSelectedGameType(event.target.value);
-    };
+
+            setSelectedGameType(event.target.value);
+        };
     
-    return(
+        return(
             <RadioGroup borderWidth={'2px'} 
                 borderColor={'blackAlpha.500'} 
                 borderStyle={'solid'}
@@ -170,7 +196,7 @@ function CreateGameButton(props : any) {
                     <Radio value='2' checked={selectedGameType === '2'} onChange={handleChange}> type de game 2 </Radio>
                     <Radio value='3' checked={selectedGameType === '3'} onChange={handleChange}> type de game 3 </Radio>
     
-                    <Button onClick={() => handleMatchmaking(selectedGameType)} alignItems={'center'}> Launch {selectedGameType} </Button>
+                    <Button onClick={() => {setLookingForGame(true)}} alignItems={'center'}> Launch {selectedGameType} </Button>
                 </Stack>
             </RadioGroup>
         );
