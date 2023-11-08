@@ -16,6 +16,7 @@ Box} from '@chakra-ui/react';
 import Game from './Game';
 import { Socket, io } from 'socket.io-client';
 import * as Constants from './const';
+import { GameInfo } from './interfaces';
 
 function CreateGameButton(props : any) {
     const buttonRef = useRef(null);
@@ -55,8 +56,13 @@ function CreateGameButton(props : any) {
         setLookingForGame(false);
         if (toggle === false)
         {
+            const tmp : GameInfo = {
+                gameType : selectedGameType, 
+                playerId : playerId, 
+                roomName : gameRoom
+            }
             console.log('Game was toggled off');
-            sock.emit('leaveGame', gameRoom);
+            sock.emit('leaveGame', tmp);
             setGameVisible(false);
             setPlayButtonVisible(true);
         }
@@ -73,7 +79,6 @@ function CreateGameButton(props : any) {
     useEffect (function matchMaking() {
         if (lookingForGame === true)
         {
-            console.log("TEST")
             sock.emit("joinGame", selectedGameType);
             setFormVisible(false);
             setWaitingScreenVisible(true);
@@ -102,13 +107,30 @@ function CreateGameButton(props : any) {
         }
     }, [lookingForGame])
 
+    function handleUnload(event : BeforeUnloadEvent) {
+        sock.emit('leaveGame', {gameType : selectedGameType, playerId : playerId, roomName : gameRoom});
+        //TO DO : handle refresh with pairing the user with a new socket
+        // sock.emit('ping');
+        event.preventDefault();
+    }
+
     useEffect(() => {
-        sock.on('gameOver', (winner) => {
+        sock.on('gameOver', (winner : string) => {
+            console.log('my Id :', playerId)
+            console.log('winner ID : ', winner)
+            console.log('my sock ID : ', sock.id)
             if (sock.id === winner)
                 console.log("YOU WON")
             else
                 console.log('YOU LOST') 
             toggleGame(false);
+        });
+
+        // window.addEventListener('beforeunload', handleUnload)
+
+        return (() => {
+            sock.off('gameOver');
+            // window.removeEventListener('beforeunload', handleUnload);
         })
     }, [])
 
@@ -116,7 +138,7 @@ function CreateGameButton(props : any) {
         
         function leaveQueue() {
             setLookingForGame(false);
-            sock.emit('leaveGame', props.roomName);
+            sock.emit('leaveQueue', gameRoom);
             setWaitingScreenVisible(false);
             setPlayButtonVisible(true);
         }

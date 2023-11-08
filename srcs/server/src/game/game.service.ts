@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { GameServDTO} from './game.gateway';
+// import { GameServDTO} from './game.gateway';
 import { Socket, Server } from 'socket.io';
 import {
   Game,
   GameInfo,
   Ball,
   Paddle,
+  GameServDTO,
   } from './interfaces'
 import { 
   willBallCollideWithWall,
@@ -43,25 +44,55 @@ export class MatchmakingService {
     /**
      * @description add client to existing room, fill the GameServDTO
      */
-    addClientToRoom(gameServDto : GameServDTO, index : number, roomName : string, client : Socket, gameType : string | string []) {
+    addClientToRoom(gamesMap : Map<string, Game>, roomName : string, client : Socket) {
         
-        gameServDto.rooms[index].name = roomName;
-        gameServDto.rooms[index].clients.push(client.id);
-        gameServDto.rooms[index].gameType = gameType
+        gamesMap.get(roomName).clientTwo = client;
+        gamesMap.get(roomName).gameIsFull = true;
         client.join(roomName);
       }
 
     /**
      * @description create a room on client request and fill the GameServDTO
      */
-    createRoom(gameServDto : GameServDTO, roomName : string, client : Socket, gameType : string | string []) {
-        
-        gameServDto.rooms.push({name : roomName, clients : [client.id], gameType : gameType})
-        client.join(roomName);
+    createRoom(gamesMap : Map<string, Game>, roomName : string, client : Socket, gameType : string) {
       
+        client.join(roomName);
+
+        let game : Game = {
+          clientOne : client,
+          clientTwo : undefined,
+          gameIsFull : false,
+          clientOneScore : 0,
+          clientTwoScore : 0,
+          Victor : '',
+          gameType  : gameType,
+          paddleOne : {
+            x : 0.5 - Constants.PADDLE_WIDTH / 2,
+            y : 1 - Constants.PADDLE_HEIGHT,
+            width : Constants.PADDLE_WIDTH,
+            height : Constants.PADDLE_HEIGHT,
+          },
+          paddleTwo : {
+            x : 0.5 - Constants.PADDLE_WIDTH / 2,
+            y : 0,
+            width : Constants.PADDLE_WIDTH,
+            height : Constants.PADDLE_HEIGHT,
+          },
+          ball : {
+            x : 0.5,
+            y : 0.5,
+            size : Constants.BALL_SIZE,
+            color : 'white',
+            angle : randomizeBallAngle(),
+            speed : Constants.BALL_SPEED,
+          },
+          ballRefreshInterval : undefined,
+        }
+        
+        gamesMap.set(roomName, game);
       }
 
-    gameCreation (server : Server, client : Socket, gameServDto : GameServDTO, gameType : string) {
+    gameCreation (server : Server, client : Socket, gamesMap : Map<string, Game>, gameType : string) {
                 
         if (client.rooms.size >= 2)
         {
@@ -70,18 +101,15 @@ export class MatchmakingService {
         }
         
         // look for open rooms and join them
-        
-        for (let i = 0; server.sockets.adapter.rooms.size > 1 && i < gameServDto.rooms.length; i ++)
+
+        for (const [key, value] of gamesMap) 
         {
-          if (server.sockets.adapter.rooms.get(gameServDto.rooms[i].name) &&
-          server.sockets.adapter.rooms.get(gameServDto.rooms[i].name).size < 2 &&
-          gameServDto.rooms[i].gameType === gameType)
+          if (value.gameIsFull === false && value.gameType === gameType)
           {
-    
-            this.addClientToRoom(gameServDto, i, gameServDto.rooms[i].name, client, gameType)
-            server.to(gameServDto.rooms[i].name).emit('roomFilled');
-            client.emit('roomName', gameServDto.rooms[i].name);
-            client.emit('playerId', '1');
+            this.addClientToRoom(gamesMap, key, client)
+            server.to(key).emit('roomFilled');
+            client.emit('roomName', key);
+            client.emit('playerId', '2'); // was one not 2 might cause trouble
             return ;
           }
         }
@@ -90,66 +118,38 @@ export class MatchmakingService {
         
         let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
         
-        this.createRoom(gameServDto, roomName, client, gameType)
+        this.createRoom(gamesMap, roomName, client, gameType)
         client.emit('roomName', roomName);
-        client.emit('playerId', '2');
+        client.emit('playerId', '1');
     }
 
-    launchGame (server : Server, gamesMap : Map<string, Game>, client : Socket,data : GameInfo) {
-         
-    let paddleWidth = 0.20;
-    let paddleHeight = 0.02;
+    leaveGame(server : Server, client : Socket, gamesMap : Map <string, Game>, data : GameInfo) {
 
-    if (data.playerId === "1")
-    {
-      let game : Game = {
-        clientOne : client.id,
-        clientTwo : '',
-        clientOneScore : 0,
-        clientTwoScore : 0,
-        Victor : '',
-        gameType  : data.gameType,
-        paddleOne : {
-          x : 0.5 - paddleWidth / 2,
-          y : 1 - paddleHeight,
-          width : paddleWidth,
-          height : paddleHeight,
-        },
-        paddleTwo : {
-          x : 0.5 - paddleWidth / 2,
-          y : 0,
-          width : paddleWidth,
-          height : paddleHeight,
-        },
-        ball : {
-          x : 0.5,
-          y : 0.5,
-          size : 0.020,
-          color : 'white',
-          //angle of motion is in RADIANTS
-          angle : randomizeBallAngle(),
-          speed : Constants.BALL_SPEED,
-        },
-        ballRefreshInterval : undefined,
+      let game : Game = gamesMap.get(data.roomName);
+      if (game === undefined)
+        return ;
+
+      if (game.gameIsFull === false)
+      {
+        client.leave(data.roomName);
+        gamesMap.delete(data.roomName);
       }
-      gamesMap.set(data.roomName, game);
-    }
-    else if (gamesMap.get(data.roomName) && data.playerId === '2')
-    {
-      // let tmp = gamesMap.get(data.roomName);
-      // if (tmp)
-      gamesMap.get(data.roomName).clientTwo = client.id;
-    }
-    }
-
-    leaveGame(server : Server, client : Socket, gameServDto : GameServDTO, gamesMap : Map <string, Game>) {
-
-      // remove the user and empty rooms from the DTO
-
-      console.log('before : ', gameServDto);
-      gameServDto.clientsId = gameServDto.clientsId.filter((id) => id != client.id);
-      gameServDto.rooms = gameServDto.rooms.filter((room) => server.sockets.adapter.rooms.get(room.name) != undefined);
-      console.log('after : ', gameServDto);
+      else if (data.playerId === '1')
+      {
+        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        server.to(data.roomName).emit('gameOver', game.clientTwo.id);
+        game.clientOne.leave(data.roomName);
+        game.clientTwo.leave(data.roomName);
+        gamesMap.delete(data.roomName);
+      }
+      else if (data.playerId === '2')
+      {
+        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        server.to(data.roomName).emit('gameOver', game.clientOne.id);
+        game.clientOne.leave(data.roomName);
+        game.clientTwo.leave(data.roomName);
+        gamesMap.delete(data.roomName);
+      }
     }
 }
 
@@ -197,16 +197,19 @@ export class GamePlayService {
 
   // ********************************* BALL ********************************* //
 
-  handleBallMovement (game : Game, data: GameInfo, client : Socket, server : Server) {
+  handleBallMovement (gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
 
     game.ballRefreshInterval = setInterval(() => {
         
         if (goal(server, game,data.roomName, game.ball))
         {
-          if (game.clientOneScore >= 2 || game.clientTwoScore >= 2)
+          if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
           {
             server.to(data.roomName).emit('gameOver',
-            client.id === game.clientOne ? game.clientOne : game.clientTwo);
+            client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
+            game.clientOne.leave(data.roomName);
+            game.clientTwo.leave(data.roomName);
+            gamesMap.delete(data.roomName);
 
             return (clearInterval(game.ballRefreshInterval))
           }

@@ -12,19 +12,20 @@ import * as Constants from './const'
 import {
   Game,
   GameInfo,
+  GameServDTO
 } from './interfaces'
 import { clearInterval } from 'timers';
 
 // import { KeyboardEvent } from 'react'
 
-export class GameServDTO {
-  clientsId : string[] = [];
-  rooms : {
-    name : string
-    clients : string[],
-    gameType :string | string [],
-  }[] = [];
-}
+// export class GameServDTO {
+//   clientsId : string[] = [];
+//   rooms : {
+//     name : string
+//     clients : string[],
+//     gameType :string | string [],
+//   }[] = [];
+// }
 
 
 /**
@@ -41,7 +42,6 @@ export class GameServDTO {
 } )
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
-  gameServDto : GameServDTO = new GameServDTO;
   gamesMap : Map<string, Game> = new Map();
   
   constructor(private readonly matchmakingService: MatchmakingService,
@@ -56,32 +56,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   */
  handleConnection(client: Socket) {
 
-    this.gameServDto.clientsId.push(client.id);
   }
   
   handleDisconnect(client: Socket){
 
-    this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
   }
 
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, this.gameServDto, gameType);
-  }
-
-  @SubscribeMessage('gameStart')
-  gameStart(@MessageBody() data : GameInfo, @ConnectedSocket() client : Socket) {
-
-    this.matchmakingService.launchGame(this.server, this.gamesMap, client, data);
+    this.matchmakingService.gameCreation(this.server, client, this.gamesMap, gameType);
   }
 
   @SubscribeMessage('leaveGame')
-  leaveGame(@MessageBody() gameRoom : string, @ConnectedSocket() client: Socket) {
+  leaveGame(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
 
-    clearInterval(this.gamesMap.get(gameRoom)?.ballRefreshInterval);
-    client.leave(gameRoom);
-    this.matchmakingService.leaveGame(this.server, client, this.gameServDto, this.gamesMap);
+    clearInterval(this.gamesMap.get(data.roomName)?.ballRefreshInterval);
+    client.leave(data.roomName);
+    this.matchmakingService.leaveGame(this.server, client, this.gamesMap, data);
+  }
+
+  @SubscribeMessage('leaveQueue')
+  leaveQueue(@MessageBody() roomName : string, @ConnectedSocket() client: Socket) {
+
+    this.gamesMap.delete(roomName);
+    client.leave(roomName);
   }
 
   @SubscribeMessage('playerMove')
@@ -100,7 +99,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     this.server.to(data.roomName).emit('ballInfos', game.ball);
     
-
-    this.gamePlayService.handleBallMovement(this.gamesMap.get(data.roomName), data, client, this.server);
+    this.gamePlayService.handleBallMovement(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
+  }
+  @SubscribeMessage('ping')
+  ping(@ConnectedSocket() client: Socket) {
+    console.log('PING PING PING PING PING PING')
   }
 }
+

@@ -98,8 +98,6 @@ function Game(props : GameProps) {
 
     useEffect (function sendStartingInfosToServer() {
 
-        sock.emit('gameStart', gameInfo);
-
         if (props.playerId === '1')
             sock.emit('ballMove', gameInfo);
     }, []);
@@ -169,14 +167,6 @@ function Game(props : GameProps) {
                 setPlayerTwoScore(newScore);
             }
         });
-
-        sock.on('gameOver', (winner) => {
-            console.log('game over');
-            // if (sock.id === winner)
-            // {
-                // clearInterval(interval);
-            // }
-        })
 
         function drawMidPointCt() {
             let numberSize = canvasBounding.width / 6 * ctSizeModifier;
@@ -277,7 +267,7 @@ function Game(props : GameProps) {
                 borderTopRightRadius={'20px'}
                 background={props.playerId === '2' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
                 padding={'2%'}
-                height={Math.floor(gameZone.clientHeight * 0.15)}
+                height={Math.floor(gameZone.clientWidth * 0.15)}
                 width={Math.floor(gameZone.clientWidth * 0.6)}
             >
                 <Image borderRadius={'full'} src='https://bit.ly/dan-abramov'></Image>
@@ -292,7 +282,7 @@ function Game(props : GameProps) {
                 borderBottomRightRadius={'20px'}
                 background={props.playerId === '1' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
                 padding={'2%'}
-                height={Math.floor(gameZone.clientHeight * 0.15)}
+                height={Math.floor(gameZone.clientWidth * 0.15)}
                 width={Math.floor(gameZone.clientWidth * 0.6)}
             >
                 <Image borderRadius={'full'} src='https://bit.ly/dan-abramov'></Image>

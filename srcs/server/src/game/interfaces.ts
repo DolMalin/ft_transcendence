@@ -1,3 +1,5 @@
+import { Socket } from "socket.io";
+
 export interface Paddle {
     x : number,
     y : number,
@@ -15,8 +17,9 @@ export interface Paddle {
   }
   
   export interface Game {
-    clientOne : string,
-    clientTwo : string,
+    clientOne : Socket,
+    clientTwo : Socket,
+    gameIsFull : boolean,
     clientOneScore : number,
     clientTwoScore : number,
     Victor : string,
@@ -31,4 +34,9 @@ export interface Paddle {
     gameType : string,
     playerId : string,
     roomName : string
+  }
+
+  export interface GameServDTO {
+    clientsId : string[];
+    rooms : Map<string, Game>,
   }
