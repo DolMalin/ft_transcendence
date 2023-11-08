@@ -226,7 +226,7 @@ export class GamePlayService {
 
         if (willBallOverlapPaddleOne(game.ball, game.paddleOne, vX, vY) === false &&
           willBallOverlapPaddleTwo(game.ball, game.paddleTwo, vX, vY) === false &&
-          willBallCollideWithWall(game.ball, vX, vY) === false)
+          willBallCollideWithWall(game.ball, vX) === false)
         {
           game.ball.x += vX;
           game.ball.y += vY;

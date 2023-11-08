@@ -1,71 +1,9 @@
-import { Socket, Server } from 'socket.io';
 import {
-  Game,
-  Ball,
-  Paddle,
-} from './interfaces'
-import * as Constants from './const'
+    Ball,
+    Paddle,
+  } from './interfaces'
+  import * as Constants from './const'
 
-
-/**
- * @description 
- * randomize ball.angle and avoid angle to be to close to 180 and 0
-*/
-export function randomizeBallAngle() {
-      
-    let angle = 0
-    while (angle < Math.PI * 0.25 
-      || angle > Math.PI * 0.75 && angle < Math.PI * 1.25 
-      || angle > Math.PI * 1.75)
-      {
-        angle = Math.floor(Math.random() * 360) * (Math.PI / 180);;
-      }
-    return (angle)
-  }
-/**
- * @description 
- * randomize ball.angle and set ball.speed for a new round
-*/
-export function ballRelaunch(ball : Ball) {
-    ball.angle = randomizeBallAngle();
-    ball.speed =  Constants.BALL_SPEED;
-}
-
-/**
- * @description 
- * set ball position at the center of the board
-*/
-export function ballReset(ball : Ball) {
-    ball.x = 0.5;
-    ball.y = 0.5;
-    ball.angle = 0;
-    ball.speed = 0;
-}
-
-/**
- * @description 
- * check if the ball as reached a goal zone
-*/
-export function goal (server : Server, game : Game,roomName : string,ball : Ball) {
-    if (ball.y + ball.size >= 1)
-    {
-        game.clientTwoScore ++;
-        server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
-        return (true)
-    }
-    else if (ball.y - ball.size <= 0)
-    {
-        game.clientOneScore ++;
-        server.to(roomName).emit('pointScored', 1, game.clientOneScore);
-        return (true);
-    }
-    else
-        return (false)
-}
-/**
- * @description 
- * change ball direction angle following a collision with a verticl surface
-*/
 export function VerticalCollisionAngle(ball : Ball) {
 
     // 1/4 of trig circle
@@ -117,28 +55,6 @@ export function HorizontalCollisionsAngle(ball : Ball, paddle : Paddle) {
     // 4/4 of trig circle
     else if (ball.angle <= 2 * Math.PI)
         ball.angle = Math.PI * 0.5 - bounceDirection;
-}
-
-/**
- * @description 
- * pause the game after a point and relaunch the ball
- *  | need server and roomName to send ball pos to front
-*/
-export function pauseBetweenPoints(ball : Ball, server : Server, roomName : string) {
-
-    let ct = 3;
-    const int = setInterval(() =>{
-        server.to(roomName).emit('midPointCt', ct);
-        if (ct === 0)
-        {
-            clearInterval(int)
-            ballRelaunch(ball)
-            server.to(roomName).emit('ballInfos', ball);
-            server.to(roomName).emit('midPointCtEnd');
-            return ;
-        }
-        ct --
-    }, 1000);
 }
 
 /**

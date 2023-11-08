@@ -1,22 +1,24 @@
 import React, { useCallback } from 'react';
 import { useRef, useEffect, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
-import { ChakraProvider,
-Button,
-ButtonGroup,
-Radio,
-RadioGroup,
-CloseButton,
-Stack,
-Spinner,
-defineStyle,
-defineStyleConfig,
-Text, 
-Box} from '@chakra-ui/react';
+import {
+    Button,
+    Radio,
+    RadioGroup,
+    CloseButton,
+    Stack,
+    Text, 
+    Box
+    } from '@chakra-ui/react';
 import Game from './Game';
 import { Socket, io } from 'socket.io-client';
 import * as Constants from './const';
 import { GameInfo } from './interfaces';
+import { 
+    willBallCollideWithWall,
+    willBallOverlapPaddleOne,
+    willBallOverlapPaddleTwo,
+ } from './BallMoves';
 
 function CreateGameButton(props : any) {
     const buttonRef = useRef(null);
