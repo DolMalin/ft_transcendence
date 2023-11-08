@@ -50,6 +50,7 @@ export function ballReset(ball : Ball) {
 export const goal = (server : Server, game : Game,roomName : string,ball : Ball) => {
     if (ball.y + ball.size >= 1)
     {
+        console.log(ball);
         game.clientTwoScore ++;
         server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
         return (true)
