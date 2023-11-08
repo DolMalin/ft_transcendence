@@ -47,10 +47,9 @@ export function ballReset(ball : Ball) {
  * @description 
  * check if the ball as reached a goal zone
 */
-export const goal = (server : Server, game : Game,roomName : string,ball : Ball) => {
+export function goal (server : Server, game : Game,roomName : string,ball : Ball) {
     if (ball.y + ball.size >= 1)
     {
-        console.log(ball);
         game.clientTwoScore ++;
         server.to(roomName).emit('pointScored', 2, game.clientTwoScore);
         return (true)
@@ -68,7 +67,7 @@ export const goal = (server : Server, game : Game,roomName : string,ball : Ball)
  * @description 
  * change ball direction angle following a collision with a verticl surface
 */
-export const VerticalCollisionAngle = (ball : Ball) => {
+export function VerticalCollisionAngle(ball : Ball) {
 
     // 1/4 of trig circle
     if (ball.angle <= 0.5 * Math.PI)
@@ -91,7 +90,7 @@ export const VerticalCollisionAngle = (ball : Ball) => {
  * @description 
  * change ball direction angle following a collision with a horizontal paddle
 */
-export const HorizontalCollisionsAngle = (ball : Ball, paddle : Paddle) => {
+export function HorizontalCollisionsAngle(ball : Ball, paddle : Paddle) {
 
     const distanceToPaddleCenter = Math.abs(ball.x - (paddle.x + paddle.width / 2))
 
@@ -126,7 +125,7 @@ export const HorizontalCollisionsAngle = (ball : Ball, paddle : Paddle) => {
  * pause the game after a point and relaunch the ball
  *  | need server and roomName to send ball pos to front
 */
-export const pauseBetweenPoints = (ball : Ball, server : Server, roomName : string) => {
+export function pauseBetweenPoints(ball : Ball, server : Server, roomName : string) {
 
     let ct = 3;
     const int = setInterval(() =>{
@@ -149,7 +148,7 @@ export const pauseBetweenPoints = (ball : Ball, server : Server, roomName : stri
  * vY : vertical velocity of the ball
  * check for collisions with vertical walls at next ball step
 */
-export const willBallCollideWithWall = (ball : Ball, vX : number, vY) => {
+export function willBallCollideWithWall(ball : Ball, vX : number, vY) {
     const futureBallX = ball.x + vX;
     if (futureBallX + ball.size >= 1 || futureBallX - ball.size <= 0)
     {
@@ -165,7 +164,7 @@ export const willBallCollideWithWall = (ball : Ball, vX : number, vY) => {
  * vY : vertical velocity of the ball
  * check for collisions and overlap with paddleOnes
 */
-export const willBallOverlapPaddleOne = (ball : Ball, paddle : Paddle,vx : number, vy : number) => {
+export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : number, vy : number) {
 
     const futureBallX = ball.x + vx;
     const futureBallY = ball.y + vy;
@@ -207,7 +206,7 @@ export const willBallOverlapPaddleOne = (ball : Ball, paddle : Paddle,vx : numbe
  * vY : vertical velocity of the ball
  * check for collisions and overlaps with paddleTwo
 */
-export const willBallOverlapPaddleTwo = (ball : Ball, paddle : Paddle,vx : number, vy : number) => {
+export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : number, vy : number) {
 
     const futureBallX = ball.x + vx;
     const futureBallY = ball.y + vy;

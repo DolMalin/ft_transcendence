@@ -153,17 +153,16 @@ function Game(props : GameProps) {
 
             ball = serverBall;
         });
-
         sock.on('pointScored', (playerId, newScore) => {
 
             if (playerId === 1)
             {
-                console.log('1 scored, score : ', newScore)
+                // console.log('1 scored, score : ', newScore)
                 setPlayerOneScore(newScore);
             }
             else if (playerId === 2)
             {
-                console.log('2 scored, score :', newScore)
+                // console.log('2 scored, score :', newScore)
                 setPlayerTwoScore(newScore);
             }
         });
@@ -230,9 +229,9 @@ function Game(props : GameProps) {
             }
             drawAdversaryPaddle(context, canvasBounding, adversaryPaddle);
             drawPaddle(context, canvasBounding, myPaddle);
-            moveBall();
+            // moveBall();
 
-            if (midPointCTOn)
+            if (midPointCTOn && playerOneScore < Constants.SCORE_TO_REACH && playerTwoScore < Constants.SCORE_TO_REACH)
                 drawMidPointCt();
 
             else

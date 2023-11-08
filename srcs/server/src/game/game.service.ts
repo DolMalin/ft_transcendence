@@ -4,9 +4,7 @@ import { Socket, Server } from 'socket.io';
 import {
   Game,
   GameInfo,
-  Ball,
   Paddle,
-  GameServDTO,
   } from './interfaces'
 import { 
   willBallCollideWithWall,
@@ -156,10 +154,13 @@ export class MatchmakingService {
 @Injectable()
 export class GamePlayService {
 
-  handlePaddleMovement(game : Game, data: {key : string, playerId : string, room : string}, client : Socket) {
-    
   // ********************************* PADDLE ********************************* //
 
+  handlePaddleMovement(game : Game, data: {key : string, playerId : string, room : string}, client : Socket) {
+    
+
+    if (game === undefined)
+      return ;
     function MoveY(paddle : Paddle, difY : number) {
       paddle.y += difY;
       paddle.y > 1 - paddle.height ? paddle.y = 1 : paddle.y;
@@ -199,6 +200,8 @@ export class GamePlayService {
 
   handleBallMovement (gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
 
+    if (game === undefined)
+      return ;
     game.ballRefreshInterval = setInterval(() => {
         
         if (goal(server, game,data.roomName, game.ball))
@@ -229,10 +232,10 @@ export class GamePlayService {
           game.ball.y += vY;
           server.to(data.roomName).emit('ballInfos', game.ball);
         }
-        else {
+        // else {
 
-          server.to(data.roomName).emit('ballInfos', game.ball);
-        }
+        //   server.to(data.roomName).emit('ballInfos', game.ball);
+        // }
 
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))

@@ -8,11 +8,9 @@ ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
 import { MatchmakingService,
 GamePlayService } from './game.service';
-import * as Constants from './const'
 import {
   Game,
   GameInfo,
-  GameServDTO
 } from './interfaces'
 import { clearInterval } from 'timers';
 
