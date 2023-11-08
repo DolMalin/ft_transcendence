@@ -35,8 +35,3 @@ export interface Paddle {
     playerId : string,
     roomName : string
   }
-
-  export interface GameServDTO {
-    clientsId : string[];
-    rooms : Map<string, Game>,
-  }
