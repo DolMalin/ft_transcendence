@@ -21,7 +21,6 @@ import {
     GameProps,
     } from './interfaces';
 
-
 function debounce(func : Function, ms : number) {
     let timer : string | number | NodeJS.Timeout;
 
@@ -69,10 +68,6 @@ function Game(props : GameProps) {
         y : props.playerId === '1' ? 0 : 1 - Constants.PADDLE_HEIGHT,
     });
 
-    // const [canvas, setCanvas] = useState<HTMLCanvasElement>();
-    // const [context, setContext] = useState<CanvasRenderingContext2D>();
-    // const [canvasBounding, setCanvasBounding] = useState<DOMRect>();
-
     const gameInfo : GameInfo = {
             gameType : props.gameType,
             playerId : props.playerId,
@@ -104,7 +99,6 @@ function Game(props : GameProps) {
 
     useEffect( () => {
 
-        // console.log('oppa')
         sock.on('midPointCt', (ct : number) => {
             setMidPointCTOn(true);
             setMidPointCT(ct);
@@ -157,12 +151,10 @@ function Game(props : GameProps) {
 
             if (playerId === 1)
             {
-                // console.log('1 scored, score : ', newScore)
                 setPlayerOneScore(newScore);
             }
             else if (playerId === 2)
             {
-                // console.log('2 scored, score :', newScore)
                 setPlayerTwoScore(newScore);
             }
         });
@@ -186,15 +178,6 @@ function Game(props : GameProps) {
                     break ;
             }
             setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
-        }
-
-        function moveBall() {
-
-            let Vx = ball.speed * Math.cos(ball.angle);
-            let Vy = ball.speed * Math.sin(ball.angle)
-            
-            ball.x += Vx;
-            ball.y += Vy;
         }
 
         function handleKeydown(event : globalThis.KeyboardEvent) {
@@ -229,7 +212,6 @@ function Game(props : GameProps) {
             }
             drawAdversaryPaddle(context, canvasBounding, adversaryPaddle);
             drawPaddle(context, canvasBounding, myPaddle);
-            // moveBall();
 
             if (midPointCTOn && playerOneScore < Constants.SCORE_TO_REACH && playerTwoScore < Constants.SCORE_TO_REACH)
                 drawMidPointCt();

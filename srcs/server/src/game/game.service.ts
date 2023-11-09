@@ -232,10 +232,10 @@ export class GamePlayService {
           game.ball.y += vY;
           server.to(data.roomName).emit('ballInfos', game.ball);
         }
-        // else {
-
-        //   server.to(data.roomName).emit('ballInfos', game.ball);
-        // }
+        else {
+          
+          server.to(data.roomName).emit('ballInfos', game.ball);
+        }
 
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))

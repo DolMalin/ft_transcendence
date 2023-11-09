@@ -14,11 +14,6 @@ import Game from './Game';
 import { Socket, io } from 'socket.io-client';
 import * as Constants from './const';
 import { GameInfo } from './interfaces';
-import { 
-    willBallCollideWithWall,
-    willBallOverlapPaddleOne,
-    willBallOverlapPaddleTwo,
- } from './BallMoves';
 
 function CreateGameButton(props : any) {
     const buttonRef = useRef(null);
