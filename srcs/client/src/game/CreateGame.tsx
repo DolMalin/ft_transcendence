@@ -196,14 +196,6 @@ function CreateGameButton(props : any) {
     
     function Form() {
 
-        console.log('SELECTED TYPE : ', selectedGameType)
-        console.log('LOOKING FOR GAME ', lookingForGame)
-        
-        const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-
-            setSelectedGameType(event.target.value);
-        };
-    
         return(
             <RadioGroup borderWidth={'2px'} 
                 borderColor={'blackAlpha.500'} 

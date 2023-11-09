@@ -16,6 +16,7 @@ import {
   randomizeBallAngle,
   } from './BallMoves';
 import * as Constants from './const'
+import { timeLog, timeStamp } from 'console';
 
 function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
