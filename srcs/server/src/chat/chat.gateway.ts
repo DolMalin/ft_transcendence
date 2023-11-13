@@ -45,6 +45,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   sendMessage(@MessageBody() data: { room: string, author: string, message: string, time: string | number}, @ConnectedSocket() client : Socket): void {
     client.to(data.room).emit("receiveMessage", data);
+    console.log("hello from send message")
     console.log(data)
   }
 }
