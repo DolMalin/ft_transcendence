@@ -7,6 +7,8 @@ import { NestModule } from '@nestjs/common';
 
 // Entities
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
+
 import { AuthModule } from './auth/auth.module';
 import { AsyncLocalStorage } from 'async_hooks';
 
@@ -23,10 +25,11 @@ import { AsyncLocalStorage } from 'async_hooks';
       synchronize: true,
     }),
     UsersModule,
+    GameModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GameModule],
 })
 
 export class AppModule { }

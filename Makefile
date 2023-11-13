@@ -1,14 +1,15 @@
 NAME = ft_malaise
-DOCKER = sudo docker
-COMPOSE = $(DOCKER) compose -p ${NAME} -f srcs/docker-compose.yml
+DOCKER = docker
+COMPOSE = sudo docker compose -p ${NAME} -f srcs/docker-compose.yml
+COMPOSE_SKEWL = docker compose -p ${NAME} -f srcs/docker-compose.yml
 
 all: up
 
 ps:
-	$(COMPOSE) ps
+	$(COMPOSE_SKEWL) ps
 
 images:
-	$(COMPOSE) images
+	$(COMPOSE_SKEWL) images
 
 volumes:
 	$(DOCKER) volume ls
@@ -17,25 +18,24 @@ networks:
 	$(DOCKER) network ls
 
 start: $(DEPENDENCIES)
-	$(COMPOSE) start
+	$(COMPOSE_SKEWL) start
 
 stop:
-	$(COMPOSE) stop
+	$(COMPOSE_SKEWL) stop
 
 restart: $(DEPENDENCIES)
-	$(COMPOSE) restart
+	$(COMPOSE_SKEWL) restart
 
 up: $(DEPENDENCIES)
-	$(COMPOSE) up --detach --build
+	$(COMPOSE_SKEWL) up --detach --build
 
 down:
-	$(COMPOSE) down
+	$(COMPOSE_SKEWL) down
 
-# clean:
-# 	$(COMPOSE) down --rmi all --volumes
+clean:
+	$(COMPOSE_SKEWL) down --rmi all --volumes
 
 fclean: clean
-	sudo $(RM) -r ${HOME}/data/*
 
 prune: down fclean
 	$(DOCKER) system prune -a -f

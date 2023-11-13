@@ -6,7 +6,7 @@ import { Navigate } from "react-router-dom"
 class Profile extends Component {
 	
 	state = {
-			redirect: null
+			redirect : ''
 	}
 
 	setStateAsync(state: any) {
