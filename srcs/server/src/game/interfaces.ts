@@ -3,8 +3,12 @@ import { Socket } from "socket.io";
 export interface Paddle {
     x : number,
     y : number,
+    movingLeft : boolean,
+    movingRight : boolean,
+    speed : number,
     width : number,
     height : number,
+    hitCount : number
   }
   
   export interface Ball {
@@ -27,11 +31,17 @@ export interface Paddle {
     paddleOne : Paddle,
     paddleTwo : Paddle,
     ball : Ball,
-    ballRefreshInterval : any
+    ballRefreshInterval : string | number | NodeJS.Timeout
   }
   
   export interface GameInfo {
     gameType : string,
     playerId : string,
     roomName : string
+  }
+
+  export interface GameMetrics {
+    paddleOne : Paddle,
+    paddleTwo : Paddle,
+    ball : Ball,
   }

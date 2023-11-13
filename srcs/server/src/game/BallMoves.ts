@@ -129,11 +129,11 @@ export function pauseBetweenPoints(ball : Ball, server : Server, roomName : stri
     let ct = 3;
     const int = setInterval(() =>{
         server.to(roomName).emit('midPointCt', ct);
-        if (ct === 0)
+        if (ct === -1)
         {
             clearInterval(int)
             ballRelaunch(ball)
-            server.to(roomName).emit('ballInfos', ball);
+            
             server.to(roomName).emit('midPointCtEnd');
             return ;
         }
@@ -163,7 +163,7 @@ export function willBallCollideWithWall(ball : Ball, vX : number) {
  * vY : vertical velocity of the ball
  * check for collisions and overlap with paddleOnes
 */
-export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : number, vy : number) {
+export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : number, vy : number, gameType : string) {
 
     const futureBallX = ball.x + vx;
     const futureBallY = ball.y + vy;
@@ -173,6 +173,8 @@ export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : numbe
         && futureBallX + ball.size <= paddle.x + vx)
     {
         ball.x = paddle.x - ball.size;
+        if (gameType === Constants.GAME_TYPE_TWO)
+            ShrinkPaddle(paddle);
         VerticalCollisionAngle(ball);
         return (true);
     }
@@ -181,6 +183,8 @@ export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : numbe
         && futureBallX - ball.size >= paddle.x + paddle.width - vx)
     {
         ball.x = paddle.x + paddle.width + ball.size;
+        if (gameType === Constants.GAME_TYPE_TWO)
+            ShrinkPaddle(paddle);
         VerticalCollisionAngle(ball);
         return (true);
     }
@@ -191,6 +195,8 @@ export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : numbe
         if (futureBallY + ball.size > paddle.y)
         {
             ball.y = paddle.y - ball.size;
+            if (gameType === Constants.GAME_TYPE_TWO)
+                ShrinkPaddle(paddle);
             HorizontalCollisionsAngle(ball, paddle);
             return (true);
         }
@@ -205,7 +211,18 @@ export function willBallOverlapPaddleOne(ball : Ball, paddle : Paddle,vx : numbe
  * vY : vertical velocity of the ball
  * check for collisions and overlaps with paddleTwo
 */
-export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : number, vy : number) {
+function ShrinkPaddle(paddle : Paddle)
+{
+    paddle.hitCount ++;
+
+    let modifier = Math.random();
+    while (modifier < 0.1)
+        modifier = Math.random();
+    paddle.width = Constants.PADDLE_WIDTH * 2 * modifier;
+    // paddle.width > 0.1 ? paddle.width -= 0.01 : paddle.width = paddle.width;
+}
+
+export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : number, vy : number, gameType : string) {
 
     const futureBallX = ball.x + vx;
     const futureBallY = ball.y + vy;
@@ -216,6 +233,8 @@ export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : numbe
         && futureBallX + ball.size <= paddle.x + vx)
     {
         ball.x = paddle.x - ball.size;
+        if (gameType === Constants.GAME_TYPE_TWO)
+            ShrinkPaddle(paddle);
         VerticalCollisionAngle(ball);
         return (true);
     }
@@ -224,6 +243,8 @@ export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : numbe
         && futureBallX - ball.size >= paddle.x + paddle.width - vx)
     {
         ball.x = paddle.x + paddle.width + ball.size;
+        if (gameType === Constants.GAME_TYPE_TWO)
+            ShrinkPaddle(paddle);
         VerticalCollisionAngle(ball);
         return (true);
     }
@@ -233,6 +254,8 @@ export function willBallOverlapPaddleTwo(ball : Ball, paddle : Paddle,vx : numbe
         if (futureBallY - ball.size <= paddle.y + paddle.height)
         {
             ball.y = paddle.y + paddle.height + ball.size;
+            if (gameType === Constants.GAME_TYPE_TWO)
+                ShrinkPaddle(paddle);
             HorizontalCollisionsAngle(ball, paddle);
             return (true);
         }

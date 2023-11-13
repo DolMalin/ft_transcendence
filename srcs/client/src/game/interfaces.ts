@@ -1,11 +1,15 @@
 import { Socket } from "socket.io-client";
 
 export interface Paddle {
-    width: number;
-    height: number;
-    x: number;
-    y: number;
-  }
+  x : number,
+  y : number,
+  movingLeft : boolean,
+  movingRight : boolean,
+  speed : number,
+  width : number,
+  height : number,
+  hitCount : number
+}
 
 export interface Ball {
     x : number,
@@ -27,4 +31,10 @@ export interface GameInfo {
     gameType : string,
     playerId : string,
     roomName : string
+}
+
+export interface GameMetrics {
+  paddleOne : Paddle,
+  paddleTwo : Paddle,
+  ball : Ball,
 }

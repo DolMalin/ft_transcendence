@@ -27,6 +27,8 @@ function CreateGameButton(props : any) {
     const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
     const [lookingForGame, setLookingForGame] = useState(false);
+    const [looseScreenVisible, setLooseScreenVisible] = useState(false);
+    const [VictoryScreenVisible, setVictoryScreenVisible] = useState(false);
 
     const sock : Socket = props.sock;
     
@@ -39,15 +41,12 @@ function CreateGameButton(props : any) {
         else
         {
             setFormVisible(false);
+            setSelectedGameType('');
             if (!gameVisible)
                 setPlayButtonVisible(true);
         }
     }
     
-    /**
-    * @description 
-    * if toggle is true will toggle the game, if it is false it will untoggleit
-    */
     const toggleGame = (toggle : boolean) => {
         
         setLookingForGame(false);
@@ -58,21 +57,18 @@ function CreateGameButton(props : any) {
                 playerId : playerId, 
                 roomName : gameRoom
             }
-            console.log('Game was toggled off');
             sock.emit('leaveGame', tmp);
             setGameVisible(false);
             setPlayButtonVisible(true);
         }
         else
         {
-            console.log('Game was toggled on');
             setGameVisible(true);
             setFormVisible(false);
             setPlayButtonVisible(false);
         }
     }
 
-    
     useEffect (function matchMaking() {
         if (lookingForGame === true)
         {
@@ -104,32 +100,21 @@ function CreateGameButton(props : any) {
         }
     }, [lookingForGame])
 
-    function handleUnload(event : BeforeUnloadEvent) {
-        sock.emit('leaveGame', {gameType : selectedGameType, playerId : playerId, roomName : gameRoom});
-        //TO DO : handle refresh with pairing the user with a new socket
-        // sock.emit('ping');
-        event.preventDefault();
-    }
-
     useEffect(() => {
         sock.on('gameOver', (winner : string) => {
-            console.log('my Id :', playerId)
-            console.log('winner ID : ', winner)
-            console.log('my sock ID : ', sock.id)
             if (sock.id === winner)
-                console.log("YOU WON")
+                setVictoryScreenVisible(true)
             else
-                console.log('YOU LOST') 
-            toggleGame(false);
+                setLooseScreenVisible(true)
+
+            setGameVisible(false);
         });
 
-        // window.addEventListener('beforeunload', handleUnload)
 
         return (() => {
             sock.off('gameOver');
-            // window.removeEventListener('beforeunload', handleUnload);
         })
-    }, [])
+    }, [gameVisible, VictoryScreenVisible, looseScreenVisible])
 
     function WaitingScreen() {
         
@@ -142,7 +127,6 @@ function CreateGameButton(props : any) {
 
         const [dot, setDot] = useState('.');
         useEffect(() => {
-            console.log('waitingScreen Use effect')
             const dotdotdot = setInterval(() => {
               switch (dot) {
                 case '.':
@@ -159,8 +143,18 @@ function CreateGameButton(props : any) {
               }
             }, 1000);
         
-            return () => clearInterval(dotdotdot); // Clear the interval on unmount
-          }, [dot]);
+            return () => clearInterval(dotdotdot);
+        }, [dot]);
+
+        useEffect(() => {
+            function handleUnload() {
+                leaveQueue();
+                setSelectedGameType('');
+            }
+
+            window.addEventListener('beforeunload', handleUnload);
+            return (() => {window.removeEventListener('beforeunload', handleUnload)})
+        }, [])
         return (
         <Box className='waitingScreen'>
             <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
@@ -176,7 +170,6 @@ function CreateGameButton(props : any) {
         useEffect(() => {
             const timer = setInterval(() => {
                 setPreGameCD((prevCd) => (prevCd > 0 ? prevCd - 1 : 0));
-                console.log('cd : ', preGameCD)
                 if (preGameCD === 0)
                 {
                     setPreGameCD(Constants.LAUNCH_CD);
@@ -188,13 +181,53 @@ function CreateGameButton(props : any) {
             return () => clearInterval(timer);
         }, []);
         return(
-            <div className='waitingScreen'>
+            <Box className='waitingScreen'>
                 <Text fontSize="2xl" textAlign="center"> GAME LAUNCH IN {preGameCD} !!!</Text>
-            </div>
+            </Box>
         )
+    }
+
+    function LooseScreen () {
+    // Display new ladder placement
+        function closeVScreen() {
+            setLooseScreenVisible(false);
+            setPlayButtonVisible(true);
+        };
+
+        return (<>
+            <Box className='waitingScreen'>
+                <CloseButton onClick={closeVScreen} alignItems={'right'}></CloseButton>
+                <Text> YOU LOST MICHEL </Text>
+            </Box>
+        </>)
+    }
+
+    function VictoryScreen () {
+    // Display new ladder placement
+        function closeVScreen() {
+            setVictoryScreenVisible(false);
+            setPlayButtonVisible(true);
+        };
+        
+        return (<>
+            <Box className='waitingScreen'>
+                <CloseButton onClick={closeVScreen} alignItems={'right'}></CloseButton>
+                <Text> YOU WON MICHEL </Text>
+            </Box>
+        </>)
     }
     
     function Form() {
+
+        const [disabledButton, setDisabledButton] = useState(true);
+
+        useEffect(() => {
+            if (selectedGameType != '')
+                setDisabledButton(false);
+            else
+                setDisabledButton(true);
+            
+        }, [selectedGameType]);
 
         return(
             <RadioGroup borderWidth={'2px'} 
@@ -206,11 +239,11 @@ function CreateGameButton(props : any) {
                 value={selectedGameType}>
                 <CloseButton onClick={toggleForm} alignItems={'right'}></CloseButton>
                 <Stack direction='column'>
-                    <Radio value='1'> type de game 1 </Radio>
-                    <Radio value='2'> type de game 2 </Radio>
-                    <Radio value='3'> type de game 3 </Radio>
+                    <Radio value={Constants.GAME_TYPE_ONE}> {Constants.GAME_TYPE_ONE} </Radio>
+                    <Radio value={Constants.GAME_TYPE_TWO}> {Constants.GAME_TYPE_TWO} </Radio>
+                    <Radio value={Constants.GAME_TYPE_THREE}> {Constants.GAME_TYPE_THREE} </Radio>
     
-                    <Button onClick={() => {setLookingForGame(true)}} alignItems={'center'}> Launch {selectedGameType} </Button>
+                    <Button as={'button'} onClick={() => {setLookingForGame(true)}} alignItems={'center'} isDisabled={disabledButton}> Launch {selectedGameType} </Button>
                 </Stack>
             </RadioGroup>
         );
@@ -222,7 +255,9 @@ function CreateGameButton(props : any) {
         {WaitingScreenVisible && <WaitingScreen />}
         {preGameCDVisible && <WaitingForLaunch />}
         {gameVisible && <Game gameType={selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
-        {gameVisible && <Button onClick={() => {toggleGame(false)}}> Leave </Button>}
+        {/* {gameVisible && <Button onClick={() => {toggleGame(false)}}> Leave </Button>} */}
+        {VictoryScreenVisible && <VictoryScreen />}
+        {looseScreenVisible && <LooseScreen />}
     </>);
 }
 

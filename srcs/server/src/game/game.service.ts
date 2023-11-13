@@ -4,6 +4,7 @@ import { Socket, Server } from 'socket.io';
 import {
   Game,
   GameInfo,
+  GameMetrics,
   Paddle,
   } from './interfaces'
 import { 
@@ -68,14 +69,22 @@ export class MatchmakingService {
           paddleOne : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
             y : 1 - Constants.PADDLE_HEIGHT,
-            width : Constants.PADDLE_WIDTH,
+            movingLeft : false,
+            movingRight : false,
+            speed : Constants.PADDLE_SPEED,
+            width : gameType === Constants.GAME_TYPE_TWO ? Constants.PADDLE_WIDTH * 2: Constants.PADDLE_WIDTH,
             height : Constants.PADDLE_HEIGHT,
+            hitCount : 0,
           },
           paddleTwo : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
             y : 0,
-            width : Constants.PADDLE_WIDTH,
+            movingLeft : false,
+            movingRight : false,
+            speed : Constants.PADDLE_SPEED,
+            width : gameType === Constants.GAME_TYPE_TWO ? Constants.PADDLE_WIDTH * 2: Constants.PADDLE_WIDTH,
             height : Constants.PADDLE_HEIGHT,
+            hitCount : 0,
           },
           ball : {
             x : 0.5,
@@ -92,7 +101,7 @@ export class MatchmakingService {
       }
 
     gameCreation (server : Server, client : Socket, gamesMap : Map<string, Game>, gameType : string) {
-                
+      
         if (client.rooms.size >= 2)
         {
           client.emit('allreadyInGame', "You are allready in a game you Gourmand !")
@@ -157,87 +166,120 @@ export class GamePlayService {
 
   // ********************************* PADDLE ********************************* //
 
-  handlePaddleMovement(game : Game, data: {key : string, playerId : string, room : string}, client : Socket) {
-    
 
-    if (game === undefined)
-      return ;
-    function MoveY(paddle : Paddle, difY : number) {
-      paddle.y += difY;
-      paddle.y > 1 - paddle.height ? paddle.y = 1 : paddle.y;
-      paddle.y <= 0 ? paddle.y = 0 : paddle.y;
-      client.emit('myMoves', paddle);
-      client.to(data.room).emit('adversaryMoves', paddle);
-    }
-    function MoveX(paddle : Paddle, difX : number) {
-      paddle.x += difX;
-      paddle.x >= 1 - paddle.width ? paddle.x = 1 - paddle.width : paddle.x;
-      paddle.x <= 0 ? paddle.x = 0 : paddle.x;
-      client.emit('myMoves', paddle);
-      client.to(data.room).emit('adversaryMoves', paddle);
-    }
-
+  movingStarted(game : Game, data: {key : string, playerId : string, room : string}) {
     switch (data.key)
     {
-      case Constants.UP :
-        data.playerId === '1' ? MoveY(game.paddleOne, -Constants.PADDLE_SPEED) : MoveY(game.paddleTwo, -Constants.PADDLE_SPEED)
-        break ;
-      case Constants.DOWN :
-        game.paddleOne.y
-        data.playerId === '1' ? MoveY(game.paddleOne, Constants.PADDLE_SPEED) : MoveY(game.paddleTwo, Constants.PADDLE_SPEED)
-        break ;
       case Constants.RIGHT :
-        data.playerId === '1' ? MoveX(game.paddleOne, Constants.PADDLE_SPEED) : MoveX(game.paddleTwo, Constants.PADDLE_SPEED)
+        data.playerId === '1' ?  game.paddleOne.movingRight = true : game.paddleTwo.movingRight = true;
         break ;
       case Constants.LEFT :
-        data.playerId === '1' ? MoveX(game.paddleOne, -Constants.PADDLE_SPEED) : MoveX(game.paddleTwo, -Constants.PADDLE_SPEED)
+        data.playerId === '1' ? game.paddleOne.movingLeft = true : game.paddleTwo.movingLeft = true;
         break ;
       default :
         break;
     }
   }
 
+  movingStopped(game : Game, data: {key : string, playerId : string, room : string}) {
+    switch (data.key)
+    {
+      case Constants.RIGHT :
+        data.playerId === '1' ?  game.paddleOne.movingRight = false : game.paddleTwo.movingRight = false;
+        break ;
+      case Constants.LEFT :
+        data.playerId === '1' ? game.paddleOne.movingLeft = false : game.paddleTwo.movingLeft = false;
+        break ;
+      default :
+        break;
+    }
+  }
+
+  handlePaddleMovement(game : Game) {
+    
+    if (game === undefined)
+      return ;
+
+    const distancePerFrame = Constants.PADDLE_SPEED;
+
+    if (game.paddleOne.movingLeft === true)
+      game.paddleOne.x -= distancePerFrame;
+
+    else if (game.paddleOne.movingRight === true)
+      game.paddleOne.x += distancePerFrame;
+
+    game.paddleOne.x >= 1 - game.paddleOne.width ? game.paddleOne.x = 1 - game.paddleOne.width : game.paddleOne.x;
+    game.paddleOne.x <= 0 ? game.paddleOne.x = 0 : game.paddleOne.x;
+
+    if (game.paddleTwo.movingLeft === true)
+      game.paddleTwo.x -= distancePerFrame;
+
+    else if (game.paddleTwo.movingRight === true)
+      game.paddleTwo.x += distancePerFrame;
+
+    game.paddleTwo.x >= 1 - game.paddleTwo.width ? game.paddleTwo.x = 1 - game.paddleTwo.width : game.paddleTwo.x;
+    game.paddleTwo.x <= 0 ? game.paddleTwo.x = 0 : game.paddleTwo.x;
+  }
+
   // ********************************* BALL ********************************* //
 
-  handleBallMovement (gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
+  handleBallMovement(game : Game, data: GameInfo, client : Socket, server : Server) {
+    
+    if (goal(server, game,data.roomName, game.ball))
+    {
+      if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
+        return ('gameOver')
 
+      ballReset(game.ball);
+      return ('goal')
+    }
+    
+    let vX = game.ball.speed * Math.cos(game.ball.angle);
+    let vY = game.ball.speed * Math.sin(game.ball.angle)
+    
+    if (willBallOverlapPaddleOne(game.ball, game.paddleOne, vX, vY, game.gameType) === false &&
+    willBallOverlapPaddleTwo(game.ball, game.paddleTwo, vX, vY, game.gameType) === false &&
+    willBallCollideWithWall(game.ball, vX) === false)
+    {
+      game.ball.x += vX;
+      game.ball.y += vY;
+    }
+    else 
+    {
+      if (game.ball.speed < Constants.BALL_SPEED * 2)
+        game.ball.speed += Constants.BALL_SPEED_INCREMENT;
+    }
+  }
+  
+  gameLoop(gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
+    
     if (game === undefined)
       return ;
     game.ballRefreshInterval = setInterval(() => {
+
+      let ballEvents = this.handleBallMovement(game, data, client, server);
+
+      this.handlePaddleMovement(game);
+
+      if (ballEvents === 'goal')
+        pauseBetweenPoints(game.ball, server, data.roomName);
+      else if (ballEvents === 'gameOver')
+      {
+        server.to(data.roomName).emit('gameOver',
+        client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
+        // TO DO add loose and win to players history
+        game.clientOne.leave(data.roomName);
+        game.clientTwo.leave(data.roomName);
+        gamesMap.delete(data.roomName);
+        return (clearInterval(game.ballRefreshInterval))
+      }
+      else
+      {
+        let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
+        let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
+        server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
+      }
         
-        if (goal(server, game,data.roomName, game.ball))
-        {
-          if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
-          {
-            server.to(data.roomName).emit('gameOver',
-            client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
-            game.clientOne.leave(data.roomName);
-            game.clientTwo.leave(data.roomName);
-            gamesMap.delete(data.roomName);
-
-            return (clearInterval(game.ballRefreshInterval))
-          }
-          ballReset(game.ball);
-          server.to(data.roomName).emit('ballInfos', game.ball);
-          pauseBetweenPoints(game.ball, server, data.roomName);
-        }
-        
-        let vX = game.ball.speed * Math.cos(game.ball.angle);
-        let vY = game.ball.speed * Math.sin(game.ball.angle)
-
-        if (willBallOverlapPaddleOne(game.ball, game.paddleOne, vX, vY) === false &&
-          willBallOverlapPaddleTwo(game.ball, game.paddleTwo, vX, vY) === false &&
-          willBallCollideWithWall(game.ball, vX) === false)
-        {
-          game.ball.x += vX;
-          game.ball.y += vY;
-          server.to(data.roomName).emit('ballInfos', game.ball);
-        }
-        else {
-          
-          server.to(data.roomName).emit('ballInfos', game.ball);
-        }
-
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))
       }, Constants.FRAME_RATE);

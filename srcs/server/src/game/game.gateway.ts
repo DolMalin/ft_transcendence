@@ -84,20 +84,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('playerMove')
   playerMove(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
     
-    // const game = this.gamesMap.get(data.room);
-
-    this.gamePlayService.handlePaddleMovement(this.gamesMap.get(data.room), data, client)
+    this.gamePlayService.movingStarted(this.gamesMap.get(data.room), data)
   }
 
-  @SubscribeMessage('ballMove')
-  ballMove(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
+  @SubscribeMessage('playerMoveStopped')
+  playerMoveStopped(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
+    
+    this.gamePlayService.movingStopped(this.gamesMap.get(data.room), data)
+  }
+
+  @SubscribeMessage('startGameLoop')
+  startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
     const game = this.gamesMap.get(data.roomName);
     if (game === undefined)
       return ; // TO DO : emit something saying game crashed
     
-    this.server.to(data.roomName).emit('ballInfos', game.ball);
-    
-    this.gamePlayService.handleBallMovement(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
+    this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
   }
   @SubscribeMessage('ping')
   ping(@ConnectedSocket() client: Socket) {

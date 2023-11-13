@@ -4,6 +4,11 @@ import {
     Ball,
     } from './interfaces';
 
+/**
+ * @description 
+ * draw numbers from 0 to 9 to a canvas, numbers are numbers array that specified which rods should be drawn
+ * ex : EIGHT = [1, 2, 3, 4, 5, 6 ,7]
+*/
 export function drawNumbers(context : CanvasRenderingContext2D, color : string,x : number, y : number, size : number, number : number[]) {
 
     let height = size;
@@ -52,13 +57,14 @@ export function drawNumbers(context : CanvasRenderingContext2D, color : string,x
                 break ;
         }
     })
-    
-    // TO DO : Add triangle edges for a smoother rendering if times is not of the matter
 };
 
 
-
-export function drawScore(playerScores : number, side : string, color : string, context : CanvasRenderingContext2D ,canvasBounding : DOMRect) {
+/**
+ * @description 
+ * use drawNumber to display score to one side or an other of the board
+*/
+export function drawScore(playerScores : number, side : string, color : string, context : CanvasRenderingContext2D,canvasBounding : DOMRect) {
     
     let numberSize = canvasBounding.width / 5;
     let y : number;
@@ -105,6 +111,10 @@ export function drawScore(playerScores : number, side : string, color : string, 
     }
 }
 
+/**
+ * @description 
+ * for more info about the paddle Type go to interfaces.ts in game folder !
+*/
 export function drawPaddle(context : CanvasRenderingContext2D, canvasBounding : DOMRect, paddle : Paddle) {
 
     context.fillStyle = Constants.BLUE;
@@ -112,6 +122,10 @@ export function drawPaddle(context : CanvasRenderingContext2D, canvasBounding : 
         paddle.width * canvasBounding.width, paddle.height * canvasBounding.height);
 }
 
+/**
+ * @description 
+ * for more info about the paddle Type go to interfaces.ts in game folder !
+*/
 export function drawAdversaryPaddle(context : CanvasRenderingContext2D, canvasBounding : DOMRect, adversaryPaddle : Paddle) {
 
     context.fillStyle = Constants.RED;
@@ -119,12 +133,19 @@ export function drawAdversaryPaddle(context : CanvasRenderingContext2D, canvasBo
         adversaryPaddle.width * canvasBounding.width, adversaryPaddle.height * canvasBounding.height);
 }
 
+/**
+ * @description 
+ * use your brain !
+*/
 export function drawBoard(context : CanvasRenderingContext2D, canvasBounding : DOMRect) {
 
     context.fillStyle = 'black';
     context.fillRect(0, 0, canvasBounding.width, canvasBounding.height);
 }
-
+/**
+ * @description 
+ * for more info about the ball Type go to interfaces.ts in game folder !
+*/
 export function drawBall(context : CanvasRenderingContext2D, canvasBounding : DOMRect, ball : Ball) {
     
     context.fillStyle = ball.color;
@@ -132,4 +153,31 @@ export function drawBall(context : CanvasRenderingContext2D, canvasBounding : DO
     context.arc(ball.x * canvasBounding.width, ball.y * canvasBounding.height, canvasBounding.width * ball.size, 0, 2 * Math.PI);
     context.stroke();
     context.fill();
+}
+
+/**
+ * @description 
+ * use draw number to display a 3 to 0 count down
+*/
+export function drawMidPointCt(context : CanvasRenderingContext2D, canvasBounding : DOMRect, ctSizeModifier : number, midPointCT : number) {
+    let numberSize = canvasBounding.width / 6 * ctSizeModifier;
+    let x = canvasBounding.width / 2 - (numberSize * 0.25)
+    let y = canvasBounding.height / 2 - (numberSize * 0.25)
+    switch (midPointCT) 
+    {
+        case 3 :
+            drawNumbers(context, 'white', x, y, numberSize, Constants.THREE);
+            break ;
+        case 2 :
+            drawNumbers(context, 'yellow', x, y, numberSize, Constants.TWO);
+            break ;
+        case 1 :
+            drawNumbers(context, 'orange', x, y, numberSize, Constants.ONE);
+            break ;
+        case 0 :
+            drawNumbers(context, 'red', x, y, numberSize, Constants.ZERO);
+            break ;
+        default :
+            break ;
+    }
 }
