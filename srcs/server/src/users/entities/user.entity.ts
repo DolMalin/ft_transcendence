@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {Socket} from 'socket.io-client'
 
 @Entity()
 export class User {
@@ -18,6 +19,12 @@ export class User {
 	@Field(() => String, {})
 	refreshToken: string
 
+	@Column({type : 'int', default : 0, nullable: true})
+	winsAmount: number
 
+	@Column({type : 'int', default : 0, nullable: true})
+	loosesAmounth : number
 
+	@Column({type : 'varchar', nullable: true})
+	WLRatio : string
 }
