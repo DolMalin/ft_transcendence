@@ -11,7 +11,7 @@ class AuthService {
 			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`, {withCredentials:true})
 			localStorage.setItem("accessToken", res.data.accessToken)	
 		} catch (err) {
-			console.log("fail to auth")
+			console.log("failed to auth")
 		}
 	}
 

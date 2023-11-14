@@ -1,4 +1,4 @@
-import React, { Profiler } from 'react';
+import React, { Profiler, useState } from 'react';
 
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
@@ -33,17 +33,17 @@ function Game(props : {socket : Socket}) {
 function App() {
   
   const [cookies, setCookie] = useCookies(["access_token"])
+  const [isAuth, setIsAuth] = useState(false)
 
+  console.log(isAuth);
 
   return (
 
       <ChakraProvider>
 
-        <BrowserRouter>
-          <Routes>
-            <Route path='/' element={<Game socket={gameSock}/>} />
-          </Routes>
-        </BrowserRouter>      
+            {!isAuth && <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>}
+            {isAuth && <Game socket={gameSock}/>}
+            
       </ChakraProvider>
 
   );

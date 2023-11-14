@@ -61,7 +61,7 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
-          console.log(err)
+          console.log('ERROR : ', err)
           resolve(null)
         })
     })

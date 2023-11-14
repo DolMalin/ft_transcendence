@@ -55,7 +55,7 @@ import { Navigate } from "react-router-dom"
 // 	}
 // }
 
-function Auth() {
+function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function}) {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [redirect, setRedirect] = useState('')
@@ -70,7 +70,7 @@ function Auth() {
 	}
 
 	const Login = async () => {
-		if (isAuthenticated)
+		if (props.isAuthenticated)
 			return
 
 		await fetchAuthUrl()
@@ -79,7 +79,7 @@ function Auth() {
 		const isLogged = await AuthService.validate()
 		if (isLogged) {
 			setRedirect('/profile')
-			setIsAuthenticated(true)
+			props.setIsAuthenticated(true)
 		}
 		else
 			setRedirect('/')
@@ -88,7 +88,7 @@ function Auth() {
 
 	Login()
 
-	if (isAuthenticated) {
+	if (props.isAuthenticated) {
 		return <Navigate to={redirect}/>
 	}
 		
