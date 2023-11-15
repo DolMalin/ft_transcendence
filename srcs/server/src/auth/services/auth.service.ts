@@ -7,6 +7,14 @@ import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 
 
+// /me
+
+
+// {
+//   username
+//   id
+// }
+
 @Injectable()
 export class AuthService {
   constructor(
