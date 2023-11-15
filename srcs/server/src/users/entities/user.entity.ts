@@ -18,5 +18,8 @@ export class User {
 	@Field(() => String, {})
 	refreshToken: string
 
+	@Column({type: 'boolean', default: false})
+	@Field(() => String, {})
+	isRegistered: boolean
 
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Req,Res,Headers, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
@@ -19,7 +19,7 @@ export class AuthController {
     }
 
     @UseGuards(FtAuthGuard)
-    @Get('login/:code')
+    @Get('login')
     async login(@Req() req: any, @Res() res: any) {
       return await this.authService.login(req, res)
     }
@@ -41,8 +41,16 @@ export class AuthController {
 
     @UseGuards(AccessTokenGuard)
     @Get('validate')
-    validate(@Req() req: any, @Res() res: any) {
-      res.send('ok')
+    async validate(@Req() req: any, @Res() res: any) {
+      const user = await this.authService.validate(req, res)
+      res.send(user)
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('register')
+    async register(@Req() req: any, @Res() res: any) {
+      res.send("ok")
+      await this.authService.register(req, res)
     }
 
 }

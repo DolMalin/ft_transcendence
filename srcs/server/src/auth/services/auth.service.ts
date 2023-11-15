@@ -37,7 +37,7 @@ export class AuthService {
           client_id: process.env.CLIENT_ID,
           code: code,
           client_secret: process.env.SECRET,
-          redirect_uri: process.env.CLIENT_URL
+          redirect_uri: process.env.CALLBACK_URL
         }
 
         const config = {
@@ -53,6 +53,7 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
+          console.log(err)
           resolve(null)
         })
     })
@@ -101,7 +102,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'10s'
+      expiresIn:'5m'
     })
   }
 
@@ -150,7 +151,15 @@ export class AuthService {
       domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
-      .send({accessToken: accessToken})
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.redirect("http://127.0.0.1:4343")
 
   }
 
@@ -196,5 +205,21 @@ export class AuthService {
   }
 
 
+  async validate(@Req() req: any, @Res() res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+
+    console.log(user)
+    if (!user)
+      throw new ForbiddenException('access denied')
+    return user
+  }
+
+
+  async register(@Req() req:any, @Res() res:any) { 
+    console.log(req)
+    console.log(req.body)
+    return req.body
+
+  }
 
 }

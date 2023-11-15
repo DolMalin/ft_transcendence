@@ -2,11 +2,15 @@ import axios from 'axios'
 import React, { Component, useEffect, useState} from 'react'
 import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
+import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
+
 
 
 function Auth() {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
+	const [isRegistered, setIsRegistered] = useState(false)
+
 
 	const fetchAuthUrl = async () => {
 		try {
@@ -18,12 +22,8 @@ function Auth() {
 	}
 
 	const validate = async () => {
-		if (AuthService.getAccessToken()?.length === 0) {
-			setIsAuthenticated(false)
-			return 401
-		}
-		
-		let status = await AuthService.validate()
+		let res = await AuthService.validate()
+		let status = res.status
 		if (status === 200)
 			setIsAuthenticated(true)
 		else if (status === 401 && AuthService.getAccessToken()){
@@ -35,49 +35,100 @@ function Auth() {
 		}
 		else
 			setIsAuthenticated(false)	
-		return status
+		
+		if (res?.data?.isRegistered === true)
+			setIsRegistered(true)
+
+
+		return 200
 	}
 
-	const login = async () => {
-		await AuthService.login()
-		await validate()
-	}
 
 	const logout = () => {
 		AuthService.logout()
 		setIsAuthenticated(false)
 	}
 
+	const handleSubmit = async (avatar:string, username:string) => {
+		console.log(avatar)
+		console.log(username)
+		console.log(avatar)
+		await AuthService.register(avatar, username)
+	}
+
+
+
 	function LoginComponent() {
 		return (
 			<div className="Log">
-				<a href=
-					{authUrl}
-				>
-					Log in with 42
-				</a>
+				<Button>
+					<Link href={authUrl}>Log in with 42</Link>
+			</Button>
 			</div>
+		)
+	}
+
+	function RegisterComponent() {
+		const [username, setUsername] = useState('')
+		const [avatar, setAvatar] = useState('')
+
+		return (
+			<Flex width="half" align="center" justifyContent="center">
+				<Box p={2}>
+					<form onSubmit={async () => await handleSubmit(avatar, username)}>
+						<FormControl isRequired>
+							<Input
+								type="text"
+								placeholder="Nom d'utilisateur"
+								onChange={ event => {setUsername(event.currentTarget.value)}}
+							/>
+
+						</FormControl>
+
+						<FormControl isRequired>
+							<Input
+								type="file"
+								height="100%"
+								width="100%"
+								accept="image/*"
+								onChange={event => {setAvatar(event.currentTarget.value)}}
+							/>
+						</FormControl>
+						
+						<Button
+							mt={4}
+							colorScheme='teal'
+							type='submit'
+						>
+							Submit
+						</Button>
+					</form>
+				</Box>
+			</Flex>
 		)
 	}
 
 	function LogoutComponent() {
 		return (
 			<div className="Log">
-				<button onClick={logout}>Logout</button>
+				<Button onClick={logout}>Logout</Button>
 			</div>
 		)
 	}
 
 	useEffect(() => {
-		login()
 		fetchAuthUrl()
+		validate()
 	}, [])
 
 
 		
 	return (<>
+
+		{isAuthenticated && !isRegistered && <RegisterComponent/>}
 		{isAuthenticated && <LogoutComponent />}
 		{!isAuthenticated && <LoginComponent />}
+		{/* {username} */}
 	</>)
 }
 

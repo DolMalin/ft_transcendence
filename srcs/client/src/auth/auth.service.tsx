@@ -1,26 +1,16 @@
 import axios from "axios"
+import Cookies from 'universal-cookie';
 
 class AuthService {
 	api = axios.create({withCredentials:true})
-
-	async login() {
-		const param:any = new URLSearchParams(window.location.search)
-		if (!param.has("code"))
-			return 403
-		
-		try {
-			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`)
-			localStorage.setItem("accessToken", res.data.accessToken)
-			return res.status	
-		} catch (err:any) {
-			return err.response.status
-		}
-	}
-
+	
 	async logout() {
+		const cookies = new Cookies()
+
 		try {
 			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/logout`)
-			localStorage.removeItem("accessToken")
+			cookies.remove("accessToken")
+			cookies.remove("refreshToken")
 			return res.status
 		} catch(err:any) {
 			return err.response.status
@@ -39,7 +29,8 @@ class AuthService {
 
 
 	getAccessToken() {
-		return localStorage.getItem("accessToken")
+		const accessToken = new Cookies().get("accessToken")
+		return accessToken
 	}
 
 	getAuthHeader() {
@@ -50,10 +41,21 @@ class AuthService {
 	async validate() {
 		try {
 			const res: any  = await this.api.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
-			return res.status
+			return res
 		} catch(err:any) {
-			return err.response.status
+			return err.response?.status
 		}
+	}
+
+	async register(username: string, avatar:string) {
+		try {
+			const res: any  = await this.api.post(`http://127.0.0.1:4545/auth/register`, {username: username, avatar: avatar}, {headers: this.getAuthHeader()})
+			console.log("BONJOUUUUR")
+			return res
+		} catch(err:any) {
+			console.log(err)
+			return err
+		}	
 	}
 
 }
