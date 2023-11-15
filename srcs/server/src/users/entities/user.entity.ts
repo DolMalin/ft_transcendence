@@ -22,4 +22,5 @@ export class User {
 	@Field(() => String, {})
 	isRegistered: boolean
 
+
 }

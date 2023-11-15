@@ -13,4 +13,5 @@ COPY package-lock.json .
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}
 ENV PORT=${CLIENT_PORT}
-CMD npm install ; npm run start
+ENV SERVER_PORT=${SERVER_PORT}
+CMD  npm install; npm run start

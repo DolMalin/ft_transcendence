@@ -40,22 +40,11 @@ class AuthService {
 
 	async validate() {
 		try {
-			const res: any  = await this.api.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
-			return res
-		} catch(err:any) {
-			return err.response?.status
+			const res: any  = await axios.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
+			return true
+		} catch(err) {
+			return false
 		}
-	}
-
-	async register(username: string, avatar:string) {
-		try {
-			const res: any  = await this.api.post(`http://127.0.0.1:4545/auth/register`, {username: username, avatar: avatar}, {headers: this.getAuthHeader()})
-			console.log("BONJOUUUUR")
-			return res
-		} catch(err:any) {
-			console.log(err)
-			return err
-		}	
 	}
 
 }

@@ -7,6 +7,14 @@ import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 
 
+// /me
+
+
+// {
+//   username
+//   id
+// }
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,6 +33,13 @@ export class AuthService {
     url.searchParams.set('response_type', 'code')
     return ({url: url.toString()})
   }
+
+  // /oauth/authorize/client_id/redirect/response_type=code
+
+  // -> url vers page de 42
+  // <+ 217.0.0.1/code=12398y1239821y3
+  // -> oauth/token
+  // <- token
 
 
   /**
@@ -53,7 +68,6 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
-          console.log(err)
           resolve(null)
         })
     })
