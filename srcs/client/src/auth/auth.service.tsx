@@ -41,10 +41,14 @@ class AuthService {
 	async validate() {
 		try {
 			const res: any  = await axios.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
-			return true
+			return res.status
 		} catch(err) {
-			return false
+			return 401
 		}
+	}
+
+	async register(avatar: string, username: string) {
+
 	}
 
 }
