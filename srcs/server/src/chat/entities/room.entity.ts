@@ -1,16 +1,16 @@
 import { Field } from '@nestjs/graphql'
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
-import { Message } from './message-list.entity';
+import { Message } from './message.entity';
 
 @Entity()
 export class Room { 
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn()
     id: number
 
-    @Column({type: String})
+    @Column({type: String, unique: true})
     @Field(() => String, {})
-    roomName: String;
+    name: String;
 
-    @OneToMany(() => Message, message => message.room)
+    @OneToMany(() => Message, message => message.room, {onDelete: 'CASCADE'})
     message: Message[]
 }
