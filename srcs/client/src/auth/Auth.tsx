@@ -77,6 +77,7 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		await AuthService.login()
 
 		const isLogged = await AuthService.validate()
+		console.log('is logged : ',isLogged)
 		if (isLogged) {
 			setRedirect('/profile')
 			props.setIsAuthenticated(true)
@@ -89,7 +90,7 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	Login()
 
 	if (props.isAuthenticated) {
-		return <Navigate to={redirect}/>
+		return (<div> oui </div>)
 	}
 		
 	return (

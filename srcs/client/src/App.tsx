@@ -2,14 +2,13 @@ import React, { Profiler, useState } from 'react';
 
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
-import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Auth from "./auth/Auth"
 import Profile from "./Profile"
 import CreateGameButton from './game/CreateGame';
-import { ChakraProvider, Button, ButtonGroup, Box } from '@chakra-ui/react'
+import { ChakraProvider, Box } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/const'
-import * as dotenv from 'dotenv'
+import LeaderBoard from './game/Leaderboard';
 
 const gameSock = io('http://localhost:4545')
 
@@ -29,7 +28,6 @@ function Game(props : {socket : Socket}) {
   )
 }
 
-
 function App() {
   
   const [cookies, setCookie] = useCookies(["access_token"])
@@ -40,9 +38,11 @@ function App() {
   return (
 
       <ChakraProvider>
-
-            {!isAuth && <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>}
-            {isAuth && <Game socket={gameSock}/>}
+            <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>
+            <LeaderBoard />
+            {/* <Game socket={gameSock}/>
+            {/* {!isAuth && <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>}
+            {isAuth && <Game socket={gameSock}/>} */}
             
       </ChakraProvider>
 

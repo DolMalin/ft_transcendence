@@ -6,6 +6,8 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
+import { leaderboardStats } from 'src/game/interfaces/interfaces';
+
 
 @Injectable()
 export class UsersService {
@@ -44,5 +46,22 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.findOneById(id)
     return this.userRepository.remove(user)
+  }
+
+  async removeAll() {
+    const users = this.findAll();
+    (await users).forEach((value) => {
+      this.userRepository.remove(value);
+    });
+  }
+
+  async returnScoreList(){
+    return (this.findAll().then((res : User[]) => {
+        let scoreList : leaderboardStats[] = []; 
+        res.forEach((value) => {
+        scoreList.push({username : value.username, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount});
+      })
+      return (scoreList);
+    }));
   }
 }

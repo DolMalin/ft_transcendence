@@ -3,7 +3,7 @@ import {
   Game,
   Ball,
   Paddle,
-} from './interfaces'
+} from './interfaces/interfaces'
 import * as Constants from './const'
 
 

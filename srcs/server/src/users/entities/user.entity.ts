@@ -10,7 +10,7 @@ export class User {
 	@Column({type: 'int', unique: true})
 	ftId: number
 
-	@Column({type: 'varchar', length: 20, nullable: true})
+	@Column({type: 'varchar',length: 20, nullable: true})
 	@Field(() => String, {})
 	username: string
 
@@ -23,8 +23,5 @@ export class User {
 	winsAmount: number
 
 	@Column({type : 'int', default : 0, nullable: true})
-	loosesAmounth : number
-
-	@Column({type : 'varchar', nullable: true})
-	WLRatio : string
+	loosesAmount : number
 }

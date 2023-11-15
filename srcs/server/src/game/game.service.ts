@@ -6,7 +6,7 @@ import {
   GameInfo,
   GameMetrics,
   Paddle,
-  } from './interfaces'
+  } from './interfaces/interfaces'
 import { 
   willBallCollideWithWall,
   willBallOverlapPaddleOne,
@@ -19,7 +19,7 @@ import {
 import * as Constants from './const'
 import { timeLog, timeStamp } from 'console';
 
-function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
+export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 

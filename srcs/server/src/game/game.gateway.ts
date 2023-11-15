@@ -11,7 +11,7 @@ GamePlayService } from './game.service';
 import {
   Game,
   GameInfo,
-} from './interfaces'
+} from './interfaces/interfaces'
 import { clearInterval } from 'timers';
 
 // import { KeyboardEvent } from 'react'

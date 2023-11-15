@@ -45,3 +45,10 @@ export interface Paddle {
     paddleTwo : Paddle,
     ball : Ball,
   }
+
+  export interface leaderboardStats {
+
+    username: string
+      winsAmount: number
+      loosesAmount: number
+  }

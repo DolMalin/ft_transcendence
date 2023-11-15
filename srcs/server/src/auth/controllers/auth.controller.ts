@@ -45,4 +45,9 @@ export class AuthController {
       res.send('ok')
     }
 
+    @Get('newUserDebug')
+    async newUserDebug(@Req() req: any, @Res() res: any) {
+      return await this.authService.newUserDebug(req, res);
+    }
+
 }

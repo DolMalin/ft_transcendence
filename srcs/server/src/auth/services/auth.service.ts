@@ -5,6 +5,8 @@ import { User } from 'src/users/entities/user.entity';
 import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
+import { roomNameGenerator } from 'src/game/game.service';
+
 
 
 // /me
@@ -201,6 +203,26 @@ export class AuthService {
     }
   }
 
+  async newUserDebug(req : any, res : any) {
+    let ftId = Math.floor(Math.random() * 8888);
+    console.log(ftId);
+    let user = await this.validateUser(ftId)
+		if (user)
+			throw new InternalServerErrorException()
 
+      console.log(user);
+      const refreshToken = await this.createRefreshToken({id: user.id})
+      const accessToken = await this.createAccessToken({id: user.id})
+  
+      await this.updateRefreshToken(user.id, await this.hash(refreshToken))
+      
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        domain:"127.0.0.1",
+        sameSite: "none",
+        maxAge: 1000 * 60 * 60 * 24, path: '/'})
+        .send({accessToken: accessToken})
+  }
 
 }
