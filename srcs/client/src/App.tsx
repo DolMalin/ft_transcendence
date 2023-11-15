@@ -2,7 +2,6 @@ import React, { Profiler } from 'react';
 
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
-import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Auth from "./auth/Auth"
 import Profile from "./Profile"
 import CreateGameButton from './game/CreateGame';
@@ -34,18 +33,11 @@ function App() {
   
   const [cookies, setCookie] = useCookies(["access_token"])
 
-
-  return (
-
-      <ChakraProvider>
-
-        <BrowserRouter>
-          <Routes>
-            <Route path='/' element={<Game socket={gameSock}/>} />
-          </Routes>
-        </BrowserRouter>      
-      </ChakraProvider>
-
+  return (<>
+    <ChakraProvider>
+      <Auth />
+    </ChakraProvider>
+  </>
   );
 }
 
