@@ -22,8 +22,7 @@ function Auth() {
 	}
 
 	const validate = async () => {
-		let res = await AuthService.validate()
-		let status = res.status
+		let status = await AuthService.validate()
 		if (status === 200)
 			setIsAuthenticated(true)
 		else if (status === 401 && AuthService.getAccessToken()){
@@ -36,8 +35,8 @@ function Auth() {
 		else
 			setIsAuthenticated(false)	
 		
-		if (res?.data?.isRegistered === true)
-			setIsRegistered(true)
+		// if (res?.data?.isRegistered === true)
+		// 	setIsRegistered(true)
 
 
 		return 200
