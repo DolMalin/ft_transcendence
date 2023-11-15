@@ -3,7 +3,6 @@ import React, { Profiler } from 'react';
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
 import Auth from "./auth/Auth"
-import Profile from "./Profile"
 import CreateGameButton from './game/CreateGame';
 import { ChakraProvider, Button, ButtonGroup, Box } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
