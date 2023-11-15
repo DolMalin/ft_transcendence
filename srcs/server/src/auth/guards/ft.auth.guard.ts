@@ -8,15 +8,14 @@ export class FtAuthGuard implements CanActivate {
 
 	async canActivate(context: ExecutionContext  ): Promise<any>{
 		const req = context.switchToHttp().getRequest()
-		const code = req.params.code
+		const code = req.query.code
 
 		if (!code?.length)
 			return false
-
 		const token = await this.authService.getFtToken(code)
 		if (!token)
 			throw new UnauthorizedException()
-
+			
 		const ftId = await this.authService.getFtId(token)
 		if (!ftId)
 			throw new UnauthorizedException()

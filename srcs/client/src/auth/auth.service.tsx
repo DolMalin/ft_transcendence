@@ -1,30 +1,36 @@
 import axios from "axios"
+import Cookies from 'universal-cookie';
 
 class AuthService {
-
-	async login() {
-		const param:any = new URLSearchParams(window.location.search)
-		if (!param.has("code"))
-			return false
-		
-		try {
-			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`, {withCredentials:true})
-			localStorage.setItem("accessToken", res.data.accessToken)	
-		} catch (err) {
-			console.log("failed to auth")
-		}
-	}
-
+	api = axios.create({withCredentials:true})
+	
 	async logout() {
-		try {
-			const res:any = await axios.get(`http://127.0.0.1:4545/auth/logout`, {withCredentials:true})
-		} catch(err) {
+		const cookies = new Cookies()
 
+		try {
+			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/logout`)
+			cookies.remove("accessToken")
+			cookies.remove("refreshToken")
+			return res.status
+		} catch(err:any) {
+			return err.response.status
 		}
 	}
+
+	async refresh() {
+		try {
+			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/refresh`)
+			localStorage.setItem("accessToken", res.data.accessToken)
+			return res.status
+		} catch(err:any) {
+			return err.response?.status
+		}
+	}
+
 
 	getAccessToken() {
-		return localStorage.getItem("accessToken")
+		const accessToken = new Cookies().get("accessToken")
+		return accessToken
 	}
 
 	getAuthHeader() {
@@ -35,11 +41,14 @@ class AuthService {
 	async validate() {
 		try {
 			const res: any  = await axios.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
-			return true
+			return res.status
 		} catch(err) {
-			console.log("NO")
-			return false
+			return 401
 		}
+	}
+
+	async register(avatar: string, username: string) {
+
 	}
 
 }

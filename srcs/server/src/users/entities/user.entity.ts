@@ -19,8 +19,9 @@ export class User {
 	@Field(() => String, {})
 	refreshToken: string
 
-	@Column({type : 'int', default : 0, nullable: true})
-	winsAmount: number
+	@Column({type: 'boolean', default: false})
+	@Field(() => String, {})
+	isRegistered: boolean
 
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
