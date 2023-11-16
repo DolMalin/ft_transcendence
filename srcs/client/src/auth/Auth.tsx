@@ -25,19 +25,8 @@ function Auth() {
 		let status = await AuthService.validate()
 		if (status === 200)
 			setIsAuthenticated(true)
-		else if (status === 401 && AuthService.getAccessToken()){
-			status = await AuthService.refresh()
-			if (status === 200)
-				setIsAuthenticated(true)
-			else
-				setIsAuthenticated(false)
-		}
 		else
-			setIsAuthenticated(false)	
-		
-		// if (res?.data?.isRegistered === true)
-		// 	setIsRegistered(true)
-
+			setIsAuthenticated(false)
 
 		return 200
 	}
