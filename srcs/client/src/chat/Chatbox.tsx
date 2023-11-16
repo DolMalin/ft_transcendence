@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from "react"
 import ScrollToBottom from 'react-scroll-to-bottom'
 import * as Chakra from '@chakra-ui/react'
+import axios from "axios"
 
 function timeOfDay(){
     let hour = new Date(Date.now()).getHours()
@@ -50,11 +51,18 @@ export function Chatbox(props: any) {
                 message: currentMessage,
                 time: timeOfDay()
             }])
+            let data = {name: props.room}
+            axios.post('http://127.0.0.1:4545/room/')
+                .then(response => {
+                    console.log('Réponse du serveur :', response.data);
+                    console.log('Statut de la réponse :', response.status);
+                    console.log('En-têtes de la réponse :', response.headers);
+                })
+                .catch(error => {console.log('post error')})
             setCurrentMessage("")
             wipeInput()
         }
     };
-
     useEffect(() => {
         props.socket.on("receiveMessage", (data: messageData) => {
         setMessageList((list) => [...list, data])

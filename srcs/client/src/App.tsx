@@ -14,7 +14,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <ChakraProvider>
-            {/* <Auth /> */}
+          <Auth />
           <Chat socket={socket}/>
           </ChakraProvider>
       </header>

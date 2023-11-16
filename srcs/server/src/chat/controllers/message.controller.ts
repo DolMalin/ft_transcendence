@@ -5,5 +5,5 @@ import { MessageService } from '../services/message.service';
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
-
+    
 }

@@ -2,6 +2,8 @@ import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards,
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
 import { Room } from '../entities/room.entity';
+import { CreateRoomDto } from '../dto/create-room.dto';
+
 
 @Controller('room')
 export class RoomController {
@@ -10,7 +12,8 @@ export class RoomController {
     }
 
     @Post()
-    async createRoom(createRoomDto: {roomName: string}){
+    async createRoom(createRoomDto: CreateRoomDto){
+        console.log("test from room controller")
         return await this.roomService.create(createRoomDto)
     }
 
@@ -18,6 +21,8 @@ export class RoomController {
     async getRoomData(){
         return await this.roomService.findAll();
     }
+
+    
 
 //     @Delete()
 //     async removeRoom(@Req() req: any){

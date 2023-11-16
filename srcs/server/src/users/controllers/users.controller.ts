@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Req, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 
 @Controller('users')
@@ -11,7 +12,7 @@ export class UsersController {
   // @Post()
   // async create(@Body() createUserDto: CreateUserDto): Promise<User> {
   //   return await this.usersService.create(createUserDto);
-  // }
+  // }      
   
   @Get()
   findAll(): Promise<User[]> {

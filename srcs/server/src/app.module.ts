@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { Room } from './chat/entities/room.entity';
+import { Message } from './chat/entities/message.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { Room } from './chat/entities/room.entity';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User, Room],
+      entities: [User, Room, Message],
       synchronize: true,
     }),
     UsersModule,
