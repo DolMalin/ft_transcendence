@@ -116,7 +116,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'5m'
+      expiresIn:'5s'
     })
   }
 
@@ -199,7 +199,15 @@ export class AuthService {
       domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
-      .send({accessToken: accessToken})
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.send()
   }
 
 
