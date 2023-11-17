@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Room } from 'src/chat/entities/room.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,10 +14,14 @@ export class User {
 	@Field(() => String, {})
 	username: string
 
-
 	@Column({type: 'varchar', nullable: true})
 	@Field(() => String, {})
 	refreshToken: string
 
+	@Column({type: 'boolean', default: false})
+	@Field(() => String, {})
+	isRegistered: boolean
 
+	@OneToMany(() => Room, room => room.user)
+	room: Room[];
 }

@@ -13,12 +13,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @WebSocketServer()
   server : Server;
 
-  // private server : Server;
-
-  // afterInit(server: Server){
-  //   this.server = server;
-  // }
-
   handleConnection (client : any) {
     console.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);

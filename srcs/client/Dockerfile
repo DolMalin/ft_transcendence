@@ -8,8 +8,7 @@ ENV PATH /usr/src/client/node_modules/.bin:$PATH
 COPY package.json .
 COPY package-lock.json .
 
-# RUN npm install -g npm@10.2.0
-# RUN npm install  -g
+# RUN npm install
 
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}

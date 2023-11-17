@@ -13,6 +13,7 @@ import { RefreshTokenStrategy } from './strategies/refreshTokenStrategy';
     PassportModule,
     JwtModule.register({})
   ],
+  exports:[AuthService],
   controllers: [AuthController],
   providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy]
 })

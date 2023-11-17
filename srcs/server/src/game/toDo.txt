@@ -1,0 +1,19 @@
+TO DO 2 / 11 / 2023 :
+
+-properly leave game when another user refresh or X webbrowser
+
+- maybe take care of the flickering ? 
+-   change canvas size ratio
+-   resize does't seems to work completly with inspector poping out ?
+
+- end game when a player win (need DB);
+
+- display Player Names
+
+- Create DB TABLE for players and games
+
+-Check that every sock.on has a sock.off
+
+- check angle redirection on paddle hit (2 / 4 ?)
+
+- COLLISON BUG BOTTONM PADDLE RIGHT 

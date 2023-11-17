@@ -31,8 +31,8 @@ up: $(DEPENDENCIES)
 down:
 	$(COMPOSE) down
 
-# clean:
-# 	$(COMPOSE) down --rmi all --volumes
+clean:
+	$(COMPOSE) down --rmi all --volumes
 
 fclean: clean
 	 $(RM) -r ${HOME}/data/*

@@ -1,30 +1,58 @@
 import axios from "axios"
+import Cookies from 'universal-cookie';
+
+
 
 class AuthService {
-
-	async login() {
-		const param:any = new URLSearchParams(window.location.search)
-		if (!param.has("code"))
-			return false
-		
-		try {
-			const res:any = await axios.get(`http://127.0.0.1:4545/auth/login/${param.get("code")}`, {withCredentials:true})
-			localStorage.setItem("accessToken", res.data.accessToken)	
-		} catch (err) {
-			console.log("fail to auth")
-		}
+	api = axios.create({withCredentials:true})
+	constructor() {
 	}
 
+	async get(uri: string) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
+					return res
+				} catch (err) {
+					return err.response
+				}
+			}
+		}
+	}
+	
 	async logout() {
-		try {
-			const res:any = await axios.get(`http://127.0.0.1:4545/auth/logout`, {withCredentials:true})
-		} catch(err) {
+		const cookies = new Cookies()
 
+		try {
+			const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
+			cookies.remove("accessToken")
+			cookies.remove("refreshToken")
+			return res.status
+		} catch(err:any) {
+			return err.response.status
 		}
 	}
+
+	async refresh() {
+		try {
+			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/refresh`)
+			return res.status
+		} catch(err:any) {
+			return err.response?.status
+		}
+	}
+
 
 	getAccessToken() {
-		return localStorage.getItem("accessToken")
+		const accessToken = new Cookies().get("accessToken")
+		return accessToken
 	}
 
 	getAuthHeader() {
@@ -34,12 +62,15 @@ class AuthService {
 
 	async validate() {
 		try {
-			const res: any  = await axios.get(`http://127.0.0.1:4545/auth/validate`, {headers: this.getAuthHeader()})
-			return true
+			const res: any  = await this.get(`http://127.0.0.1:4545/auth/validate`)
+			return res.status
 		} catch(err) {
-			console.log("NO")
-			return false
+			return 401
 		}
+	}
+
+	async register(avatar: string, username: string) {
+
 	}
 
 }

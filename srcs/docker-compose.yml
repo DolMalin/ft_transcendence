@@ -15,9 +15,11 @@ services:
         CLIENT_PORT: ${CLIENT_PORT}
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
-    restart: unless-stopped
+    env_file:
+      - ./.env
     volumes:
       - ./client:/usr/src/client
+    restart: unless-stopped
 
   server:
     container_name: server

@@ -7,6 +7,8 @@ import { NestModule } from '@nestjs/common';
 
 // Entities
 import { UsersModule } from './users/users.module';
+import { GameModule } from './game/game.module';
+
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { Room } from './chat/entities/room.entity';
@@ -25,11 +27,12 @@ import { Message } from './chat/entities/message.entity';
       synchronize: true,
     }),
     UsersModule,
+    GameModule,
     AuthModule,
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatModule],
+  providers: [AppService, ChatModule, GameModule],
 })
 
 export class AppModule { }

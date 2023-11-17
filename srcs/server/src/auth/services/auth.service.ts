@@ -7,6 +7,14 @@ import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 
 
+// /me
+
+
+// {
+//   username
+//   id
+// }
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,6 +34,13 @@ export class AuthService {
     return ({url: url.toString()})
   }
 
+  // /oauth/authorize/client_id/redirect/response_type=code
+
+  // -> url vers page de 42
+  // <+ 217.0.0.1/code=12398y1239821y3
+  // -> oauth/token
+  // <- token
+
 
   /**
    * @description Send a post request to the 42 api with the `callback code` and fetch the 42 auth `token` 
@@ -37,7 +52,7 @@ export class AuthService {
           client_id: process.env.CLIENT_ID,
           code: code,
           client_secret: process.env.SECRET,
-          redirect_uri: process.env.CLIENT_URL
+          redirect_uri: process.env.CALLBACK_URL
         }
 
         const config = {
@@ -53,7 +68,6 @@ export class AuthService {
         ).then((res) => {
           resolve(res.data.access_token as string)
         }, (err) => {
-          console.log(err)
           resolve(null)
         })
     })
@@ -102,7 +116,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'5min'
+      expiresIn:'10m'
     })
   }
 
@@ -143,32 +157,6 @@ export class AuthService {
     const refreshToken = await this.createRefreshToken({id: req.user.id})
     const accessToken = await this.createAccessToken({id: req.user.id})
 
-    await this.updateRefreshToken(req.user.id, await this.hash(refreshToken))
-    
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      domain:"127.0.0.1",
-      sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, path: '/'})
-      .send({accessToken: accessToken})
-
-  }
-
-
-  async refresh(req: any, res: any) {
-    const user = await this.usersService.findOneById(req.user?.id)
-
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('access denied')
-
-    if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
-      throw new ForbiddenException('access denied')
-
-    
-    const refreshToken = await this.createRefreshToken({id: req.user.id})
-    const accessToken = await this.createAccessToken({id: req.user.id})
-
     await this.updateRefreshToken(req.user.id, refreshToken)
     
     res.cookie('refreshToken', refreshToken, {
@@ -177,7 +165,49 @@ export class AuthService {
       domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
-      .send({accessToken: accessToken})
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.redirect("http://127.0.0.1:4343")
+
+  }
+
+  async refresh(req: any, res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+    
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('access denied')
+    
+    if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
+      throw new ForbiddenException('access denied')
+
+    const refreshToken = await this.createRefreshToken({id: user.id})
+    const accessToken = await this.createAccessToken({id: user.id})
+
+    await this.updateRefreshToken(user.id, refreshToken)
+
+    Logger.log(`Tokens refreshed for user #${user.id}`)
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.send()
   }
 
 
@@ -185,14 +215,33 @@ export class AuthService {
   /** 
    * @description Logout user by clearing its jwt in cookies
    */
-  logout(@Req() req: any, @Res() res: any) {
-    try {
-      res.clearCookie("jwt").end()
-    } catch {
-      throw new HttpException("Can't update cookies", HttpStatus.BAD_REQUEST)
-    }
+  async logout(@Req() req: any, @Res() res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+
+    if (!user)
+      throw new ForbiddenException('access denied')
+    
+    res.clearCookie("refreshToken").sendStatus(200)
+    Logger.log(`User #${user.id} logged out`)
+
   }
 
 
+  async validate(@Req() req: any, @Res() res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+
+    console.log(user)
+    if (!user)
+      throw new ForbiddenException('access denied')
+    return user
+  }
+
+
+  async register(@Req() req:any, @Res() res:any) { 
+    console.log(req)
+    console.log(req.body)
+    return req.body
+
+  }
 
 }

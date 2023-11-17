@@ -8,12 +8,13 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     credentials: true,
-    origin: process.env.CLIENT_URL,
+    origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
     methods: ["GET", "POST", "PUT", "DELETE"],
     
     allowedHeaders: [
       "Content-Type",
       "Authorization",
+      "Acces-Control-Request-Methods",
       "Access-Control-Allow-Credentials",
       "Access-Control-Allow-Headers"
     ]
@@ -21,5 +22,6 @@ async function bootstrap() {
   
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   await app.listen(process.env.PORT);
+
 }
 bootstrap();

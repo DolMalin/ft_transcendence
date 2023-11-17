@@ -1,5 +1,5 @@
 import { Field } from '@nestjs/graphql'
-import { Entity, CreateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm'
+import { Entity, CreateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne, OneToOne } from 'typeorm'
 import { Room } from './room.entity';
 import { User } from 'src/users/entities/user.entity';
 
@@ -12,10 +12,10 @@ export class Message {
     @Field(() => String, {})
     content : String;
 
-    // @Column()
-    // author : User
+    @OneToOne(() => User, user => user.username)
+    author : User
 
-    @CreateDateColumn({ type: 'timestamptz' })
+    @CreateDateColumn({ type: 'timestamptz'})
 	send_at: Date;
 
     @ManyToOne(() => Room, room => room.message)

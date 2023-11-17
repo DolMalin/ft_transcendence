@@ -7,9 +7,10 @@ import { RoomService } from "./services/room.service";
 import { MessageService } from "./services/message.service";
 import { MessageController } from "./controllers/message.controller";
 import { Message } from "./entities/message.entity";
-
+import { AuthModule } from "src/auth/auth.module";
+import { AuthService } from "src/auth/services/auth.service";
 @Module({
-    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message])],
+    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule] ,
     controllers: [RoomController, MessageController],
     providers: [ChatGateway, RoomService, MessageService],
     exports: [RoomService, MessageService]
