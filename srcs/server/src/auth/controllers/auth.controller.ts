@@ -48,9 +48,8 @@ export class AuthController {
 
     @UseGuards(AccessTokenGuard)
     @Post('register')
-    async register(@Req() req: any, @Res() res: any) {
+    async register(@Body() body:any, @Res() res:any) {
+      await this.authService.register(body)
       res.send("ok")
-      await this.authService.register(req, res)
     }
-
 }

@@ -3,6 +3,7 @@ import React, { Component, useEffect, useState} from 'react'
 import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
+import { useForm } from "react-hook-form";
 
 
 
@@ -11,7 +12,7 @@ function Auth() {
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
-
+	// move in service
 	const fetchAuthUrl = async () => {
 		try {
 			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
@@ -28,7 +29,7 @@ function Auth() {
 		else
 			setIsAuthenticated(false)
 
-		return 200
+		return status
 	}
 
 
@@ -37,13 +38,13 @@ function Auth() {
 		setIsAuthenticated(false)
 	}
 
-	const handleSubmit = async (avatar:string, username:string) => {
-		console.log(avatar)
-		console.log(username)
-		console.log(avatar)
-		await AuthService.register(avatar, username)
+	const onSubmit = async (data:any) => {
+		try {
+			await AuthService.register(data)
+		} catch(err) {
+			console.log(err)
+		}
 	}
-
 
 
 	function LoginComponent() {
@@ -59,27 +60,40 @@ function Auth() {
 	function RegisterComponent() {
 		const [username, setUsername] = useState('')
 		const [avatar, setAvatar] = useState('')
+		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
 				<Box p={2}>
-					<form onSubmit={async () => await handleSubmit(avatar, username)}>
+					<form onSubmit={handleSubmit(onSubmit)}>
 						<FormControl isRequired>
 							<Input
 								type="text"
 								placeholder="Nom d'utilisateur"
-								onChange={ event => {setUsername(event.currentTarget.value)}}
+								{
+									...register("username", {
+										required: "Please enter first name",
+										minLength: 3,
+										maxLength: 80
+									})
+								}
 							/>
 
 						</FormControl>
 
 						<FormControl isRequired>
 							<Input
-								type="file"
+								type="text"
 								height="100%"
 								width="100%"
-								accept="image/*"
-								onChange={event => {setAvatar(event.currentTarget.value)}}
+								{
+									...register("avatar", {
+										required: "Please enter avatar",
+										minLength: 3,
+										maxLength: 80
+									})
+								}
+								// accept="image/*"
 							/>
 						</FormControl>
 						
@@ -116,7 +130,6 @@ function Auth() {
 		{isAuthenticated && !isRegistered && <RegisterComponent/>}
 		{isAuthenticated && <LogoutComponent />}
 		{!isAuthenticated && <LoginComponent />}
-		{/* {username} */}
 	</>)
 }
 

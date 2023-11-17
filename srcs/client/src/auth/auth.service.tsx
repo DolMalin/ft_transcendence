@@ -5,13 +5,11 @@ import Cookies from 'universal-cookie';
 
 class AuthService {
 	api = axios.create({withCredentials:true})
-	constructor() {
-	}
 
 	async get(uri: string) {
 		let retry: boolean = true
 		try {
-			const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
+			const res: any = await this.api.get(uri,{ headers: {'Authorization': 'Bearer ' + this.getAccessToken()}})
 			return res
 	 	} catch(err) {
 			if (err.response.status == 401 && retry) {
@@ -26,7 +24,32 @@ class AuthService {
 			}
 		}
 	}
+
+	async post(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken()
+			}})
+			console.log(res)
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken()
+					}})
+					return res
+				} catch (err) {
+					return err.response
+				}
+			}
+		}
+	}
 	
+
 	async logout() {
 		const cookies = new Cookies()
 
@@ -57,7 +80,7 @@ class AuthService {
 
 	getAuthHeader() {
 		const accessToken = this.getAccessToken()
-		return { Authorization: 'Bearer ' + accessToken}
+		return { 'Authorization': 'Bearer ' + accessToken}
 	}
 
 	async validate() {
@@ -69,8 +92,12 @@ class AuthService {
 		}
 	}
 
-	async register(avatar: string, username: string) {
+	async register(data:any) {
+		try {
+			const res: any = await this.post(`http://127.0.0.1:4545/auth/register`, {avatar: data.avatar, username:data.username})
+		} catch(err) {
 
+		}
 	}
 
 }
