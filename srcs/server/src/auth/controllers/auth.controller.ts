@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
 import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
 import { RefreshTokenGuard } from '../guards/refreshToken.auth.guard';
+import { UseInterceptors} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { read } from 'fs';
 
 @Controller('auth')
@@ -47,9 +49,10 @@ export class AuthController {
     }
 
     @UseGuards(AccessTokenGuard)
+    @UseInterceptors(FileInterceptor('file'))
     @Post('register')
-    async register(@Body() body:any, @Res() res:any) {
-      await this.authService.register(body)
+    async register(@UploadedFile() file: any, @Body() body:any, @Res() res:any, @Req() req:any) {
+      await this.authService.register(file)
       res.send("ok")
     }
 }

@@ -29,7 +29,8 @@ class AuthService {
 		let retry: boolean = true
 		try {
 			const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
-				Authorization: 'Bearer ' + this.getAccessToken()
+				Authorization: 'Bearer ' + this.getAccessToken(),
+				'Content-Type': 'multipart/form-data'
 			}})
 			console.log(res)
 			return res
@@ -39,7 +40,8 @@ class AuthService {
 				try {
 					await this.refresh()
 					const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
-						Authorization: 'Bearer ' + this.getAccessToken()
+						Authorization: 'Bearer ' + this.getAccessToken(),
+						'Content-Type': 'multipart/form-data'
 					}})
 					return res
 				} catch (err) {
@@ -48,7 +50,7 @@ class AuthService {
 			}
 		}
 	}
-	
+
 
 	async logout() {
 		const cookies = new Cookies()
@@ -94,7 +96,7 @@ class AuthService {
 
 	async register(data:any) {
 		try {
-			const res: any = await this.post(`http://127.0.0.1:4545/auth/register`, {avatar: data.avatar, username:data.username})
+			const res: any = await this.post(`http://127.0.0.1:4545/auth/register`, data)
 		} catch(err) {
 
 		}

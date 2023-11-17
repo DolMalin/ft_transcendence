@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -6,20 +6,11 @@ import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 
-
-// /me
-
-
-// {
-//   username
-//   id
-// }
-
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
     ) { }
   
 
@@ -33,13 +24,6 @@ export class AuthService {
     url.searchParams.set('response_type', 'code')
     return ({url: url.toString()})
   }
-
-  // /oauth/authorize/client_id/redirect/response_type=code
-
-  // -> url vers page de 42
-  // <+ 217.0.0.1/code=12398y1239821y3
-  // -> oauth/token
-  // <- token
 
 
   /**

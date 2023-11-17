@@ -40,7 +40,10 @@ function Auth() {
 
 	const onSubmit = async (data:any) => {
 		try {
-			await AuthService.register(data)
+			const formData = new FormData()
+			formData.append("file", data.avatar[0])
+			console.log(formData)
+			await AuthService.register(formData)
 		} catch(err) {
 			console.log(err)
 		}
@@ -83,17 +86,15 @@ function Auth() {
 
 						<FormControl isRequired>
 							<Input
-								type="text"
 								height="100%"
 								width="100%"
+								type="file"
 								{
 									...register("avatar", {
 										required: "Please enter avatar",
-										minLength: 3,
-										maxLength: 80
 									})
 								}
-								// accept="image/*"
+								accept="image/*"
 							/>
 						</FormControl>
 						

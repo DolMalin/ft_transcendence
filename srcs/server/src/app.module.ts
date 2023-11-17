@@ -10,7 +10,6 @@ import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
 import { AuthModule } from './auth/auth.module';
-import { AsyncLocalStorage } from 'async_hooks';
 
 @Module({
   imports: [
