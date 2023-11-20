@@ -7,19 +7,6 @@
     height: 100vh;
 }
 
-.sideBar {
-    width: 20vw;
-    min-width: 200px;
-    height: 100vh;
-
-    display: flex;
-    flex-direction: column;
-    overflow: scroll;
-
-    background-color: grey;
-    border: 2px, solid, black;
-}
-
 .decor {
     width: 80%;
     height: 100%;

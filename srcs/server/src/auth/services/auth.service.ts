@@ -223,7 +223,7 @@ export class AuthService {
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
     
-    console.log(user)
+    // console.log(user)
     if (!user)
       throw new ForbiddenException('access denied')
     return user
@@ -231,20 +231,20 @@ export class AuthService {
 
   
   async register(@Req() req:any, @Res() res:any) { 
-    console.log(req)
-    console.log(req.body)
+    // console.log(req)
+    // console.log(req.body)
     return req.body
     
   }
   
   async newUserDebug(req : any, res : any) {
     let ftId = Math.floor(Math.random() * 8888);
-    console.log(ftId);
+    // console.log(ftId);
     let user = await this.validateUser(ftId)
     if (user)
       throw new InternalServerErrorException()
 
-      console.log(user);
+      // console.log(user);
       const refreshToken = await this.createRefreshToken({id: user.id})
       const accessToken = await this.createAccessToken({id: user.id})
   

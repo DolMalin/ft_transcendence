@@ -6,9 +6,9 @@ import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
 
 
 
-function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function}*/) {
+function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function}) {
 	const [authUrl, setAuthUrl] = useState('')
-	const [isAuthenticated, setIsAuthenticated] = useState(false)
+	// const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
 
@@ -23,18 +23,18 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 
 	const validate = async () => {
 		let res = await AuthService.validate()
-		let status = res.status
+		let status = res
 		if (status === 200)
-			setIsAuthenticated(true)
+			props.setIsAuthenticated(true)
 		else if (status === 401 && AuthService.getAccessToken()){
 			status = await AuthService.refresh()
 			if (status === 200)
-				setIsAuthenticated(true)
+				props.setIsAuthenticated(true)
 			else
-				setIsAuthenticated(false)
+				props.setIsAuthenticated(false)
 		}
 		else
-			setIsAuthenticated(false)	
+			props.setIsAuthenticated(false)	
 		
 		if (res?.data?.isRegistered === true)
 			setIsRegistered(true)
@@ -46,13 +46,13 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 
 	const logout = () => {
 		AuthService.logout()
-		setIsAuthenticated(false)
+		props.setIsAuthenticated(false)
 	}
 
 	const handleSubmit = async (avatar:string, username:string) => {
-		console.log(avatar)
-		console.log(username)
-		console.log(avatar)
+		// console.log(avatar)
+		// console.log(username)
+		// console.log(avatar)
 		await AuthService.register(avatar, username)
 	}
 
@@ -61,7 +61,7 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 	function LoginComponent() {
 		return (
 			<div className="Log">
-				<Button>
+				<Button fontWeight={'normal'}>
 					<Link href={authUrl}>Log in with 42</Link>
 			</Button>
 			</div>
@@ -96,6 +96,7 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 						</FormControl>
 						
 						<Button
+							fontWeight={'normal'}
 							mt={4}
 							colorScheme='teal'
 							type='submit'
@@ -111,7 +112,7 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 	function LogoutComponent() {
 		return (
 			<div className="Log">
-				<Button onClick={logout}>Logout</Button>
+				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>
 			</div>
 		)
 	}
@@ -122,12 +123,12 @@ function Auth(/*props : {isAuthenticated : boolean, setIsAuthenticated: Function
 	}, [])
 
 
-		
+	// console.log(props.isAuthenticated);
 	return (<>
 
-		{isAuthenticated && !isRegistered && <RegisterComponent/>}
-		{isAuthenticated && <LogoutComponent />}
-		{!isAuthenticated && <LoginComponent />}
+		{props.isAuthenticated && !isRegistered && <RegisterComponent/>}
+		{props.isAuthenticated && <LogoutComponent />}
+		{!props.isAuthenticated && <LoginComponent />}
 		{/* {username} */}
 	</>)
 }

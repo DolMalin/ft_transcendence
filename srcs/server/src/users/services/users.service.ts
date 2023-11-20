@@ -59,7 +59,7 @@ export class UsersService {
     return (this.findAll().then((res : User[]) => {
         let scoreList : leaderboardStats[] = []; 
         res.forEach((value) => {
-        scoreList.push({username : value.username, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount});
+        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount});
       })
       return (scoreList);
     }));

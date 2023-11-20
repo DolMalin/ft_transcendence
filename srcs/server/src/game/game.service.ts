@@ -13,11 +13,10 @@ import {
   willBallOverlapPaddleTwo,
   goal,
   ballReset,
-  pauseBetweenPoints,
   randomizeBallAngle,
+  ballRelaunch
   } from './BallMoves';
 import * as Constants from './const'
-import { timeLog, timeStamp } from 'console';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -48,6 +47,7 @@ export class MatchmakingService {
         
         gamesMap.get(roomName).clientTwo = client;
         gamesMap.get(roomName).gameIsFull = true;
+        client.emit('roomName', roomName);
         client.join(roomName);
       }
 
@@ -62,6 +62,7 @@ export class MatchmakingService {
           clientOne : client,
           clientTwo : undefined,
           gameIsFull : false,
+          isPaused : true,
           clientOneScore : 0,
           clientTwoScore : 0,
           Victor : '',
@@ -116,7 +117,6 @@ export class MatchmakingService {
           {
             this.addClientToRoom(gamesMap, key, client)
             server.to(key).emit('roomFilled');
-            client.emit('roomName', key);
             client.emit('playerId', '2'); // was one not 2 might cause trouble
             return ;
           }
@@ -250,36 +250,68 @@ export class GamePlayService {
         game.ball.speed += Constants.BALL_SPEED_INCREMENT;
     }
   }
+
+  /**
+ * @description 
+ * pause the game after a point and relaunch the ball
+ *  | need server and roomName to send ball pos to front
+*/
+  pauseBetweenPoints(game : Game, server : Server, roomName : string) {
+
+    let ct = 3;
+    const int = setInterval(() =>{
+        server.to(roomName).emit('midPointCt', ct);
+        if (ct === -1)
+        {
+            clearInterval(int)
+            ballRelaunch(game.ball)
+            
+            server.to(roomName).emit('midPointCtEnd');
+            return ;
+        }
+        ct --
+    }, 1000);
+  }
   
   gameLoop(gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
     
+    let ballEvents : string = 'start';
+
     if (game === undefined)
       return ;
+    
     game.ballRefreshInterval = setInterval(() => {
+      
+        ballEvents = this.handleBallMovement(game, data, client, server);
+          
+        this.handlePaddleMovement(game);
 
-      let ballEvents = this.handleBallMovement(game, data, client, server);
-
-      this.handlePaddleMovement(game);
-
-      if (ballEvents === 'goal')
-        pauseBetweenPoints(game.ball, server, data.roomName);
-      else if (ballEvents === 'gameOver')
-      {
-        server.to(data.roomName).emit('gameOver',
-        client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
-        // TO DO add loose and win to players history
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
-        gamesMap.delete(data.roomName);
-        return (clearInterval(game.ballRefreshInterval))
-      }
-      else
-      {
-        let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
-        let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
-        server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
-      }
-        
+        if (game.isPaused === true)
+        {
+          game.isPaused = false;
+          ballReset(game.ball);
+          this.pauseBetweenPoints(game, server, data.roomName);
+        }
+        else if (ballEvents === 'goal')
+        {
+          this.pauseBetweenPoints(game, server, data.roomName);
+        }
+        else if (ballEvents === 'gameOver')
+        {
+          server.to(data.roomName).emit('gameOver',
+          client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
+          // TO DO add loose and win to players history
+          game.clientOne.leave(data.roomName);
+          game.clientTwo.leave(data.roomName);
+          gamesMap.delete(data.roomName);
+          return (clearInterval(game.ballRefreshInterval))
+        }
+        else
+        {
+          let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
+          let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
+          server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
+        }
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))
       }, Constants.FRAME_RATE);

@@ -24,5 +24,8 @@ export class User {
 	isRegistered: boolean
 
 	@Column({type : 'int', default : 0, nullable: true})
+	winsAmount : number
+
+	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
 }

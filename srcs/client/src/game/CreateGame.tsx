@@ -1,85 +1,108 @@
-import React, { useCallback } from 'react';
-import { useRef, useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState, useReducer } from 'react';
 import 'reactjs-popup/dist/index.css';
-import {
-    Button,
-    Radio,
-    RadioGroup,
-    CloseButton,
-    Stack,
-    Text, 
-    Box
-    } from '@chakra-ui/react';
 import Game from './Game';
-import { Socket, io } from 'socket.io-client';
-import * as Constants from './const';
-import { GameInfo } from './interfaces';
+import { Socket } from 'socket.io-client';
+import PlayBox from './game-creation/PlayBox';
+import VictoryScreen from './game-creation/VictoryScreen';
+import LooseScreen from './game-creation/LooseScreen';
+import GameMode from './game-creation/GameMode';
+import WaitingScreen from './game-creation/WaitingScreen';
+import { Route } from 'react-router-dom';
+
+type actionType = 
+| {type : 'SET_PLAY'; payload :boolean}
+| {type : 'SET_GAME_MOD'; payload :boolean}
+| {type : 'SET_GAME'; payload :boolean}
+| {type : 'SET_WAITING_SCREEN'; payload :boolean}
+| {type : 'SET_LF_GAME'; payload :boolean}
+| {type : 'SET_L_SCREEN'; payload :boolean}
+| {type : 'SET_V_SCREEN'; payload :boolean}
+| {type : 'SET_GAME_TYPE'; payload :string};
+
+type stateType = {
+    playButtonVisible : boolean,
+    gameModVisible : boolean,
+    gameVisible : boolean,
+    waitingScreenVisible : boolean,
+    lookingForGame : boolean,
+    looseScreenVisible : boolean,
+    victoryScreenVisible : boolean,
+    selectedGameType : string,
+}
 
 function CreateGameButton(props : any) {
-    const buttonRef = useRef(null);
-    const [playButtonVisible, setPlayButtonVisible] = useState(true);
-    const [formVisible, setFormVisible] = useState(false);
-    const [gameVisible, setGameVisible] = useState(false);
-    const [selectedGameType, setSelectedGameType] = useState('');
-    const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
-    const [preGameCDVisible, setPreGameCDVisible] = useState(false);
-    const [preGameCD, setPreGameCD] = useState(Constants.LAUNCH_CD);
+    // const [playButtonVisible, setPlayButtonVisible] = useState(true);
+    // const [formVisible, setFormVisible] = useState(false);
+    // const [gameVisible, setGameVisible] = useState(false);
+    // const [selectedGameType, setSelectedGameType] = useState('');
+    // const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
     const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
-    const [lookingForGame, setLookingForGame] = useState(false);
-    const [looseScreenVisible, setLooseScreenVisible] = useState(false);
-    const [VictoryScreenVisible, setVictoryScreenVisible] = useState(false);
+    // const [lookingForGame, setLookingForGame] = useState(false);
+    // const [looseScreenVisible, setLooseScreenVisible] = useState(false);
+    // const [VictoryScreenVisible, setVictoryScreenVisible] = useState(false);
 
     const sock : Socket = props.sock;
     
-    const toggleForm = () => {
-        if(formVisible == false)
-        {
-            setPlayButtonVisible(false);
-            setFormVisible(true);
-        }
-        else
-        {
-            setFormVisible(false);
-            setSelectedGameType('');
-            if (!gameVisible)
-                setPlayButtonVisible(true);
-        }
-    }
-    
-    const toggleGame = (toggle : boolean) => {
-        
-        setLookingForGame(false);
-        if (toggle === false)
-        {
-            const tmp : GameInfo = {
-                gameType : selectedGameType, 
-                playerId : playerId, 
-                roomName : gameRoom
+    function reducer(state : stateType, action : actionType) {
+
+        switch(action.type) {
+            case 'SET_PLAY': {
+                return ({...state, playButtonVisible : action.payload})
             }
-            sock.emit('leaveGame', tmp);
-            setGameVisible(false);
-            setPlayButtonVisible(true);
+            case 'SET_GAME_MOD': {
+                return ({...state, gameModVisible : action.payload})
+
+            }
+            case 'SET_GAME': {
+                return ({...state, gameVisible : action.payload})
+            }
+            case 'SET_WAITING_SCREEN': {
+                return ({...state, waitingScreenVisible : action.payload})
+            }
+            case 'SET_LF_GAME': {
+                return ({...state, lookingForGame : action.payload})
+            }
+            case 'SET_L_SCREEN': {
+                return ({...state, looseScreenVisible : action.payload})
+            }
+            case 'SET_V_SCREEN': {
+                return({...state, victoryScreenVisible : action.payload})
+            }
+            case 'SET_GAME_TYPE': {
+                return ({...state, selectedGameType : action.payload})
+            }
         }
-        else
-        {
-            setGameVisible(true);
-            setFormVisible(false);
-            setPlayButtonVisible(false);
-        }
+        return (state);
     }
 
+    const [state, dispatch] = useReducer(reducer, {
+        playButtonVisible : true,
+        gameModVisible : false,
+        gameVisible : false,
+        waitingScreenVisible : false,
+        lookingForGame : false,
+        looseScreenVisible : false,
+        victoryScreenVisible : false,
+        selectedGameType : '',
+    });
+
     useEffect (function matchMaking() {
-        if (lookingForGame === true)
+        if (state.lookingForGame === true)
         {
-            sock.emit("joinGame", selectedGameType);
-            setFormVisible(false);
-            setWaitingScreenVisible(true);
+            sock.emit("joinGame", state.selectedGameType);
+            // setFormVisible(false);
+            dispatch({type : 'SET_GAME_MOD', payload : false});
+            // setWaitingScreenVisible(true);
+            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
 
             sock.on('roomFilled', () => {
 
-                setWaitingScreenVisible(false);
-                setPreGameCDVisible(true);
+                // setWaitingScreenVisible(false);
+                dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+                // toggleGame(true);
+                dispatch({type : 'SET_GAME', payload : true});
             })
 
             sock.on('playerId', (side) => {
@@ -98,166 +121,34 @@ function CreateGameButton(props : any) {
                 sock.off('playerId');
             })
         }
-    }, [lookingForGame])
+    }, [state.lookingForGame])
 
     useEffect(() => {
         sock.on('gameOver', (winner : string) => {
             if (sock.id === winner)
-                setVictoryScreenVisible(true)
+                dispatch({type : 'SET_V_SCREEN', payload : true});
+                // setVictoryScreenVisible(true)
             else
-                setLooseScreenVisible(true)
+                dispatch({type : 'SET_L_SCREEN', payload : true});
 
-            setGameVisible(false);
+            // setGameVisible(false);
+            dispatch({type : 'SET_GAME', payload : false});
         });
 
 
         return (() => {
             sock.off('gameOver');
         })
-    }, [gameVisible, VictoryScreenVisible, looseScreenVisible])
-
-    function WaitingScreen() {
-        
-        function leaveQueue() {
-            setLookingForGame(false);
-            sock.emit('leaveQueue', gameRoom);
-            setWaitingScreenVisible(false);
-            setPlayButtonVisible(true);
-        }
-
-        const [dot, setDot] = useState('.');
-        useEffect(() => {
-            const dotdotdot = setInterval(() => {
-              switch (dot) {
-                case '.':
-                  setDot('..');
-                  break;
-                case '..':
-                  setDot('...');
-                  break;
-                case '...':
-                  setDot('.');
-                  break;
-                default:
-                  break;
-              }
-            }, 1000);
-        
-            return () => clearInterval(dotdotdot);
-        }, [dot]);
-
-        useEffect(() => {
-            function handleUnload() {
-                leaveQueue();
-                setSelectedGameType('');
-            }
-
-            window.addEventListener('beforeunload', handleUnload);
-            return (() => {window.removeEventListener('beforeunload', handleUnload)})
-        }, [])
-        return (
-        <Box className='waitingScreen'>
-            <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
-                Looking for game {dot}
-            </Text>
-            <Button onClick={leaveQueue} > Leave Queue</Button>
-        </Box>
-        )
-    }
-    
-    function WaitingForLaunch() {
-
-        useEffect(() => {
-            const timer = setInterval(() => {
-                setPreGameCD((prevCd) => (prevCd > 0 ? prevCd - 1 : 0));
-                if (preGameCD === 0)
-                {
-                    setPreGameCD(Constants.LAUNCH_CD);
-                    setPreGameCDVisible(false);
-                    toggleGame(true);
-                    return ;
-                }
-            }, 1000);
-            return () => clearInterval(timer);
-        }, []);
-        return(
-            <Box className='waitingScreen'>
-                <Text fontSize="2xl" textAlign="center"> GAME LAUNCH IN {preGameCD} !!!</Text>
-            </Box>
-        )
-    }
-
-    function LooseScreen () {
-    // Display new ladder placement
-        function closeVScreen() {
-            setLooseScreenVisible(false);
-            setPlayButtonVisible(true);
-        };
-
-        return (<>
-            <Box className='waitingScreen'>
-                <CloseButton onClick={closeVScreen} alignItems={'right'}></CloseButton>
-                <Text> YOU LOST MICHEL </Text>
-            </Box>
-        </>)
-    }
-
-    function VictoryScreen () {
-    // Display new ladder placement
-        function closeVScreen() {
-            setVictoryScreenVisible(false);
-            setPlayButtonVisible(true);
-        };
-        
-        return (<>
-            <Box className='waitingScreen'>
-                <CloseButton onClick={closeVScreen} alignItems={'right'}></CloseButton>
-                <Text> YOU WON MICHEL </Text>
-            </Box>
-        </>)
-    }
-    
-    function Form() {
-
-        const [disabledButton, setDisabledButton] = useState(true);
-
-        useEffect(() => {
-            if (selectedGameType != '')
-                setDisabledButton(false);
-            else
-                setDisabledButton(true);
-            
-        }, [selectedGameType]);
-
-        return(
-            <RadioGroup borderWidth={'2px'} 
-                borderColor={'blackAlpha.500'} 
-                borderStyle={'solid'}
-                padding={10}
-                backgroundColor={'pink.100'}
-                onChange={setSelectedGameType}
-                value={selectedGameType}>
-                <CloseButton onClick={toggleForm} alignItems={'right'}></CloseButton>
-                <Stack direction='column'>
-                    <Radio value={Constants.GAME_TYPE_ONE}> {Constants.GAME_TYPE_ONE} </Radio>
-                    <Radio value={Constants.GAME_TYPE_TWO}> {Constants.GAME_TYPE_TWO} </Radio>
-                    <Radio value={Constants.GAME_TYPE_THREE}> {Constants.GAME_TYPE_THREE} </Radio>
-    
-                    <Button as={'button'} onClick={() => {setLookingForGame(true)}} alignItems={'center'} isDisabled={disabledButton}> Launch {selectedGameType} </Button>
-                </Stack>
-            </RadioGroup>
-        );
-    }
+    }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
     
     return (<>
-        {playButtonVisible && <Button onClick={toggleForm}> Play</Button>}
-        {formVisible && <Form />}
-        {WaitingScreenVisible && <WaitingScreen />}
-        {preGameCDVisible && <WaitingForLaunch />}
-        {gameVisible && <Game gameType={selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
+        {state.playButtonVisible && <PlayBox dispatch={dispatch}/>}
+        {state.gameModVisible && <GameMode dispatch={dispatch}/>}
+        {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
+        {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
         {/* {gameVisible && <Button onClick={() => {toggleGame(false)}}> Leave </Button>} */}
-        {VictoryScreenVisible && <VictoryScreen />}
-        {looseScreenVisible && <LooseScreen />}
+        {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}
+        {state.looseScreenVisible && <LooseScreen dispatch={dispatch}/>}
     </>);
 }
 

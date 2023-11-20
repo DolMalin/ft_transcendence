@@ -14,25 +14,6 @@ import {
 } from './interfaces/interfaces'
 import { clearInterval } from 'timers';
 
-// import { KeyboardEvent } from 'react'
-
-// export class GameServDTO {
-//   clientsId : string[] = [];
-//   rooms : {
-//     name : string
-//     clients : string[],
-//     gameType :string | string [],
-//   }[] = [];
-// }
-
-
-/**
- * @description generate string of lenght size, without ever recreating
- * one that is identical to one of the keys from the map passed as argument
- */
-
-
-
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
     origin : process.env.CLIENT_URL
@@ -77,6 +58,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveQueue')
   leaveQueue(@MessageBody() roomName : string, @ConnectedSocket() client: Socket) {
 
+    // console.log ('queue left, room :', roomName, ' deleted');
     this.gamesMap.delete(roomName);
     client.leave(roomName);
   }
@@ -102,8 +84,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
   }
   @SubscribeMessage('ping')
-  ping(@ConnectedSocket() client: Socket) {
-    console.log('PING PING PING PING PING PING')
+  ping(@MessageBody() data : any, @ConnectedSocket() client: Socket) {
+    console.log('PINGED DATA : ', data)
   }
 }
 

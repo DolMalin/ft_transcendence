@@ -25,7 +25,6 @@ function LeaderBoard() {
             const res = await axios.get('http://127.0.0.1:4545/users/scoreList')
 
             setScoreList(res.data)
-            console.log('res :', scoreList);
         }
         catch (err)
         {
@@ -63,7 +62,7 @@ function LeaderBoard() {
     }
 
     return (<>
-        <Button onClick={createUser}> Create user</Button>
+        <Button fontWeight={'normal'} onClick={createUser}> Create user</Button>
         <Table variant={'striped'}>
             <Thead>
                 <Tr>

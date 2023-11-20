@@ -121,28 +121,6 @@ export function HorizontalCollisionsAngle(ball : Ball, paddle : Paddle) {
 
 /**
  * @description 
- * pause the game after a point and relaunch the ball
- *  | need server and roomName to send ball pos to front
-*/
-export function pauseBetweenPoints(ball : Ball, server : Server, roomName : string) {
-
-    let ct = 3;
-    const int = setInterval(() =>{
-        server.to(roomName).emit('midPointCt', ct);
-        if (ct === -1)
-        {
-            clearInterval(int)
-            ballRelaunch(ball)
-            
-            server.to(roomName).emit('midPointCtEnd');
-            return ;
-        }
-        ct --
-    }, 1000);
-}
-
-/**
- * @description 
  * vX : horizontal velocity of the ball
  * vY : vertical velocity of the ball
  * check for collisions with vertical walls at next ball step
