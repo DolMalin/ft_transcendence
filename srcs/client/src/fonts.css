@@ -1,0 +1,19 @@
+@font-face {
+    font-family: 'Goma';
+
+    src: url('../public/fonts/gomarice_goma_block.ttf')
+}
+
+@font-face {
+    font-family: 'Bionic';
+
+    src: url('../public/fonts/BIONICKIDSIMPLE.ttf')
+}
+
+.goma {
+    font-family: 'Goma';
+}
+
+.bionic {
+    font-family: 'Bionic';
+}
