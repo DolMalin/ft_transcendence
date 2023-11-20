@@ -4,6 +4,7 @@ import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
 import './chat.css'
 import axios from "axios";
+import authService from "../auth/auth.service";
 
 export function Chat(props: any){
     const [room, setRoom] = useState("");
@@ -11,36 +12,61 @@ export function Chat(props: any){
     const [showChat, setShowChat] = useState(false);
     const [checked, setChecked] = useState(false);
 
-    const joinRoom = () => {
-        //get pour savoir si le channel existe
-        //faire les verifs et le rejoindre 
-    }
-
-    const createRoom = () => {
-        if (room !== ""){
+    const createRoom = async () => {
+        if (room != "")
+        {
             let data = {name: room, password: password}
-            axios.post('http://127.0.0.1:4545/room', data)
+            await axios.post('http://127.0.0.1:4545/room', data)
                 .then(response =>{
                     console.log('Réponse du serveur :', response.data);
                     console.log('Statut de la réponse :', response.status);
-                    console.log('En-tê tes de la réponse :', response.headers);
+                    console.log('En-têtes de la réponse :', response.headers);
+                    joinRoom()
                 })
-                .catch(error => {console.log('post error')})
-            props.socket.emit("joinRoom", room); // a deplacer
-            setShowChat(true);
+                .catch(error => {
+                    console.log('Channel', room, 'already exists.')
+                })
         }
+    }
+ 
+   const getAllRoom = async () => {
+        
+        try{
+            const allRoom = await authService.get('http://127.0.0.1:4545/room')
+            return allRoom;
+        }catch(err){
+            console.log(err)
+        }
+    }
+    
+    const  joinRoom = async () => {
+       
+        await getAllRoom()
+            .then(response => {
+                let roomList = response.data
+                let bool = roomList.some((obj: { name: string}) => obj.name === room)
+                if (bool === true){
+                    props.socket.emit("joinRoom", room)
+                    setShowChat(true);
+                }
+                else{
+                    console.log("ERR: channel", room, "doesnt exist.")
+                }
+
+        })
     }
     return (
     <div className="Chat">
         {!showChat ? (
         <div className="joinChatContainer">
             <ChakraProvider>
-                <h3>Join a chat</h3>
+                <h3>Create a channel</h3>
                 <Chakra.Input 
-                    type="text" 
-                    placeholder="room id ..."
-                    onChange={(event) => {setRoom(event.target.value)}}/>
-                {checked && ( 
+                    type="text"
+                    placeholder="chose channel name..."
+                    onChange={(event) => {setRoom(event.target.value)}}
+                    />                
+                {checked && (
                 <Chakra.Input
                     type="text"
                     placeholder="password ..."
@@ -49,10 +75,20 @@ export function Chat(props: any){
                 <Chakra.Stack spacing={10} direction='row'>
                 <Chakra.Checkbox 
                     colorScheme='green' 
-                    onChange={(e) => setChecked(e.target.checked)}> password
+                    onChange={(e) => setChecked(e.target.checked)}> password 
                 </Chakra.Checkbox>
                 </Chakra.Stack>
-                <Chakra.Button onClick={createRoom}>Join A Room</Chakra.Button>
+                <Chakra.Button onClick={createRoom}>Create a channel</Chakra.Button>
+                <h3>Join a channel</h3>
+                <Chakra.Input 
+                    type="text" 
+                    placeholder="enter channel name ..."
+                    onChange={(event) => {setRoom(event.target.value)}}/>
+                <Chakra.Input 
+                    type="text"
+                    placeholder="enter password (if needed)"
+                />
+                <Chakra.Button onClick={joinRoom}>Join A Room</Chakra.Button>
             </ChakraProvider>
         </div>
         )

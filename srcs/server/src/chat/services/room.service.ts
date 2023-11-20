@@ -4,19 +4,31 @@ import { CreateRoomDto } from '../dto/create-room.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { Repository } from 'typeorm'
 import { Room } from '../entities/room.entity'
+import { User } from '../../users/entities/user.entity'
+import { Message } from '../entities/message.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 
 @Injectable()
 export class RoomService {
+    
     constructor(
+        
         @InjectRepository(Room)
-        private roomRepository: Repository<Room>
+        private roomRepository: Repository<Room>,  
     ) {}
 
     async create(createRoomDto: CreateRoomDto) {
         const newRoom = this.roomRepository.create(createRoomDto)
         return await this.roomRepository.save(newRoom)
     }
+
+    // async createMsg(user: User, msgContent: string){
+    //     const msg =  this.msgRepository.create({
+    //         content: msgContent,
+    //         author: user,
+    //         send_at: new Date (),
+    //     })
+    // }
 
     findAll() {
         return this.roomRepository.find();
@@ -39,4 +51,5 @@ export class RoomService {
         return this.roomRepository.remove(room)
     }
     
+
 }

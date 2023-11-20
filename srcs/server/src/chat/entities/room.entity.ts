@@ -8,7 +8,7 @@ export class Room {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({type: String, nullable: true})
+    @Column({type: String, unique: true, nullable: true})
     @Field(() => String, {})
     name: string
 

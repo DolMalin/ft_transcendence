@@ -74,7 +74,7 @@ export function Chatbox(props: any) {
     return (
         <div className="chat-window">
             <div className="chat-header">
-                <p>live chat</p>
+                <p>channel: {props.room}</p>
             </div>
             <div className="chat-body">
                 <ScrollToBottom className="message-container">
