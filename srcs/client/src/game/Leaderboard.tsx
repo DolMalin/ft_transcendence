@@ -73,8 +73,8 @@ function LeaderBoard() {
                 </Tr>
             </Thead>
             <Tbody>
-                {scoreList.map((value) => {
-                    return (<Tr>
+                {scoreList.map((value, index) => {
+                    return (<Tr key={index}>
                         <Td> {value.username} </Td>
                         <Td isNumeric> {value.winsAmount}</Td>
                         <Td isNumeric> {value.loosesAmount}</Td>
