@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Req, Res } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
@@ -51,5 +51,15 @@ export class RoomService {
         return this.roomRepository.remove(room)
     }
     
-
+    async joinRoom(req: any, res: any){
+        const roomList = await this.findAll()
+        let roomExist = roomList.some((obj: { name: string}) => obj.name === req.body?.roomName)
+        if (!roomExist)
+            throw new ForbiddenException('room does not exist')
+        console.log('req', req.body?.roomName)
+        const room = roomList.filter(id => id.name !== req.body?.roomName)
+        // const room = roomList.find(req.body?.roomName)
+        console.log('room',room)
+        res.send('ok')
+    }
 }

@@ -116,7 +116,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'10m'
+      expiresIn:'1y'
     })
   }
 
@@ -230,7 +230,6 @@ export class AuthService {
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
 
-    console.log(user)
     if (!user)
       throw new ForbiddenException('access denied')
     return user
@@ -238,8 +237,6 @@ export class AuthService {
 
 
   async register(@Req() req:any, @Res() res:any) { 
-    console.log(req)
-    console.log(req.body)
     return req.body
 
   }

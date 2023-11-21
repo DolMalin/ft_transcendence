@@ -26,6 +26,32 @@ class AuthService {
 			}
 		}
 	}
+
+	async post(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.post(uri, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken(),
+				// 'Content-Type': 'multipart/form-data'
+			}})
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.post(uri, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken(),
+						// 'Content-Type': 'multipart/form-data'
+					}})
+					return res
+				} catch (err) {
+					return err.response
+				}
+			}
+		}
+	}
+
 	
 	async logout() {
 		const cookies = new Cookies()

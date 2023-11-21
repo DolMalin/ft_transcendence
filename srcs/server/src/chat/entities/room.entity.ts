@@ -16,11 +16,13 @@ export class Room {
     @Field(() => String, {})
     password: string
 
+    @Column({type: Boolean, nullable: true})
+    @Field(() => Boolean, {})
+    privChan: boolean
+
     @ManyToOne(() => User, user => user.room)
     user: User
 
     @OneToMany(() => Message, message => message.room, {onDelete:'CASCADE'})
     message: Message[]
-
-
 }
