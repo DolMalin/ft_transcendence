@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
-import { GameGateway } from './game.gateway'
+import { GameGateway } from './gateway/game.gateway'
 import { MatchmakingService,
-GamePlayService } from './game.service'
+GamePlayService } from './services/game.service'
 
 @Module({
     providers: [GameGateway, MatchmakingService, GamePlayService],

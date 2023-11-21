@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import {Socket} from 'socket.io-client'
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable} from 'typeorm';
+import { Game } from 'src/game/entities/game-entity';
 
 @Entity()
 export class User {
@@ -27,4 +27,8 @@ export class User {
 
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
+
+    @ManyToMany(() => Game)
+	@JoinTable()
+	playedGames : Game[];
 }

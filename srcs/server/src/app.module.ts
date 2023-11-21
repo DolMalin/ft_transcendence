@@ -3,14 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { Game } from './game/entities/game-entity';
 import { NestModule } from '@nestjs/common';
 
-// Entities
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
 import { AuthModule } from './auth/auth.module';
-import { AsyncLocalStorage } from 'async_hooks';
 
 @Module({
   imports: [
@@ -21,7 +20,7 @@ import { AsyncLocalStorage } from 'async_hooks';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User],
+      entities: [User, Game],
       synchronize: true,
     }),
     UsersModule,

@@ -5,7 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
-import { roomNameGenerator } from 'src/game/game.service';
+import { roomNameGenerator } from 'src/game/services/game.service';
 
 
 
@@ -164,18 +164,18 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain:"127.0.0.1",
+      domain:"10.14.6.7",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain:"127.0.0.1",
+      domain:"10.14.6.7",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
-    res.redirect("http://127.0.0.1:4343")
+    res.redirect("http://10.14.6.7:4343")
 
   }
 

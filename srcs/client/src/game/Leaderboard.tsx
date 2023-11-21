@@ -95,7 +95,7 @@ function LeaderBoard() {
         justifyContent={'center'}
         overflow={'auto'}
         flexWrap={'wrap'}
-        background={'black'}
+        background={Constants.BG_COLOR}
         padding={'30px'}
         >
         <Table w={'90%'}>
