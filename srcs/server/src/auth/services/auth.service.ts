@@ -201,7 +201,15 @@ export class AuthService {
       domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
-      .send({accessToken: accessToken})
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: false,
+      secure: true,
+      domain:"127.0.0.1",
+      sameSite: "none",
+      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+
+    res.send()
   }
 
 
