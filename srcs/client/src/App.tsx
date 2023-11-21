@@ -17,6 +17,7 @@ import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/const'
 import LeaderBoard from './game/Leaderboard';
 import './fonts.css'
+import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 
 const gameSock = io('http://localhost:4545')
 
@@ -42,18 +43,18 @@ function Malaise() {
   return (
     <Tabs isFitted variant='enclosed' className='goma'>
 
-      <TabList mb='1em' margin={'0'} padding={'0'} height={'4vh'} minH={'40px'} textColor={'white'} className='bionic' overflowX={'auto'} overflowY={'clip'}>
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'}
+      <TabList border='none' mb='1em' margin={'0'} padding={'0'} height={'4vh'} minH={'40px'} textColor={'white'} className='goma' overflowX={'auto'} overflowY={'clip'}>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
         _selected={{borderBottomRadius : '5px', background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Pong</Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'}
-        _selected={{borderBottomRadius : '5px', background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Chat</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
+        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Chat</Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'}
-        _selected={{borderBottomRadius : '5px', background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>LeaderBoard</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
+        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>LeaderBoard</Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'}
-        _selected={{borderBottomRadius : '5px', background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Profile</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
+        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Profile</Tab>
       </TabList>
 
       <TabPanels margin={'0'} padding={'0'}>

@@ -2,36 +2,12 @@ import React from "react";
 import { Box,
 Button,
 Flex,
-Divider
+Divider,
  } from "@chakra-ui/react"
 import * as Constants from '../const'
-
+import { LeftBracket, RightBracket } from "./Brackets";
 
 function GameMode(props : {dispatch : Function}) {
-
-    function LeftBracket() {
-        return (
-            <Box w={'30px'} h={'150px'}
-                content='  '
-                border={'10px solid white'}
-                borderRight={'none'}
-                marginRight={'10px'}
-                padding={'8px 5px 8px 5px'}
-            ></Box>
-        )
-    }
-
-    function RightBracket() {
-        return (
-        <Box w={'30px'} h={'150px'}
-            content='  '
-            border={'10px solid white'}
-            borderLeft={'none'}
-            marginLeft={'10px'}
-            padding={'8px 5px 8px 5px'}
-        ></Box>
-        )
-    }
 
     return (<>
         <Flex flexDir={'column'} wrap={'nowrap'}
@@ -47,7 +23,7 @@ function GameMode(props : {dispatch : Function}) {
                 display={'flex'} flexDir={'row'} 
                 alignItems={'center'} justifyContent={'center'}
                 >
-                    <LeftBracket />
+                    <LeftBracket w={'30px'} h={'150px'} girth={'10px'}/>
 
                     <Button
                     fontSize={'2xl'}
@@ -62,7 +38,7 @@ function GameMode(props : {dispatch : Function}) {
                         {Constants.GAME_TYPE_ONE} 
                     </Button>
 
-                    <RightBracket />
+                    <RightBracket w={'30px'} h={'150px'} girth={'10px'}/>
                 </Box>
             </Box>
             
@@ -93,7 +69,7 @@ function GameMode(props : {dispatch : Function}) {
                 display={'flex'} flexDir={'row'} 
                 alignItems={'center'} justifyContent={'center'}
                 >
-                    <LeftBracket/>
+                    <LeftBracket w={'30px'} h={'150px'} girth={'10px'}/>
 
                     <Button
                     fontSize={'2xl'}
@@ -108,7 +84,7 @@ function GameMode(props : {dispatch : Function}) {
                         {Constants.GAME_TYPE_TWO}
                     </Button>
 
-                    <RightBracket/>
+                    <RightBracket w={'30px'} h={'150px'} girth={'10px'}/>
                 </Box>
             </Box>
         </Flex>

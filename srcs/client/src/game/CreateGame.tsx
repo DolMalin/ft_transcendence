@@ -32,16 +32,8 @@ type stateType = {
 }
 
 function CreateGameButton(props : any) {
-    // const [playButtonVisible, setPlayButtonVisible] = useState(true);
-    // const [formVisible, setFormVisible] = useState(false);
-    // const [gameVisible, setGameVisible] = useState(false);
-    // const [selectedGameType, setSelectedGameType] = useState('');
-    // const [WaitingScreenVisible, setWaitingScreenVisible] = useState (false);
     const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
-    // const [lookingForGame, setLookingForGame] = useState(false);
-    // const [looseScreenVisible, setLooseScreenVisible] = useState(false);
-    // const [VictoryScreenVisible, setVictoryScreenVisible] = useState(false);
 
     const sock : Socket = props.sock;
     
@@ -53,7 +45,6 @@ function CreateGameButton(props : any) {
             }
             case 'SET_GAME_MOD': {
                 return ({...state, gameModVisible : action.payload})
-
             }
             case 'SET_GAME': {
                 return ({...state, gameVisible : action.payload})
@@ -92,16 +83,12 @@ function CreateGameButton(props : any) {
         if (state.lookingForGame === true)
         {
             sock.emit("joinGame", state.selectedGameType);
-            // setFormVisible(false);
             dispatch({type : 'SET_GAME_MOD', payload : false});
-            // setWaitingScreenVisible(true);
             dispatch({type : 'SET_WAITING_SCREEN', payload : true});
 
             sock.on('roomFilled', () => {
 
-                // setWaitingScreenVisible(false);
                 dispatch({type : 'SET_WAITING_SCREEN', payload : false});
-                // toggleGame(true);
                 dispatch({type : 'SET_GAME', payload : true});
             })
 
@@ -127,11 +114,9 @@ function CreateGameButton(props : any) {
         sock.on('gameOver', (winner : string) => {
             if (sock.id === winner)
                 dispatch({type : 'SET_V_SCREEN', payload : true});
-                // setVictoryScreenVisible(true)
             else
                 dispatch({type : 'SET_L_SCREEN', payload : true});
 
-            // setGameVisible(false);
             dispatch({type : 'SET_GAME', payload : false});
         });
 
@@ -146,7 +131,6 @@ function CreateGameButton(props : any) {
         {state.gameModVisible && <GameMode dispatch={dispatch}/>}
         {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
         {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
-        {/* {gameVisible && <Button onClick={() => {toggleGame(false)}}> Leave </Button>} */}
         {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}
         {state.looseScreenVisible && <LooseScreen dispatch={dispatch}/>}
     </>);
