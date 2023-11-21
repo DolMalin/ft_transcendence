@@ -50,6 +50,7 @@ export interface Paddle {
   export interface leaderboardStats {
 
     username: string
-      winsAmount: number
-      loosesAmount: number
+    winsAmount: number
+    loosesAmount: number
+    WLRatio : number
   }
