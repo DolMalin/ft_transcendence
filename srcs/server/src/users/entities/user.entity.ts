@@ -14,7 +14,6 @@ export class User {
 	@Field(() => String, {})
 	username: string
 
-
 	@Column({type: 'varchar', nullable: true})
 	@Field(() => String, {})
 	refreshToken: string

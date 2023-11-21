@@ -56,10 +56,24 @@ export class UsersService {
   }
 
   async returnScoreList(){
+
+    function winRatioCalculator(w : number, l : number) {
+        
+      if (l === 0 && w === 0)
+          return (0);
+      if (l === 0)
+          return (100);
+
+      let ratio = w * 100 / (w + l);
+
+      return (ratio)
+  }
+
     return (this.findAll().then((res : User[]) => {
         let scoreList : leaderboardStats[] = []; 
         res.forEach((value) => {
-        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount});
+        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
+        WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
       })
       return (scoreList);
     }));
