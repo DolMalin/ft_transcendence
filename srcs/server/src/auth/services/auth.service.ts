@@ -50,8 +50,10 @@ export class AuthService {
           bodyParameters,
           config
         ).then((res) => {
+          console.log("bjr")
           resolve(res.data.access_token as string)
         }, (err) => {
+          console.log(err)
           resolve(null)
         })
     })
@@ -100,7 +102,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'3s'
+      expiresIn:'15m'
     })
   }
 
@@ -209,11 +211,10 @@ export class AuthService {
     Logger.log(`User #${user.id} logged out`)
 
   }
-
+  
 
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
-
     if (!user)
       throw new ForbiddenException('access denied')
     return user
@@ -222,6 +223,7 @@ export class AuthService {
 
   async register(body: any) { 
     console.log(body)
+    // await this.usersService.add
     return "ok"
 
   }

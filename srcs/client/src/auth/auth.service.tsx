@@ -19,16 +19,17 @@ class AuthService {
 					const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
 					return res
 				} catch (err) {
-					return err.response
+					throw err
 				}
-			}
+			} 
+			throw err
 		}
 	}
 
 	async post(uri: string, params: any) {
 		let retry: boolean = true
 		try {
-			const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
+			const res: any = await this.api.post(uri, params, {headers: {
 				Authorization: 'Bearer ' + this.getAccessToken(),
 				'Content-Type': 'multipart/form-data'
 			}})
@@ -39,15 +40,16 @@ class AuthService {
 				retry = false
 				try {
 					await this.refresh()
-					const res: any = await this.api.post(`http://127.0.0.1:4545/auth/register`, params, {headers: {
+					const res: any = await this.api.post(uri, params, {headers: {
 						Authorization: 'Bearer ' + this.getAccessToken(),
 						'Content-Type': 'multipart/form-data'
 					}})
 					return res
 				} catch (err) {
-					return err.response
+					throw err
 				}
 			}
+			throw err
 		}
 	}
 
@@ -68,9 +70,9 @@ class AuthService {
 	async refresh() {
 		try {
 			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/refresh`)
-			return res.status
+			return res
 		} catch(err:any) {
-			return err.response?.status
+			throw err
 		}
 	}
 
@@ -88,17 +90,19 @@ class AuthService {
 	async validate() {
 		try {
 			const res: any  = await this.get(`http://127.0.0.1:4545/auth/validate`)
-			return res.status
+			return res
 		} catch(err) {
-			return 401
+			throw err
 		}
 	}
 
 	async register(data:any) {
 		try {
-			const res: any = await this.post(`http://127.0.0.1:4545/auth/register`, data)
+			console.log(data)
+			let res: any = await this.post(`http://127.0.0.1:4545/auth/register`, data)
+			return res.status
 		} catch(err) {
-
+			throw err
 		}
 	}
 

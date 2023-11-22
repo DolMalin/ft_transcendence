@@ -1,18 +1,12 @@
-import { Controller, Get, Post, Req, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, StreamableFile, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { Readable } from 'stream';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  // To remove in production
-  // @Post()
-  // async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-  //   return await this.usersService.create(createUserDto);
-  // }
-  //
   
   @Get()
   findAll(): Promise<User[]> {
@@ -24,6 +18,21 @@ export class UsersController {
     return this.usersService.findOneById(id);
   }
 
+  @Get('avatar/:id')
+  async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
+    const avatar = await this.usersService.getAvatar(id)
+    const stream = Readable.from(avatar.data)
+    console.log(avatar.data)
+    
+    res.set({
+      'Content-Disposition':`inline; filename="${avatar.filename}"`,
+      'Content-Type' :'image'
+    })
+
+    return new StreamableFile(stream)
+
+  }
+
   @Patch()
   update(
     @Req() req:any,
@@ -32,9 +41,9 @@ export class UsersController {
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
-
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);
   }
 }
+

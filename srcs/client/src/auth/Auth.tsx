@@ -18,32 +18,35 @@ function Auth() {
 			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
 			setAuthUrl(res.data.url)
 		} catch (err) {
-			console.error(err)
 		}
 	}
 
 	const validate = async () => {
-		let status = await AuthService.validate()
-		if (status === 200)
+		try {
+			const res = await AuthService.validate()
 			setIsAuthenticated(true)
-		else
+			if (res.data?.isRegistered)
+				setIsRegistered(true)
+		} catch (err) {
 			setIsAuthenticated(false)
-
-		return status
+		}
 	}
 
-
 	const logout = () => {
-		AuthService.logout()
-		setIsAuthenticated(false)
+		try {
+			AuthService.logout()
+			setIsAuthenticated(false)
+		} catch(err) {
+		}
 	}
 
 	const onSubmit = async (data:any) => {
 		try {
 			const formData = new FormData()
 			formData.append("file", data.avatar[0])
-			console.log(formData)
+			formData.append("username", data.username)
 			await AuthService.register(formData)
+			setIsRegistered(true)
 		} catch(err) {
 			console.log(err)
 		}

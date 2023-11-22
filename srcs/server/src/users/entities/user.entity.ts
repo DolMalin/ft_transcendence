@@ -1,5 +1,6 @@
 import { Field } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne} from 'typeorm';
+import { Avatar } from './avatar.entity';
 
 @Entity()
 export class User {
@@ -22,5 +23,10 @@ export class User {
 	@Field(() => String, {})
 	isRegistered: boolean
 
+	@JoinColumn({name: 'avatarId'})
+	@OneToOne(() => Avatar, {nullable:true})
+	avatar: Avatar
 
+	@Column({nullable: true})
+	avatarId?: string
 }

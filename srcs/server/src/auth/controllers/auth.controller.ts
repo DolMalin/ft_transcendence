@@ -44,15 +44,17 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
+      console.log(req.user)
       const user = await this.authService.validate(req, res)
       res.send(user)
     }
 
-    @UseGuards(AccessTokenGuard)
     @UseInterceptors(FileInterceptor('file'))
+    @UseGuards(AccessTokenGuard)
     @Post('register')
     async register(@UploadedFile() file: any, @Body() body:any, @Res() res:any, @Req() req:any) {
-      await this.authService.register(file)
+      await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
+      await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
       res.send("ok")
     }
 }
