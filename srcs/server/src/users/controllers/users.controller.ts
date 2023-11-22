@@ -2,13 +2,19 @@ import { Controller, Get, Query,Post, Req, Res, Body, Patch, Param, Delete, UseG
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { leaderboardStats } from 'src/game/interfaces/interfaces';
+import { leaderboardStats } from 'src/game/globals/interfaces';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
+  // @UseGuards(AccessTokenGuard)
+  @Get('currentUser')
+  findCurrentUser(@Req() req : any) {
+    console.log(req.user)
+    return ('feur')
+  }
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -24,6 +30,7 @@ export class UsersController {
   findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOneById(id);
   }
+
 
   // patch below not working properly
 

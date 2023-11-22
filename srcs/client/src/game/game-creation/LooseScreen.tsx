@@ -3,6 +3,8 @@ import { Box,
 Text,
 Button,
  } from "@chakra-ui/react"
+import * as Constants from '../globals/const'
+
 
 function LooseScreen (props : {dispatch : Function}) {
     // Display new ladder placement
@@ -23,8 +25,9 @@ function LooseScreen (props : {dispatch : Function}) {
         >
             <Text fontSize={'5em'}> YOU LOST MICHEL </Text>
 
-            <Button fontWeight={'normal'} size={'3em'} bg={'black'} borderRadius={'0'} fontSize={'3em'}
-            _hover={{background : 'white', textColor: 'black'}}
+            <Button fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
+            size={'3em'} bg={Constants.BG_COLOR} fontSize={'3em'}
+            borderRadius={'0'}
             onClick={closeVScreen}
             >
             Fuck go back ?</Button>

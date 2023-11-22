@@ -28,6 +28,12 @@ export class User {
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
 
+	@Column({type : 'bool', default: true})
+	isInQueue : boolean
+
+	@Column({type : 'bool', default: true})
+	isInGame : boolean
+
     @ManyToMany(() => Game)
 	@JoinTable()
 	playedGames : Game[];

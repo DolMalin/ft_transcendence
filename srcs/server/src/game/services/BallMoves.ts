@@ -3,8 +3,8 @@ import {
   GameState,
   Ball,
   Paddle,
-} from '../interfaces/interfaces'
-import * as Constants from '../interfaces/const'
+} from '../globals/interfaces'
+import * as Constants from '../globals/const'
 
 
 /**

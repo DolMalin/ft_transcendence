@@ -4,9 +4,8 @@ Button,
 Flex,
 Divider,
  } from "@chakra-ui/react"
-import * as Constants from '../const'
+import * as Constants from '../globals/const'
 import { LeftBracket, RightBracket } from "./Brackets";
-import { constants } from "crypto";
 
 function GameMode(props : {dispatch : Function}) {
 
@@ -80,7 +79,7 @@ function GameMode(props : {dispatch : Function}) {
                     h={'100px'}
                     borderRadius={'0px'}
                     _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
+                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_TWO}); 
                     props.dispatch({type : 'SET_LF_GAME', payload : true})}}>
                         {Constants.GAME_TYPE_TWO}
                     </Button>

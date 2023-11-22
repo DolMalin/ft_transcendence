@@ -5,7 +5,7 @@ Button,
 Flex
  } from "@chakra-ui/react"
 import { Socket } from "socket.io-client";
-import * as Constants from '../const'
+import * as Constants from '../globals/const'
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
         

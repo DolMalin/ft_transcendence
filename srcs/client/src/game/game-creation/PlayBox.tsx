@@ -7,7 +7,7 @@ import {
     Flex,
     Heading
 } from '@chakra-ui/react';
-import * as Constants from '../const';
+import * as Constants from '../globals/const';
 import '../../fonts.css'
 
 function PlayBox(props : {dispatch : Function}) {
@@ -41,6 +41,7 @@ function PlayBox(props : {dispatch : Function}) {
         flexDirection={'row'}
         alignItems={'center'}
         padding={'10px'}
+        textColor={Constants.HIDDEN_FONT_COLOR}
         _hover={{textColor: 'white'}}
         >
             <Flex w={'95%'} h={'100%'}
@@ -110,6 +111,7 @@ function PlayBox(props : {dispatch : Function}) {
         flexDirection={'row'}
         alignItems={'center'}
         padding={'10px'}
+        textColor={Constants.HIDDEN_FONT_COLOR}
         _hover={{textColor: 'white'}}
         >
             <Flex w={'95%'} h={'100%'}

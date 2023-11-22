@@ -45,6 +45,7 @@ export const DARK_GREEN = 'rgba(0, 130, 100, 1)';
 
 export const BG_COLOR = 'rgba(20, 20, 20, 1)';
 
+export const HIDDEN_FONT_COLOR = 'rgba(60, 60, 70, 1)';
 
 export const TABS_COLOR = 'rgba(20, 20, 20, 1)';
 export const SELECTED_TAB_COLOR = 'rgba(20, 20, 20, 1)';

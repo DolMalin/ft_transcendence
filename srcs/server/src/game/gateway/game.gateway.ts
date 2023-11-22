@@ -11,7 +11,7 @@ GamePlayService } from '../services/game.service';
 import {
   GameState,
   GameInfo,
-} from '../interfaces/interfaces'
+} from '../globals/interfaces'
 import { clearInterval } from 'timers';
 
 @WebSocketGateway( {cors: {
@@ -28,15 +28,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   
   @WebSocketServer()
   server : Server;
-  /**
-   * @description make the client join a room if there are some waiting for players,
-   * otherwise create its own
-   * also send to player if he is player 1 or 2
-  */
+
  handleConnection(client: Socket) {
 
-  console.log('some one JOINED')
-  console.log('in handle : ', process.env.PORT);
   }
   
   handleDisconnect(client: Socket){
@@ -44,9 +38,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinGame')
-  joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
+  joinGame(@MessageBody() data : {gameType : string, dbUserId : string}, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, this.gamesMap, gameType);
+    this.matchmakingService.gameCreation(this.server, client, data.dbUserId, this.gamesMap, data.gameType);
   }
 
   @SubscribeMessage('leaveGame')
@@ -60,7 +54,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveQueue')
   leaveQueue(@MessageBody() roomName : string, @ConnectedSocket() client: Socket) {
 
-    // console.log ('queue left, room :', roomName, ' deleted');
     this.gamesMap.delete(roomName);
     client.leave(roomName);
   }

@@ -6,7 +6,7 @@ import {
   GameInfo,
   GameMetrics,
   Paddle,
-  } from '../interfaces/interfaces'
+  } from '../globals/interfaces'
 import { 
   willBallCollideWithWall,
   willBallOverlapPaddleOne,
@@ -16,7 +16,7 @@ import {
   randomizeBallAngle,
   ballRelaunch
   } from './BallMoves';
-import * as Constants from '../interfaces/const'
+import * as Constants from '../globals/const'
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -43,9 +43,9 @@ export class MatchmakingService {
     /**
      * @description add client to existing room, fill the GameServDTO
      */
-    addClientToRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket) {
+    addClientToRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket, dbUserId : string) {
         
-        gamesMap.get(roomName).clientTwo = client;
+        gamesMap.get(roomName).clientTwo = {socket : client, id : dbUserId};
         gamesMap.get(roomName).gameIsFull = true;
         client.emit('roomName', roomName);
         client.join(roomName);
@@ -54,12 +54,12 @@ export class MatchmakingService {
     /**
      * @description create a room on client request and fill the GameServDTO
      */
-    createRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket, gameType : string) {
+    createRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket, dbUserId : string,gameType : string) {
       
         client.join(roomName);
 
         let game : GameState = {
-          clientOne : client,
+          clientOne : {socket : client, id : dbUserId},
           clientTwo : undefined,
           gameIsFull : false,
           isPaused : true,
@@ -101,7 +101,7 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    gameCreation (server : Server, client : Socket, gamesMap : Map<string, GameState>, gameType : string) {
+    gameCreation (server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
         if (client.rooms.size >= 2)
         {
@@ -115,7 +115,7 @@ export class MatchmakingService {
         {
           if (value.gameIsFull === false && value.gameType === gameType)
           {
-            this.addClientToRoom(gamesMap, key, client)
+            this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
             client.emit('playerId', '2'); // was one not 2 might cause trouble
             return ;
@@ -126,7 +126,7 @@ export class MatchmakingService {
         
         let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
         
-        this.createRoom(gamesMap, roomName, client, gameType)
+        this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
         client.emit('roomName', roomName);
         client.emit('playerId', '1');
     }
@@ -144,18 +144,21 @@ export class MatchmakingService {
       }
       else if (data.playerId === '1')
       {
+        console.log('here')
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
-        server.to(data.roomName).emit('gameOver', game.clientTwo.id);
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
+        game.clientOne.socket.leave(data.roomName);
+        game.clientTwo.socket.leave(data.roomName);
         gamesMap.delete(data.roomName);
       }
       else if (data.playerId === '2')
       {
+        console.log('there')
+
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
-        server.to(data.roomName).emit('gameOver', game.clientOne.id);
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
+        game.clientOne.socket.leave(data.roomName);
+        game.clientTwo.socket.leave(data.roomName);
         gamesMap.delete(data.roomName);
       }
     }
@@ -290,6 +293,8 @@ export class GamePlayService {
 
     if (game === undefined)
       return ;
+
+    server.to(data.roomName).emit('gameStarted');
     
     game.ballRefreshInterval = setInterval(() => {
       
@@ -310,10 +315,11 @@ export class GamePlayService {
         else if (ballEvents === 'gameOver')
         {
           server.to(data.roomName).emit('gameOver',
-          client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
+          // MAYBE PROBLE WITH WINNER / LOOSER
+          client.id === game.clientOne.socket.id ? game.clientOne.socket.id : game.clientTwo.socket.id);
           // TO DO add loose and win to players history
-          game.clientOne.leave(data.roomName);
-          game.clientTwo.leave(data.roomName);
+          game.clientOne.socket.leave(data.roomName);
+          game.clientTwo.socket.leave(data.roomName);
           gamesMap.delete(data.roomName);
           return (clearInterval(game.ballRefreshInterval))
         }

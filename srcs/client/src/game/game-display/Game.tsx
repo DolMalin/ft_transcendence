@@ -1,7 +1,7 @@
-import React from 'react'
-import { useRef, useEffect, useState } from 'react'
+import React, { Component } from 'react'
+import { useRef, useEffect, useState, useReducer } from 'react'
 import { Socket, io } from 'socket.io-client'
-import * as Constants from './const'
+import * as Constants from '../globals/const'
 import { 
     Box,
     Text,
@@ -20,7 +20,7 @@ import {
     GameInfo,
     GameProps,
     GameMetrics
-    } from './interfaces';
+    } from '../globals/interfaces';
 
 /**
  * @description 
@@ -43,6 +43,8 @@ function Game(props : GameProps) {
 
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
+
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     const [gameMetrics, setGameMetrics] = useState<GameMetrics>({
         paddleOne : {
@@ -252,6 +254,7 @@ function Game(props : GameProps) {
     }, [dimension, playerOneScore, playerTwoScore, midPointCT, midPointCTOn, ctSizeModifier, gameMetrics]);
 
 
+    console.log('rerendering')
     return (<>
         <Flex flexDir={'column'} textColor={'white'} fontSize={'1em'}>
 
