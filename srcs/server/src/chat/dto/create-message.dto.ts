@@ -12,6 +12,6 @@ export class CreateMessageDto {
     @Field(() => String, {})
     author : User
 
-	send_at: Date;
+	send_at: string;
     
 }

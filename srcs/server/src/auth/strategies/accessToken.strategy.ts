@@ -1,11 +1,15 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt"
 import { Injectable } from "@nestjs/common";
+import { UsersService } from "src/users/services/users.service";
+import { Repository } from "typeorm";
 
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-	constructor() {
+	constructor(
+		private userService: UsersService
+	) {
 		super({
 			jwtFromRequest:ExtractJwt.fromExtractors([
 				AccessTokenStrategy.extractJWT
@@ -27,6 +31,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 
 	async validate(payload: any) {
-		return payload
+        const user = await this.userService.findOneById(payload.id)
+        return user
 	}
 }

@@ -8,6 +8,12 @@ export class CreateRoomDto {
     @Field(() => Boolean, {})
     privChan: boolean
 
+    @Field(() => Boolean, {})
+    owner: boolean
+
+    @Field(() => Boolean, {})
+    administrator: boolean
+
     @Field(() => String, {})
     password: string
 }

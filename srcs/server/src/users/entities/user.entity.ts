@@ -24,4 +24,6 @@ export class User {
 
 	@OneToMany(() => Room, room => room.user)
 	room: Room[];
+
+	//rel vers user blocked
 }

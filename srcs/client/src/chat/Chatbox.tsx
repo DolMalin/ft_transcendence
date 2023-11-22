@@ -54,6 +54,13 @@ export function Chatbox(props: any) {
                 message: currentMessage,
                 time: timeOfDay()
             }
+            try{
+                const res = await authService.post('http://127.0.0.1:4545/room/message', message)
+
+            }  
+            catch(err){
+                console.log(err.response.data.message)
+            }
             await props.socket.emit("sendMessage", message);
             setMessageList((list) => [...list, {
                 room: props.room,

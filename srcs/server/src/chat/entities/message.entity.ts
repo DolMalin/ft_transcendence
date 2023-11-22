@@ -16,7 +16,7 @@ export class Message {
     author : User
 
     @CreateDateColumn({ type: 'timestamptz'})
-	send_at: Date;
+	send_at: string;
 
     @ManyToOne(() => Room, room => room.message)
     room: Room;

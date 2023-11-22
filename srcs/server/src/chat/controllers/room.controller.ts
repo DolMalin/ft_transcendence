@@ -31,15 +31,20 @@ export class RoomController {
         return await this.roomService.findAll();
     }
 
-    // @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuard)
     @Post('joinRoom')
     async joinRoom(@Req() req: any, @Res() res: any){
+        console.log('sender:',req.user)
+        // console.log('test from joinroom back')
         return await this.roomService.joinRoom(req, res)
     }
-//     @Delete()
-//     async removeRoom(@Req() req: any){
-//         return await this.roomService.remove(req.body.id)
-//     }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('message')
+    async postMessage(@Req() req: any, @Res() res: any){
+        return await this.roomService.postMessage(req, res)
+    }
+
     @UseGuards(AccessTokenGuard)
     @Delete(':id')
     async removeRoom(@Param("id") id: number){

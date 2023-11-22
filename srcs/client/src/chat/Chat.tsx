@@ -18,7 +18,7 @@ export function Chat(props: any){
         {
             let data = {name: room, password: password, privChan: privateChan}
             try{
-                const res = await authService.post('http://127.0.0.1:4545/room', data)
+                const res = await axios.post('http://127.0.0.1:4545/room', data)
                 console.log(res.data)
                 joinRoom()
             }
@@ -31,11 +31,13 @@ export function Chat(props: any){
     const  joinRoom = async () => {
 
         try{
-            const res =  await axios.post('http://127.0.0.1:4545/room/joinRoom', {roomName: room, password: password})
+            console.log('pas', password)
+            const res =  await authService.post('http://127.0.0.1:4545/room/joinRoom', {roomName: room, password: password})
             props.socket.emit("joinRoom", room)
             setShowChat(true);
         }
         catch(err){
+            console.log(err.response.data.message)
         }
     }
     return (
@@ -74,6 +76,7 @@ export function Chat(props: any){
                 <Chakra.Input 
                     type="text"
                     placeholder="enter password (if needed)"
+                    onChange={(event => {setPassword(event.target.value)})}
                 />
                 <Chakra.Button onClick={joinRoom}>Join A Room</Chakra.Button>
             </ChakraProvider>

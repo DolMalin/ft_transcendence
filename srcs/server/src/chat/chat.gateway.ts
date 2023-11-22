@@ -9,11 +9,15 @@ class ChatDTO {
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   chatDTO: ChatDTO = new ChatDTO;
-
   @WebSocketServer()
   server : Server;
 
   handleConnection (client : any) {
+    // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
+    // for (const id of userBlocked){
+      // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
+    // }
+
     console.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);
     this.server.emit("clientList", this.chatDTO.clientID);
@@ -34,13 +38,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   joinRoom(@MessageBody() room, @ConnectedSocket() client : Socket): void {
     client.join(room)
     console.log(`User with ID: ${client.id} joined room ${room}`)
-  }  
+  
+  }
   
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() data: { room: string, author: string, message: string, time: string | number}, @ConnectedSocket() client : Socket): void {
-    client.to(data.room).emit("receiveMessage", data);
+  sendMessage(@MessageBody() data: { room: string, author: string, message: string, time: string | number, senderId; number}, @ConnectedSocket() client : Socket): void {
+    client.to(data.room)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
     console.log("hello from send message")
-    console.log(data)
   }
 }
-

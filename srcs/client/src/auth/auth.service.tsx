@@ -35,7 +35,7 @@ class AuthService {
 				// 'Content-Type': 'multipart/form-data'
 			}})
 			return res
-	 	} catch(err) {
+		} catch(err) {
 			if (err.response.status == 401 && retry) {
 				retry = false
 				try {
@@ -46,9 +46,10 @@ class AuthService {
 					}})
 					return res
 				} catch (err) {
-					return err.response
+					throw err
 				}
 			}
+			throw err
 		}
 	}
 

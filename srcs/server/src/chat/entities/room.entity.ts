@@ -20,6 +20,14 @@ export class Room {
     @Field(() => Boolean, {})
     privChan: boolean
 
+    @Column({type: Boolean, nullable: true})
+    @Field(() => Boolean, {})
+    owner: boolean
+
+    @Column({type: Boolean, nullable: true})
+    @Field(() => Boolean, {})
+    administrator: boolean
+
     @ManyToOne(() => User, user => user.room)
     user: User
 
