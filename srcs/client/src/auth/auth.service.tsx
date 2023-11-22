@@ -26,7 +26,7 @@ class AuthService {
 		}
 	}
 
-	async post(uri: string, params: any) {
+	async postForm(uri: string, params: any) {
 		let retry: boolean = true
 		try {
 			const res: any = await this.api.post(uri, params, {headers: {
@@ -52,6 +52,57 @@ class AuthService {
 			throw err
 		}
 	}
+
+	async post(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.post(uri, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken(),
+			}})
+			console.log(res)
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.post(uri, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken(),
+					}})
+					return res
+				} catch (err) {
+					throw err
+				}
+			}
+			throw err
+		}
+	}
+
+	async patch(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.patch(uri, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken(),
+			}})
+			console.log(res)
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.patch(uri, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken(),
+					}})
+					return res
+				} catch (err) {
+					throw err
+				}
+			}
+			throw err
+		}
+	}
+
 
 
 	async logout() {
@@ -99,7 +150,7 @@ class AuthService {
 	async register(data:any) {
 		try {
 			console.log(data)
-			let res: any = await this.post(`http://127.0.0.1:4545/auth/register`, data)
+			let res: any = await this.postForm(`http://127.0.0.1:4545/auth/register`, data)
 			return res.status
 		} catch(err) {
 			throw err
