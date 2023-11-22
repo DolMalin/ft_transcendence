@@ -3,6 +3,7 @@ import React, { Component, useEffect, useState} from 'react'
 import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
+import { useForm } from "react-hook-form";
 
 
 
@@ -11,51 +12,45 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	// const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
-
+	// move in service
 	const fetchAuthUrl = async () => {
 		try {
 			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
 			setAuthUrl(res.data.url)
 		} catch (err) {
-			console.error(err)
 		}
 	}
 
 	const validate = async () => {
-		let res = await AuthService.validate()
-		let status = res
-		if (status === 200)
+		try {
+			const res = await AuthService.validate()
 			props.setIsAuthenticated(true)
-		else if (status === 401 && AuthService.getAccessToken()){
-			status = await AuthService.refresh()
-			if (status === 200)
-				props.setIsAuthenticated(true)
-			else
-				props.setIsAuthenticated(false)
+			if (res.data?.isRegistered)
+				setIsRegistered(true)
+		} catch (err) {
+			props.setIsAuthenticated(false)
 		}
-		else
-			props.setIsAuthenticated(false)	
-		
-		if (res?.data?.isRegistered === true)
-			setIsRegistered(true)
-
-
-		return 200
 	}
-
 
 	const logout = () => {
-		AuthService.logout()
-		props.setIsAuthenticated(false)
+		try {
+			AuthService.logout()
+			props.setIsAuthenticated(false)
+		} catch(err) {
+		}
 	}
 
-	const handleSubmit = async (avatar:string, username:string) => {
-		// console.log(avatar)
-		// console.log(username)
-		// console.log(avatar)
-		await AuthService.register(avatar, username)
+	const onSubmit = async (data:any) => {
+		try {
+			const formData = new FormData()
+			formData.append("file", data.avatar[0])
+			formData.append("username", data.username)
+			await AuthService.register(formData)
+			setIsRegistered(true)
+		} catch(err) {
+			console.log(err)
+		}
 	}
-
 
 
 	function LoginComponent() {
@@ -71,27 +66,38 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	function RegisterComponent() {
 		const [username, setUsername] = useState('')
 		const [avatar, setAvatar] = useState('')
+		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
 				<Box p={2}>
-					<form onSubmit={async () => await handleSubmit(avatar, username)}>
+					<form onSubmit={handleSubmit(onSubmit)}>
 						<FormControl isRequired>
 							<Input
 								type="text"
 								placeholder="Nom d'utilisateur"
-								onChange={ event => {setUsername(event.currentTarget.value)}}
+								{
+									...register("username", {
+										required: "Please enter first name",
+										minLength: 3,
+										maxLength: 80
+									})
+								}
 							/>
 
 						</FormControl>
 
 						<FormControl isRequired>
 							<Input
-								type="file"
 								height="100%"
 								width="100%"
+								type="file"
+								{
+									...register("avatar", {
+										required: "Please enter avatar",
+									})
+								}
 								accept="image/*"
-								onChange={event => {setAvatar(event.currentTarget.value)}}
 							/>
 						</FormControl>
 						
@@ -129,7 +135,6 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		{props.isAuthenticated && !isRegistered && <RegisterComponent/>}
 		{props.isAuthenticated && <LogoutComponent />}
 		{!props.isAuthenticated && <LoginComponent />}
-		{/* {username} */}
 	</>)
 }
 

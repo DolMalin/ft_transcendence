@@ -6,14 +6,15 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
+import { AvatarService } from './avatar.service';
 import { leaderboardStats } from 'src/game/interfaces/interfaces';
-
 
 @Injectable()
 export class UsersService {
   constructor(
 		@InjectRepository(User)
-		private userRepository: Repository<User>
+		private userRepository: Repository<User>,
+    private readonly avatarService: AvatarService
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -40,6 +41,20 @@ export class UsersService {
     if (newUser)
       return newUser
     throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+  }
+
+  async addAvatar(id: string, dataBuffer: Buffer, filename: string) {
+    const avatar = await this.avatarService.create(dataBuffer, filename)
+    await this.userRepository.update(id, {
+      avatarId: avatar.id
+    })
+    return avatar
+  }
+
+  async getAvatar(id: string) {
+    const user = await this.userRepository.findOneBy({id})
+    const avatar = await this.avatarService.getAvatarById(user.avatarId)
+    return avatar
   }
 
 

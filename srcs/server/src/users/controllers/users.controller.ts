@@ -1,9 +1,9 @@
-import { Controller, Get, Query,Post, Req, Res, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, StreamableFile, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/interfaces/interfaces';
-import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -25,7 +25,20 @@ export class UsersController {
     return this.usersService.findOneById(id);
   }
 
-  // patch below not working properly
+  @Get('avatar/:id')
+  async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
+    const avatar = await this.usersService.getAvatar(id)
+    const stream = Readable.from(avatar.data)
+    console.log(avatar.data)
+    
+    res.set({
+      'Content-Disposition':`inline; filename="${avatar.filename}"`,
+      'Content-Type' :'image'
+    })
+
+    return new StreamableFile(stream)
+
+  }
 
   @Patch()
   update(
@@ -36,21 +49,6 @@ export class UsersController {
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  @Patch(':id')
-  updateWithId(
-    @Req() req:any,
-    @Body() updateUserDto: UpdateUserDto,
-    @Param('id') id: string)
-    : Promise<User> {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @Delete() 
-  deleteAll () {
-
-    return (this.usersService.removeAll());
-  }
-  
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);
@@ -59,3 +57,4 @@ export class UsersController {
 
 
 }
+

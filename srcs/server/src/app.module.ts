@@ -10,7 +10,7 @@ import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
 import { AuthModule } from './auth/auth.module';
-import { AsyncLocalStorage } from 'async_hooks';
+import { Avatar } from './users/entities/avatar.entity';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { AsyncLocalStorage } from 'async_hooks';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User],
+      entities: [User, Avatar],
       synchronize: true,
     }),
     UsersModule,

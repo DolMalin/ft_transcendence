@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import {Socket} from 'socket.io-client'
+import { Entity, Column, PrimaryGeneratedColumn, JoinColumn, OneToOne} from 'typeorm';
+import { Avatar } from './avatar.entity';
 
 @Entity()
 export class User {
@@ -22,9 +22,10 @@ export class User {
 	@Field(() => String, {})
 	isRegistered: boolean
 
-	@Column({type : 'int', default : 0, nullable: true})
-	winsAmount : number
+	@JoinColumn({name: 'avatarId'})
+	@OneToOne(() => Avatar, {nullable:true})
+	avatar: Avatar
 
-	@Column({type : 'int', default : 0, nullable: true})
-	loosesAmount : number
+	@Column({nullable: true})
+	avatarId?: string
 }
