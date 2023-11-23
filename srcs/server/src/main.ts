@@ -2,25 +2,31 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser'
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {bodyParser:true})
 
   app.use(cookieParser())
-  // app.useGlobalPipes(new ValidationPipe());
+
+
   app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    origin: [process.env.CLIENT_URL, process.env.SERVER_URL],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    
-    allowedHeaders: [
-      "Content-Type",
+        allowedHeaders: [
+      "Accept",
+      "Origin",
+      "X-Api-Key",
+      "content-type",
       "Authorization",
       "Acces-Control-Request-Methods",
       "Access-Control-Allow-Credentials",
-      "Access-Control-Allow-Headers"
+      "Access-Control-Allow-Headers",
+      "X-Requested-With",
     ]
-  })
+});
+
   
-  app.getHttpAdapter().getInstance().disable('x-powered-by');
-  await app.listen(process.env.PORT, '0.0.0.0');
+  // app.getHttpAdapter().getInstance().disable('x-powered-by');
+  await app.listen(process.env.PORT);
+
 }
 bootstrap();

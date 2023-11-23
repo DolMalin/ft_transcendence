@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -8,20 +8,11 @@ import { JwtService } from '@nestjs/jwt'
 import { roomNameGenerator } from 'src/game/services/game.services';
 
 
-
-// /me
-
-
-// {
-//   username
-//   id
-// }
-
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
     ) { }
   
 
@@ -35,13 +26,6 @@ export class AuthService {
     url.searchParams.set('response_type', 'code')
     return ({url: url.toString()})
   }
-
-  // /oauth/authorize/client_id/redirect/response_type=code
-
-  // -> url vers page de 42
-  // <+ 217.0.0.1/code=12398y1239821y3
-  // -> oauth/token
-  // <- token
 
 
   /**
@@ -68,8 +52,10 @@ export class AuthService {
           bodyParameters,
           config
         ).then((res) => {
+          console.log("bjr")
           resolve(res.data.access_token as string)
         }, (err) => {
+          console.log(err)
           resolve(null)
         })
     })
@@ -118,7 +104,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'1d'
+      expiresIn:'15m'
     })
   }
 
@@ -227,44 +213,21 @@ export class AuthService {
     Logger.log(`User #${user.id} logged out`)
 
   }
+  
 
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
-    
-    // console.log(user)
     if (!user)
       throw new ForbiddenException('access denied')
     return user
   }
 
-  
-  async register(@Req() req:any, @Res() res:any) { 
-    // console.log(req)
-    // console.log(req.body)
-    return req.body
-    
-  }
-  
-  async newUserDebug(req : any, res : any) {
-    let ftId = Math.floor(Math.random() * 8888);
-    // console.log(ftId);
-    let user = await this.validateUser(ftId)
-    if (user)
-      throw new InternalServerErrorException()
 
-      // console.log(user);
-      const refreshToken = await this.createRefreshToken({id: user.id})
-      const accessToken = await this.createAccessToken({id: user.id})
-  
-      await this.updateRefreshToken(user.id, await this.hash(refreshToken))
-      
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        domain:"127.0.0.1",
-        sameSite: "none",
-        maxAge: 1000 * 60 * 60 * 24, path: '/'})
-        .send({accessToken: accessToken})
+  async register(body: any) { 
+    console.log(body)
+    // await this.usersService.add
+    return "ok"
+
   }
 
 }

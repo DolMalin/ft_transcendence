@@ -1,6 +1,7 @@
 import { Field } from '@nestjs/graphql';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, OneToOne} from 'typeorm';
 import { Game } from 'src/game/entities/game-entity';
+import { Avatar } from './avatar.entity';
 
 @Entity()
 export class User {
@@ -37,4 +38,11 @@ export class User {
     @ManyToMany(() => Game)
 	@JoinTable()
 	playedGames : Game[];
+
+	@JoinColumn({name: 'avatarId'})
+	@OneToOne(() => Avatar, {nullable:true})
+	avatar: Avatar
+
+	@Column({nullable: true})
+	avatarId?: string
 }

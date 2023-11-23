@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
 import { AuthModule } from './auth/auth.module';
+import { Avatar } from './users/entities/avatar.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User, Game],
+      entities: [User, Avatar, Game],
       synchronize: true,
     }),
     UsersModule,

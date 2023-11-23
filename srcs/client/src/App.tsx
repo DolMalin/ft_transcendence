@@ -1,6 +1,5 @@
-import React, { Profiler, useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState } from 'react';
 
-import {CookiesProvider, useCookies}  from 'react-cookie';
 import Auth from "./auth/Auth"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
@@ -13,12 +12,11 @@ import {
   TabPanels,
   TabPanel,
  } from '@chakra-ui/react'
-import { Socket, io } from 'socket.io-client'
+import { io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
-import axios from 'axios';
 
 const gameSock = io('http://127.0.0.1:4545')
 
@@ -137,15 +135,14 @@ function Malaise() {
 
 function App() {
   
-  const [cookies, setCookie] = useCookies(["access_token"])
-  const [isAuth, setIsAuth] = useState(false)
-  const [isReg, setIsReg] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isRegistered, setIsRegistered] = useState(false)
 
-  console.log('Parent : is Auth : ', isAuth, ' is Reg : ', isReg);
   return (<>
     <ChakraProvider>
-      <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth} isReg={isReg} setIsReg={setIsReg}/>
-      {isAuth && isReg && <Malaise/>}
+
+      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
+      {isAuthenticated && isRegistered && <Malaise/>}
     </ChakraProvider>
   </>
   );

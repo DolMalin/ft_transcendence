@@ -3,71 +3,64 @@ import React, { Component, useEffect, useState} from 'react'
 import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
+import { useForm } from "react-hook-form";
 
 
 
-function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isReg : boolean, setIsReg : Function}) {
+// function Auth(props: {dispatch: Function, state: any}) {
+	function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isRegistered : boolean, setIsRegistered: Function}) {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
-
+	// move in service
 	const fetchAuthUrl = async () => {
 		try {
 			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
 			setAuthUrl(res.data.url)
 		} catch (err) {
-			console.error(err)
 		}
 	}
 
+
+	// @TODO: vrai status code stp
 	const validate = async () => {
-		let res = await AuthService.validate()
-		let status = res
-		if (status === 200)
+		try {
+			const res = await AuthService.validate()
 			props.setIsAuthenticated(true)
-		else if (status === 401 && AuthService.getAccessToken()){
-			status = await AuthService.refresh()
-			if (status === 200)
-				props.setIsAuthenticated(true)
-			else
-			{
-				props.setIsAuthenticated(false)
-				return (100);
+			if (res.data?.isRegistered) {
+				props.setIsRegistered(true)
+				setIsRegistered(true)
 			}
+			return 200
+		} catch (err) {
+			props.setIsAuthenticated(false)
+			setIsAuthenticated(false)
+			return 500
 		}
-		else
-		{
-			props.setIsAuthenticated(false)	
-			return (100);
-		}
-		
-		if (res?.data?.isRegistered === true)
-			props.setIsReg(true)
-
-
-		return 200
 	}
-
 
 	const logout = () => {
-
-		console.log('logout ?')
-
-		AuthService.logout()
-		props.setIsAuthenticated(false)
-		setIsAuthenticated(false);
+		try {
+			AuthService.logout()
+			props.setIsAuthenticated(false)
+			setIsAuthenticated(false)
+		} catch(err) {
+		}
 	}
 
-	const handleSubmit = async (avatar:string, username:string) => {
-		// console.log(avatar)
-		// console.log(username)
-		// console.log(avatar)
-		await AuthService.register(avatar, username)
-		setIsRegistered(true);
-		props.setIsReg(true);
+	const onSubmit = async (data:any) => {
+		try {
+			const formData = new FormData()
+			formData.append("file", data.avatar[0])
+			formData.append("username", data.username)
+			await AuthService.register(formData)
+			props.setIsRegistered(true)
+			setIsRegistered(true)
+		} catch(err) {
+			console.log(err)
+		}
 	}
-
 
 
 	function LoginComponent() {
@@ -82,31 +75,40 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, 
 	}
 
 	function RegisterComponent() {
-		const [username, setUsername] = useState('')
-		const [avatar, setAvatar] = useState('')
+		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		console.log('reg')
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
 				<Box p={2}>
-					<form onSubmit={async () => await handleSubmit(avatar, username)}>
+					<form onSubmit={handleSubmit(onSubmit)}>
 						<FormControl isRequired>
 							<Input
 								type="text"
 								placeholder="Nom d'utilisateur"
-								onChange={ event => {setUsername(event.currentTarget.value)}}
+								{
+									...register("username", {
+										required: "Please enter first name",
+										minLength: 3,
+										maxLength: 80
+									})
+								}
 							/>
 
 						</FormControl>
 
 						<FormControl isRequired>
 							<Input
-								type="file"
 								height="100%"
 								width="100%"
+								type="file"
+								{
+									...register("avatar", {
+										required: "Please enter avatar",
+									})
+								}
 								accept="image/*"
-								onChange={event => {setAvatar(event.currentTarget.value)}}
 							/>
 						</FormControl>
 						
@@ -133,33 +135,25 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, 
 		)
 	}
 
+
+
 	useEffect(() => {
-		async function feur() {
-		fetchAuthUrl()
-		let res = await validate();
-		console.log('res : ',res)
-		if (res === 200)
-		{
-			setIsAuthenticated(true)
-			// props.setIsAuthenticated(true)
-		}
-		else 
-		{
-			setIsAuthenticated(false)
-			// props.setIsAuthenticated(false)
-		}
-	};
-	feur();
-	}, [isAuthenticated, isRegistered])
+        async function asyncWrapper() {
+        fetchAuthUrl()
+        const status = await validate();
+        if (status === 200)
+            setIsAuthenticated(true)
+        else 
+            setIsAuthenticated(false)
+    };
+    asyncWrapper();
+    }, [isAuthenticated, isRegistered])
 
-
-	console.log('is auth : ', isAuthenticated, 'is reg : ', isRegistered);
 	return (<>
 
-		{isAuthenticated && !isRegistered && <RegisterComponent/>}
+		{ isAuthenticated && !isRegistered && <RegisterComponent/>}
 		{isAuthenticated && <LogoutComponent />}
 		{!isAuthenticated && <LoginComponent />}
-		{/* {username} */}
 	</>)
 }
 
