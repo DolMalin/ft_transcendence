@@ -5,6 +5,6 @@ GamePlayService } from './services/game.services'
 import { MatchHistoryService } from './services/match.history.services'
 
 @Module({
-    providers: [GameGateway, MatchmakingService, GamePlayService, MatchHistoryService],
+    providers: [GameGateway, MatchmakingService, GamePlayService],
 })
 export class GameModule {}

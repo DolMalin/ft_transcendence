@@ -20,7 +20,7 @@ import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 import axios from 'axios';
 
-const gameSock = io('http://10.14.6.7:4545')
+const gameSock = io('http://127.0.0.1:4545')
 
 function Malaise() {
 
@@ -138,13 +138,14 @@ function Malaise() {
 function App() {
   
   const [cookies, setCookie] = useCookies(["access_token"])
-  const [isAuth, setIsAuth] = useState(true)
+  const [isAuth, setIsAuth] = useState(false)
+  const [isReg, setIsReg] = useState(false)
 
+  console.log('Parent : is Auth : ', isAuth, ' is Reg : ', isReg);
   return (<>
     <ChakraProvider>
-
-      {!isAuth && <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>}
-      {isAuth && <Malaise/>}
+      <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth} isReg={isReg} setIsReg={setIsReg}/>
+      {isAuth && isReg && <Malaise/>}
     </ChakraProvider>
   </>
   );

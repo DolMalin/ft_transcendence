@@ -164,18 +164,18 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain:"10.14.6.7",
+      domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain:"10.14.6.7",
+      domain:"127.0.0.1",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
-    res.redirect("http://10.14.6.7:4343")
+    res.redirect("http://127.0.0.1:4343")
 
   }
 

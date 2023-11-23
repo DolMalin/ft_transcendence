@@ -70,7 +70,12 @@ class AuthService {
 	}
 
 	async register(avatar: string, username: string) {
-
+		// try {
+		// 	const res: any  = await this.post(`http://127.0.0.1:4545/auth/register`)
+		// 	return res.status
+		// } catch(err) {
+		// 	return 401
+		// }
 	}
 
 }

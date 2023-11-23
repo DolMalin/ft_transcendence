@@ -6,9 +6,9 @@ import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
 
 
 
-function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function}) {
+function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isReg : boolean, setIsReg : Function}) {
 	const [authUrl, setAuthUrl] = useState('')
-	// const [isAuthenticated, setIsAuthenticated] = useState(false)
+	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
 
@@ -31,13 +31,19 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 			if (status === 200)
 				props.setIsAuthenticated(true)
 			else
+			{
 				props.setIsAuthenticated(false)
+				return (100);
+			}
 		}
 		else
+		{
 			props.setIsAuthenticated(false)	
+			return (100);
+		}
 		
 		if (res?.data?.isRegistered === true)
-			setIsRegistered(true)
+			props.setIsReg(true)
 
 
 		return 200
@@ -45,8 +51,12 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 
 
 	const logout = () => {
+
+		console.log('logout ?')
+
 		AuthService.logout()
 		props.setIsAuthenticated(false)
+		setIsAuthenticated(false);
 	}
 
 	const handleSubmit = async (avatar:string, username:string) => {
@@ -54,11 +64,14 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		// console.log(username)
 		// console.log(avatar)
 		await AuthService.register(avatar, username)
+		setIsRegistered(true);
+		props.setIsReg(true);
 	}
 
 
 
 	function LoginComponent() {
+		console.log('login, is auth : ', props.isAuthenticated)
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'}>
@@ -71,6 +84,8 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	function RegisterComponent() {
 		const [username, setUsername] = useState('')
 		const [avatar, setAvatar] = useState('')
+
+		console.log('reg')
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
@@ -110,6 +125,7 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	}
 
 	function LogoutComponent() {
+		console.log('logout')
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>
@@ -118,17 +134,31 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	}
 
 	useEffect(() => {
+		async function feur() {
 		fetchAuthUrl()
-		validate()
-	}, [])
+		let res = await validate();
+		console.log('res : ',res)
+		if (res === 200)
+		{
+			setIsAuthenticated(true)
+			// props.setIsAuthenticated(true)
+		}
+		else 
+		{
+			setIsAuthenticated(false)
+			// props.setIsAuthenticated(false)
+		}
+	};
+	feur();
+	}, [isAuthenticated, isRegistered])
 
 
-	// console.log(props.isAuthenticated);
+	console.log('is auth : ', isAuthenticated, 'is reg : ', isRegistered);
 	return (<>
 
-		{props.isAuthenticated && !isRegistered && <RegisterComponent/>}
-		{props.isAuthenticated && <LogoutComponent />}
-		{!props.isAuthenticated && <LoginComponent />}
+		{isAuthenticated && !isRegistered && <RegisterComponent/>}
+		{isAuthenticated && <LogoutComponent />}
+		{!isAuthenticated && <LoginComponent />}
 		{/* {username} */}
 	</>)
 }

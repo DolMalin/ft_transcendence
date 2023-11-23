@@ -28,10 +28,10 @@ export class User {
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
 
-	@Column({type : 'bool', default: true})
+	@Column({type : 'bool', default: false})
 	isInQueue : boolean
 
-	@Column({type : 'bool', default: true})
+	@Column({type : 'bool', default: false})
 	isInGame : boolean
 
     @ManyToMany(() => Game)
