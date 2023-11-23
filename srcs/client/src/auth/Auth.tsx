@@ -7,9 +7,10 @@ import { useForm } from "react-hook-form";
 
 
 
-function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function}) {
+// function Auth(props: {dispatch: Function, state: any}) {
+	function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isRegistered : boolean, setIsRegistered: Function}) {
 	const [authUrl, setAuthUrl] = useState('')
-	// const [isAuthenticated, setIsAuthenticated] = useState(false)
+	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
 	// move in service
@@ -21,14 +22,21 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		}
 	}
 
+
+	// @TODO: vrai status code stp
 	const validate = async () => {
 		try {
 			const res = await AuthService.validate()
 			props.setIsAuthenticated(true)
-			if (res.data?.isRegistered)
+			if (res.data?.isRegistered) {
+				props.setIsRegistered(true)
 				setIsRegistered(true)
+			}
+			return 200
 		} catch (err) {
 			props.setIsAuthenticated(false)
+			setIsAuthenticated(false)
+			return 500
 		}
 	}
 
@@ -36,6 +44,7 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		try {
 			AuthService.logout()
 			props.setIsAuthenticated(false)
+			setIsAuthenticated(false)
 		} catch(err) {
 		}
 	}
@@ -46,6 +55,7 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 			formData.append("file", data.avatar[0])
 			formData.append("username", data.username)
 			await AuthService.register(formData)
+			props.setIsRegistered(true)
 			setIsRegistered(true)
 		} catch(err) {
 			console.log(err)
@@ -64,8 +74,6 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 	}
 
 	function RegisterComponent() {
-		const [username, setUsername] = useState('')
-		const [avatar, setAvatar] = useState('')
 		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
@@ -123,18 +131,25 @@ function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function})
 		)
 	}
 
+
+
 	useEffect(() => {
-		fetchAuthUrl()
-		validate()
-	}, [])
+        async function asyncWrapper() {
+        fetchAuthUrl()
+        const status = await validate();
+        if (status === 200)
+            setIsAuthenticated(true)
+        else 
+            setIsAuthenticated(false)
+    };
+    asyncWrapper();
+    }, [isAuthenticated, isRegistered])
 
-
-	// console.log(props.isAuthenticated);
 	return (<>
 
-		{props.isAuthenticated && !isRegistered && <RegisterComponent/>}
-		{props.isAuthenticated && <LogoutComponent />}
-		{!props.isAuthenticated && <LoginComponent />}
+		{ isAuthenticated && !isRegistered && <RegisterComponent/>}
+		{isAuthenticated && <LogoutComponent />}
+		{!isAuthenticated && <LoginComponent />}
 	</>)
 }
 

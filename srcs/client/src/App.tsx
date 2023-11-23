@@ -1,4 +1,4 @@
-import React, { Profiler, useState } from 'react';
+import React, { Profiler, useReducer, useState } from 'react';
 
 import './App.css';
 import {CookiesProvider, useCookies}  from 'react-cookie';
@@ -17,7 +17,6 @@ import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/const'
 import LeaderBoard from './game/Leaderboard';
 import './fonts.css'
-import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 
 const gameSock = io('http://localhost:4545')
 
@@ -82,15 +81,14 @@ function Malaise() {
 
 function App() {
   
-  const [cookies, setCookie] = useCookies(["access_token"])
-  const [isAuth, setIsAuth] = useState(false)
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isRegistered, setIsRegistered] = useState(false)
 
   return (<>
     <ChakraProvider>
 
-      {!isAuth && <Auth isAuthenticated={isAuth} setIsAuthenticated={setIsAuth}/>}
-      {isAuth && <Malaise/>}
+      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
+      {isAuthenticated && isRegistered && <Malaise/>}
     </ChakraProvider>
   </>
   );
