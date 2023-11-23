@@ -4,7 +4,7 @@ Button,
 Flex,
 Divider,
  } from "@chakra-ui/react"
-import * as Constants from '../const'
+import * as Constants from '../globals/const'
 import { LeftBracket, RightBracket } from "./Brackets";
 
 function GameMode(props : {dispatch : Function}) {
@@ -28,7 +28,7 @@ function GameMode(props : {dispatch : Function}) {
                     <Button
                     fontSize={'2xl'}
                     textColor={'white'}
-                    bgColor={'black'}
+                    bgColor={Constants.BG_COLOR}
                     fontWeight={'normal'}
                     h={'100px'}
                     borderRadius={'0px'}
@@ -49,7 +49,7 @@ function GameMode(props : {dispatch : Function}) {
                 <Divider variant={'dashed'} w={'35%'}/>
                 <Button w='20%' margin='5%'
                 borderRadius={'0'}
-                bg={'black'} 
+                bg={Constants.BG_COLOR} 
                 textColor={'white'} 
                 fontWeight={'normal'}
                 _hover={{background : 'white', textColor: 'black'}}
@@ -75,11 +75,11 @@ function GameMode(props : {dispatch : Function}) {
                     fontSize={'2xl'}
                     fontWeight={'normal'}
                     textColor={'white'}
-                    bgColor={'black'}
+                    bgColor={Constants.BG_COLOR}
                     h={'100px'}
                     borderRadius={'0px'}
                     _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
+                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_TWO}); 
                     props.dispatch({type : 'SET_LF_GAME', payload : true})}}>
                         {Constants.GAME_TYPE_TWO}
                     </Button>

@@ -149,7 +149,6 @@ class AuthService {
 
 	async register(data:any) {
 		try {
-			console.log(data)
 			let res: any = await this.postForm(`http://127.0.0.1:4545/auth/register`, data)
 			return res.status
 		} catch(err) {

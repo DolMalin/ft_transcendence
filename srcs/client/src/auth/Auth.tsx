@@ -64,6 +64,7 @@ import { useForm } from "react-hook-form";
 
 
 	function LoginComponent() {
+		console.log('login, is auth : ', props.isAuthenticated)
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'}>
@@ -75,6 +76,8 @@ import { useForm } from "react-hook-form";
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
+
+		console.log('reg')
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
@@ -124,6 +127,7 @@ import { useForm } from "react-hook-form";
 	}
 
 	function LogoutComponent() {
+		console.log('logout')
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>

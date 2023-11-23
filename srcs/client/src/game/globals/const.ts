@@ -43,8 +43,12 @@ export const DARKERKER_RED = 'rgba(255, 140, 140)';
 export const LIGHT_GREEN = 'rgba(0, 130, 100, 0.8)';
 export const DARK_GREEN = 'rgba(0, 130, 100, 1)';
 
-export const TABS_COLOR = 'rgba(70, 70, 70, 1)';
-export const SELECTED_TAB_COLOR = 'rgba(30, 30, 30, 1)';
+export const BG_COLOR = 'rgba(20, 20, 20, 1)';
+
+export const HIDDEN_FONT_COLOR = 'rgba(60, 60, 70, 1)';
+
+export const TABS_COLOR = 'rgba(20, 20, 20, 1)';
+export const SELECTED_TAB_COLOR = 'rgba(20, 20, 20, 1)';
 export const TABS_BORDER = '1px solid white';
 
 export const BOX_GRADIANT = 'linear(to-br, grey, lightgrey)';

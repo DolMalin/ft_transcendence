@@ -20,9 +20,9 @@ export interface Paddle {
     speed : number
   }
   
-  export interface Game {
-    clientOne : Socket,
-    clientTwo : Socket,
+  export interface GameState {
+    clientOne : {socket : Socket, id : string},
+    clientTwo : {socket : Socket, id : string},
     gameIsFull : boolean,
     isPaused : boolean,
     clientOneScore : number,

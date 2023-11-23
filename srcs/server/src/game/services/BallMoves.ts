@@ -1,10 +1,10 @@
 import { Socket, Server } from 'socket.io';
 import {
-  Game,
+  GameState,
   Ball,
   Paddle,
-} from './interfaces/interfaces'
-import * as Constants from './const'
+} from '../globals/interfaces'
+import * as Constants from '../globals/const'
 
 
 /**
@@ -46,7 +46,7 @@ export function ballReset(ball : Ball) {
  * @description 
  * check if the ball as reached a goal zone
 */
-export function goal (server : Server, game : Game,roomName : string,ball : Ball) {
+export function goal (server : Server, game : GameState,roomName : string,ball : Ball) {
     if (ball.y + ball.size >= 1)
     {
         game.clientTwoScore ++;

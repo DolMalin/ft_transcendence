@@ -7,32 +7,28 @@ MessageBody,
 ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
 import { MatchmakingService,
-GamePlayService } from './game.service';
+GamePlayService } from '../services/game.services';
 import {
-  Game,
+  GameState,
   GameInfo,
-} from './interfaces/interfaces'
+} from '../globals/interfaces'
 import { clearInterval } from 'timers';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
-    origin : process.env.CLIENT_URL
+    origin : '*'
   },
 } )
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
-  gamesMap : Map<string, Game> = new Map();
+  gamesMap : Map<string, GameState> = new Map();
   
   constructor(private readonly matchmakingService: MatchmakingService,
   private readonly gamePlayService : GamePlayService) {}
   
   @WebSocketServer()
   server : Server;
-  /**
-   * @description make the client join a room if there are some waiting for players,
-   * otherwise create its own
-   * also send to player if he is player 1 or 2
-  */
+
  handleConnection(client: Socket) {
 
   }
@@ -42,9 +38,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinGame')
-  joinGame(@MessageBody() gameType : string, @ConnectedSocket() client: Socket) {
+  joinGame(@MessageBody() data : {gameType : string, dbUserId : string}, @ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, this.gamesMap, gameType);
+    this.matchmakingService.gameCreation(this.server, client, data.dbUserId, this.gamesMap, data.gameType);
   }
 
   @SubscribeMessage('leaveGame')
@@ -58,7 +54,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveQueue')
   leaveQueue(@MessageBody() roomName : string, @ConnectedSocket() client: Socket) {
 
-    // console.log ('queue left, room :', roomName, ' deleted');
     this.gamesMap.delete(roomName);
     client.leave(roomName);
   }

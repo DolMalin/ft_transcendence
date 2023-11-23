@@ -5,6 +5,7 @@ Button,
 Flex
  } from "@chakra-ui/react"
 import { Socket } from "socket.io-client";
+import * as Constants from '../globals/const'
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
         
@@ -71,7 +72,7 @@ import { Socket } from "socket.io-client";
             alignItems={'center'}
             justifyContent={'center'}
             >
-                <Button bg={'black'} textColor={'white'} borderRadius={'0'} fontSize={'2xl'} fontWeight={'normal'}
+                <Button bg={Constants.BG_COLOR} textColor={'white'} borderRadius={'0'} fontSize={'2xl'} fontWeight={'normal'}
                 _hover={{background : 'white', textColor: 'black'}}
                 onClick={leaveQueue} 
                 > 

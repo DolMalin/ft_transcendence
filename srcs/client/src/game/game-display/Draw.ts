@@ -1,8 +1,8 @@
-import * as Constants from './const'
+import * as Constants from '../globals/const'
 import { 
     Paddle,
     Ball,
-    } from './interfaces';
+    } from '../globals/interfaces';
 
 /**
  * @description 
@@ -139,7 +139,7 @@ export function drawAdversaryPaddle(context : CanvasRenderingContext2D, canvasBo
 */
 export function drawBoard(context : CanvasRenderingContext2D, canvasBounding : DOMRect) {
 
-    context.fillStyle = 'black';
+    context.fillStyle = Constants.BG_COLOR;
     context.fillRect(0, 0, canvasBounding.width, canvasBounding.height);
 }
 /**

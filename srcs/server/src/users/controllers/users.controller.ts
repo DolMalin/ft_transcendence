@@ -2,13 +2,20 @@ import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, 
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { Readable } from 'stream';
-import { leaderboardStats } from 'src/game/interfaces/interfaces';
+import { leaderboardStats } from 'src/game/globals/interfaces';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
+  // @UseGuards(AccessTokenGuard)
+  @Get('currentUser')
+  findCurrentUser(@Req() req : any) {
+    console.log(req.user)
+    return ('feur')
+  }
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();

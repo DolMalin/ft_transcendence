@@ -1,14 +1,17 @@
 import React from 'react';
 import { useEffect, useState, useReducer } from 'react';
 import 'reactjs-popup/dist/index.css';
-import Game from './Game';
+import Game from '../game-display/Game';
 import { Socket } from 'socket.io-client';
-import PlayBox from './game-creation/PlayBox';
-import VictoryScreen from './game-creation/VictoryScreen';
-import LooseScreen from './game-creation/LooseScreen';
-import GameMode from './game-creation/GameMode';
-import WaitingScreen from './game-creation/WaitingScreen';
-import { Route } from 'react-router-dom';
+import PlayBox from './PlayBox';
+import VictoryScreen from './VictoryScreen';
+import LooseScreen from './LooseScreen';
+import GameMode from './GameMode';
+import WaitingScreen from './WaitingScreen';
+import { Box } from '@chakra-ui/react'
+import * as Constants from '../globals/const'
+import axios from 'axios';
+import authService from '../../auth/auth.service';
 
 type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}
@@ -31,7 +34,7 @@ type stateType = {
     selectedGameType : string,
 }
 
-function CreateGameButton(props : any) {
+function CreateGame(props : {sock : Socket}) {
     const [playerId, setPlayerId] = useState("1");
     const [gameRoom, setGameRoom] = useState('');
 
@@ -82,7 +85,9 @@ function CreateGameButton(props : any) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
-            sock.emit("joinGame", state.selectedGameType);
+            // const dbUserID = authService.
+
+            sock.emit("joinGame", {gameType : state.selectedGameType, dbUserId : 'feur'});
             dispatch({type : 'SET_GAME_MOD', payload : false});
             dispatch({type : 'SET_WAITING_SCREEN', payload : true});
 
@@ -126,14 +131,33 @@ function CreateGameButton(props : any) {
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
     
+    try {
+        axios.get('http://127.0.0.1:4545/users/currentUser')
+      }
+      catch (err)
+      {
+        console.log(err.message)
+      }
+
     return (<>
-        {state.playButtonVisible && <PlayBox dispatch={dispatch}/>}
-        {state.gameModVisible && <GameMode dispatch={dispatch}/>}
-        {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
-        {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
-        {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}
-        {state.looseScreenVisible && <LooseScreen dispatch={dispatch}/>}
+            <Box id={Constants.GAME_ZONE}
+        width={'100vw'}
+        height={'96vh'}
+        display={'flex'}
+        alignItems={'center'}
+        justifyContent={'center'}
+        overflow={'auto'}
+        flexWrap={'wrap'}
+        background={Constants.BG_COLOR}
+        >
+            {state.playButtonVisible && <PlayBox dispatch={dispatch}/>}
+            {state.gameModVisible && <GameMode dispatch={dispatch}/>}
+            {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
+            {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
+            {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}
+            {state.looseScreenVisible && <LooseScreen dispatch={dispatch}/>}
+        </Box>
     </>);
 }
 
-export default CreateGameButton;
+export default CreateGame;

@@ -7,7 +7,7 @@ import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
-import { leaderboardStats } from 'src/game/interfaces/interfaces';
+import { leaderboardStats } from 'src/game/globals/interfaces';
 
 @Injectable()
 export class UsersService {

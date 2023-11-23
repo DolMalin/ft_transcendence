@@ -14,9 +14,9 @@ import {
     TableContainer,
     Avatar,
   } from '@chakra-ui/react'
-import * as Constants from './const'
+import * as Constants from '../game/globals/const'
 import axios from "axios";
-import { leaderboardStats } from "./interfaces";
+import { leaderboardStats } from "../game/globals/interfaces";
 
 
 function LeaderBoard() {
@@ -62,7 +62,6 @@ function LeaderBoard() {
             const res = await axios.get('http://127.0.0.1:4545/users/scoreList')
 
             setScoreList(sortScoreList(res.data))
-            console.log('score list : ', scoreList);
         }
         catch (err)
         {
@@ -95,7 +94,7 @@ function LeaderBoard() {
         justifyContent={'center'}
         overflow={'auto'}
         flexWrap={'wrap'}
-        background={'black'}
+        background={Constants.BG_COLOR}
         padding={'30px'}
         >
         <Table w={'90%'}>

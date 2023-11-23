@@ -1,65 +1,119 @@
-import React, { Profiler, useReducer, useState } from 'react';
+import React, {useEffect, useRef, useState } from 'react';
 
-import './App.css';
-import {CookiesProvider, useCookies}  from 'react-cookie';
 import Auth from "./auth/Auth"
-import CreateGameButton from './game/CreateGame';
+import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
   Box,
+  Text,
   TabList,
   Tabs,
   Tab,
   TabPanels,
   TabPanel,
  } from '@chakra-ui/react'
-import { Socket, io } from 'socket.io-client'
-import * as Constants from './game/const'
-import LeaderBoard from './game/Leaderboard';
+import { io } from 'socket.io-client'
+import * as Constants from './game/globals/const'
+import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
+import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 
-const gameSock = io('http://localhost:4545')
-
-function GameBox(props : {socket : Socket}) {
-  return (
-        <Box id={Constants.GAME_ZONE}
-        width={'100vw'}
-        height={'96vh'}
-        display={'flex'}
-        alignItems={'center'}
-        justifyContent={'center'}
-        overflow={'auto'}
-        flexWrap={'wrap'}
-        background={'black'}
-        >
-          <CreateGameButton sock={props.socket}/>
-        </Box>
-  )
-}
+const gameSock = io('http://127.0.0.1:4545')
 
 function Malaise() {
 
+  const tabsRef = useRef(null)
+  const [tab, setTab] = useState(0);
+  const [switchingFrom, setSwitchingFrom] = useState(false)
+  const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
+
+  useEffect(function DOMEvents() {
+
+    function handleResize() {
+      if (window.innerWidth > 1300)
+        setFontSize('2em');
+      else if (window.innerWidth > 1000)
+        setFontSize('1.5em')
+      else if (window.innerWidth < 800)
+        setFontSize('1em')
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return(() => {
+      window.removeEventListener('resize', handleResize)
+    })
+  }, [fontSize])
+
+  useEffect(function socketEvents() {
+
+    gameSock.on('gameStarted', () => {
+      
+      setSwitchingFrom(true);
+      setTab(0)
+      // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
+      window.dispatchEvent(new Event('resize'))
+    })
+
+    return(() => {
+      gameSock.off('gameStarted')
+    })
+  }, [tab, tabsRef?.current?.tabIndex])
+
+  console.log('tab on rerender : ', tab)
   return (
-    <Tabs isFitted variant='enclosed' className='goma'>
+    <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
+    index={tab} onChange={(index) => {
+      switchingFrom ? setTab(0) : setTab(index); 
+      setSwitchingFrom(false); 
+      // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
+      window.dispatchEvent(new Event('resize'));}}
+    >
 
-      <TabList border='none' mb='1em' margin={'0'} padding={'0'} height={'4vh'} minH={'40px'} textColor={'white'} className='goma' overflowX={'auto'} overflowY={'clip'}>
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
-        _selected={{borderBottomRadius : '5px', background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Pong</Tab>
+      <TabList border='none' mb='2em' 
+      margin={'0'} padding={'0'} height={'4vh'} 
+      minH={'60px'} 
+      textColor={'white'} className='goma'
+      overflowX={'auto'} overflowY={'clip'}
+      >
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'} fontSize={fontSize}
+        _selected={{background: Constants.TABS_COLOR}}
+        >
+          {tab === 0 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
+          <Text w={'80%'}>Pong</Text>
+          {tab === 0 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
+        </Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
-        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Chat</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'} fontSize={fontSize}
+        _selected={{background: Constants.TABS_COLOR}}
+        >
+          {tab === 1 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
+            <Text w={'80%'}>Chat</Text>
+          {tab === 1 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
+        </Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
-        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>LeaderBoard</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'} fontSize={fontSize}
+        _selected={{background: Constants.SELECTED_TAB_COLOR}}
+        >
+          {tab === 2 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
+            <Text w={'80%'}>LeaderBoard</Text>
+          {tab === 2 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
+        </Tab>
 
-        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'}
-        _selected={{background: Constants.SELECTED_TAB_COLOR, transform: 'scale(1.2)'}}>Profile</Tab>
+        <Tab bgColor={Constants.TABS_COLOR} border={'none'} borderRadius={'0px'} fontSize={fontSize}
+        _selected={{background: Constants.SELECTED_TAB_COLOR}}
+        >
+          {tab === 3 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
+          <Text w={'80%'}>Profile</Text>
+          {tab === 3 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
+        </Tab>
+
       </TabList>
 
       <TabPanels margin={'0'} padding={'0'}>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <GameBox socket={gameSock}/>
+          <CreateGame sock={gameSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

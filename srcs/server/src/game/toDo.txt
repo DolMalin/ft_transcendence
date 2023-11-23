@@ -17,3 +17,5 @@ TO DO 2 / 11 / 2023 :
 - check angle redirection on paddle hit (2 / 4 ?)
 
 - COLLISON BUG BOTTONM PADDLE RIGHT 
+
+IP : 10.14.6.7:4343

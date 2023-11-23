@@ -2,7 +2,9 @@ import React from "react";
 import { Box,
 Text,
 Button,
- } from "@chakra-ui/react";
+} from "@chakra-ui/react";
+import * as Constants from '../globals/const'
+
 
  function VictoryScreen (props : {dispatch : Function}) {
 // Display new ladder placement
@@ -23,7 +25,10 @@ Button,
         >
             <Text fontSize={'5em'}> YOU WON MICHEL </Text>
 
-            <Button fontWeight={'normal'} size={'3em'} bg={'black'} borderRadius={'0'} fontSize={'3em'}
+            <Button 
+            fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
+            size={'3em'} bg={Constants.BG_COLOR} fontSize={'3em'}
+            borderRadius={'0'}
             _hover={{background : 'white', textColor: 'black'}}
             onClick={closeVScreen}
             >
