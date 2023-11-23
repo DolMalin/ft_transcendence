@@ -7,7 +7,7 @@ MessageBody,
 ConnectedSocket} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io'
 import { MatchmakingService,
-GamePlayService } from '../services/game.service';
+GamePlayService } from '../services/game.services';
 import {
   GameState,
   GameInfo,

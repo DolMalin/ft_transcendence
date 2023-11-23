@@ -5,7 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
-import { roomNameGenerator } from 'src/game/services/game.service';
+import { roomNameGenerator } from 'src/game/services/game.services';
 
 
 
