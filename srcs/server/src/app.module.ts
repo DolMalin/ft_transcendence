@@ -25,6 +25,7 @@ import { Message } from './chat/entities/message.entity';
       password: process.env.DATABASE_PASSWORD,
       entities: [User, Room, Message],
       synchronize: true,
+      // dropSchema: true,
     }),
     UsersModule,
     GameModule,
@@ -32,7 +33,7 @@ import { Message } from './chat/entities/message.entity';
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatModule, GameModule],
+  providers: [AppService],
 })
 
 export class AppModule { }

@@ -4,6 +4,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
+import { GetUser } from '../decorator/user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -23,10 +24,8 @@ export class UsersController {
 
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  async getUserInfo(@Req() req: any, @Res()  res: any ){
-    const user = await this.usersService.findOneById(req.user?.id)
-    console.log(user.username, user.id)
-    res.send({username: user.username, id: user.id})
+  getUserInfo(@GetUser() user: User){
+    return {username: user.username, id: user.id}
   }
 
 

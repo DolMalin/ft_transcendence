@@ -9,8 +9,9 @@ import { MessageController } from "./controllers/message.controller";
 import { Message } from "./entities/message.entity";
 import { AuthModule } from "src/auth/auth.module";
 import { AuthService } from "src/auth/services/auth.service";
+import { JwtModule } from "@nestjs/jwt";
 @Module({
-    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule] ,
+    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule] ,
     controllers: [RoomController, MessageController],
     providers: [ChatGateway, RoomService, MessageService],
     exports: [RoomService, MessageService]

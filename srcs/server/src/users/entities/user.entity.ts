@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql';
 import { Room } from 'src/chat/entities/room.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -11,18 +11,15 @@ export class User {
 	ftId: number
 
 	@Column({type: 'varchar', length: 20, nullable: true})
-	@Field(() => String, {})
 	username: string
 
 	@Column({type: 'varchar', nullable: true})
-	@Field(() => String, {})
 	refreshToken: string
 
 	@Column({type: 'boolean', default: false})
-	@Field(() => String, {})
 	isRegistered: boolean
 
-	@OneToMany(() => Room, room => room.user)
+	@ManyToMany(() => Room, room => room.users)
 	room: Room[];
 
 	//rel vers user blocked

@@ -3,27 +3,41 @@ import { ChakraProvider } from "@chakra-ui/react";
 import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
 import './chat.css'
-import axios from "axios";
 import authService from "../auth/auth.service";
 
+export interface MessageData {
+    id: number;
+    author: {id: string};
+    content: string;
+    sendAt: Date;
+};
+
+export interface Room {
+    id: number,
+    name: string,
+    message: MessageData[]
+}
+
 export function Chat(props: any){
-    const [room, setRoom] = useState("");
+    const [roomPlaceholder, setRoomPlaceholder] = useState("")
+    const [room, setRoom] = useState<Room>()
     const [password, setPassword] = useState("")
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
 
+    
+
     const createRoom = async () => {
-        if (room != "")
+        if (roomPlaceholder !== "")
         {
-            let data = {name: room, password: password, privChan: privateChan}
+            let data = {name: roomPlaceholder, password: password, privChan: privateChan}
             try{
-                const res = await axios.post('http://127.0.0.1:4545/room', data)
-                console.log(res.data)
+                await authService.post('http://127.0.0.1:4545/room', data)
                 joinRoom()
             }
             catch(err){
-                console.log('Channel', room, 'already exists.')
+                console.log('Channel', roomPlaceholder, 'already exists.')
             }
         }
     }
@@ -31,13 +45,14 @@ export function Chat(props: any){
     const  joinRoom = async () => {
 
         try{
-            console.log('pas', password)
-            const res =  await authService.post('http://127.0.0.1:4545/room/joinRoom', {roomName: room, password: password})
-            props.socket.emit("joinRoom", room)
-            setShowChat(true);
+            const res = await authService.post('http://127.0.0.1:4545/room/joinRoom', {name: roomPlaceholder, password: password})
+            console.log('res', res)
+            setRoom(res.data)
+            props.socket.emit("joinRoom", res.data.id)
+            setShowChat(true)
         }
         catch(err){
-            console.log(err.response.data.message)
+            console.log(err)
         }
     }
     return (
@@ -49,7 +64,7 @@ export function Chat(props: any){
                 <Chakra.Input 
                     type="text"
                     placeholder="chose channel name..."
-                    onChange={(event) => {setRoom(event.target.value)}}
+                    onChange={(event) => {setRoomPlaceholder(event.target.value)}}
                     />                
                 {checked && (
                 <Chakra.Input
@@ -72,9 +87,9 @@ export function Chat(props: any){
                 <Chakra.Input 
                     type="text" 
                     placeholder="enter channel name ..."
-                    onChange={(event) => {setRoom(event.target.value)}}/>
+                    onChange={(event) => {setRoomPlaceholder(event.target.value)}}/>
                 <Chakra.Input 
-                    type="text"
+                    type="password"
                     placeholder="enter password (if needed)"
                     onChange={(event => {setPassword(event.target.value)})}
                 />
@@ -83,7 +98,7 @@ export function Chat(props: any){
         </div>
         )
         : (
-        <Chatbox socket={props.socket} room={room}/>
+        <Chatbox socket={props.socket} room={room} />
         )}
     </div>
     )

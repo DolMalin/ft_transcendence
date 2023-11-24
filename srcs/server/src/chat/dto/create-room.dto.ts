@@ -1,19 +1,11 @@
 import { Field } from "@nestjs/graphql";
+import { User } from "src/users/entities/user.entity";
 
 export class CreateRoomDto {
     
-    @Field(() => String, {})
-    name: string;
-
-    @Field(() => Boolean, {})
+    name: string
+    
     privChan: boolean
 
-    @Field(() => Boolean, {})
-    owner: boolean
-
-    @Field(() => Boolean, {})
-    administrator: boolean
-
-    @Field(() => String, {})
     password: string
 }

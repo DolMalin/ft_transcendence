@@ -8,8 +8,9 @@ import { ChakraProvider, Button, ButtonGroup, Box } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/const'
 import * as dotenv from 'dotenv'
+import authService from './auth/auth.service';
 
-const gameSock = io('http://localhost:4545')
+const gameSock = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}})
 
 function Game(props : {socket : Socket}) {
   return (
@@ -27,7 +28,7 @@ function Game(props : {socket : Socket}) {
   )
 }
 
-const socket = io('http://localhost:4545');
+const socket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
   

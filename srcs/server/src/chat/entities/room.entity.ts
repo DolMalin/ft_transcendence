@@ -1,6 +1,6 @@
 import { Field } from '@nestjs/graphql'
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from 'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, ManyToMany, JoinTable, OneToOne } from 'typeorm'
 import { Message } from './message.entity';
 
 @Entity()
@@ -9,28 +9,25 @@ export class Room {
     id: number
 
     @Column({type: String, unique: true, nullable: true})
-    @Field(() => String, {})
     name: string
 
     @Column({type: String, nullable: true})
-    @Field(() => String, {})
     password: string
 
     @Column({type: Boolean, nullable: true})
-    @Field(() => Boolean, {})
     privChan: boolean
 
-    @Column({type: Boolean, nullable: true})
-    @Field(() => Boolean, {})
-    owner: boolean
+    @ManyToOne(() => User, user => user.id)
+    owner: User
 
-    @Column({type: Boolean, nullable: true})
-    @Field(() => Boolean, {})
-    administrator: boolean
+    @ManyToMany(() => User, user => user.id)
+    @JoinTable()
+    administrator: User[]
 
-    @ManyToOne(() => User, user => user.room)
-    user: User
+    @ManyToMany(() => User, user => user.room)
+    @JoinTable()
+    users: User
 
-    @OneToMany(() => Message, message => message.room, {onDelete:'CASCADE'})
+    @OneToMany(() => Message, message => message.room/* , {onDelete:'CASCADE'} */)
     message: Message[]
 }

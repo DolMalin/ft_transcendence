@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode } from '@nestjs/common';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
 import { Room } from '../entities/room.entity';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { AuthService } from 'src/auth/services/auth.service';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
+import { CreateMessageDto } from '../dto/create-message.dto';
+import { GetUser } from 'src/users/decorator/user.decorator';
+import { User } from 'src/users/entities/user.entity';
+import { RoomDto } from '../dto/room.dto';
 
 
 @Controller('room')
@@ -33,18 +37,22 @@ export class RoomController {
 
     @UseGuards(AccessTokenGuard)
     @Post('joinRoom')
-    async joinRoom(@Req() req: any, @Res() res: any){
-        console.log('sender:',req.user)
-        // console.log('test from joinroom back')
-        return await this.roomService.joinRoom(req, res)
+    async joinRoom(@GetUser() user: User, @Body() dto: RoomDto){
+        return await this.roomService.joinRoom(dto);
     }
 
     @UseGuards(AccessTokenGuard)
+    @HttpCode(200)
     @Post('message')
-    async postMessage(@Req() req: any, @Res() res: any){
-        return await this.roomService.postMessage(req, res)
+    async postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
+        return await this.roomService.postMessage(user.id, dto)
     }
 
+    @Get('message')
+    async getMessage(){
+        return await this.roomService.getMessage()
+    }
+    
     @UseGuards(AccessTokenGuard)
     @Delete(':id')
     async removeRoom(@Param("id") id: number){
