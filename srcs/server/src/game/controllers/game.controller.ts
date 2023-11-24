@@ -7,6 +7,7 @@ import { CreateGameDto } from "../dto/create.game.dto";
 import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
 import { GetUser } from "src/users/decorator/user.decorator";
 import { UpdateGameDto } from "../dto/update.game.dto";
+import { GameState } from "../globals/interfaces";
 
 @Controller('games')
 export class GamesController {
@@ -25,13 +26,13 @@ export class GamesController {
 
     // @UseGuards(AccessTokenGuard)
     //this route will disapear
-    @Post()
-    async addGameToDB(@GetUser() user : User, @Body()createGameDto : CreateGameDto): Promise<Game> {
+    // @Post()
+    // async addGameToDB(@Body()game : GameState): Promise<Game> {
 
-        const newGame = await this.matchHistoryService.storeGameResults(createGameDto);
-        console.log('Ginette :', newGame);
-        return (newGame);
-    }
+    //     const newGame = await this.matchHistoryService.storeGameResults(game);
+    //     console.log('Ginette :', newGame);
+    //     return (newGame);
+    // }
 
     // @UseGuards(AccessTokenGuard)
     @Get(':id')

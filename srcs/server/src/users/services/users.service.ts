@@ -6,9 +6,10 @@ import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
-import { leaderboardStats } from 'src/game/globals/interfaces';
+import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
 import { CreateGameDto } from 'src/game/dto/create.game.dto';
 import { Game } from 'src/game/entities/game-entity';
+import { UpdateGameDto } from 'src/game/dto/update.game.dto';
 
 @Injectable()
 export class UsersService {
@@ -69,30 +70,6 @@ export class UsersService {
     (await users).forEach((value) => {
       this.userRepository.remove(value);
     });
-  }
-
-  async addGameToWinnerPlayedGames(game : Game) {
-
-    const winner = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.winnerId }});
-    // console.log('id : ', winner.id, 'winner : ', winner)
-    if (winner.playedGames === undefined)
-      winner.playedGames = [];
-    winner.playedGames.push(game);
-    winner.winsAmount ++;
-    this.userRepository.save(winner);
-
-  }
-
-  async addGameToLooserPlayedGames(game : Game)
-  {
-    const looser = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.winnerId }});
-    if (looser.playedGames === undefined)
-    looser.playedGames = [];
-  looser.playedGames.push(game);
-  // console.log('played games : ', looser.playedGames)
-  // console.log('id : ', looser.id, 'looser : ', looser)
-  looser.loosesAmount ++;
-    this.userRepository.save(looser);
   }
 
   async returnScoreList(){

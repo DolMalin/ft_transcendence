@@ -17,6 +17,7 @@ import {
   ballRelaunch
   } from './BallMoves';
 import * as Constants from '../globals/const'
+import { MatchHistoryService } from './match.history.services';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -39,6 +40,11 @@ export function roomNameGenerator(lenght : number, map : Map<string, Set<string>
 
 @Injectable()
 export class MatchmakingService {
+
+  constructor(
+
+    private readonly matchHistoryServices : MatchHistoryService
+) {}
 
     /**
      * @description add client to existing room, fill the GameServDTO
@@ -65,7 +71,8 @@ export class MatchmakingService {
           isPaused : true,
           clientOneScore : 0,
           clientTwoScore : 0,
-          Victor : '',
+          winner : undefined,
+          looser : undefined,
           gameType  : gameType,
           paddleOne : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
@@ -158,6 +165,8 @@ export class MatchmakingService {
         game.clientTwo.socket.leave(data.roomName);
         gamesMap.delete(data.roomName);
       }
+
+      this.matchHistoryServices.storeGameResults(game);
     }
 }
 

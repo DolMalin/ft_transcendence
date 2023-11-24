@@ -7,9 +7,6 @@ export class Game {
     id: string;
 
     @Column({type: 'varchar', nullable: true})
-    date : string;
-
-    @Column({type: 'varchar', nullable: true})
     winnerId : string;
 
     @Column({type: 'varchar', nullable: true})

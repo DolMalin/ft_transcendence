@@ -6,16 +6,16 @@ export class UpdateGameDto extends PartialType(CreateGameDto){
 	
     @IsString()
     @IsOptional()
-    date : string;
-
-    @IsString()
-    @IsOptional()
     winnerId : string;
 
     @IsString()
     @IsOptional()
     winnerUsername : string;
 
+    @IsNumber()
+    @IsOptional()
+    winnerScore : number;
+    
     @IsString()
     @IsOptional()
     looserId : string;
@@ -24,9 +24,6 @@ export class UpdateGameDto extends PartialType(CreateGameDto){
     @IsOptional()
     looserUsername : string;
 
-    @IsNumber()
-    @IsOptional()
-    winnerScore : number;
 
     @IsNumber()
     @IsOptional()
