@@ -3,8 +3,10 @@ import { MatchHistoryService } from "../services/match.history.services";
 import { Game } from "../entities/game-entity";
 import { UsersService } from "src/users/services/users.service";
 import { User } from "src/users/entities/user.entity";
-import { CreateGameDto } from "../dto/game.dto";
+import { CreateGameDto } from "../dto/create.game.dto";
 import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
+import { GetUser } from "src/users/decorator/user.decorator";
+import { UpdateGameDto } from "../dto/update.game.dto";
 
 @Controller('games')
 export class GamesController {
@@ -13,13 +15,22 @@ export class GamesController {
         private readonly  userService: UsersService,
     ) {}
 
-    // @UseGuards(AccessTokenGuard)
-    @Post()
-    async updateHistory(createGameDto : CreateGameDto): Promise<Game> {
 
-        const newGame = this.matchHistoryService.storeGameResults(createGameDto);
-        this.matchHistoryService.addGameToUsersHistory(createGameDto);
-        return (newGame)
+    @Get()
+    async findAll(): Promise<Game[]> {
+        const gameArray : Game[]= []
+        return (gameArray)
+    }
+
+
+    // @UseGuards(AccessTokenGuard)
+    //this route will disapear
+    @Post()
+    async addGameToDB(@GetUser() user : User, @Body()createGameDto : CreateGameDto): Promise<Game> {
+
+        const newGame = await this.matchHistoryService.storeGameResults(createGameDto);
+        console.log('Ginette :', newGame);
+        return (newGame);
     }
 
     // @UseGuards(AccessTokenGuard)

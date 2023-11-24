@@ -17,6 +17,8 @@ import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
+import axios from 'axios';
+import authService from './auth/auth.service';
 
 const gameSock = io('http://127.0.0.1:4545')
 
@@ -60,7 +62,6 @@ function Malaise() {
     })
   }, [tab, tabsRef?.current?.tabIndex])
 
-  console.log('tab on rerender : ', tab)
   return (
     <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
     index={tab} onChange={(index) => {

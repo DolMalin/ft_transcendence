@@ -44,7 +44,7 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
-      console.log(req.user)
+      console.log('user in get validate :', req.user)
       const user = await this.authService.validate(req, res)
       res.send(user)
     }

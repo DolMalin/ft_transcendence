@@ -113,7 +113,7 @@ export class MatchmakingService {
 
         for (const [key, value] of gamesMap) 
         {
-          if (value.gameIsFull === false && value.gameType === gameType)
+          if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
           {
             this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
@@ -144,7 +144,6 @@ export class MatchmakingService {
       }
       else if (data.playerId === '1')
       {
-        console.log('here')
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
         server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
         game.clientOne.socket.leave(data.roomName);
@@ -153,8 +152,6 @@ export class MatchmakingService {
       }
       else if (data.playerId === '2')
       {
-        console.log('there')
-
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
         server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
         game.clientOne.socket.leave(data.roomName);

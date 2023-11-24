@@ -52,7 +52,6 @@ export class AuthService {
           bodyParameters,
           config
         ).then((res) => {
-          console.log("bjr")
           resolve(res.data.access_token as string)
         }, (err) => {
           console.log(err)
@@ -224,7 +223,7 @@ export class AuthService {
 
 
   async register(body: any) { 
-    console.log(body)
+    console.log('body in register :', body)
     // await this.usersService.add
     return "ok"
 

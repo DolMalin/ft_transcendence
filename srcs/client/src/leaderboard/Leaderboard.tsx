@@ -74,18 +74,8 @@ function LeaderBoard() {
         setTimeout(getScoreList, 2000);
     }, [scoreList])
 
-    async function createUser() {
-        try {
-            const res = await axios.get('http://127.0.0.1:4545/auth/newUserDebug')
-        }
-        catch (e) {
-            console.log(e);
-        }
-    }
-
     //TO DO => UserName redirect to profile page
     return (<>
-        {/* <Button fontWeight={'normal'} onClick={createUser}> Create user</Button> */}
         <Box
         width={'100vw'}
         height={'96vh'}

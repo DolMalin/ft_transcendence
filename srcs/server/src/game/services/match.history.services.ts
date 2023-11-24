@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Game } from '../entities/game-entity';
 import { Repository } from 'typeorm';
-import { CreateGameDto } from '../dto/game.dto';
+import { CreateGameDto } from '../dto/create.game.dto';
+import { UsersService } from 'src/users/services/users.service';
 
 
 @Injectable()
@@ -10,16 +11,24 @@ export class MatchHistoryService {
 
     constructor(
         @InjectRepository(Game)
-        private gameRepository: Repository<Game>
+        private gameRepository: Repository<Game>,
+
+        private readonly usersService : UsersService
     ) {}
 
-    async storeGameResults(createGameDto : CreateGameDto) {
+    async storeGameResults(createGameDto : CreateGameDto): Promise<Game> {
 
-        const newGame = this.gameRepository.create(createGameDto);
-        return (this.gameRepository.save(newGame))
+        console.log('jacquouille')
+        let newGame = this.gameRepository.create(createGameDto);
+        newGame = await this.gameRepository.save(newGame)
+        this.addGameToUsersPlayedGames(newGame)
+        console.log('hubert')
+        return (newGame)
     }
 
-    addGameToUsersHistory(createGameDto : CreateGameDto) {
+    addGameToUsersPlayedGames(game : Game) {
         
+        this.usersService.addGameToLooserPlayedGames(game);
+        // this.usersService.addGameToWinnerPlayedGames(game);
     }
 }

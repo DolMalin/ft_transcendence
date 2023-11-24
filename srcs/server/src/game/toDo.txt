@@ -19,3 +19,39 @@ TO DO 2 / 11 / 2023 :
 - COLLISON BUG BOTTONM PADDLE RIGHT 
 
 IP : 10.14.6.7:4343
+
+
+{
+    "id" : "1",
+    "date" : "09/11/2001",
+    "winnerId" : "ce706f30-79d0-4b67-a82b-8d9a4c6d1087",
+    "looserId" : "ce706f30-79d0-4b67-a82b-8d9a4c6d1087",
+    "winnerScore" : 10,
+    "looserScore" : 9,
+    players : [
+            {
+        "id": "ce706f30-79d0-4b67-a82b-8d9a4c6d1087",
+        "ftId": 96563,
+        "username": "michel",
+        "refreshToken": "$argon2id$v=19$m=65536,t=3,p=4$n2Vav5Os4/MDn0162Bm9Ig$sfQas3Hbewej8L/2jVbvfKdAdsLnWkm+jjcSZp88VmQ",
+        "isRegistered": true,
+        "winsAmount": 0,
+        "loosesAmount": 0,
+        "isInQueue": false,
+        "isInGame": false,
+        "avatarId": "cbdac859-9cbd-4263-9bef-2a2f473a74dd"
+    },
+        {
+        "id": "ce706f30-79d0-4b67-a82b-8d9a4c6d1087",
+        "ftId": 96563,
+        "username": "michel",
+        "refreshToken": "$argon2id$v=19$m=65536,t=3,p=4$n2Vav5Os4/MDn0162Bm9Ig$sfQas3Hbewej8L/2jVbvfKdAdsLnWkm+jjcSZp88VmQ",
+        "isRegistered": true,
+        "winsAmount": 0,
+        "loosesAmount": 0,
+        "isInQueue": false,
+        "isInGame": false,
+        "avatarId": "cbdac859-9cbd-4263-9bef-2a2f473a74dd"
+    }
+    ]
+}

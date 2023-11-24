@@ -5,17 +5,19 @@ import { User } from '../entities/user.entity';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
+import { GetUser } from '../decorator/user.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
+  // TO DO : Can't get this to work
   // @UseGuards(AccessTokenGuard)
-  @Get('currentUser')
-  findCurrentUser(@Req() req : any) {
-    console.log(req.user)
-    return ('feur')
-  }
+  // @Get('currentUser')
+  // findCurrentUser(@Req() req : any) {
+  //   console.log('current user : ', req.user)
+  //   return ('feur')
+  // }
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -27,6 +29,14 @@ export class UsersController {
     return (this.usersService.returnScoreList());
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Get('myself')
+  getMyself(@GetUser() user : User)
+  {
+    console.log('User in getMyself : ', user)
+    return (user)
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOneById(id);
@@ -36,7 +46,7 @@ export class UsersController {
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
     const avatar = await this.usersService.getAvatar(id)
     const stream = Readable.from(avatar.data)
-    console.log(avatar.data)
+    console.log('avatar :', avatar.data)
     
     res.set({
       'Content-Disposition':`inline; filename="${avatar.filename}"`,
@@ -52,7 +62,7 @@ export class UsersController {
     @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-      console.log(req.user)
+      console.log('user in Patch update : ', req.user)
     return this.usersService.update(req.user.id, updateUserDto);
   }
 

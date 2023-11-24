@@ -85,11 +85,18 @@ function CreateGame(props : {sock : Socket}) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
-            // const dbUserID = authService.
+            try {
+                authService.get('http://127.0.0.1:4545/users/myself').then((myself) => {
 
-            sock.emit("joinGame", {gameType : state.selectedGameType, dbUserId : 'feur'});
-            dispatch({type : 'SET_GAME_MOD', payload : false});
-            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
+                    sock.emit("joinGame", {gameType : state.selectedGameType, dbUserId : myself.id});
+                    dispatch({type : 'SET_GAME_MOD', payload : false});
+                    dispatch({type : 'SET_WAITING_SCREEN', payload : true});
+                });
+            }
+            catch (e) {
+                console.log(e);
+            }
+
 
             sock.on('roomFilled', () => {
 
@@ -130,14 +137,6 @@ function CreateGame(props : {sock : Socket}) {
             sock.off('gameOver');
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
-    
-    try {
-        axios.get('http://127.0.0.1:4545/users/currentUser')
-      }
-      catch (err)
-      {
-        console.log(err.message)
-      }
 
     return (<>
             <Box id={Constants.GAME_ZONE}

@@ -13,6 +13,8 @@ import {
   GameInfo,
 } from '../globals/interfaces'
 import { clearInterval } from 'timers';
+import { GetUser } from 'src/users/decorator/user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
@@ -38,7 +40,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinGame')
-  joinGame(@MessageBody() data : {gameType : string, dbUserId : string}, @ConnectedSocket() client: Socket) {
+  joinGame(@MessageBody() data : {gameType : string, dbUserId : string},@ConnectedSocket() client: Socket) {
 
     this.matchmakingService.gameCreation(this.server, client, data.dbUserId, this.gamesMap, data.gameType);
   }

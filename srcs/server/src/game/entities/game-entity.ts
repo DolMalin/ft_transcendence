@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, JoinTable, ManyToMany } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
 @Entity()
@@ -13,7 +13,13 @@ export class Game {
     winnerId : string;
 
     @Column({type: 'varchar', nullable: true})
+    winnerUsername : string;
+
+    @Column({type: 'varchar', nullable: true})
     looserId : string;
+
+    @Column({type: 'varchar', nullable: true})
+    looserUsername : string;
 
     @Column({type: 'int', nullable: true})
     winnerScore : number;
@@ -21,7 +27,7 @@ export class Game {
     @Column({type: 'int', nullable: true})
     looserScore : number;
 
-    // @OneToMany(() => User, (game) => game.players)
-    // @JoinTable()
-    // players : User[];
+    @ManyToMany(() => Game)
+    @JoinTable()
+	playedGames: Game[];
 }
