@@ -26,8 +26,6 @@ export function Chat(props: any){
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
 
-    
-
     const createRoom = async () => {
         if (roomPlaceholder !== "")
         {
@@ -68,7 +66,7 @@ export function Chat(props: any){
                     />                
                 {checked && (
                 <Chakra.Input
-                    type="text"
+                    type="password"
                     placeholder="password ..."
                     onChange={(event => {setPassword(event.target.value)})}/>)
                 }
