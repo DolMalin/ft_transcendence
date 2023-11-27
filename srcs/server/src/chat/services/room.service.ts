@@ -22,9 +22,19 @@ export class RoomService {
         private messageRepository: Repository<Message>
     ) {}
 
-    async create(createRoomDto: CreateRoomDto) {
-        const newRoom = this.roomRepository.create(createRoomDto)
-        return await this.roomRepository.save(newRoom)
+    // async create(createRoomDto: CreateRoomDto) {
+    //     const newRoom = this.roomRepository.create(createRoomDto)
+    //     return await this.roomRepository.save(newRoom)
+    // }
+
+    async create(createRoomDto: CreateRoomDto, user: User){
+        const room = this.roomRepository.create({
+            name: createRoomDto.name,
+            password: createRoomDto?.password,
+            owner: {id: user.id}
+        })
+        console.log(room)
+        return await this.roomRepository.save(room);
     }
 
     // async createMsg(user: User, msgContent: string){

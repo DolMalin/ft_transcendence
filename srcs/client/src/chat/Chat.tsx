@@ -21,7 +21,7 @@ export interface Room {
 export function Chat(props: any){
     const [roomPlaceholder, setRoomPlaceholder] = useState("")
     const [room, setRoom] = useState<Room>()
-    const [password, setPassword] = useState("")
+    const [password, setPassword] = useState("") 
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
@@ -96,7 +96,7 @@ export function Chat(props: any){
         </div>
         )
         : (
-        <Chatbox socket={props.socket} room={room} />
+        <Chatbox socket={props.socket} room={room} showChat={setShowChat}/>
         )}
     </div>
     )

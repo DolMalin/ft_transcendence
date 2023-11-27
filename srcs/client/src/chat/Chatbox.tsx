@@ -28,7 +28,7 @@ function timeOfDay(timestampz: string | Date){
     return (date);
 }
 
-export function Chatbox(props: {socket: Socket, room: Room}) {
+export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
 
     const [currentMessage, setCurrentMessage] = useState("");
     const [messageList, setMessageList] = useState<MessageData[]>([]);
@@ -45,13 +45,13 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
             setMe(response.data)
         })
     }, [])
-
+    
     const wipeInput = () => {
         if (inputRef.current){
             inputRef.current.value = ""
         }
     }
-
+    
     const getMe = async () => {
         try{
             const me = await authService.get('http://127.0.0.1:4545/users/me')
@@ -60,14 +60,14 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         }catch(err){
             console.log(err)
         }}
-    
-    const sendMessage = async () => {
         
-        try {
-            if (currentMessage !== ""){
-                const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: me.id})
-                const message = res.data;
-                console.log(message)
+        const sendMessage = async () => {
+            
+            try {
+                if (currentMessage !== ""){
+                    const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: me.id})
+                    const message = res.data;
+                    console.log(message)
                 props.socket.emit("sendMessage", message);
                 setMessageList((list) => [...list, message])
                 setCurrentMessage("") 
@@ -77,24 +77,26 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         catch(err){
             console.log(err)
         }
-
-        
     };
     useEffect(() => {
         props.socket.on("receiveMessage", (data: MessageData) => {
         setMessageList((list) => [...list, data])
         })  
     }, [props.socket])
-    console.log('socket', props.socket.id)
     return (
-        <div className="chat-window">
-            <div className="chat-header">
-                <p>channel: {props.room.name}</p>
-            </div>
-            <div className="chat-body">
-                <ScrollToBottom className="message-container">
-                {messageList.map((messageContent) => {
-                    return  <div className="message" key={messageContent.id}  id={messageContent.author.id  === me?.id  ? "other" : "you"}>
+        <><div>
+            <Chakra.Button onClick={() => {
+                    props.showChat(false)}}>
+                back
+            </Chakra.Button>
+        </div><div className="chat-window">
+                <div className="chat-header">
+                    <p>channel: {props.room.name}</p>
+                </div>
+                <div className="chat-body">
+                    <ScrollToBottom className="message-container">
+                        {messageList.map((messageContent) => {
+                            return <div className="message" key={messageContent.id} id={messageContent.author.id === me?.id ? "other" : "you"}>
                                 <div>
                                     <div className="message-content">
                                         <p>{messageContent.content}</p>
@@ -105,23 +107,22 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
                                     </div>
                                 </div>
                             </div>
-                })}
-                </ScrollToBottom>
-            </div>
-            <div className="chat-footer">
-                <Chakra.Input 
-                    type="text" 
-                    ref={inputRef}
-                    placeholder="message..." 
-                    onChange={(event) => {setCurrentMessage(event.target.value)}}
-                    onKeyPress={(event) => {event.key === "Enter" && sendMessage()}}
-                    />
-                <Chakra.Button onClick={sendMessage}>
-                    <>
-                    &#9658;
-                    </>
-                </Chakra.Button>
-            </div>
-        </div>
+                        })}
+                    </ScrollToBottom>
+                </div>
+                <div className="chat-footer">
+                    <Chakra.Input
+                        type="text"
+                        ref={inputRef}
+                        placeholder="message..."
+                        onChange={(event) => { setCurrentMessage(event.target.value) } }
+                        onKeyPress={(event) => { event.key === "Enter" && sendMessage() } } />
+                    <Chakra.Button onClick={sendMessage}>
+                        <>
+                            &#9658;
+                        </>
+                    </Chakra.Button>
+                </div>
+            </div></>
     )
 }

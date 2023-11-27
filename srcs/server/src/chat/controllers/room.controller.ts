@@ -22,11 +22,10 @@ export class RoomController {
 
     @UseGuards(AccessTokenGuard)
     @Post()
-    async createRoom(@Body() createRoomDto: CreateRoomDto){
-        console.log('test from createroom')
+    async createRoom(@GetUser() user: User, @Body() createRoomDto: CreateRoomDto){
         if (createRoomDto.password?.length > 0)
             createRoomDto.password = await this.authService.hash(createRoomDto.password)
-        return await this.roomService.create(createRoomDto)
+        return await this.roomService.create(createRoomDto, user)
     }
 
     @UseGuards(AccessTokenGuard)
