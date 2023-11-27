@@ -141,30 +141,9 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
   return (
-    // <div className="App">
-    //   <header className="App-header">
         <ChakraProvider>
           <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
           {isAuthenticated && isRegistered && <Malaise/>}
-          {/* <Chat socket={socket}/> */}
         </ChakraProvider>
-    //   </header>
-    // </div>
 )}
 export default App;
-// function App() {
-  
-//   const [isAuthenticated, setIsAuthenticated] = useState(false)
-//   const [isRegistered, setIsRegistered] = useState(false)
-
-//   return (<>
-//     <ChakraProvider>
-
-//       <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-//       {isAuthenticated && isRegistered && <Malaise/>}
-//     </ChakraProvider>
-//   </>
-//   );
-// }
-
-// export default App;
