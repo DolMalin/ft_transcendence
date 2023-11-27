@@ -34,13 +34,12 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
     const [messageList, setMessageList] = useState<MessageData[]>([]);
     const inputRef = useRef<HTMLInputElement | null>(null)
     const [me, setMe] = useState<{id: string, username: string} | undefined>(undefined)
-    const [date, setDate] = useState<Date>(undefined)
-    
+
     useEffect(()  => {
         if (props.room.message){
             props.room.message.reverse()
         }
-        setMessageList(props.room.message.reverse()? props.room.message: [])
+        setMessageList(props.room.message? props.room.message: [])
         const res = getMe()
         res.then(response => {
             setMe(response.data)
@@ -66,7 +65,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         
         try {
             if (currentMessage !== ""){
-                const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: props.socket.id})
+                const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: me.id})
                 const message = res.data;
                 console.log(message)
                 props.socket.emit("sendMessage", message);
@@ -86,7 +85,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         setMessageList((list) => [...list, data])
         })  
     }, [props.socket])
-
+    console.log('socket', props.socket.id)
     return (
         <div className="chat-window">
             <div className="chat-header">
@@ -102,7 +101,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
                                     </div>
                                     <div className="message-meta">
                                         <p id="time">{timeOfDay(messageContent.sendAt)}</p>
-                                        <p id="author">{me?.id}</p>
+                                        <p id="author">{me?.username}</p>
                                     </div>
                                 </div>
                             </div>
