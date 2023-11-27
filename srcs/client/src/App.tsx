@@ -1,5 +1,4 @@
 import React, {useEffect, useRef, useState } from 'react';
-
 import Auth from "./auth/Auth"
 import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
@@ -119,7 +118,7 @@ function Malaise() {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          CECI EST UN CHAT
+          <Chat socket={chatSocket}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -135,22 +134,24 @@ function Malaise() {
   )
 }
 
-const socket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
   return (
-    <div className="App">
-      <header className="App-header">
+    // <div className="App">
+    //   <header className="App-header">
         <ChakraProvider>
           <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-          <Chat socket={socket}/>
-          </ChakraProvider>
-      </header>
-    </div>
+          {isAuthenticated && isRegistered && <Malaise/>}
+          {/* <Chat socket={socket}/> */}
+        </ChakraProvider>
+    //   </header>
+    // </div>
 )}
+export default App;
 // function App() {
   
 //   const [isAuthenticated, setIsAuthenticated] = useState(false)
