@@ -12,7 +12,7 @@ import { leaderboardStats } from 'src/game/globals/interfaces';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   @Get('currentUser')
   findCurrentUser(@Req() req : any) {
     console.log(req.user)
