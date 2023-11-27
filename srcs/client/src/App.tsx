@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState } from 'react';
 
 import Auth from "./auth/Auth"
+import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
@@ -17,6 +18,7 @@ import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
+import authService from './auth/auth.service';
 
 const gameSock = io('http://127.0.0.1:4545')
 
@@ -133,19 +135,35 @@ function Malaise() {
   )
 }
 
+const socket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+
 function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
+  return (
+    <div className="App">
+      <header className="App-header">
+        <ChakraProvider>
+          <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
+          <Chat socket={socket}/>
+          </ChakraProvider>
+      </header>
+    </div>
+)}
+// function App() {
+  
+//   const [isAuthenticated, setIsAuthenticated] = useState(false)
+//   const [isRegistered, setIsRegistered] = useState(false)
 
-  return (<>
-    <ChakraProvider>
+//   return (<>
+//     <ChakraProvider>
 
-      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-      {isAuthenticated && isRegistered && <Malaise/>}
-    </ChakraProvider>
-  </>
-  );
-}
+//       <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
+//       {isAuthenticated && isRegistered && <Malaise/>}
+//     </ChakraProvider>
+//   </>
+//   );
+// }
 
-export default App;
+// export default App;

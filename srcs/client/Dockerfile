@@ -13,5 +13,4 @@ COPY package-lock.json .
 COPY . .
 EXPOSE ${CLIENT_PORT}:${CLIENT_PORT}
 ENV PORT=${CLIENT_PORT}
-ENV SERVER_PORT=${SERVER_PORT}
-CMD  npm install; npm run start
+CMD npm i --save-dev @chakra-ui/react @emotion/react @emotion/styled framer-motion typescript react-scripts reactjs-popup @nestjs/websockets socket.io socket.io-client ; npm run start
