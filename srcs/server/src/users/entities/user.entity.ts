@@ -29,11 +29,8 @@ export class User {
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
 
-	@Column({type : 'bool', default: false})
-	isInQueue : boolean
-
-	@Column({type : 'bool', default: false})
-	isInGame : boolean
+	@Column({type : 'bool', default: true})
+	isAvailable : boolean
 	
 	@ManyToMany(() => Game)
     @JoinTable()
@@ -45,4 +42,7 @@ export class User {
 
 	@Column({nullable: true})
 	avatarId?: string
+
+	@Column({type : 'text', default : null, array : true, nullable : true})
+	gameSockets : string[];
 }

@@ -8,4 +8,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	isRegistered?: boolean
 	winsAmount?: number
 	loosesAmount?: number
+	isAvailable?: boolean
 }

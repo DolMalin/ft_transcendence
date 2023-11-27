@@ -181,7 +181,8 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    switch (data.key)
+    console.log('in started : ', data.key);
+    switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
         data.playerId === '1' ?  game.paddleOne.movingRight = true : game.paddleTwo.movingRight = true;
@@ -199,7 +200,8 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    switch (data.key)
+    console.log('in stopped : ', data.key);
+    switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
         data.playerId === '1' ?  game.paddleOne.movingRight = false : game.paddleTwo.movingRight = false;

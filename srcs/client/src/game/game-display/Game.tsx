@@ -132,9 +132,10 @@ function Game(props : GameProps) {
 
         function handleKeydown(event : globalThis.KeyboardEvent) {
 
-            switch (event.key)
+            switch (event.key.toLowerCase())
             {
                 case Constants.LEFT :
+                    sock.emit('playerMove', {key : event.key, playerId : props.playerId,room : props.gameRoom});
                 case Constants.RIGHT:
                     sock.emit('playerMove', {key : event.key, playerId : props.playerId,room : props.gameRoom});
                     break ;
@@ -145,16 +146,20 @@ function Game(props : GameProps) {
 
         function handleKeyup(event : globalThis.KeyboardEvent) {
 
-            switch (event.key)
+            switch (event.key.toLowerCase())
             {
                 case Constants.LEFT :
-                    case Constants.RIGHT:
-                        sock.emit('playerMoveStopped', {key : event.key, playerId : props.playerId,room : props.gameRoom});
-                        break ;
-                    default :
-                        break ;
+                    sock.emit('playerMoveStopped', {key : event.key, playerId : props.playerId,room : props.gameRoom});
+                    break ;
+                case Constants.RIGHT:
+                    sock.emit('playerMoveStopped', {key : event.key, playerId : props.playerId,room : props.gameRoom});
+                    break ;
+                default :
+                    break ;
             }
         }
+
+        console.log('getting through move effect');
 
         function leaveGameOnRefresh() {
             try {

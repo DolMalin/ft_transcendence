@@ -12,7 +12,7 @@ import {
   TabPanels,
   TabPanel,
  } from '@chakra-ui/react'
-import { io } from 'socket.io-client'
+import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
@@ -20,9 +20,7 @@ import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 import axios from 'axios';
 import authService from './auth/auth.service';
 
-const gameSock = io('http://127.0.0.1:4545')
-
-function Malaise() {
+function Malaise(props : {gameSock : Socket}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
@@ -49,7 +47,7 @@ function Malaise() {
 
   useEffect(function socketEvents() {
 
-    gameSock.on('gameStarted', () => {
+      props.gameSock.on('gameStarted', () => {
       
       setSwitchingFrom(true);
       setTab(0)
@@ -58,7 +56,7 @@ function Malaise() {
     })
 
     return(() => {
-      gameSock.off('gameStarted')
+      props.gameSock.off('gameStarted')
     })
   }, [tab, tabsRef?.current?.tabIndex])
 
@@ -114,7 +112,7 @@ function Malaise() {
       <TabPanels margin={'0'} padding={'0'}>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <CreateGame sock={gameSock}/>
+          <CreateGame sock={props.gameSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -134,16 +132,20 @@ function Malaise() {
   )
 }
 
+// const gameSock =  io('http://localhost:4545/');
+const gameSock = io('http://localhost:4545/', {extraHeaders: {"authorization": "Bearer " + authService.getAccessToken()}});
+
 function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
 
+
   return (<>
     <ChakraProvider>
 
       <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-      {isAuthenticated && isRegistered && <Malaise/>}
+      {isAuthenticated && isRegistered && <Malaise gameSock={gameSock}/>}
     </ChakraProvider>
   </>
   );

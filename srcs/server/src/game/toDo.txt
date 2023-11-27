@@ -20,6 +20,12 @@ TO DO 2 / 11 / 2023 :
 
 IP : 10.14.6.7:4343
 
+BUGS :
+
+Paddle never stop going in a direction at some points
+
+
+
 
 {
     "id" : "1",

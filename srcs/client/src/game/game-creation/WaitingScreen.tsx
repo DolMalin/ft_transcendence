@@ -6,6 +6,7 @@ Flex
  } from "@chakra-ui/react"
 import { Socket } from "socket.io-client";
 import * as Constants from '../globals/const'
+import authService from "../../auth/auth.service";
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
         
@@ -17,6 +18,12 @@ import * as Constants from '../globals/const'
         props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
         props.dispatch({type : 'SET_GAME_TYPE', payload : ''})
         props.dispatch({type : 'SET_PLAY', payload : true});
+        try {
+          authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+        }
+        catch (e) {
+            console.log('setting is Available to false returned : ', e);
+        }
     }
 
     const [dot, setDot] = useState('.');

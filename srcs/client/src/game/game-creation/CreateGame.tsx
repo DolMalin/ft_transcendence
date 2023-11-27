@@ -12,8 +12,9 @@ import { Box } from '@chakra-ui/react'
 import * as Constants from '../globals/const'
 import axios from 'axios';
 import authService from '../../auth/auth.service';
+import { type } from 'os';
 
-type actionType = 
+export type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}
 | {type : 'SET_GAME_MOD'; payload :boolean}
 | {type : 'SET_GAME'; payload :boolean}
@@ -23,7 +24,7 @@ type actionType =
 | {type : 'SET_V_SCREEN'; payload :boolean}
 | {type : 'SET_GAME_TYPE'; payload :string};
 
-type stateType = {
+export type stateType = {
     playButtonVisible : boolean,
     gameModVisible : boolean,
     gameVisible : boolean,
@@ -101,6 +102,7 @@ function CreateGame(props : {sock : Socket}) {
             sock.on('roomFilled', () => {
 
                 dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+                dispatch({type : 'SET_LF_GAME', payload : false})
                 dispatch({type : 'SET_GAME', payload : true});
             })
 
@@ -130,6 +132,12 @@ function CreateGame(props : {sock : Socket}) {
                 dispatch({type : 'SET_L_SCREEN', payload : true});
 
             dispatch({type : 'SET_GAME', payload : false});
+            try {
+                authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+            }
+            catch (e) {
+                console.log('setting is Available to false returned : ', e);
+            }
         });
 
 

@@ -13,7 +13,7 @@ import {
   GameInfo,
 } from '../globals/interfaces'
 import { clearInterval } from 'timers';
-import { GetUser } from 'src/users/decorator/user.decorator';
+import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
 
 @WebSocketGateway( {cors: {
@@ -25,14 +25,38 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   gamesMap : Map<string, GameState> = new Map();
   
-  constructor(private readonly matchmakingService: MatchmakingService,
-  private readonly gamePlayService : GamePlayService) {}
+  constructor(
+  private readonly matchmakingService: MatchmakingService,
+  private readonly gamePlayService : GamePlayService,
+  private readonly jwtService : JwtService
+  ) {}
   
   @WebSocketServer()
   server : Server;
 
  handleConnection(client: Socket) {
+      // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
+    // for (const id of userBlocked){
+      // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
+    // }
 
+    if (client.handshake.headers.authorization) {
+      const token = client.handshake.headers.authorization.split(' ');
+      if (token.length == 2) {
+        //TODO not decode but verify
+        console.log('token : ', token[1])
+        const payload = this.jwtService.decode(token[1]) as {id: string};
+        console.log('pay load : ', payload);
+      }
+      console.log("Connection of socket ID : " + client.id);
+    }
+    else {
+      client.disconnect();
+      console.log("client disconnected, wrong token : " + client.id);
+      
+    }
+    // TODO else disconnect
+    
   }
   
   handleDisconnect(client: Socket){
@@ -80,6 +104,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
   }
+
   @SubscribeMessage('ping')
   ping(@MessageBody() data : any, @ConnectedSocket() client: Socket) {
     console.log('PINGED DATA : ', data)

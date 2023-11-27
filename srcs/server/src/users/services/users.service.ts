@@ -84,11 +84,11 @@ export class UsersService {
       let ratio = w * 100 / (w + l);
 
       return (ratio)
-  }
+    }
 
     return (this.findAll().then((res : User[]) => {
         let scoreList : leaderboardStats[] = []; 
-        res.forEach((value) => {
+        res?.forEach((value) => {
         scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
         WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
       })

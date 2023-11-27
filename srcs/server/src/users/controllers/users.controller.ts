@@ -6,6 +6,7 @@ import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
+import { Socket, io } from 'socket.io-client';
 
 @Controller('users')
 export class UsersController {
@@ -22,7 +23,14 @@ export class UsersController {
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
+
+  @UseGuards(AccessTokenGuard)
+  @Get('current')
+  async current(@GetUser() user : User) : Promise<User> {
+    return (user);
+  }
   
+  @UseGuards(AccessTokenGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {
 
@@ -30,11 +38,24 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Get('isAvailable')
+  isAvailable(@GetUser() user : User) {
+    
+    return (user.isAvailable);
+  }
+  @UseGuards(AccessTokenGuard)
   @Get('myself')
   getMyself(@GetUser() user : User)
   {
     console.log('User in getMyself : ', user)
     return (user)
+  }
+  
+  @UseGuards(AccessTokenGuard)
+  @Patch('updateIsAvailable')
+  updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
+    
+    return (this.usersService.update(user.id, updateDto));
   }
 
   @Get(':id')

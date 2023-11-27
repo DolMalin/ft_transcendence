@@ -17,6 +17,7 @@ import {
 import * as Constants from '../game/globals/const'
 import axios from "axios";
 import { leaderboardStats } from "../game/globals/interfaces";
+import authService from "../auth/auth.service";
 
 
 function LeaderBoard() {
@@ -59,9 +60,10 @@ function LeaderBoard() {
 
     async function getScoreList() {
         try {
-            const res = await axios.get('http://127.0.0.1:4545/users/scoreList')
+            authService.get('http://127.0.0.1:4545/users/scoreList').then((res) => {
+                setScoreList(sortScoreList(res?.data))
+            })
 
-            setScoreList(sortScoreList(res.data))
         }
         catch (err)
         {
