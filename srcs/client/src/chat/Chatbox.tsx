@@ -40,7 +40,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         if (props.room.message){
             props.room.message.reverse()
         }
-        setMessageList(props.room.message? props.room.message: [])
+        setMessageList(props.room.message.reverse()? props.room.message: [])
         const res = getMe()
         res.then(response => {
             setMe(response.data)
