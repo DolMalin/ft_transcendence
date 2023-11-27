@@ -1,12 +1,12 @@
-import React from 'react'
-import { useRef, useEffect, useState, KeyboardEvent } from 'react'
+import React, { Component } from 'react'
+import { useRef, useEffect, useState, useReducer } from 'react'
 import { Socket, io } from 'socket.io-client'
-import * as Constants from './const'
+import * as Constants from '../globals/const'
 import { 
     Box,
     Text,
-    Image,
     Avatar,
+    Flex,
     WrapItem
     } from '@chakra-ui/react';
 import { 
@@ -20,7 +20,7 @@ import {
     GameInfo,
     GameProps,
     GameMetrics
-    } from './interfaces';
+    } from '../globals/interfaces';
 
 /**
  * @description 
@@ -43,6 +43,8 @@ function Game(props : GameProps) {
 
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
+
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     const [gameMetrics, setGameMetrics] = useState<GameMetrics>({
         paddleOne : {
@@ -209,6 +211,11 @@ function Game(props : GameProps) {
             setMidPointCT(0);
             setCtSizeModifier(1);
         });
+
+        sock.on('gameOver', () => {
+            console.log('leaving ?')
+            sock.emit('leaveGame', gameInfo);
+        })
         
         function update() {
 
@@ -247,15 +254,11 @@ function Game(props : GameProps) {
     }, [dimension, playerOneScore, playerTwoScore, midPointCT, midPointCTOn, ctSizeModifier, gameMetrics]);
 
 
+    console.log('rerendering')
     return (<>
-        <Box display={'flex'} flexDirection={'column'}>
+        <Flex flexDir={'column'} textColor={'white'} fontSize={'1em'}>
 
             <Box display={'flex'} flexDirection={'row'}
-                border={'2px solid black'}
-                borderTopLeftRadius={'20px'}
-                borderTopRightRadius={'20px'}
-                background={props.playerId === '2' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
-                padding={'2%'}
                 height={dimension.height * 0.08}
                 width={dimension.width * 0.6}
             >
@@ -268,21 +271,16 @@ function Game(props : GameProps) {
                 </WrapItem>
                 <Text
                 size='xs'
-                padding={'10%'}
                 > Joueureuse 2 </Text>
             </Box>
             
-            <canvas ref={canvasRef} width={dimension.width * 0.6} height={dimension.height * 0.8} ></canvas>
+            <Box borderLeft={'2px solid white'} borderRight={'2px solid white'}>
+                <canvas ref={canvasRef} width={dimension.width * 0.6} height={dimension.height * 0.8} ></canvas>
+            </Box>
             
             <Box display={'flex'} flexDirection={'row-reverse'}
-                border={'2px solid black'}
-                borderBottomLeftRadius={'20px'}
-                borderBottomRightRadius={'20px'}
-                background={props.playerId === '1' ? Constants.DARKER_BLUE : Constants.DARKER_RED}
-                padding={'2%'}
                 height={dimension.height * 0.08}
                 width={dimension.width * 0.6}
-                overflow='hidden'
             >
                 <WrapItem>
                     <Avatar
@@ -294,7 +292,7 @@ function Game(props : GameProps) {
                 <Text> &name </Text>
             </Box>
 
-        </Box>
+        </Flex>
     </>)
 }
 

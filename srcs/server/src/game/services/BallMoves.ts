@@ -1,10 +1,10 @@
 import { Socket, Server } from 'socket.io';
 import {
-  Game,
+  GameState,
   Ball,
   Paddle,
-} from './interfaces'
-import * as Constants from './const'
+} from '../globals/interfaces'
+import * as Constants from '../globals/const'
 
 
 /**
@@ -46,7 +46,7 @@ export function ballReset(ball : Ball) {
  * @description 
  * check if the ball as reached a goal zone
 */
-export function goal (server : Server, game : Game,roomName : string,ball : Ball) {
+export function goal (server : Server, game : GameState,roomName : string,ball : Ball) {
     if (ball.y + ball.size >= 1)
     {
         game.clientTwoScore ++;
@@ -117,28 +117,6 @@ export function HorizontalCollisionsAngle(ball : Ball, paddle : Paddle) {
     // 4/4 of trig circle
     else if (ball.angle <= 2 * Math.PI)
         ball.angle = Math.PI * 0.5 - bounceDirection;
-}
-
-/**
- * @description 
- * pause the game after a point and relaunch the ball
- *  | need server and roomName to send ball pos to front
-*/
-export function pauseBetweenPoints(ball : Ball, server : Server, roomName : string) {
-
-    let ct = 3;
-    const int = setInterval(() =>{
-        server.to(roomName).emit('midPointCt', ct);
-        if (ct === -1)
-        {
-            clearInterval(int)
-            ballRelaunch(ball)
-            
-            server.to(roomName).emit('midPointCtEnd');
-            return ;
-        }
-        ct --
-    }, 1000);
 }
 
 /**

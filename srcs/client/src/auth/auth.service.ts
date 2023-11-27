@@ -5,13 +5,11 @@ import Cookies from 'universal-cookie';
 
 class AuthService {
 	api = axios.create({withCredentials:true})
-	constructor() {
-	}
 
 	async get(uri: string) {
 		let retry: boolean = true
 		try {
-			const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
+			const res: any = await this.api.get(uri,{ headers: {'Authorization': 'Bearer ' + this.getAccessToken()}})
 			return res
 	 	} catch(err) {
 			if (err.response.status == 401 && retry) {
@@ -21,28 +19,30 @@ class AuthService {
 					const res: any = await this.api.get(uri,{ headers: {Authorization: 'Bearer ' + this.getAccessToken()}})
 					return res
 				} catch (err) {
-					return err.response
+					throw err
 				}
-			}
+			} 
+			throw err
 		}
 	}
 
-	async post(uri: string, params: any) {
+	async postForm(uri: string, params: any) {
 		let retry: boolean = true
 		try {
 			const res: any = await this.api.post(uri, params, {headers: {
 				Authorization: 'Bearer ' + this.getAccessToken(),
-				// 'Content-Type': 'multipart/form-data'
+				'Content-Type': 'multipart/form-data'
 			}})
+			console.log(res)
 			return res
-		} catch(err) {
+	 	} catch(err) {
 			if (err.response.status == 401 && retry) {
 				retry = false
 				try {
 					await this.refresh()
 					const res: any = await this.api.post(uri, params, {headers: {
 						Authorization: 'Bearer ' + this.getAccessToken(),
-						// 'Content-Type': 'multipart/form-data'
+						'Content-Type': 'multipart/form-data'
 					}})
 					return res
 				} catch (err) {
@@ -53,7 +53,58 @@ class AuthService {
 		}
 	}
 
-	
+	async post(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.post(uri, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken(),
+			}})
+			console.log(res)
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.post(uri, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken(),
+					}})
+					return res
+				} catch (err) {
+					throw err
+				}
+			}
+			throw err
+		}
+	}
+
+	async patch(uri: string, params: any) {
+		let retry: boolean = true
+		try {
+			const res: any = await this.api.patch(uri, params, {headers: {
+				Authorization: 'Bearer ' + this.getAccessToken(),
+			}})
+			console.log(res)
+			return res
+	 	} catch(err) {
+			if (err.response.status == 401 && retry) {
+				retry = false
+				try {
+					await this.refresh()
+					const res: any = await this.api.patch(uri, params, {headers: {
+						Authorization: 'Bearer ' + this.getAccessToken(),
+					}})
+					return res
+				} catch (err) {
+					throw err
+				}
+			}
+			throw err
+		}
+	}
+
+
+
 	async logout() {
 		const cookies = new Cookies()
 
@@ -70,9 +121,9 @@ class AuthService {
 	async refresh() {
 		try {
 			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/refresh`)
-			return res.status
+			return res
 		} catch(err:any) {
-			return err.response?.status
+			throw err
 		}
 	}
 
@@ -84,20 +135,25 @@ class AuthService {
 
 	getAuthHeader() {
 		const accessToken = this.getAccessToken()
-		return { Authorization: 'Bearer ' + accessToken}
+		return { 'Authorization': 'Bearer ' + accessToken}
 	}
 
 	async validate() {
 		try {
 			const res: any  = await this.get(`http://127.0.0.1:4545/auth/validate`)
-			return res.status
+			return res
 		} catch(err) {
-			return 401
+			throw err
 		}
 	}
 
-	async register(avatar: string, username: string) {
-
+	async register(data:any) {
+		try {
+			let res: any = await this.postForm(`http://127.0.0.1:4545/auth/register`, data)
+			return res.status
+		} catch(err) {
+			throw err
+		}
 	}
 
 }

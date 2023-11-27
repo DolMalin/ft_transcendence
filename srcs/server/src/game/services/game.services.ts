@@ -2,24 +2,23 @@ import { Injectable } from '@nestjs/common';
 // import { GameServDTO} from './game.gateway';
 import { Socket, Server } from 'socket.io';
 import {
-  Game,
+  GameState,
   GameInfo,
   GameMetrics,
   Paddle,
-  } from './interfaces'
+  } from '../globals/interfaces'
 import { 
   willBallCollideWithWall,
   willBallOverlapPaddleOne,
   willBallOverlapPaddleTwo,
   goal,
   ballReset,
-  pauseBetweenPoints,
   randomizeBallAngle,
+  ballRelaunch
   } from './BallMoves';
-import * as Constants from './const'
-import { timeLog, timeStamp } from 'console';
+import * as Constants from '../globals/const'
 
-function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
+export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
   const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -44,24 +43,26 @@ export class MatchmakingService {
     /**
      * @description add client to existing room, fill the GameServDTO
      */
-    addClientToRoom(gamesMap : Map<string, Game>, roomName : string, client : Socket) {
+    addClientToRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket, dbUserId : string) {
         
-        gamesMap.get(roomName).clientTwo = client;
+        gamesMap.get(roomName).clientTwo = {socket : client, id : dbUserId};
         gamesMap.get(roomName).gameIsFull = true;
+        client.emit('roomName', roomName);
         client.join(roomName);
       }
 
     /**
      * @description create a room on client request and fill the GameServDTO
      */
-    createRoom(gamesMap : Map<string, Game>, roomName : string, client : Socket, gameType : string) {
+    createRoom(gamesMap : Map<string, GameState>, roomName : string, client : Socket, dbUserId : string,gameType : string) {
       
         client.join(roomName);
 
-        let game : Game = {
-          clientOne : client,
+        let game : GameState = {
+          clientOne : {socket : client, id : dbUserId},
           clientTwo : undefined,
           gameIsFull : false,
+          isPaused : true,
           clientOneScore : 0,
           clientTwoScore : 0,
           Victor : '',
@@ -100,7 +101,7 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    gameCreation (server : Server, client : Socket, gamesMap : Map<string, Game>, gameType : string) {
+    gameCreation (server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
         if (client.rooms.size >= 2)
         {
@@ -114,9 +115,8 @@ export class MatchmakingService {
         {
           if (value.gameIsFull === false && value.gameType === gameType)
           {
-            this.addClientToRoom(gamesMap, key, client)
+            this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
-            client.emit('roomName', key);
             client.emit('playerId', '2'); // was one not 2 might cause trouble
             return ;
           }
@@ -126,14 +126,14 @@ export class MatchmakingService {
         
         let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
         
-        this.createRoom(gamesMap, roomName, client, gameType)
+        this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
         client.emit('roomName', roomName);
         client.emit('playerId', '1');
     }
 
-    leaveGame(server : Server, client : Socket, gamesMap : Map <string, Game>, data : GameInfo) {
+    leaveGame(server : Server, client : Socket, gamesMap : Map <string, GameState>, data : GameInfo) {
 
-      let game : Game = gamesMap.get(data.roomName);
+      let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
         return ;
 
@@ -144,18 +144,21 @@ export class MatchmakingService {
       }
       else if (data.playerId === '1')
       {
+        console.log('here')
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
-        server.to(data.roomName).emit('gameOver', game.clientTwo.id);
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
+        game.clientOne.socket.leave(data.roomName);
+        game.clientTwo.socket.leave(data.roomName);
         gamesMap.delete(data.roomName);
       }
       else if (data.playerId === '2')
       {
+        console.log('there')
+
         // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
-        server.to(data.roomName).emit('gameOver', game.clientOne.id);
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
+        game.clientOne.socket.leave(data.roomName);
+        game.clientTwo.socket.leave(data.roomName);
         gamesMap.delete(data.roomName);
       }
     }
@@ -167,7 +170,11 @@ export class GamePlayService {
   // ********************************* PADDLE ********************************* //
 
 
-  movingStarted(game : Game, data: {key : string, playerId : string, room : string}) {
+  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}) {
+
+    if (game === undefined)
+      return ;
+
     switch (data.key)
     {
       case Constants.RIGHT :
@@ -181,7 +188,11 @@ export class GamePlayService {
     }
   }
 
-  movingStopped(game : Game, data: {key : string, playerId : string, room : string}) {
+  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}) {
+
+    if (game === undefined)
+      return ;
+
     switch (data.key)
     {
       case Constants.RIGHT :
@@ -195,7 +206,7 @@ export class GamePlayService {
     }
   }
 
-  handlePaddleMovement(game : Game) {
+  handlePaddleMovement(game : GameState) {
     
     if (game === undefined)
       return ;
@@ -223,8 +234,11 @@ export class GamePlayService {
 
   // ********************************* BALL ********************************* //
 
-  handleBallMovement(game : Game, data: GameInfo, client : Socket, server : Server) {
+  handleBallMovement(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
+    if (game === undefined)
+      return ('gamrOver');
+
     if (goal(server, game,data.roomName, game.ball))
     {
       if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
@@ -250,36 +264,71 @@ export class GamePlayService {
         game.ball.speed += Constants.BALL_SPEED_INCREMENT;
     }
   }
+
+  /**
+ * @description 
+ * pause the game after a point and relaunch the ball
+ *  | need server and roomName to send ball pos to front
+*/
+  pauseBetweenPoints(game : GameState, server : Server, roomName : string) {
+
+    let ct = 3;
+    const int = setInterval(() =>{
+        server.to(roomName).emit('midPointCt', ct);
+        if (ct === -1)
+        {
+            clearInterval(int)
+            ballRelaunch(game?.ball)
+            
+            server.to(roomName).emit('midPointCtEnd');
+            return ;
+        }
+        ct --
+    }, 1000);
+  }
   
-  gameLoop(gamesMap : Map <string, Game>,game : Game, data: GameInfo, client : Socket, server : Server) {
+  gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
     
+    let ballEvents : string = 'start';
+
     if (game === undefined)
       return ;
+
+    server.to(data.roomName).emit('gameStarted');
+    
     game.ballRefreshInterval = setInterval(() => {
+      
+        ballEvents = this.handleBallMovement(game, data, client, server);
+          
+        this.handlePaddleMovement(game);
 
-      let ballEvents = this.handleBallMovement(game, data, client, server);
-
-      this.handlePaddleMovement(game);
-
-      if (ballEvents === 'goal')
-        pauseBetweenPoints(game.ball, server, data.roomName);
-      else if (ballEvents === 'gameOver')
-      {
-        server.to(data.roomName).emit('gameOver',
-        client === game.clientOne ? game.clientOne.id : game.clientTwo.id);
-        // TO DO add loose and win to players history
-        game.clientOne.leave(data.roomName);
-        game.clientTwo.leave(data.roomName);
-        gamesMap.delete(data.roomName);
-        return (clearInterval(game.ballRefreshInterval))
-      }
-      else
-      {
-        let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
-        let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
-        server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
-      }
-        
+        if (game.isPaused === true)
+        {
+          game.isPaused = false;
+          ballReset(game.ball);
+          this.pauseBetweenPoints(game, server, data.roomName);
+        }
+        else if (ballEvents === 'goal')
+        {
+          this.pauseBetweenPoints(game, server, data.roomName);
+        }
+        else if (ballEvents === 'gameOver')
+        {
+          server.to(data.roomName).emit('gameOver',
+          // MAYBE PROBLE WITH WINNER / LOOSER
+          client.id === game.clientOne.socket.id ? game.clientOne.socket.id : game.clientTwo.socket.id);
+          // TO DO add loose and win to players history
+          game.clientOne.socket.leave(data.roomName);
+          game.clientTwo.socket.leave(data.roomName);
+          gamesMap.delete(data.roomName);
+          return (clearInterval(game.ballRefreshInterval))
+        }
+        else
+        {
+          let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
+          let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
+          server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
+        }
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))
       }, Constants.FRAME_RATE);

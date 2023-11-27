@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
 import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
 import { RefreshTokenGuard } from '../guards/refreshToken.auth.guard';
+import { UseInterceptors} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { read } from 'fs';
 
 @Controller('auth')
@@ -42,15 +44,17 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
+      console.log(req.user)
       const user = await this.authService.validate(req, res)
       res.send(user)
     }
 
-    // @UseGuards(AccessTokenGuard)
+    @UseInterceptors(FileInterceptor('file'))
+    @UseGuards(AccessTokenGuard)
     @Post('register')
-    async register(@Req() req: any, @Res() res: any) {
+    async register(@UploadedFile() file: any, @Body() body:any, @Res() res:any, @Req() req:any) {
+      await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
+      await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
       res.send("ok")
-      await this.authService.register(req, res)
     }
-
 }

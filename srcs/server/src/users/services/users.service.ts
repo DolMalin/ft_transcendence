@@ -6,12 +6,15 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
+import { AvatarService } from './avatar.service';
+import { leaderboardStats } from 'src/game/globals/interfaces';
 
 @Injectable()
 export class UsersService {
   constructor(
 		@InjectRepository(User)
-		private userRepository: Repository<User>
+		private userRepository: Repository<User>,
+    private readonly avatarService: AvatarService
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -40,8 +43,54 @@ export class UsersService {
     throw new HttpException('User not found', HttpStatus.NOT_FOUND)
   }
 
+  async addAvatar(id: string, dataBuffer: Buffer, filename: string) {
+    const avatar = await this.avatarService.create(dataBuffer, filename)
+    await this.userRepository.update(id, {
+      avatarId: avatar.id
+    })
+    return avatar
+  }
+
+  async getAvatar(id: string) {
+    const user = await this.userRepository.findOneBy({id})
+    const avatar = await this.avatarService.getAvatarById(user.avatarId)
+    return avatar
+  }
+
+
   async remove(id: string) {
     const user = await this.findOneById(id)
     return this.userRepository.remove(user)
+  }
+
+  async removeAll() {
+    const users = this.findAll();
+    (await users).forEach((value) => {
+      this.userRepository.remove(value);
+    });
+  }
+
+  async returnScoreList(){
+
+    function winRatioCalculator(w : number, l : number) {
+        
+      if (l === 0 && w === 0)
+          return (0);
+      if (l === 0)
+          return (100);
+
+      let ratio = w * 100 / (w + l);
+
+      return (ratio)
+  }
+
+    return (this.findAll().then((res : User[]) => {
+        let scoreList : leaderboardStats[] = []; 
+        res.forEach((value) => {
+        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
+        WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
+      })
+      return (scoreList);
+    }));
   }
 }

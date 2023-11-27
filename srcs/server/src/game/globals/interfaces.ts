@@ -20,10 +20,11 @@ export interface Paddle {
     speed : number
   }
   
-  export interface Game {
-    clientOne : Socket,
-    clientTwo : Socket,
+  export interface GameState {
+    clientOne : {socket : Socket, id : string},
+    clientTwo : {socket : Socket, id : string},
     gameIsFull : boolean,
+    isPaused : boolean,
     clientOneScore : number,
     clientTwoScore : number,
     Victor : string,
@@ -44,4 +45,12 @@ export interface Paddle {
     paddleOne : Paddle,
     paddleTwo : Paddle,
     ball : Ball,
+  }
+
+  export interface leaderboardStats {
+
+    username: string
+    winsAmount: number
+    loosesAmount: number
+    WLRatio : number
   }

@@ -1,5 +1,5 @@
 export const GAME_TYPE_ONE = "Standard";
-export const GAME_TYPE_TWO = "Randomodes";
+export const GAME_TYPE_TWO = "Randomode";
 export const GAME_TYPE_THREE = "3";
 export const FPS = 60;
 export const FRAME_RATE = 1000 / FPS;

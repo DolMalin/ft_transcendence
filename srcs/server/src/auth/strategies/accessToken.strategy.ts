@@ -7,10 +7,9 @@ import { Repository } from "typeorm";
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-	constructor(
-		private userService: UsersService
-	) {
+	constructor( private userService: UsersService) {
 		super({
+			
 			jwtFromRequest:ExtractJwt.fromExtractors([
 				AccessTokenStrategy.extractJWT
 			  ]),
@@ -29,9 +28,8 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 		return null;
 	  }
 
-
 	async validate(payload: any) {
-        const user = await this.userService.findOneById(payload.id)
-        return user
+		const user = await this.userService.findOneById(payload.id)
+		return user
 	}
 }
