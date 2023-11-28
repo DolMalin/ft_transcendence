@@ -1,28 +1,34 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useLayoutEffect, useState } from "react"
 import {
     Table,
     Thead,
     Tbody,
     Link,
-    Tfoot,
     Tr,
     Th,
     Td,
     Button,
     Box,
-    TableCaption,
-    TableContainer,
     Avatar,
+    useDisclosure,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalCloseButton,
+    ModalBody,
+    ModalFooter,
+    Text,
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
-import axios from "axios";
 import { leaderboardStats } from "../game/globals/interfaces";
 import authService from "../auth/auth.service";
-
+import ProfileModal from "./ProfileModal";
 
 function LeaderBoard() {
 
     const [scoreList, setScoreList] = useState<leaderboardStats[]>([]);
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     function sortScoreList(list : leaderboardStats[])
     {
@@ -60,10 +66,8 @@ function LeaderBoard() {
 
     async function getScoreList() {
         try {
-            authService.get('http://127.0.0.1:4545/users/scoreList').then((res) => {
-                setScoreList(sortScoreList(res?.data))
-            })
-
+            const res = await authService.get('http://127.0.0.1:4545/users/scoreList');
+            setScoreList(sortScoreList(res?.data))
         }
         catch (err)
         {
@@ -72,11 +76,16 @@ function LeaderBoard() {
         }
     }
 
-    useEffect(() => {
-        setTimeout(getScoreList, 2000);
-    }, [scoreList])
+    setTimeout(getScoreList, 2000);
 
-    //TO DO => UserName redirect to profile page
+    const [userId, setUserId] = useState<string>('');
+
+    function openProfileModal(userId : string) {
+
+        setUserId(userId);
+        onOpen();
+    }
+
     return (<>
         <Box
         width={'100vw'}
@@ -89,42 +98,46 @@ function LeaderBoard() {
         background={Constants.BG_COLOR}
         padding={'30px'}
         >
-        <Table w={'90%'}>
-            <Thead>
-                <Tr textColor={'white'}>
-                    <Th textColor={'white'} >
-                        <Link href={'https://r.mtdv.me/KF9vP1hDTg'} isExternal>
-                            Username
-                        </Link>
-                    </Th>
-                    <Th textColor={'white'}>Wins</Th>
-                    <Th textColor={'white'}>Loose</Th>
-                    <Th textColor={'white'}>W/L Ratio</Th>
-                </Tr>
-            </Thead>
-            <Tbody>
-                {scoreList.map((value, index) => {
-                    return (<Tr key={index}  textColor={index % 2 !== 0 ? 'rgb(220, 220, 220)' : 'rgb(150, 150, 150)'}>
-                        <Td display={'flex'} alignItems={'center'} >
-                            <Avatar 
-                                size='md'
-                                name='Thomas Sankara'
-                                src='https://bit.ly/dan-abramov'
-                                marginRight={'10px'}
-                            ></Avatar>
-
-                            <Link textAlign={'center'} justifyContent={'center'} href={'https://r.mtdv.me/KF9vP1hDTg'} isExternal> 
-                                {value.username} 
+            <Table w={'90%'}>
+                <Thead>
+                    <Tr textColor={'white'}>
+                        <Th textColor={'white'} >
+                            <Link href={'https://r.mtdv.me/KF9vP1hDTg'} isExternal>
+                                Username
                             </Link>
-                        </Td>
-                        <Td> {value.winsAmount}</Td>
-                        <Td> {value.loosesAmount}</Td>
-                        <Td > {value.WLRatio.toString() + '%'}</Td>
-                        </Tr>)
-                })}
-            </Tbody>
-        </Table>
+                        </Th>
+                        <Th textColor={'white'}>Wins</Th>
+                        <Th textColor={'white'}>Loose</Th>
+                        <Th textColor={'white'}>W/L Ratio</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {scoreList.map((value, index) => {
+
+                        return (<Tr key={index}  textColor={index % 2 !== 0 ? 'rgb(220, 220, 220)' : 'rgb(150, 150, 150)'}>
+                            <Td display={'flex'} alignItems={'center'} >
+                                <Avatar 
+                                    size='md'
+                                    name={'avatar'}
+                                    src={'http://127.0.0.1:4545/users/avatar/' + value?.id}
+                                    marginRight={'10px'}
+                                ></Avatar>
+
+                                <Link textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value.id)} }> 
+                                    {value?.username} 
+                                </Link>
+                            </Td>
+                            <Td> {value?.winsAmount}</Td>
+                            <Td> {value?.loosesAmount}</Td>
+                            <Td> {value?.WLRatio.toString() + '%'}</Td>
+                            </Tr>)
+                    })}
+                </Tbody>
+            </Table>
+            <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen}/>
         </Box>
+
+
     </>)
   }
 

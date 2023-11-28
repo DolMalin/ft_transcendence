@@ -9,4 +9,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	winsAmount?: number
 	loosesAmount?: number
 	isAvailable?: boolean
+	gameSockets?: string[]
 }

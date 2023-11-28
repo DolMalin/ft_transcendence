@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -10,13 +10,15 @@ import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
 import { CreateGameDto } from 'src/game/dto/create.game.dto';
 import { Game } from 'src/game/entities/game-entity';
 import { UpdateGameDto } from 'src/game/dto/update.game.dto';
+import { Avatar } from '../entities/avatar.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
-    private readonly avatarService: AvatarService
+
+    private readonly avatarService: AvatarService,
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -72,7 +74,7 @@ export class UsersService {
     });
   }
 
-  async returnScoreList(){
+  returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {
         
@@ -86,10 +88,13 @@ export class UsersService {
       return (ratio)
     }
 
+    
     return (this.findAll().then((res : User[]) => {
-        let scoreList : leaderboardStats[] = []; 
-        res?.forEach((value) => {
-        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
+      let scoreList : leaderboardStats[] = []; 
+
+      res?.forEach(async (value) => {
+
+        scoreList.push({username : value.username, id : value.id,winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
         WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
       })
       return (scoreList);

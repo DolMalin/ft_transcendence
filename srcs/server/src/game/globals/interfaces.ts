@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Avatar } from "src/users/entities/avatar.entity";
 
 export interface Paddle {
     x : number,
@@ -51,6 +52,7 @@ export interface Paddle {
   export interface leaderboardStats {
 
     username: string
+    id : string
     winsAmount: number
     loosesAmount: number
     WLRatio : number

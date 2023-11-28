@@ -19,7 +19,7 @@ export class AvatarService {
 		return newAvatar
 	}
 
-	async getAvatarById(id: string) {
+	async getAvatarById(id: string) : Promise<Avatar> {
 		const avatar = await this.avatarRepository.findOneBy({id})
 		if (!avatar)
 			throw new NotFoundException()

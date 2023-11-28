@@ -89,7 +89,7 @@ function CreateGame(props : {sock : Socket}) {
             try {
                 authService.get('http://127.0.0.1:4545/users/myself').then((myself) => {
 
-                    sock.emit("joinGame", {gameType : state.selectedGameType, dbUserId : myself.id});
+                    sock?.emit("joinGame", {gameType : state.selectedGameType, dbUserId : myself.id});
                     dispatch({type : 'SET_GAME_MOD', payload : false});
                     dispatch({type : 'SET_WAITING_SCREEN', payload : true});
                 });
@@ -99,34 +99,34 @@ function CreateGame(props : {sock : Socket}) {
             }
 
 
-            sock.on('roomFilled', () => {
+            sock?.on('roomFilled', () => {
 
                 dispatch({type : 'SET_WAITING_SCREEN', payload : false});
                 dispatch({type : 'SET_LF_GAME', payload : false})
                 dispatch({type : 'SET_GAME', payload : true});
             })
 
-            sock.on('playerId', (side) => {
+            sock?.on('playerId', (side) => {
 
                 setPlayerId(side);
             })
 
-            sock.on('roomName', (roomName) => {
+            sock?.on('roomName', (roomName) => {
 
                 setGameRoom(roomName);
             })
 
             return (() => {
-                sock.off('roomFilled');
-                sock.off('roomName');
-                sock.off('playerId');
+                sock?.off('roomFilled');
+                sock?.off('roomName');
+                sock?.off('playerId');
             })
         }
     }, [state.lookingForGame])
 
     useEffect(() => {
-        sock.on('gameOver', (winner : string) => {
-            if (sock.id === winner)
+        sock?.on('gameOver', (winner : string) => {
+            if (sock?.id === winner)
                 dispatch({type : 'SET_V_SCREEN', payload : true});
             else
                 dispatch({type : 'SET_L_SCREEN', payload : true});
@@ -142,7 +142,7 @@ function CreateGame(props : {sock : Socket}) {
 
 
         return (() => {
-            sock.off('gameOver');
+            sock?.off('gameOver');
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
 

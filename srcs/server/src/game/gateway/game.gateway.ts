@@ -15,6 +15,7 @@ import {
 import { clearInterval } from 'timers';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/services/users.service';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
@@ -28,39 +29,32 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
   private readonly matchmakingService: MatchmakingService,
   private readonly gamePlayService : GamePlayService,
-  private readonly jwtService : JwtService
+  private readonly userService : UsersService
   ) {}
   
   @WebSocketServer()
   server : Server;
 
  handleConnection(client: Socket) {
-      // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
-    // for (const id of userBlocked){
-      // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
-    // }
 
-    if (client.handshake.headers.authorization) {
-      const token = client.handshake.headers.authorization.split(' ');
-      if (token.length == 2) {
-        //TODO not decode but verify
-        console.log('token : ', token[1])
-        const payload = this.jwtService.decode(token[1]) as {id: string};
-        console.log('pay load : ', payload);
-      }
-      console.log("Connection of socket ID : " + client.id);
+    try {
+      this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+
+        if (user.gameSockets === null)
+          user.gameSockets = [];
+        user.gameSockets.push(client.id);
+        this.userService.update(user.id, {gameSockets : user.gameSockets});
+        // console.log(user.gameSockets);
+      })
     }
-    else {
-      client.disconnect();
-      console.log("client disconnected, wrong token : " + client.id);
-      
+    catch(e) {
+      console.log('handle connection ERROR : ', e);
     }
-    // TODO else disconnect
-    
   }
   
   handleDisconnect(client: Socket){
 
+    //TO DO : REMOVE SOCKET FROM SOCKET [] in User on traditional disco
   }
 
   @SubscribeMessage('joinGame')

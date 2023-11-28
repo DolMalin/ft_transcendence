@@ -47,7 +47,7 @@ function Malaise(props : {gameSock : Socket}) {
 
   useEffect(function socketEvents() {
 
-      props.gameSock.on('gameStarted', () => {
+      props.gameSock?.on('gameStarted', () => {
       
       setSwitchingFrom(true);
       setTab(0)
@@ -56,7 +56,7 @@ function Malaise(props : {gameSock : Socket}) {
     })
 
     return(() => {
-      props.gameSock.off('gameStarted')
+      props.gameSock?.off('gameStarted')
     })
   }, [tab, tabsRef?.current?.tabIndex])
 
@@ -133,19 +133,59 @@ function Malaise(props : {gameSock : Socket}) {
 }
 
 // const gameSock =  io('http://localhost:4545/');
-const gameSock = io('http://localhost:4545/', {extraHeaders: {"authorization": "Bearer " + authService.getAccessToken()}});
+
+
 
 function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
+  const [gameSock, setGameSock] = useState<Socket>(null)
+  const [userId, setUserId] = useState('');
 
+  useEffect(() => {
+    function handleUnload() {
+      if (gameSock)
+      {
+        gameSock.emit('ping', 'test')
+        authService.patch('http://127.0.0.1:4545/users/removeSocket', [gameSock.id]);
+      }
+    }
+
+    window.addEventListener('beforeunload', handleUnload);
+    return (() => {window.removeEventListener('beforeunload', handleUnload)})
+}, [gameSock])
+
+  async function getUserId() {
+    try {
+      const res = await authService.get('http://127.0.0.1:4545/users/current');
+      console.log('res : ', res.data );
+      setUserId(res.data.id);
+
+    }
+    catch(e) {
+      console.log('Error on game socket creation : ', e);
+    }
+  }
+
+  useEffect(() => {
+
+        getUserId();
+        if (userId != '')
+        {
+          setGameSock (io('http://localhost:4545/', {
+            query : {
+              userId : userId,
+            }
+          }));
+        }
+  }, [userId]); 
 
   return (<>
     <ChakraProvider>
 
       <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-      {isAuthenticated && isRegistered && <Malaise gameSock={gameSock}/>}
+      {isAuthenticated && isRegistered && gameSock && <Malaise gameSock={gameSock}/>}
     </ChakraProvider>
   </>
   );

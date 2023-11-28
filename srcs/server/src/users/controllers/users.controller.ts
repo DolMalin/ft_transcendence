@@ -19,6 +19,7 @@ export class UsersController {
   //   console.log('current user : ', req.user)
   //   return ('feur')
   // }
+  @UseGuards(AccessTokenGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -58,35 +59,55 @@ export class UsersController {
     return (this.usersService.update(user.id, updateDto));
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOneById(id);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get('avatar/:id')
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
-    const avatar = await this.usersService.getAvatar(id)
-    const stream = Readable.from(avatar.data)
-    console.log('avatar :', avatar.data)
-    
-    res.set({
-      'Content-Disposition':`inline; filename="${avatar.filename}"`,
-      'Content-Type' :'image'
-    })
-
-    return new StreamableFile(stream)
-
+    try {
+      const avatar = await this.usersService.getAvatar(id)
+      const stream = Readable.from(avatar?.data)
+      
+      res.set({
+        'Content-Disposition':`inline; filename="${avatar?.filename}"`,
+        'Content-Type' :'image'
+      })
+  
+      return new StreamableFile(stream)
+    }
+    catch (e) {
+      console.log('get User Avatar : ', e);
+      throw Error
+    }
   }
 
+  @UseGuards(AccessTokenGuard)
   @Patch()
   update(
     @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-      console.log('user in Patch update : ', req.user)
+      // console.log('user in Patch update : ', req.user)
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Patch('removeSocket')
+  removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
+
+    console.log('socket : ',gameSocketId);
+    console.log('before : ', user.gameSockets);
+
+    user.gameSockets = user.gameSockets.filter((value) => value != gameSocketId)
+    console.log('after : ', user.gameSockets);
+    return (this.usersService.update(user.id, { gameSockets : user.gameSockets}))
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);

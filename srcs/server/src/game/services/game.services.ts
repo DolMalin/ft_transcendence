@@ -120,7 +120,7 @@ export class MatchmakingService {
 
         for (const [key, value] of gamesMap) 
         {
-          if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
+          if (value.gameIsFull === false && value.gameType === gameType /*&& dbUserId !== value.clientOne.id*/)
           {
             this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
