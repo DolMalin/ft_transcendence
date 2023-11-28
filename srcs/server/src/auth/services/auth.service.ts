@@ -6,6 +6,8 @@ import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { roomNameGenerator } from 'src/game/services/game.services';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode'
 
 
 @Injectable()
@@ -104,7 +106,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'15m'
+      expiresIn:'7d'
     })
   }
 
@@ -162,8 +164,8 @@ export class AuthService {
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.redirect("http://127.0.0.1:4343")
-
   }
+
 
   async refresh(req: any, res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
@@ -227,7 +229,29 @@ export class AuthService {
     console.log(body)
     // await this.usersService.add
     return "ok"
-
   }
+
+  async generateTwoFactorAuthenticationSecret(user: User) {
+    const secret = authenticator.generateSecret()
+    const otpAuthUrl = authenticator.keyuri(user.id, process.env.APP_NAME, secret)
+    await this.usersService.update(user.id, {twoFactorAuthenticationSecret:secret})
+    return {secret, otpAuthUrl}
+  }
+
+  
+  async generateQrCodeDataURL(otpAuthUrl: string) {
+    return toDataURL(otpAuthUrl)
+  }
+
+  isTwoFactorAuthenticationValid(twoFactorAuthenticationCode: string, user:User) {
+    return authenticator.verify({
+      token:twoFactorAuthenticationCode,
+      secret:user?.twoFactorAuthenticationSecret
+    })
+  }
+
+
+
+
 
 }

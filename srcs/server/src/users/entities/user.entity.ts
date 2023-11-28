@@ -20,8 +20,16 @@ export class User {
 	refreshToken: string
 
 	@Column({type: 'boolean', default: false})
-	@Field(() => String, {})
+	@Field(() => Boolean, {})
 	isRegistered: boolean
+
+	@Column({type: 'varchar', nullable:true})
+	@Field(() => String, {})
+	twoFactorAuthenticationSecret: string
+
+	@Column({type: 'boolean', default: false})
+	@Field(() => Boolean, {})
+	isTwoFactorAuthenticationEnabled: boolean
 
 	@Column({type : 'int', default : 0, nullable: true})
 	winsAmount : number

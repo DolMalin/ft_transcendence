@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
@@ -7,6 +7,7 @@ import { RefreshTokenGuard } from '../guards/refreshToken.auth.guard';
 import { UseInterceptors} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { read } from 'fs';
+import { authenticator } from 'otplib';
 
 @Controller('auth')
 export class AuthController {
@@ -57,4 +58,42 @@ export class AuthController {
       await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
       res.send("ok")
     }
+
+    @UseGuards(AccessTokenGuard)
+    @Get('test')
+    async test(@Req() req:any) {
+      await this.authService.generateTwoFactorAuthenticationSecret(req.user)
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Get('2fa/generate')
+    async generateTwoFactorAuthenticationQRCode(@Req() req:any) {
+      let user = await this.authService.generateTwoFactorAuthenticationSecret(req.user)
+      let qrCodeDataURL = await this.authService.generateQrCodeDataURL(user.otpAuthUrl)
+      return `<img src="${qrCodeDataURL}" alt="QR Code" />`; 
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('2fa/turn-on')
+    async turnOnTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
+
+      if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
+        throw new UnauthorizedException('Wrong authentication code')
+
+      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true})
+      res.send("OK")
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Post('2fa/turn-off')
+    async turnOffTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
+
+      if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
+        throw new UnauthorizedException('Wrong authentication code')
+
+      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: false})
+      res.send("OK")
+    }
+
+
 }

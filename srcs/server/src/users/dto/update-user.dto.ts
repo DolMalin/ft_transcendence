@@ -6,6 +6,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	username?: string
 	refreshToken?: string
 	isRegistered?: boolean
+	twoFactorAuthenticationSecret?: string
+	isTwoFactorAuthenticationEnabled?: boolean
 	winsAmount?: number
 	loosesAmount?: number
 }
