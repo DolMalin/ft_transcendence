@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
-import { Repository } from 'typeorm'
+import { FindOptionsOrder, Repository } from 'typeorm'
 import { Room } from '../entities/room.entity'
 import { User } from '../../users/entities/user.entity'
 import { Message } from '../entities/message.entity'
@@ -33,7 +33,6 @@ export class RoomService {
             password: createRoomDto?.password,
             owner: {id: user.id}
         })
-        console.log(room)
         return await this.roomRepository.save(room);
     }
 
@@ -66,30 +65,31 @@ export class RoomService {
         return this.roomRepository.remove(room)
     }
     
-    async joinRoom(dto: RoomDto){ 
-        const room = await this.roomRepository.findOne({
-            select: {
-                message: true
-            },
-            relations: {message: {author: true}},
-            where: { name: dto.name }
-            })
+    async joinRoom(dto: RoomDto){         console.log("TESTTTTTTTTTTTTTT")
+
+        console.log('dto', dto)
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .where('room.name = :name', { name: dto.name })
+            .orderBy('message.id', 'ASC')
+            .getOne();
         if (!room)
             throw new ForbiddenException('room does not exist')
         if (room.privChan === true)
             throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
-        if (room?.password.length > 0){
+        if (room.password?.length > 0){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
         return room;
     }
 
-    async postMessage(senderId: string, dto: CreateMessageDto){
+    async postMessage(sender: User, dto: CreateMessageDto){
         
-        console.log('dto', dto, senderId)
         const msg = this.messageRepository.create({
-            author: {id: senderId},
+            author: {id: sender.id , username: dto.authorName},
             content: dto.content,
             room: {id: dto.roomId}
         })

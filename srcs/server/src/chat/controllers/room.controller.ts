@@ -44,7 +44,7 @@ export class RoomController {
     @HttpCode(200)
     @Post('message')
     async postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
-        return await this.roomService.postMessage(user.id, dto)
+        return await this.roomService.postMessage(user, dto)
     }
 
     @Get('message')

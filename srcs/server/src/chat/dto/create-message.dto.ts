@@ -10,7 +10,10 @@ export class CreateMessageDto {
     content : string;
 
     roomId : number;
-    
+
+    authorName: string
+    authorId: number
+
 	sendAt: string;
     
 }

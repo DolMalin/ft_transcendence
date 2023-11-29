@@ -76,9 +76,6 @@ import { useForm } from "react-hook-form";
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-
-		console.log('reg')
-
 		return (
 			<Flex width="half" align="center" justifyContent="center">
 				<Box p={2}>

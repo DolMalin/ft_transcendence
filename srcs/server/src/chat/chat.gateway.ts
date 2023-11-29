@@ -27,8 +27,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       if (token.length == 2) {
         //TODO not decode but verify
         const payload = this.jwtService.decode(token[1]) as {id: string};
-        console.log(" payload", payload.id)
-        client.userId = payload.id;
+        console.log(" payload", payload?.id)
+        client.userId = payload?.id;
       }
     }
     // TODO else disconnect

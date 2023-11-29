@@ -70,9 +70,9 @@ function LeaderBoard() {
         }
     }
 
-    useEffect(() => {
-        setTimeout(getScoreList, 2000);
-    }, [scoreList])
+    // useEffect(() => {
+    //     setTimeout(getScoreList, 2000);
+    // }, [scoreList])
 
     async function createUser() {
         try {
