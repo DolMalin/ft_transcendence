@@ -40,11 +40,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
 
-        if (user.gameSockets === null)
-          user.gameSockets = [];
-        user.gameSockets.push(client.id);
-        this.userService.update(user.id, {gameSockets : user.gameSockets});
-        // console.log(user.gameSockets);
+        this.userService.addSocketId(client.id, user.gameSockets, user);
       })
     }
     catch(e) {
@@ -55,12 +51,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket){
 
     //TO DO : REMOVE SOCKET FROM SOCKET [] in User on traditional disco
+    try {
+      this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+
+        this.userService.removeSocketId(client.id, user.gameSockets, user)
+      })
+    }
+    catch(e) {
+      console.log('handle connection ERROR : ', e);
+    }
+    // this.userService
   }
 
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() data : {gameType : string, dbUserId : string},@ConnectedSocket() client: Socket) {
 
-    this.matchmakingService.gameCreation(this.server, client, data.dbUserId, this.gamesMap, data.gameType);
+    this.matchmakingService.gameCreation(this.server, client, client.handshake.query.userId as string, this.gamesMap, data.gameType);
   }
 
   @SubscribeMessage('leaveGame')
@@ -76,6 +82,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.gamesMap.delete(roomName);
     client.leave(roomName);
+    try {
+      this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+
+        this.userService.update(user.id, {isAvailable : true});
+        user.gameSockets.forEach((value) => {
+          this.server.to(value).emit('isAvailable', true);
+        })
+      })
+    }
+    catch(e) {
+      console.log('in availability change ERROR : ', e);
+    }
   }
 
   @SubscribeMessage('playerMove')
@@ -97,6 +115,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return ; // TO DO : emit something saying game crashed
     
     this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
+  }
+
+  @SubscribeMessage('availabilityChange')
+  availabilityChange(@MessageBody() bool : boolean, @ConnectedSocket() client: Socket) {
+    
+    try {
+      this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+
+        if (bool === true)
+          this.userService.update(user.id, {isAvailable : bool});
+        user.gameSockets.forEach((value) => {
+          this.server.to(value).emit('isAvailable', bool);
+        })
+      })
+    }
+    catch(e) {
+      console.log('in availability change ERROR : ', e);
+    }
+  }
+
+  @SubscribeMessage('logout')
+  logout(@ConnectedSocket() client: Socket) {
+    
+    this.availabilityChange(true, client);
+    this.handleDisconnect(client);
+    try {
+        this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+
+        user.gameSockets.forEach((value) => {
+          this.server.to(value).emit('logout');
+        })
+      })
+    }
+    catch(e) {
+      console.log('in availability change ERROR : ', e);
+    }
   }
 
   @SubscribeMessage('ping')

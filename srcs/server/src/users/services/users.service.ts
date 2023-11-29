@@ -74,6 +74,30 @@ export class UsersService {
     });
   }
 
+  /**
+ * @description remove a socket Id from an array of string stored in user entity and update the user
+ */
+  removeSocketId(socketId : string, socketIdArray : string[], user : User) {
+
+    user.gameSockets = socketIdArray?.filter((value) => value != socketId)
+    return (this.update(user.id, { gameSockets : user.gameSockets}))
+  }
+
+    /**
+ * @description add a socket Id to an array of string stored in user entity and update the user
+ */
+  addSocketId(socketId : string, socketIdArray : string[], user : User) {
+
+    if (socketIdArray === null)
+      socketIdArray = [];
+    socketIdArray?.push(socketId);
+    user.gameSockets = socketIdArray;
+    return (this.update(user.id, {gameSockets : user.gameSockets}));
+  }
+
+  /**
+ * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
+ */ 
   returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {
@@ -99,5 +123,17 @@ export class UsersService {
       })
       return (scoreList);
     }));
+  }
+
+  async returnHistory(userId : string){
+
+    try {
+      
+      const res = await this.findOneById(userId);
+      return (res.playedGames.reverse());
+    }
+    catch (e) {
+      console.log('Get History back : ', e.message)
+    }
   }
 }

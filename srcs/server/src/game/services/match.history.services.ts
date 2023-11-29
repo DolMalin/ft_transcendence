@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { GameState } from '../globals/interfaces';
 import { UpdateGameDto } from '../dto/update.game.dto';
+import { windowTime } from 'rxjs';
 
 
 @Injectable()
@@ -59,7 +60,8 @@ export class MatchHistoryService {
 
     async addGameToLooserPlayedGames(game : Game)
     {
-        const looser = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.winnerId }});
+        
+        const looser = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.looserId }});
         
         if (looser.playedGames === undefined)
             looser.playedGames = [];

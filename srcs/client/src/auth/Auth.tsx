@@ -4,15 +4,27 @@ import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
+import { Socket } from 'socket.io-client'
 
 
 
 // function Auth(props: {dispatch: Function, state: any}) {
-	function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isRegistered : boolean, setIsRegistered: Function}) {
+	function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isRegistered : boolean, setIsRegistered: Function, gameSock : Socket}) {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
 
+
+	useEffect(() => {
+
+		props.gameSock?.on('logout', () => {
+		  setIsAuthenticated(false);
+		})
+  
+		return (() => {
+			props.gameSock?.off('logout');
+		})
+	}, [props.gameSock])
 	// move in service
 	const fetchAuthUrl = async () => {
 		try {
@@ -42,7 +54,7 @@ import { useForm } from "react-hook-form";
 
 	const logout = () => {
 		try {
-			AuthService.logout()
+			AuthService.logout(props.gameSock)
 			props.setIsAuthenticated(false)
 			setIsAuthenticated(false)
 		} catch(err) {
@@ -64,7 +76,6 @@ import { useForm } from "react-hook-form";
 
 
 	function LoginComponent() {
-		console.log('login, is auth : ', props.isAuthenticated)
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'}>
@@ -76,8 +87,6 @@ import { useForm } from "react-hook-form";
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-
-		console.log('reg')
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
@@ -127,7 +136,6 @@ import { useForm } from "react-hook-form";
 	}
 
 	function LogoutComponent() {
-		console.log('logout')
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>

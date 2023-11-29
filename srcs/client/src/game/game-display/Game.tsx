@@ -159,11 +159,10 @@ function Game(props : GameProps) {
             }
         }
 
-        console.log('getting through move effect');
-
         function leaveGameOnRefresh() {
             try {
                 sock.emit('leaveGame', gameInfo);
+                sock.emit('availabilityChange', true)
             } catch (e) {
                 alert(e.message);
             }
@@ -218,7 +217,6 @@ function Game(props : GameProps) {
         });
 
         sock.on('gameOver', () => {
-            console.log('leaving ?')
             sock.emit('leaveGame', gameInfo);
         })
         
@@ -258,8 +256,6 @@ function Game(props : GameProps) {
         };
     }, [dimension, playerOneScore, playerTwoScore, midPointCT, midPointCTOn, ctSizeModifier, gameMetrics]);
 
-
-    console.log('rerendering')
     return (<>
         <Flex flexDir={'column'} textColor={'white'} fontSize={'1em'}>
 

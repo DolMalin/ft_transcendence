@@ -16,25 +16,14 @@ export class GamesController {
         private readonly  userService: UsersService,
     ) {}
 
-
+    @UseGuards(AccessTokenGuard)
     @Get()
     async findAll(): Promise<Game[]> {
         const gameArray : Game[]= []
         return (gameArray)
     }
 
-
-    // @UseGuards(AccessTokenGuard)
-    //this route will disapear
-    // @Post()
-    // async addGameToDB(@Body()game : GameState): Promise<Game> {
-
-    //     const newGame = await this.matchHistoryService.storeGameResults(game);
-    //     console.log('Ginette :', newGame);
-    //     return (newGame);
-    // }
-
-    // @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessTokenGuard)
     @Get(':id')
     async findUserHistory(@Param('id') id : string): Promise<Game[]>
     {

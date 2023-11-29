@@ -143,7 +143,7 @@ export class MatchmakingService {
       let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
         return ;
-
+      
       if (game.gameIsFull === false)
       {
         client.leave(data.roomName);
@@ -151,22 +151,30 @@ export class MatchmakingService {
       }
       else if (data.playerId === '1')
       {
-        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        if (game.winner === undefined)
+        {
+          game.winner = game.clientTwo.id;
+          game.looser = game.clientOne.id;
+        }
+      
         server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
-        gamesMap.delete(data.roomName);
       }
       else if (data.playerId === '2')
       {
-        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        if (game.winner === undefined)
+        {
+          game.winner = game.clientOne.id;
+          game.looser = game.clientTwo.id;
+        }
         server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
-        gamesMap.delete(data.roomName);
       }
-
+      
       this.matchHistoryServices.storeGameResults(game);
+      gamesMap.delete(data.roomName);
     }
 }
 
@@ -181,7 +189,6 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    console.log('in started : ', data.key);
     switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
@@ -200,7 +207,6 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    console.log('in stopped : ', data.key);
     switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
@@ -250,7 +256,11 @@ export class GamePlayService {
     if (goal(server, game,data.roomName, game.ball))
     {
       if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
+      {
+        game.clientOneScore >= Constants.SCORE_TO_REACH ? game.winner = game.clientOne.id : game.winner = game.clientTwo.id;
+        game.clientOneScore >= Constants.SCORE_TO_REACH ? game.looser = game.clientTwo.id : game.winner = game.clientOne.id;
         return ('gameOver')
+      }
 
       ballReset(game.ball);
       return ('goal')
@@ -322,13 +332,11 @@ export class GamePlayService {
         }
         else if (ballEvents === 'gameOver')
         {
-          server.to(data.roomName).emit('gameOver',
-          // MAYBE PROBLE WITH WINNER / LOOSER
-          client.id === game.clientOne.socket.id ? game.clientOne.socket.id : game.clientTwo.socket.id);
+          server.to(data.roomName).emit('gameOver', game.winner);
           // TO DO add loose and win to players history
-          game.clientOne.socket.leave(data.roomName);
-          game.clientTwo.socket.leave(data.roomName);
-          gamesMap.delete(data.roomName);
+          // game.clientOne.socket.leave(data.roomName);
+          // game.clientTwo.socket.leave(data.roomName);
+          // gamesMap.delete(data.roomName);
           return (clearInterval(game.ballRefreshInterval))
         }
         else

@@ -23,8 +23,4 @@ export class Game {
 
     @Column({type: 'int', nullable: true})
     looserScore : number;
-
-    @ManyToMany(() => Game)
-    @JoinTable()
-	playedGames: Game[];
 }

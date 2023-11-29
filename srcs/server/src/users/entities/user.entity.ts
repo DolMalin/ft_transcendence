@@ -33,8 +33,18 @@ export class User {
 	isAvailable : boolean
 	
 	@ManyToMany(() => Game)
-    @JoinTable()
-	playedGames: Game[];
+    @JoinTable({
+		name: 'user_history',
+		joinColumn : {
+			name: 'user_id',
+			referencedColumnName : 'id'
+		},
+		inverseJoinColumn: {
+			name: 'game_id',
+			referencedColumnName: 'id'
+		}
+	})
+	playedGames?: Game[];
 
 	@JoinColumn({name: 'avatarId'})
 	@OneToOne(() => Avatar, {nullable:true})

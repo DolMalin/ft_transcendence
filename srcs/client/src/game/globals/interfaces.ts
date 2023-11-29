@@ -53,3 +53,13 @@ export interface leaderboardStats {
   loosesAmount: number
   WLRatio : number
 }
+
+export interface DBGame {
+  id: string
+  winnerId : string
+  winnerUsername : string
+  looserId : string
+  looserUsername : string
+  winnerScore : number
+  looserScore : number
+}

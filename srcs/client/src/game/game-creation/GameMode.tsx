@@ -7,23 +7,34 @@ Divider,
 import * as Constants from '../globals/const'
 import { LeftBracket, RightBracket } from "./Brackets";
 import authService from "../../auth/auth.service";
+import { Socket } from "socket.io-client";
 
-function GameMode(props : {dispatch : Function}) {
+function GameMode(props : {dispatch : Function, sock : Socket}) {
 
     const [playerAvailable, setPlayerAvalaible] = useState(false);
 
-    useEffect(function checkPlayerAvailability() {
+    useEffect(() => {async function checkPlayerAvailability() {
 
         try {
-                authService.get('http://127.0.0.1:4545/users/isAvailable').then((res) => {
-                console.log('player available : ', res.data)
-                return (setPlayerAvalaible(res.data));
-            })
+            const res = await authService.get('http://127.0.0.1:4545/users/isAvailable');
+            setPlayerAvalaible(res.data);
         }
         catch (e) {
             console.log('IsAvalaible returned : ', e)
         }
-    }, [playerAvailable])
+    }
+    checkPlayerAvailability();
+    }, [])
+
+    useEffect(() => {
+
+        props.sock.on('isAvailable', (bool) => {
+            setPlayerAvalaible(bool);
+        })
+        return (() => {
+            props.sock.off('isAvailable');
+        })
+    }, []);
 
     return (<>
         <Flex flexDir={'column'} wrap={'nowrap'}
@@ -51,14 +62,14 @@ function GameMode(props : {dispatch : Function}) {
                     _hover={{background : 'white', textColor: 'black'}}
                     isDisabled={playerAvailable ? false : true}
                     onClick={() => {
-                        console.log('test')
                         props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
                         props.dispatch({type : 'SET_LF_GAME', payload : true});
                         try {
                             authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            props.sock.emit('availabilityChange', false);
                         }
                         catch (e) {
-                            console.log('setting is Available to false returned : ', e);
+                            console.log('setting is Available to false returned : ', e.message);
                         }
                     }}> 
                         {Constants.GAME_TYPE_ONE} 
@@ -111,6 +122,7 @@ function GameMode(props : {dispatch : Function}) {
                         props.dispatch({type : 'SET_LF_GAME', payload : true})
                         try {
                             authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            props.sock.emit('availabilityChange', false);
                         }
                         catch (e) {
                             console.log('setting is Available to false returned : ', e);

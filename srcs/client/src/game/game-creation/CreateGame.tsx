@@ -86,18 +86,9 @@ function CreateGame(props : {sock : Socket}) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
-            try {
-                authService.get('http://127.0.0.1:4545/users/myself').then((myself) => {
-
-                    sock?.emit("joinGame", {gameType : state.selectedGameType, dbUserId : myself.id});
-                    dispatch({type : 'SET_GAME_MOD', payload : false});
-                    dispatch({type : 'SET_WAITING_SCREEN', payload : true});
-                });
-            }
-            catch (e) {
-                console.log(e);
-            }
-
+            sock?.emit("joinGame", {gameType : state.selectedGameType});
+            dispatch({type : 'SET_GAME_MOD', payload : false});
+            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
 
             sock?.on('roomFilled', () => {
 
@@ -134,9 +125,10 @@ function CreateGame(props : {sock : Socket}) {
             dispatch({type : 'SET_GAME', payload : false});
             try {
                 authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+                props.sock.emit('availabilityChange', true);
             }
             catch (e) {
-                console.log('setting is Available to false returned : ', e);
+                console.log('setting is Available to false returned : ', e.message);
             }
         });
 
@@ -158,7 +150,7 @@ function CreateGame(props : {sock : Socket}) {
         background={Constants.BG_COLOR}
         >
             {state.playButtonVisible && <PlayBox dispatch={dispatch}/>}
-            {state.gameModVisible && <GameMode dispatch={dispatch}/>}
+            {state.gameModVisible && <GameMode dispatch={dispatch} sock={props.sock}/>}
             {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
             {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
             {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}

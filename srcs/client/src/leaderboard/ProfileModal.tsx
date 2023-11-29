@@ -10,11 +10,75 @@ import {
     ModalBody,
     ModalFooter,
     Text,
+    Accordion,
+    AccordionButton,
+    AccordionItem,
+    AccordionPanel,
+    AccordionIcon,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
 import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
+import { Link } from "react-router-dom";
+import { DBGame } from "../game/globals/interfaces";
 
+
+function PlayerHistory(props : {userId : string}) {
+    const [history, setHistory] = useState<DBGame[]>([]);
+
+    async function getHistory() {
+        try {
+            const res = await authService.get('http://127.0.0.1/users/history/' + props.userId);
+            setHistory(res.data);
+        }
+        catch (e) {
+            console.log('get History front : ', e.message)
+        }
+    }
+
+    return (<>
+        <Accordion allowMultiple 
+        marginTop={'40px'}> 
+            <AccordionItem border={'none'}>
+                <h2>
+                    <AccordionButton onClick={getHistory}>
+                        <Box as="span" flex='1' textAlign='center' fontSize={'1.5em'}>
+                            Player History
+                        </Box>
+                        <AccordionIcon />
+                    </AccordionButton>
+                </h2>
+                <AccordionPanel pb={4}>
+                    <Table>
+                        <Thead>
+                            <Tr>
+                                <Th> Player </Th>
+                                <Th></Th>
+                                <Th> Adversary </Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                        {history.map((value, index) => {
+                            console.log('test');
+                            return (<Tr key={index}>
+                                <Td> {props.userId === value.winnerId ? value.winnerUsername : value.looserUsername} </Td>
+                                <Td> {props.userId === value.winnerId ? "WON TO" : "LOST TO"} </Td>
+                                <Td> {props.userId === value.winnerId ? value.looserUsername : value.winnerUsername} </Td>
+                            </Tr>)
+                        })}
+                        </Tbody>
+                    </Table>
+                </AccordionPanel>
+            </AccordionItem>
+        </Accordion>
+    </>)
+}
 
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void}) {
 
@@ -26,11 +90,11 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             return ;
         const fetchUserData = async () => {
             try {
-            const response = await authService.get('http://127.0.0.1:4545/users/' + props.userId);
-            setUser(response.data);
+                const response = await authService.get('http://127.0.0.1:4545/users/' + props.userId);
+                setUser(response.data);
     
             } catch (error) {
-            console.error('Error fetching user data:', error);
+                console.error('Error fetching user data:', error);
             }
         }
     
@@ -86,7 +150,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     justifyContent={'center'}
                     >
                         <Text textAlign={'center'} fontSize={'2em'}> LOOSES </Text>
-                        <Text textAlign={'center'} fontSize={'2em'}> {user?.winsAmount} </Text>
+                        <Text textAlign={'center'} fontSize={'2em'}> {user?.loosesAmount} </Text>
                     </Box>
 
                 </ModalBody>
@@ -96,7 +160,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     fontWeight={'normal'}
                     borderRadius={'none'}
                     _hover={{background : 'white', textColor: 'black'}}>
-                        Message Him !
+                        Message Them !
                     </Button>
 
                     <Button colorScheme='none'
@@ -104,9 +168,11 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     borderRadius={'none'}
                     _hover={{background : 'white', textColor: 'black'}}
                     >
-                        Defy Him !
+                        Defy Them !
                     </Button>
                 </ModalFooter>
+                <PlayerHistory userId={user?.id}/>
+
             </ModalContent>
     </Modal>);
 }

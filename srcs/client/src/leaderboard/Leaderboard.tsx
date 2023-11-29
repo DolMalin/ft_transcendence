@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     Table,
     Thead,
@@ -7,18 +7,9 @@ import {
     Tr,
     Th,
     Td,
-    Button,
     Box,
     Avatar,
     useDisclosure,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    Text,
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import { leaderboardStats } from "../game/globals/interfaces";
@@ -29,6 +20,7 @@ function LeaderBoard() {
 
     const [scoreList, setScoreList] = useState<leaderboardStats[]>([]);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [userId, setUserId] = useState<string>('');
 
     function sortScoreList(list : leaderboardStats[])
     {
@@ -75,10 +67,12 @@ function LeaderBoard() {
             setScoreList([])
         }
     }
+    useEffect(() => {
 
-    setTimeout(getScoreList, 2000);
+        getScoreList();
+    })
 
-    const [userId, setUserId] = useState<string>('');
+    // setTimeout(getScoreList, 2000);
 
     function openProfileModal(userId : string) {
 

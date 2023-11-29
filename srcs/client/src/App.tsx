@@ -134,8 +134,6 @@ function Malaise(props : {gameSock : Socket}) {
 
 // const gameSock =  io('http://localhost:4545/');
 
-
-
 function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -144,11 +142,27 @@ function App() {
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
-    function handleUnload() {
-      if (gameSock)
+
+      gameSock?.on('logout', () => {
+        setIsAuthenticated(false);
+      })
+
+      return (() => {
+        gameSock?.off('logout');
+      })
+  }, [gameSock])
+  
+  useEffect(() => {
+    async function handleUnload() {
+      if (gameSock != null)
       {
-        gameSock.emit('ping', 'test')
-        authService.patch('http://127.0.0.1:4545/users/removeSocket', [gameSock.id]);
+        try {
+          await authService.patch('http://127.0.0.1:4545/users/removeGameSocket', [gameSock?.id]);
+          gameSock.emit('availabilityChange', true);
+        }
+        catch (e) {
+          console.log(e.message);
+        }
       }
     }
 
@@ -159,12 +173,11 @@ function App() {
   async function getUserId() {
     try {
       const res = await authService.get('http://127.0.0.1:4545/users/current');
-      console.log('res : ', res.data );
       setUserId(res.data.id);
 
     }
     catch(e) {
-      console.log('Error on game socket creation : ', e);
+      console.log('Error on game socket creation : ', e.message);
     }
   }
 
@@ -184,7 +197,7 @@ function App() {
   return (<>
     <ChakraProvider>
 
-      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
+      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered} gameSock={gameSock}/>
       {isAuthenticated && isRegistered && gameSock && <Malaise gameSock={gameSock}/>}
     </ChakraProvider>
   </>

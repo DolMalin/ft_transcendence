@@ -37,6 +37,7 @@ export class AuthController {
     @UseGuards(RefreshTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
+
       return this.authService.logout(req, res)
     }
 
@@ -44,7 +45,6 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
-      // console.log('user in get validate :', req.user)
       const user = await this.authService.validate(req, res)
       res.send(user)
     }

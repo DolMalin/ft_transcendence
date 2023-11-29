@@ -7,10 +7,14 @@ import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { Socket, io } from 'socket.io-client';
+import { WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService
+    ) {}
   
   // TO DO : Can't get this to work
   // @UseGuards(AccessTokenGuard)
@@ -39,16 +43,23 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
+  @Get('history/:id')
+  history(@Param('id') userId: string) {
+
+      return (this.usersService.returnHistory(userId));
+  }
+
+  @UseGuards(AccessTokenGuard)
   @Get('isAvailable')
   isAvailable(@GetUser() user : User) {
     
     return (user.isAvailable);
   }
+
   @UseGuards(AccessTokenGuard)
   @Get('myself')
   getMyself(@GetUser() user : User)
   {
-    console.log('User in getMyself : ', user)
     return (user)
   }
   
@@ -96,15 +107,10 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
-  @Patch('removeSocket')
+  @Patch('removeGameSocket')
   removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
 
-    console.log('socket : ',gameSocketId);
-    console.log('before : ', user.gameSockets);
-
-    user.gameSockets = user.gameSockets.filter((value) => value != gameSocketId)
-    console.log('after : ', user.gameSockets);
-    return (this.usersService.update(user.id, { gameSockets : user.gameSockets}))
+    this.usersService.removeSocketId(gameSocketId, user.gameSockets, user);
   }
 
   @UseGuards(AccessTokenGuard)

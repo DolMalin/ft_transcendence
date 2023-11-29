@@ -223,7 +223,6 @@ export class AuthService {
 
 
   async register(body: any) { 
-    console.log('body in register :', body)
     // await this.usersService.add
     return "ok"
 

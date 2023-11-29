@@ -11,19 +11,13 @@ import authService from "../../auth/auth.service";
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
         
     function leaveQueue() {
-        
-        props.sock.emit('leaveQueue', props.roomName);
 
-        props.dispatch({type : 'SET_LF_GAME', payload : false});
-        props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
-        props.dispatch({type : 'SET_GAME_TYPE', payload : ''})
-        props.dispatch({type : 'SET_PLAY', payload : true});
-        try {
-          authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
-        }
-        catch (e) {
-            console.log('setting is Available to false returned : ', e);
-        }
+      props.sock.emit('leaveQueue', props.roomName);
+
+      props.dispatch({type : 'SET_LF_GAME', payload : false});
+      props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+      props.dispatch({type : 'SET_GAME_TYPE', payload : ''})
+      props.dispatch({type : 'SET_PLAY', payload : true});
     }
 
     const [dot, setDot] = useState('.');
