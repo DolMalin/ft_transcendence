@@ -4,7 +4,7 @@ import { Game } from "../entities/game-entity";
 import { UsersService } from "src/users/services/users.service";
 import { User } from "src/users/entities/user.entity";
 import { CreateGameDto } from "../dto/game.dto";
-import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
+import { AccessToken2FAGuard } from "src/auth/guards/accessToken2FA.auth.guard";
 
 @Controller('games')
 export class GamesController {

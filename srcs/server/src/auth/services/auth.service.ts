@@ -54,7 +54,6 @@ export class AuthService {
           bodyParameters,
           config
         ).then((res) => {
-          console.log("bjr")
           resolve(res.data.access_token as string)
         }, (err) => {
           console.log(err)
@@ -210,6 +209,8 @@ export class AuthService {
 
     if (!user)
       throw new ForbiddenException('access denied')
+
+    await this.usersService.update(user.id, {isTwoFactorAuthenticated: false})
     
     res.clearCookie("refreshToken").sendStatus(200)
     Logger.log(`User #${user.id} logged out`)
@@ -217,6 +218,7 @@ export class AuthService {
   }
   
 
+  // @TODO: CHECK VALUES IS SEND BACK IN USER
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
     if (!user)

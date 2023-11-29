@@ -7,12 +7,22 @@ import { useForm } from "react-hook-form";
 
 
 
-// function Auth(props: {dispatch: Function, state: any}) {
-	function Auth(props : {isAuthenticated : boolean, setIsAuthenticated: Function, isRegistered : boolean, setIsRegistered: Function}) {
+	function Auth(props : {
+		isAuthenticated : boolean,
+		setIsAuthenticated: Function,
+		isRegistered : boolean,
+		setIsRegistered: Function,
+		isTwoFactorAuthenticated: boolean,
+		setIsTwoFactorAuthenticated: Function,
+		isTwoFactorAuthenticationEnabled: boolean
+		setIsTwoFactorAuthenticationEnabled: Function
+	}) {
 	const [authUrl, setAuthUrl] = useState('')
 	const [isAuthenticated, setIsAuthenticated] = useState(false)
 	const [isRegistered, setIsRegistered] = useState(false)
-
+	const [isTwoFactorAuthenticated, setIsTwoFactorAuthenticated] = useState(false)
+	const [isTwoFactorAuthenticationEnabled, setIsTwoFactorAuthenticationEnabled] = useState(false)
+	
 	// move in service
 	const fetchAuthUrl = async () => {
 		try {
@@ -22,19 +32,26 @@ import { useForm } from "react-hook-form";
 		}
 	}
 
-
 	// @TODO: vrai status code stp
 	const validate = async () => {
 		try {
+			
 			const res = await AuthService.validate()
 			props.setIsAuthenticated(true)
-			if (res.data?.isRegistered) {
-				props.setIsRegistered(true)
-				setIsRegistered(true)
-			}
+
+			props.setIsRegistered(res.data?.isRegistered)
+			setIsRegistered(res.data?.isRegistered)
+
+			props.setIsTwoFactorAuthenticationEnabled(res.data?.isTwoFactorAuthenticationEnabled)
+			setIsTwoFactorAuthenticationEnabled(res.data?.isTwoFactorAuthenticationEnabled)
+
+			setIsTwoFactorAuthenticated(res.data?.isTwoFactorAuthenticated)
+			props.setIsTwoFactorAuthenticated(res.data?.isTwoFactorAuthenticated)
+
 			return 200
 		} catch (err) {
 			props.setIsAuthenticated(false)
+			props.setIsTwoFactorAuthenticated(false)
 			setIsAuthenticated(false)
 			return 500
 		}
@@ -45,7 +62,19 @@ import { useForm } from "react-hook-form";
 			AuthService.logout()
 			props.setIsAuthenticated(false)
 			setIsAuthenticated(false)
+			props.setIsTwoFactorAuthenticated(false)
+			setIsTwoFactorAuthenticated(false)
 		} catch(err) {
+		}
+	}
+
+	const onSubmit2fa = async (data:any) => {
+		try {
+			await AuthService.twoFactorAuthenticationLogin(data.twoFactorAuthenticationCode)
+			props.setIsTwoFactorAuthenticated(true)
+			setIsTwoFactorAuthenticated(true)
+		} catch(err) {
+			console.log(err)
 		}
 	}
 
@@ -63,6 +92,7 @@ import { useForm } from "react-hook-form";
 	}
 
 
+
 	function LoginComponent() {
 		console.log('login, is auth : ', props.isAuthenticated)
 		return (
@@ -76,8 +106,6 @@ import { useForm } from "react-hook-form";
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-
-		console.log('reg')
 
 		return (
 			<Flex width="half" align="center" justifyContent="center">
@@ -135,6 +163,45 @@ import { useForm } from "react-hook-form";
 		)
 	}
 
+	function enableTwoFactorAuthenticationComponent() {
+		
+	}
+
+	function TwoFactorAuthenticationComponent() {
+		const { register, handleSubmit, formState: { errors } } = useForm();
+
+		return (
+			<Flex width="half" align="center" justifyContent="center">
+				<Box p={2}>
+					<form onSubmit={handleSubmit(onSubmit2fa)}>
+						<FormControl isRequired>
+							<Input
+								type="text"
+								placeholder="2fa code"
+								{
+									...register("twoFactorAuthenticationCode", {
+										required: "enter 2facode",
+										minLength: 3,
+										maxLength: 80
+									})
+								}
+							/>
+
+						</FormControl>
+
+						<Button
+							fontWeight={'normal'}
+							mt={4}
+							colorScheme='teal'
+							type='submit'
+						>
+							Submit
+						</Button>
+					</form>
+				</Box>
+			</Flex>
+		)
+	}
 
 
 	useEffect(() => {
@@ -147,12 +214,11 @@ import { useForm } from "react-hook-form";
             setIsAuthenticated(false)
     };
     asyncWrapper();
-    }, [isAuthenticated, isRegistered])
+    }, [isAuthenticated, isRegistered, isTwoFactorAuthenticated])
 
 	return (<>
-
+		{isAuthenticated && (!isTwoFactorAuthenticated && isTwoFactorAuthenticationEnabled) && <TwoFactorAuthenticationComponent />}
 		{ isAuthenticated && !isRegistered && <RegisterComponent/>}
-		{isAuthenticated && <LogoutComponent />}
 		{!isAuthenticated && <LoginComponent />}
 	</>)
 }

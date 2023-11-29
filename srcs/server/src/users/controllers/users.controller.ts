@@ -2,7 +2,7 @@ import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, 
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
+import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 
@@ -13,9 +13,10 @@ export class UsersController {
   // @UseGuards(AccessTokenGuard)
   @Get('currentUser')
   findCurrentUser(@Req() req : any) {
-    console.log(req.user)
     return ('feur')
   }
+
+  @UseGuards(AccessToken2FAGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -36,7 +37,6 @@ export class UsersController {
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
     const avatar = await this.usersService.getAvatar(id)
     const stream = Readable.from(avatar.data)
-    console.log(avatar.data)
     
     res.set({
       'Content-Disposition':`inline; filename="${avatar.filename}"`,
@@ -52,7 +52,6 @@ export class UsersController {
     @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-      console.log(req.user)
     return this.usersService.update(req.user.id, updateUserDto);
   }
 

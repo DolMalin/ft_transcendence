@@ -17,10 +17,20 @@ import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
+import Profile from './profile/Profile';
 
 const gameSock = io('http://127.0.0.1:4545')
 
-function Malaise() {
+function Malaise(props : {
+  isAuthenticated : boolean,
+  setIsAuthenticated: Function,
+  isRegistered : boolean,
+  setIsRegistered: Function,
+  isTwoFactorAuthenticated: boolean,
+  setIsTwoFactorAuthenticated: Function,
+  isTwoFactorAuthenticationEnabled: boolean,
+  setIsTwoFactorAuthenticationEnabled: Function
+}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
@@ -125,7 +135,16 @@ function Malaise() {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          CECI EST UN PROFIL
+          {<Profile
+                  isAuthenticated={props.isAuthenticated}
+                  setIsAuthenticated={props.setIsAuthenticated}
+                  isRegistered={props.isRegistered}
+                  setIsRegistered={props.setIsRegistered}
+                  isTwoFactorAuthenticated={props.isTwoFactorAuthenticated}
+                  setIsTwoFactorAuthenticated={props.setIsTwoFactorAuthenticated}
+                  isTwoFactorAuthenticationEnabled={props.isTwoFactorAuthenticationEnabled}
+                  setIsTwoFactorAuthenticationEnabled={props.setIsTwoFactorAuthenticationEnabled}
+          />}
         </TabPanel>
 
     </TabPanels>
@@ -137,12 +156,34 @@ function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isRegistered, setIsRegistered] = useState(false)
+  const [isTwoFactorAuthenticated, setIsTwoFactorAuthenticated] = useState(false)
+  const [isTwoFactorAuthenticationEnabled, setIsTwoFactorAuthenticationEnabled] = useState(false)
+
 
   return (<>
     <ChakraProvider>
 
-      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered}/>
-      {isAuthenticated && isRegistered && <Malaise/>}
+      <Auth
+        isAuthenticated={isAuthenticated}
+        setIsAuthenticated={setIsAuthenticated}
+        isRegistered={isRegistered}
+        setIsRegistered={setIsRegistered}
+        isTwoFactorAuthenticated={isTwoFactorAuthenticated}
+        setIsTwoFactorAuthenticated={setIsTwoFactorAuthenticated}
+        isTwoFactorAuthenticationEnabled={isTwoFactorAuthenticationEnabled}
+        setIsTwoFactorAuthenticationEnabled={setIsTwoFactorAuthenticationEnabled}
+      />
+
+      {isAuthenticated && isRegistered && (isTwoFactorAuthenticated || !isTwoFactorAuthenticationEnabled) && <Malaise
+              isAuthenticated={isAuthenticated}
+              setIsAuthenticated={setIsAuthenticated}
+              isRegistered={isRegistered}
+              setIsRegistered={setIsRegistered}
+              isTwoFactorAuthenticated={isTwoFactorAuthenticated}
+              setIsTwoFactorAuthenticated={setIsTwoFactorAuthenticated}
+              isTwoFactorAuthenticationEnabled={isTwoFactorAuthenticationEnabled}
+              setIsTwoFactorAuthenticationEnabled={setIsTwoFactorAuthenticationEnabled}
+        />}
     </ChakraProvider>
   </>
   );
