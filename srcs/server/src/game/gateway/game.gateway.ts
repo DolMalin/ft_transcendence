@@ -16,6 +16,7 @@ import { clearInterval } from 'timers';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
+import { type } from 'os';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
@@ -64,7 +65,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinGame')
-  joinGame(@MessageBody() data : {gameType : string, dbUserId : string},@ConnectedSocket() client: Socket) {
+  joinGame(@MessageBody() data : {gameType : string},@ConnectedSocket() client: Socket) {
+
+    if (typeof data?.gameType !== 'string')
+    {
+      console.log('test : ', typeof data?.gameType)
+      return ;
+    }
 
     this.matchmakingService.gameCreation(this.server, client, client.handshake.query.userId as string, this.gamesMap, data.gameType);
   }
@@ -72,13 +79,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('leaveGame')
   leaveGame(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
 
-    clearInterval(this.gamesMap.get(data.roomName)?.ballRefreshInterval);
+    // console.log ('data in leave : ', data)
+    if (typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
+    {
+      console.log('wrong type in leaveGame')
+      return ;
+    }
+     
+      clearInterval(this.gamesMap.get(data.roomName)?.ballRefreshInterval);
     client.leave(data.roomName);
     this.matchmakingService.leaveGame(this.server, client, this.gamesMap, data);
   }
 
   @SubscribeMessage('leaveQueue')
   leaveQueue(@MessageBody() roomName : string, @ConnectedSocket() client: Socket) {
+
+    if (typeof roomName !== 'string')
+      return ;
 
     this.gamesMap.delete(roomName);
     client.leave(roomName);
@@ -99,17 +116,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('playerMove')
   playerMove(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
     
+    if (typeof data.key !== 'string' || typeof data.playerId !== 'string' || typeof data.room !== 'string' )
+    {
+      console.log('wrong type in move')
+      return ;
+    }
+
     this.gamePlayService.movingStarted(this.gamesMap.get(data.room), data)
   }
 
   @SubscribeMessage('playerMoveStopped')
   playerMoveStopped(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
     
+    if (typeof data.key !== 'string' || typeof data.playerId !== 'string' || typeof data.room !== 'string' )
+      return ;
+
     this.gamePlayService.movingStopped(this.gamesMap.get(data.room), data)
   }
 
   @SubscribeMessage('startGameLoop')
   startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
+
+    if (typeof data.gameType !== 'string' || typeof data.playerId !== 'string' || typeof data.roomName !== 'string')
+      return ;
+
     const game = this.gamesMap.get(data.roomName);
     if (game === undefined)
       return ; // TO DO : emit something saying game crashed
@@ -120,6 +150,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('availabilityChange')
   availabilityChange(@MessageBody() bool : boolean, @ConnectedSocket() client: Socket) {
     
+    if (typeof bool !== 'boolean')
+      return ;
+
     try {
       this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
 
@@ -153,6 +186,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+
+  // TO DO : Remove This
   @SubscribeMessage('ping')
   ping(@MessageBody() data : any, @ConnectedSocket() client: Socket) {
     console.log('PINGED DATA : ', data)

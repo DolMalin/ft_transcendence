@@ -245,7 +245,7 @@ function Game(props : GameProps) {
             setCtSizeModifier(1);
         });
 
-        sock.on('gameOver', () => {
+        sock.once('gameOver', () => {
             sock.emit('leaveGame', gameInfo);
         })
         

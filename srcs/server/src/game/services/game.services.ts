@@ -173,7 +173,6 @@ export class MatchmakingService {
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
       }
-      
       this.matchHistoryServices.storeGameResults(game);
       gamesMap.delete(data.roomName);
     }
@@ -257,17 +256,25 @@ export class GamePlayService {
   handleBallMovement(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     if (game === undefined)
-      return ('gamrOver');
+    {
+      console.log("TEST TEST TEST")
+      return ('gameOver');
+    }
 
     if (goal(server, game,data.roomName, game.ball))
     {
-      if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
+      if (game.clientOneScore >= Constants.SCORE_TO_REACH)
       {
-        game.clientOneScore >= Constants.SCORE_TO_REACH ? game.winner = game.clientOne.id : game.winner = game.clientTwo.id;
-        game.clientOneScore >= Constants.SCORE_TO_REACH ? game.looser = game.clientTwo.id : game.winner = game.clientOne.id;
+        game.winner = game.clientOne.id;
+        game.looser = game.clientTwo.id;
         return ('gameOver')
       }
-
+      else if (game.clientTwoScore >= Constants.SCORE_TO_REACH)
+      {
+        game.winner = game.clientTwo.id;
+        game.looser = game.clientOne.id;
+        return ('gameOver')
+      }
       ballReset(game.ball);
       return ('goal')
     }
@@ -350,10 +357,6 @@ export class GamePlayService {
         else if (ballEvents === 'gameOver')
         {
           server.to(data.roomName).emit('gameOver', game.winner);
-          // TO DO add loose and win to players history
-          // game.clientOne.socket.leave(data.roomName);
-          // game.clientTwo.socket.leave(data.roomName);
-          // gamesMap.delete(data.roomName);
           return (clearInterval(game.ballRefreshInterval))
         }
         else
