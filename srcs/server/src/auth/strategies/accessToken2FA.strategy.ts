@@ -30,7 +30,7 @@ export class AccessToken2FAStrategy extends PassportStrategy(Strategy, 'jwt-2fa'
 
 	async validate(payload: any) {
 		const user = await this.userService.findOneById(payload.id)
-			
+		
 		if (!user?.isTwoFactorAuthenticationEnabled)
 			return user
 		
