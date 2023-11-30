@@ -1,27 +1,21 @@
 import axios from 'axios'
-import React, { Component, useEffect, useState} from 'react'
+import React, { Component, useEffect, useState, useReducer} from 'react'
 import AuthService from './auth.service'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
+import reducer, {stateType} from './components/reducer'
 
 
-
-	function Auth(props : {
-		isAuthenticated : boolean,
-		setIsAuthenticated: Function,
-		isRegistered : boolean,
-		setIsRegistered: Function,
-		isTwoFactorAuthenticated: boolean,
-		setIsTwoFactorAuthenticated: Function,
-		isTwoFactorAuthenticationEnabled: boolean
-		setIsTwoFactorAuthenticationEnabled: Function
-	}) {
+function Auth(props : {state: stateType, dispatch: Function}) {
 	const [authUrl, setAuthUrl] = useState('')
-	const [isAuthenticated, setIsAuthenticated] = useState(false)
-	const [isRegistered, setIsRegistered] = useState(false)
-	const [isTwoFactorAuthenticated, setIsTwoFactorAuthenticated] = useState(false)
-	const [isTwoFactorAuthenticationEnabled, setIsTwoFactorAuthenticationEnabled] = useState(false)
+
+	const [state, dispatch] = useReducer(reducer, {
+		isAuthenticated: props.state.isAuthenticated,
+		isRegistered: props.state.isRegistered,
+		isTwoFactorAuthenticated: props.state.isTwoFactorAuthenticated,
+		isTwoFactorAuthenticationEnabled: props.state.isTwoFactorAuthenticationEnabled
+	  })
 	
 	// move in service
 	const fetchAuthUrl = async () => {
@@ -37,22 +31,25 @@ import { useForm } from "react-hook-form";
 		try {
 			
 			const res = await AuthService.validate()
-			props.setIsAuthenticated(true)
+			props.dispatch({type: 'SET_IS_AUTHENTICATED', payload: true})
+			dispatch({type: 'SET_IS_AUTHENTICATED', payload: true})
 
-			props.setIsRegistered(res.data?.isRegistered)
-			setIsRegistered(res.data?.isRegistered)
+			props.dispatch({type: 'SET_IS_REGISTERED', payload: res.data?.isRegistered})
+			dispatch({type: 'SET_IS_REGISTERED', payload: res.data?.isRegistered})
+			
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload: res.data?.isTwoFactorAuthenticationEnabled})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload: res.data?.isTwoFactorAuthenticationEnabled})
 
-			props.setIsTwoFactorAuthenticationEnabled(res.data?.isTwoFactorAuthenticationEnabled)
-			setIsTwoFactorAuthenticationEnabled(res.data?.isTwoFactorAuthenticationEnabled)
-
-			setIsTwoFactorAuthenticated(res.data?.isTwoFactorAuthenticated)
-			props.setIsTwoFactorAuthenticated(res.data?.isTwoFactorAuthenticated)
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
 
 			return 200
 		} catch (err) {
-			props.setIsAuthenticated(false)
-			props.setIsTwoFactorAuthenticated(false)
-			setIsAuthenticated(false)
+			props.dispatch({type: 'SET_IS_AUTHENTICATED', payload: false})
+			dispatch({type: 'SET_IS_AUTHENTICATED', payload: false})
+
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			return 500
 		}
 	}
@@ -60,10 +57,11 @@ import { useForm } from "react-hook-form";
 	const logout = () => {
 		try {
 			AuthService.logout()
-			props.setIsAuthenticated(false)
-			setIsAuthenticated(false)
-			props.setIsTwoFactorAuthenticated(false)
-			setIsTwoFactorAuthenticated(false)
+			props.dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+			dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
 		} catch(err) {
 		}
 	}
@@ -71,8 +69,9 @@ import { useForm } from "react-hook-form";
 	const onSubmit2fa = async (data:any) => {
 		try {
 			await AuthService.twoFactorAuthenticationLogin(data.twoFactorAuthenticationCode)
-			props.setIsTwoFactorAuthenticated(true)
-			setIsTwoFactorAuthenticated(true)
+
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 		} catch(err) {
 			console.log(err)
 		}
@@ -84,17 +83,16 @@ import { useForm } from "react-hook-form";
 			formData.append("file", data.avatar[0])
 			formData.append("username", data.username)
 			await AuthService.register(formData)
-			props.setIsRegistered(true)
-			setIsRegistered(true)
+
+			props.dispatch({type:'SET_IS_REGISTERED', payload:true})
+			dispatch({type:'SET_IS_REGISTERED', payload:true})
 		} catch(err) {
 			console.log(err)
 		}
 	}
 
 
-
 	function LoginComponent() {
-		console.log('login, is auth : ', props.isAuthenticated)
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'}>
@@ -155,16 +153,11 @@ import { useForm } from "react-hook-form";
 	}
 
 	function LogoutComponent() {
-		console.log('logout')
 		return (
 			<div className="Log">
 				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>
 			</div>
 		)
-	}
-
-	function enableTwoFactorAuthenticationComponent() {
-		
 	}
 
 	function TwoFactorAuthenticationComponent() {
@@ -208,18 +201,22 @@ import { useForm } from "react-hook-form";
         async function asyncWrapper() {
         fetchAuthUrl()
         const status = await validate();
-        if (status === 200)
-            setIsAuthenticated(true)
-        else 
-            setIsAuthenticated(false)
+        if (status === 200) {
+			props.dispatch({type:'SET_IS_AUTHENTICATED', payload:true})
+			dispatch({type:'SET_IS_AUTHENTICATED', payload:true})
+		} else {
+			props.dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+			dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+		}
     };
     asyncWrapper();
-    }, [isAuthenticated, isRegistered, isTwoFactorAuthenticated])
+    }, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated])
 
 	return (<>
-		{isAuthenticated && (!isTwoFactorAuthenticated && isTwoFactorAuthenticationEnabled) && <TwoFactorAuthenticationComponent />}
-		{ isAuthenticated && !isRegistered && <RegisterComponent/>}
-		{!isAuthenticated && <LoginComponent />}
+		{state.isAuthenticated && (!state.isTwoFactorAuthenticated && state.isTwoFactorAuthenticationEnabled) && <TwoFactorAuthenticationComponent />}
+		{ state.isAuthenticated && !state.isRegistered && <RegisterComponent/>}
+		{state.isAuthenticated && !state.isRegistered && <LogoutComponent/>}
+		{!state.isAuthenticated && <LoginComponent />}
 	</>)
 }
 

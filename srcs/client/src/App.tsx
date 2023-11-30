@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState, useReducer} from 'react';
 
 import Auth from "./auth/Auth"
 import CreateGame from './game/game-creation/CreateGame';
@@ -18,25 +18,20 @@ import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 import Profile from './profile/Profile';
-
+import reducer from './auth/components/reducer'
+import { stateType } from './auth/components/reducer'
 const gameSock = io('http://127.0.0.1:4545')
 
-function Malaise(props : {
-  isAuthenticated : boolean,
-  setIsAuthenticated: Function,
-  isRegistered : boolean,
-  setIsRegistered: Function,
-  isTwoFactorAuthenticated: boolean,
-  setIsTwoFactorAuthenticated: Function,
-  isTwoFactorAuthenticationEnabled: boolean,
-  setIsTwoFactorAuthenticationEnabled: Function
-}) {
+
+
+function Malaise(props : {state: stateType, dispatch: Function}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
   const [switchingFrom, setSwitchingFrom] = useState(false)
   const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
 
+  
   useEffect(function DOMEvents() {
 
     function handleResize() {
@@ -135,16 +130,7 @@ function Malaise(props : {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {<Profile
-                  isAuthenticated={props.isAuthenticated}
-                  setIsAuthenticated={props.setIsAuthenticated}
-                  isRegistered={props.isRegistered}
-                  setIsRegistered={props.setIsRegistered}
-                  isTwoFactorAuthenticated={props.isTwoFactorAuthenticated}
-                  setIsTwoFactorAuthenticated={props.setIsTwoFactorAuthenticated}
-                  isTwoFactorAuthenticationEnabled={props.isTwoFactorAuthenticationEnabled}
-                  setIsTwoFactorAuthenticationEnabled={props.setIsTwoFactorAuthenticationEnabled}
-          />}
+          {<Profile state={props.state} dispatch={props.dispatch}/>}
         </TabPanel>
 
     </TabPanels>
@@ -153,37 +139,20 @@ function Malaise(props : {
 }
 
 function App() {
-  
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isRegistered, setIsRegistered] = useState(false)
-  const [isTwoFactorAuthenticated, setIsTwoFactorAuthenticated] = useState(false)
-  const [isTwoFactorAuthenticationEnabled, setIsTwoFactorAuthenticationEnabled] = useState(false)
+
+  const [state, dispatch] = useReducer(reducer, {
+    isAuthenticated: false,
+    isRegistered: false,
+    isTwoFactorAuthenticated: false,
+    isTwoFactorAuthenticationEnabled: false
+  })
 
 
   return (<>
     <ChakraProvider>
 
-      <Auth
-        isAuthenticated={isAuthenticated}
-        setIsAuthenticated={setIsAuthenticated}
-        isRegistered={isRegistered}
-        setIsRegistered={setIsRegistered}
-        isTwoFactorAuthenticated={isTwoFactorAuthenticated}
-        setIsTwoFactorAuthenticated={setIsTwoFactorAuthenticated}
-        isTwoFactorAuthenticationEnabled={isTwoFactorAuthenticationEnabled}
-        setIsTwoFactorAuthenticationEnabled={setIsTwoFactorAuthenticationEnabled}
-      />
-
-      {isAuthenticated && isRegistered && (isTwoFactorAuthenticated || !isTwoFactorAuthenticationEnabled) && <Malaise
-              isAuthenticated={isAuthenticated}
-              setIsAuthenticated={setIsAuthenticated}
-              isRegistered={isRegistered}
-              setIsRegistered={setIsRegistered}
-              isTwoFactorAuthenticated={isTwoFactorAuthenticated}
-              setIsTwoFactorAuthenticated={setIsTwoFactorAuthenticated}
-              isTwoFactorAuthenticationEnabled={isTwoFactorAuthenticationEnabled}
-              setIsTwoFactorAuthenticationEnabled={setIsTwoFactorAuthenticationEnabled}
-        />}
+      <Auth dispatch={dispatch} state={state}/>
+      {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) && <Malaise state={state} dispatch={dispatch}/>}
     </ChakraProvider>
   </>
   );

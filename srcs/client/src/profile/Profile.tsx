@@ -1,38 +1,62 @@
 import axios from 'axios'
-import React, { Component, useEffect, useState} from 'react'
+import React, { Component, useEffect, useState, useReducer} from 'react'
 import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box, Image} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
+import { stateType} from '../auth/components/reducer';
+import reducer from '../auth/components/reducer';
+import Auth from '../auth/Auth';
 
 
-function Profile(props : {
-	isAuthenticated : boolean,
-	setIsAuthenticated: Function,
-	isRegistered : boolean,
-	setIsRegistered: Function,
-	isTwoFactorAuthenticated: boolean,
-	setIsTwoFactorAuthenticated: Function,
-	isTwoFactorAuthenticationEnabled:boolean,
-	setIsTwoFactorAuthenticationEnabled:Function
-}) {
-	const [authUrl, setAuthUrl] = useState('')
-	const [isAuthenticated, setIsAuthenticated] = useState(props.isAuthenticated)
-	const [isRegistered, setIsRegistered] = useState(props.isRegistered)
-	const [isTwoFactorAuthenticated, setIsTwoFactorAuthenticated] = useState(props.isTwoFactorAuthenticated)
-	const [isTwoFactorAuthenticationEnabled, setIsTwoFactorAuthenticationEnabled] = useState(props.isTwoFactorAuthenticationEnabled)
+function Profile(props : {state: stateType, dispatch: Function}) {
 	const [qrCode, setQrCode] = useState('')
 	const [displayActivate2FA, setDisplayActivate2FA] = useState(false)
 	const [displayDeactivate2FA, setDisplayDeactivate2FA] = useState(false)
 
+	const [state, dispatch] = useReducer(reducer, {
+		isAuthenticated: props.state.isAuthenticated,
+		isRegistered: props.state.isRegistered,
+		isTwoFactorAuthenticated: props.state.isTwoFactorAuthenticated,
+		isTwoFactorAuthenticationEnabled: props.state.isTwoFactorAuthenticationEnabled
+	  })
 
-	const logout = () => {
+	const validate = async () => {
 		try {
-			AuthService.logout()
-			props.setIsAuthenticated(false)
-			setIsAuthenticated(false)
-			props.setIsTwoFactorAuthenticated(false)
-			setIsTwoFactorAuthenticated(false)
+			const res = await AuthService.validate()
+			props.dispatch({type: 'SET_IS_AUTHENTICATED', payload: true})
+			dispatch({type:'SET_IS_AUTHENTICATED', payload: true})
+
+			props.dispatch({type: 'SET_IS_REGISTERED', payload: res.data?.isRegistered})
+			dispatch({type: 'SET_IS_REGISTERED', payload: res.data?.isRegistered})
+			
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload: res.data?.isTwoFactorAuthenticationEnabled})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload: res.data?.isTwoFactorAuthenticationEnabled})
+
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
+
+			return 200
+		} catch (err) {
+			props.dispatch({type: 'SET_IS_AUTHENTICATED', payload: false})
+			dispatch({type: 'SET_IS_AUTHENTICATED', payload: false})
+
+			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
+			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
+
+			return 500
+		}
+	}
+
+	const logout = async () => {
+		try {
+			props.dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+			dispatch({type:'SET_IS_AUTHENTICATED', payload:false})
+			
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
+			await AuthService.logout()
+			window.location.reload()
 		} catch(err) {
 		}
 	}
@@ -42,11 +66,11 @@ function Profile(props : {
 		try {
 			await AuthService.twoFactorAuthenticationTurnOn({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
 
-			props.setIsTwoFactorAuthenticated(true)
-			setIsTwoFactorAuthenticated(true)
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 
-			setIsTwoFactorAuthenticationEnabled(true)
-			props.setIsTwoFactorAuthenticationEnabled(true)
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
 
 			setDisplayActivate2FA(false)
 		} catch(err) {
@@ -59,8 +83,8 @@ function Profile(props : {
 		try {
 			await AuthService.twoFactorAuthenticationTurnOff({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
 
-			props.setIsTwoFactorAuthenticationEnabled(false)
-			setIsTwoFactorAuthenticationEnabled(false)
+			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
+			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
 
 			setDisplayDeactivate2FA(false)
 		} catch(err) {
@@ -87,7 +111,6 @@ function Profile(props : {
 
 	async function deactivateTwoFactorAuthentication() {
 			setDisplayDeactivate2FA(true)
-			setIsTwoFactorAuthenticated(false)
 	}
 
 	function ActivateTwoFactorAuthentication() {
@@ -108,8 +131,7 @@ function Profile(props : {
 
 
 	function TwoFactorAuthenticationButton() {
-		console.log(isTwoFactorAuthenticationEnabled)
-		if (!isTwoFactorAuthenticationEnabled) {
+		if (!props.state.isTwoFactorAuthenticationEnabled) {
 			return (
 				<div>
 					<Button onClick={activateTwoFactorAuthentication} fontWeight={'normal'} >Activer 2FA</Button>
@@ -198,7 +220,7 @@ function Profile(props : {
 	}
 
 
-	useEffect(() => {}, [isAuthenticated, isRegistered, isTwoFactorAuthenticated, isTwoFactorAuthenticationEnabled])
+	useEffect(() => {async function  asyncWrapper() {validate()}; asyncWrapper()}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
 		{<TwoFactorAuthenticationButton />}

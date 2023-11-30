@@ -102,8 +102,6 @@ class AuthService {
 		}
 	}
 
-
-
 	async logout() {
 		const cookies = new Cookies()
 

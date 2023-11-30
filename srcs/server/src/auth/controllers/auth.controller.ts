@@ -83,13 +83,11 @@ export class AuthController {
     @Post('2fa/turn-on')
     async turnOnTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
 
-      console.log(req.user.twoFactorAuthenticationSecret)
-      console.log(body.twoFactorAuthenticationCode)
       if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
         throw new UnauthorizedException('Wrong authentication code')
       
 
-      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true})
+      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true})
       res.send("OK")
     }
 

@@ -11,7 +11,6 @@ import WaitingScreen from './WaitingScreen';
 import { Box } from '@chakra-ui/react'
 import * as Constants from '../globals/const'
 import axios from 'axios';
-import authService from '../../auth/auth.service';
 
 type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}
