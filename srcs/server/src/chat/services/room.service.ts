@@ -22,12 +22,8 @@ export class RoomService {
         private messageRepository: Repository<Message>
     ) {}
 
-    // async create(createRoomDto: CreateRoomDto) {
-    //     const newRoom = this.roomRepository.create(createRoomDto)
-    //     return await this.roomRepository.save(newRoom)
-    // }
-
     async create(createRoomDto: CreateRoomDto, user: User){
+
         const room = this.roomRepository.create({
             name: createRoomDto.name,
             password: createRoomDto?.password,
@@ -36,23 +32,27 @@ export class RoomService {
         return await this.roomRepository.save(room);
     }
 
-    // async createMsg(user: User, msgContent: string){
-    //     const msg =  this.msgRepository.create({
-    //         content: msgContent,
-    //         author: user,
-    //         send_at: new Date (),
-    //     })
-    // }
-
     findAll() {
+
+        
         return this.roomRepository.find();
     }
 
     findOneById(id: number){
+
         return this.roomRepository.findOneBy({id})
     }
 
+    async findAllUsers(){
+        const userList = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.users', 'user')
+            .getMany()
+        console.log('---------------USERLIST--------------\n', userList)
+    }
+
     async update(id: number, updateRoomDto: UpdateRoomDto) {
+
         await this.roomRepository.update(id, updateRoomDto)
         const newRoom = await this.findOneById(id)
         if (newRoom)
@@ -61,13 +61,13 @@ export class RoomService {
     }
     
     async remove(id: number) {
+
         const room = await this.findOneById(id)
         return this.roomRepository.remove(room)
     }
     
-    async joinRoom(dto: RoomDto){         console.log("TESTTTTTTTTTTTTTT")
+    async joinRoom(dto: RoomDto){
 
-        console.log('dto', dto)
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
@@ -97,6 +97,7 @@ export class RoomService {
     }
 
     async getMessage(){
+
         const msgList = await this.messageRepository.find()
         msgList.reverse()
         return msgList

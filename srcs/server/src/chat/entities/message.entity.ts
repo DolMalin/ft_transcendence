@@ -5,6 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Message { 
+    
     @PrimaryGeneratedColumn()
     id: number
 

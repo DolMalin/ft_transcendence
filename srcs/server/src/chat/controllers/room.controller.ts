@@ -30,8 +30,14 @@ export class RoomController {
 
     @UseGuards(AccessTokenGuard)
     @Get()
-    async getRoomData(){
+    async getRoomList(){
         return await this.roomService.findAll();
+    }
+
+    @UseGuards(AccessTokenGuard)
+    @Get('userlist')
+    async getUserList(){
+        return await this.roomService.findAllUsers()
     }
 
     @UseGuards(AccessTokenGuard)
