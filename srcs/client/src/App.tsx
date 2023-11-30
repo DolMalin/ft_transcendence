@@ -63,11 +63,14 @@ function Malaise(props : {gameSock : Socket}) {
   return (
     <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
     index={tab} onChange={(index) => {
+
       switchingFrom ? setTab(0) : setTab(index); 
       setSwitchingFrom(false); 
-      // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
-      window.dispatchEvent(new Event('resize'));}}
+      window.dispatchEvent(new Event('resize'));
+    }}
       bgColor={Constants.BG_COLOR}
+      // width={'100vw'}
+      // height={'100vh'}
     >
 
       <TabList border='none' mb='2em' 
