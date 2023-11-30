@@ -18,6 +18,7 @@ import {
   } from './BallMoves';
 import * as Constants from '../globals/const'
 import { MatchHistoryService } from './match.history.services';
+import { UsersService } from 'src/users/services/users.service';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -181,6 +182,11 @@ export class MatchmakingService {
 @Injectable()
 export class GamePlayService {
 
+  constructor(
+
+    private readonly usersService : UsersService
+) {}
+
   // ********************************* PADDLE ********************************* //
 
 
@@ -304,15 +310,26 @@ export class GamePlayService {
         ct --
     }, 1000);
   }
+
+  async getUserBasicInfos(id : string) {
+    try {
+      const res = await this.usersService.findOneById(id);
+      return ({id : id, username : res.username});    
+    }
+    catch (e) {
+      console.log(e);
+    } 
+  }
   
-  gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
+  async gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     let ballEvents : string = 'start';
 
     if (game === undefined)
       return ;
 
-    server.to(data.roomName).emit('gameStarted');
+    server.to(data.roomName).emit('gameStarted', 
+    await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
     
     game.ballRefreshInterval = setInterval(() => {
       

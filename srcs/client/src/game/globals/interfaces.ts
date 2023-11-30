@@ -39,6 +39,11 @@ export interface GameMetrics {
   ball : Ball,
 }
 
+export interface userBasicInfos {
+  id : string,
+  username : string
+}
+
 export interface Avatar {
   id : string,
   filename : string

@@ -10,7 +10,9 @@ import {
     Box,
     Avatar,
     useDisclosure,
+    Button,
   } from '@chakra-ui/react'
+import {RepeatIcon} from '@chakra-ui/icons'
 import * as Constants from '../game/globals/const'
 import { leaderboardStats } from "../game/globals/interfaces";
 import authService from "../auth/auth.service";
@@ -70,9 +72,7 @@ function LeaderBoard() {
     useEffect(() => {
 
         getScoreList();
-    })
-
-    // setTimeout(getScoreList, 2000);
+    }, [])
 
     function openProfileModal(userId : string) {
 
@@ -82,7 +82,7 @@ function LeaderBoard() {
 
     return (<>
         <Box
-        width={'100vw'}
+        width={'100vw - 30px'}
         height={'96vh'}
         display={'flex'}
         alignItems={'center'}
@@ -91,18 +91,29 @@ function LeaderBoard() {
         flexWrap={'wrap'}
         background={Constants.BG_COLOR}
         padding={'30px'}
+        scrollBehavior={'smooth'}
         >
             <Table w={'90%'}>
                 <Thead>
                     <Tr textColor={'white'}>
                         <Th textColor={'white'} >
+                            <Button onClick={getScoreList}
+                            size={'sm'}
+                            bg={Constants.BG_COLOR}
+                            _hover={{background : Constants.BG_COLOR}}>
+                                <RepeatIcon width={'100%'} height={'100%'} color={'white'}
+                                _hover={{color : 'rgba(255, 255, 255, 0.6)'}}
+                                _active={{color : 'white'}}/>
+                            </Button>
                             <Link href={'https://r.mtdv.me/KF9vP1hDTg'} isExternal>
                                 Username
                             </Link>
                         </Th>
-                        <Th textColor={'white'}>Wins</Th>
+                        <Th textColor={'white'}>
+                            Wins</Th>
                         <Th textColor={'white'}>Loose</Th>
-                        <Th textColor={'white'}>W/L Ratio</Th>
+                        <Th textColor={'white'}>W/L Ratio
+                        </Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -112,7 +123,7 @@ function LeaderBoard() {
                             <Td display={'flex'} alignItems={'center'} >
                                 <Avatar 
                                     size='md'
-                                    name={'avatar'}
+                                    name={value?.username}
                                     src={'http://127.0.0.1:4545/users/avatar/' + value?.id}
                                     marginRight={'10px'}
                                 ></Avatar>
@@ -130,8 +141,6 @@ function LeaderBoard() {
             </Table>
             <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen}/>
         </Box>
-
-
     </>)
   }
 

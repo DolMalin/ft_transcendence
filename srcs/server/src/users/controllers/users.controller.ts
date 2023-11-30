@@ -6,14 +6,13 @@ import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
-import { Socket, io } from 'socket.io-client';
-import { WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { MatchHistoryService } from 'src/game/services/match.history.services';
 
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly matchHistoryService: MatchHistoryService
     ) {}
   
   // TO DO : Can't get this to work
@@ -46,7 +45,8 @@ export class UsersController {
   @Get('history/:id')
   history(@Param('id') userId: string) {
 
-      return (this.usersService.returnHistory(userId));
+    console.log(userId)
+      return (this.matchHistoryService.returnHistory(userId));
   }
 
   @UseGuards(AccessTokenGuard)
@@ -116,6 +116,7 @@ export class UsersController {
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
+
     return this.usersService.remove(id);
   }
 }

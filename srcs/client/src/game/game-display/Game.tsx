@@ -19,8 +19,10 @@ import {
 import { 
     GameInfo,
     GameProps,
-    GameMetrics
+    GameMetrics,
+    userBasicInfos
     } from '../globals/interfaces';
+import authService from '../../auth/auth.service';
 
 /**
  * @description 
@@ -44,8 +46,14 @@ function Game(props : GameProps) {
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
 
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
-
+    const [userOne, setUserOne] = useState<userBasicInfos>({
+        id : undefined,
+        username : undefined
+    })
+    const [userTwo, setUserTwo] = useState<userBasicInfos>({
+        id : undefined,
+        username : undefined
+    })
     const [gameMetrics, setGameMetrics] = useState<GameMetrics>({
         paddleOne : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
@@ -83,6 +91,19 @@ function Game(props : GameProps) {
             playerId : props.playerId,
             roomName : props.gameRoom
         }
+
+    useEffect(function getUserBasicInfos() {
+
+        sock?.on('gameStarted', (userOneInfo : userBasicInfos, userTwoInfo : userBasicInfos) => {
+            setUserOne(userOneInfo);
+            setUserTwo(userTwoInfo);
+            console.log('info : ',userOneInfo, 'user : ', userOne)
+        })
+
+        return (() => {
+            sock?.off('gameStarted');
+        })
+    }, [userOne, userTwo])
 
     useEffect(function resizeEvents() {
 
@@ -159,6 +180,12 @@ function Game(props : GameProps) {
             }
         }
 
+        function handleFocusOut() {
+
+            sock.emit('playerMoveStopped', {key : Constants.LEFT, playerId : props.playerId,room : props.gameRoom});
+            sock.emit('playerMoveStopped', {key : Constants.RIGHT, playerId : props.playerId,room : props.gameRoom});
+        }
+
         function leaveGameOnRefresh() {
             try {
                 sock.emit('leaveGame', gameInfo);
@@ -171,6 +198,7 @@ function Game(props : GameProps) {
         document.addEventListener("keydown", handleKeydown);
         document.addEventListener("keyup", handleKeyup);
         window.addEventListener("beforeunload", leaveGameOnRefresh);
+        window.addEventListener("blur", handleFocusOut)
 
         if (props.playerId === '1')
             sock.emit('startGameLoop', gameInfo);
@@ -178,6 +206,7 @@ function Game(props : GameProps) {
             document.removeEventListener('keydown', handleKeydown);
             document.removeEventListener('keyup', handleKeyup);
             window.removeEventListener("beforeunload", leaveGameOnRefresh)
+            window.removeEventListener("blur", handleFocusOut);
         })
     }, []);
     
@@ -265,14 +294,14 @@ function Game(props : GameProps) {
             >
                 <WrapItem>
                     <Avatar
-                    size='full'
-                    name='Silvester Staline'
-                    src='https://bit.ly/prosper-baba'
+                    size='lg'
+                    name={userTwo?.username}
+                    src={userTwo?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userTwo?.id : ''}
                     />{' '}
                 </WrapItem>
                 <Text
                 size='xs'
-                > Joueureuse 2 </Text>
+                > {userTwo?.username}</Text>
             </Box>
             
             <Box borderLeft={'2px solid white'} borderRight={'2px solid white'}>
@@ -285,12 +314,12 @@ function Game(props : GameProps) {
             >
                 <WrapItem>
                     <Avatar
-                    size='full'
-                    name='Thomas Sankara'
-                    src='https://bit.ly/dan-abramov'
+                    size='lg'
+                    name={userOne?.username}
+                    src={userOne?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userOne?.id : ""}
                     />{' '}
                 </WrapItem>
-                <Text> &name </Text>
+                <Text> {userOne?.username} </Text>
             </Box>
 
         </Flex>

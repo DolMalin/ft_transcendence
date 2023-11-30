@@ -25,19 +25,25 @@ export class MatchHistoryService {
 
     async storeGameResults(game : GameState): Promise<Game> {
 
-        let createDto : CreateGameDto = {
-            winnerId : game.winner,
-            winnerUsername : (await this.usersService.findOneById(game.winner)).username,
-            winnerScore : game.winner === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
-            looserId : game.looser,
-            looserUsername : (await this.usersService.findOneById(game.looser)).username,
-            looserScore: game.looser === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
-        }
+        try {
 
-        let newGame = this.gameRepository.create(createDto);
-        newGame = await this.gameRepository.save(newGame)
-        this.addGameToUsersPlayedGames(newGame)
-        return (newGame)
+            let createDto : CreateGameDto = {
+                winnerId : game.winner,
+                winnerUsername : (await this.usersService.findOneById(game.winner)).username,
+                winnerScore : game.winner === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
+                looserId : game.looser,
+                looserUsername : (await this.usersService.findOneById(game.looser)).username,
+                looserScore: game.looser === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
+            }
+            
+            let newGame = this.gameRepository.create(createDto);
+            newGame = await this.gameRepository.save(newGame)
+            this.addGameToUsersPlayedGames(newGame)
+            return (newGame)
+        }
+        catch (e) {
+            console.log('ERROR in adding game to DB : ', e.message)
+        }
     }
 
     addGameToUsersPlayedGames(game : Game) {
@@ -69,4 +75,18 @@ export class MatchHistoryService {
         looser.loosesAmount ++;
         this.userRepository.save(looser);
     }
+
+
+  async returnHistory(userId : string){
+
+    try {
+      
+      const res = await this.userRepository.findOne({relations : {playedGames: true},where: {id : userId}});
+      return (res.playedGames.reverse());
+    }
+    catch (e) {
+      console.log('Get History back : ', e.message)
+      throw Error
+    }
+  }
 }

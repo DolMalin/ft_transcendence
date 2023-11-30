@@ -67,6 +67,7 @@ function Malaise(props : {gameSock : Socket}) {
       setSwitchingFrom(false); 
       // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
       window.dispatchEvent(new Event('resize'));}}
+      bgColor={Constants.BG_COLOR}
     >
 
       <TabList border='none' mb='2em' 
@@ -131,8 +132,6 @@ function Malaise(props : {gameSock : Socket}) {
   </Tabs>
   )
 }
-
-// const gameSock =  io('http://localhost:4545/');
 
 function App() {
   

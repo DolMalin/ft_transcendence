@@ -124,16 +124,4 @@ export class UsersService {
       return (scoreList);
     }));
   }
-
-  async returnHistory(userId : string){
-
-    try {
-      
-      const res = await this.findOneById(userId);
-      return (res.playedGames.reverse());
-    }
-    catch (e) {
-      console.log('Get History back : ', e.message)
-    }
-  }
 }
