@@ -35,6 +35,7 @@ clean:
 	$(COMPOSE) down --rmi all --volumes
 
 fclean: clean
+	 $(RM) -r ${HOME}/data/*
 
 prune: down fclean
 	$(DOCKER) system prune -a -f

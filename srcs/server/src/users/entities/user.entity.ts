@@ -1,4 +1,5 @@
 import { Field } from '@nestjs/graphql';
+import { Room } from 'src/chat/entities/room.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, OneToOne} from 'typeorm';
 import { Game } from 'src/game/entities/game-entity';
 import { Avatar } from './avatar.entity';
@@ -11,12 +12,10 @@ export class User {
 	@Column({type: 'int', unique: true})
 	ftId: number
 
-	@Column({type: 'varchar',length: 20, nullable: true})
-	@Field(() => String, {})
+	@Column({type: 'varchar', length: 20, nullable: true})
 	username: string
 
 	@Column({type: 'varchar', nullable: true})
-	@Field(() => String, {})
 	refreshToken: string
 
 	@Column({type: 'boolean', default: false})
@@ -35,6 +34,10 @@ export class User {
 	@Field(() => Boolean, {})
 	isTwoFactorAuthenticated: boolean
 
+	@ManyToMany(() => Room, room => room.users)
+	room: Room[];
+
+	//rel vers user blocked
 	@Column({type : 'int', default : 0, nullable: true})
 	winsAmount : number
 

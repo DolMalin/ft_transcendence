@@ -14,6 +14,7 @@ import { RefreshToken2FAStrategy } from './strategies/refreshToken2FAStrategy';
     PassportModule,
     JwtModule.register({})
   ],
+  exports:[AuthService],
   controllers: [AuthController],
   providers: [AuthService, AccessTokenStrategy, AccessToken2FAStrategy, RefreshToken2FAStrategy]
 })

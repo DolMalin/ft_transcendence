@@ -10,6 +10,9 @@ import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
 
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
+import { Room } from './chat/entities/room.entity';
+import { Message } from './chat/entities/message.entity';
 import { Avatar } from './users/entities/avatar.entity';
 
 @Module({
@@ -21,15 +24,18 @@ import { Avatar } from './users/entities/avatar.entity';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User, Avatar, Game],
+      entities: [User, Room, Message, Avatar, Game],
+      // entities: [User, Avatar, Game],
       synchronize: true,
+      // dropSchema: true, wipe la db a chaque refresh
     }),
     UsersModule,
     GameModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GameModule],
+  providers: [AppService],
 })
 
 export class AppModule { }

@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState, useReducer} from 'react';
 
 import Auth from "./auth/Auth"
+import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
@@ -20,6 +21,8 @@ import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 import Profile from './profile/Profile';
 import reducer from './auth/components/reducer'
 import { stateType } from './auth/components/reducer'
+import authService from './auth/auth.service';
+
 const gameSock = io('http://127.0.0.1:4545')
 
 
@@ -122,7 +125,7 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          CECI EST UN CHAT
+          <Chat socket={chatSocket}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -137,6 +140,8 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
   </Tabs>
   )
 }
+
+const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
 

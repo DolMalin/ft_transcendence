@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, StreamableFile, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
+import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
+import { GetUser } from '../decorator/user.decorator';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 
@@ -10,7 +13,7 @@ import { leaderboardStats } from 'src/game/globals/interfaces';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('currentUser')
   findCurrentUser(@Req() req : any) {
     return ('feur')
@@ -27,6 +30,14 @@ export class UsersController {
 
     return (this.usersService.returnScoreList());
   }
+
+
+  @UseGuards(AccessTokenGuard)
+  @Get('me')
+  getUserInfo(@GetUser() user: User){
+    return {username: user.username, id: user.id}
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
