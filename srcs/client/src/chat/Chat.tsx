@@ -5,7 +5,7 @@ import { Chatbox } from "./Chatbox";
 import './chat.css'
 import authService from "../auth/auth.service";
 import { useForm } from "react-hook-form";
-import { ZERO } from "../game/globals/const";
+import { Socket } from "socket.io-client";
 
 export interface MessageData {
     id: number;
@@ -22,11 +22,14 @@ export interface Room {
 
 async function getRoomList(){
 
-    let roomList: { id: number; name: string; password: string | null; privChan: string | null }[]; 
+    let roomList: { 
+        id: number; 
+        name: string; 
+        password: string | null; 
+        privChan: string | null }[]; 
     try{
-        const res = await authService.get('http://127.0.0.1:4545/room/roomlist')
+        const res = await authService.get('http://127.0.0.1:4545/room/')
         roomList = res.data
-        console.log('roomlist', res.data)
     }
     catch(err){
         console.log(err)
@@ -34,7 +37,7 @@ async function getRoomList(){
     return roomList
 }
 
-export function Chat(props: any){
+export function Chat(props: {socket: Socket}){
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -73,7 +76,6 @@ export function Chat(props: any){
  
     const  joinRoom = async (dt: {room: string, password: string}) => {
         try{
-            console.log('--------------------dt in front---------------------=', dt)
             const res = await authService.post('http://127.0.0.1:4545/room/joinRoom',
             {
                 name: dt.room,
@@ -115,19 +117,22 @@ export function Chat(props: any){
     useEffect(() => {
         fetchRoom()
     }, [])
-
     return (
         <div>
-            <mark><h2>Channel list</h2></mark> 
-            {roomList.map((room, index: number) => {
-                return  <div className="roomlist" key={index}>
-                            <div>
-                                <ul>
-                                    <li>{room.name}</li>       
-                                </ul>
-                            </div>
-                        </div>
-            })}
+        <mark>
+            <h2>Channel list</h2>
+        </mark>
+        {roomList?.length > 0 && (
+        roomList.map((room, index: number) => (
+            <div className="roomlist" key={index}>
+                <div>
+                    <ul>
+                        <li>{room.name}</li>
+                    </ul>
+                </div>
+            </div>
+        ))
+        )}
         <div className="Chat">
             {!showChat ? (
             <div className="joinChatContainer">

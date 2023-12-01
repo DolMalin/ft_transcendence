@@ -35,15 +35,15 @@ export class RoomController {
     }
 
     @UseGuards(AccessTokenGuard)
-    @Get('userlist')
-    async getUserList(){
-        return await this.roomService.findAllUsers()
+    @Get('userlist/:id')
+    async getUserList(@Param("id") id: number){
+        return await this.roomService.findAllUsers(id)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('joinRoom')
     async joinRoom(@GetUser() user: User, @Body() dto: RoomDto){
-        return await this.roomService.joinRoom(dto);
+        return await this.roomService.joinRoom(dto, user);
     }
 
     @UseGuards(AccessTokenGuard)

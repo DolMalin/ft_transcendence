@@ -19,7 +19,9 @@ export class RoomService {
         @InjectRepository(Room)
         private roomRepository: Repository<Room>,
         @InjectRepository(Message)
-        private messageRepository: Repository<Message>
+        private messageRepository: Repository<Message>,
+        @InjectRepository(Message)
+        private userRepository: Repository<User>
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
@@ -43,12 +45,32 @@ export class RoomService {
         return this.roomRepository.findOneBy({id})
     }
 
-    async findAllUsers(){
-        const userList = await this.roomRepository
+    // async findAllUsers(){
+    //     const userList = await this.roomRepository
+    //         .createQueryBuilder('room')
+    //         .leftJoinAndSelect('room.users', 'user')
+    //         .getMany()
+
+    //     console.log('-------------------------------\n', userList)
+    //     return userList
+    // }
+
+    async findAllUsers(id: number) {
+        const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')
-            .getMany()
-        console.log('---------------USERLIST--------------\n', userList)
+            .where('room.id = :id', {id})
+            .getOne();
+    
+        if (!room){
+            throw new ForbiddenException('room does not exist')
+        }
+        
+        const usersInRoom = room.users.map(user => ({
+            id: user.id,
+            username: user.username,
+        }))
+        return usersInRoom;
     }
 
     async update(id: number, updateRoomDto: UpdateRoomDto) {
@@ -66,12 +88,13 @@ export class RoomService {
         return this.roomRepository.remove(room)
     }
     
-    async joinRoom(dto: RoomDto){
-
+    async joinRoom(dto: RoomDto, user: User){
+        
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
             .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
             .where('room.name = :name', { name: dto.name })
             .orderBy('message.id', 'ASC')
             .getOne();
@@ -83,6 +106,11 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
+        console.log('ALAID', room.users)
+        if (room.users === undefined)
+            room.users = []
+        room.users.push(user)
+        this.roomRepository.save(room)
         return room;
     }
 

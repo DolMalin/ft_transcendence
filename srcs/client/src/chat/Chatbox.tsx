@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from "react"
 import ScrollToBottom from 'react-scroll-to-bottom'
 import * as Chakra from '@chakra-ui/react'
-import axios from "axios"
 import authService from "../auth/auth.service"
 import { MessageData, Room } from "./Chat"
 import { Socket } from "socket.io-client"
@@ -28,10 +27,34 @@ function timeOfDay(timestampz: string | Date){
     return (date);
 }
 
+async function getUserList(id: number){
+    let userlist : {
+        id : string,
+        username: string
+    }[]
+    try{
+        const res =  await authService.get('http://127.0.0.1:4545/room/userlist/' + id)
+        userlist = res.data
+    }
+    catch(err){
+        console.log(err)
+    }
+    return userlist
+}
+
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
 
     const [messageList, setMessageList] = useState<MessageData[]>([]);
-    const [me, setMe] = useState<{id: string, username: string} | undefined>(undefined)
+    const [me, setMe] = useState
+    <{
+        id: string, 
+        username: string
+    } | undefined>(undefined)
+    const [userList, setUserList] = useState
+    <{
+        id: string, 
+        username: string
+    }[]>([])
     const { 
         register, 
         handleSubmit, 
@@ -75,6 +98,21 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             props.socket.off("sendMessage")
         })
     }
+
+    const fetchUserList = async () => {
+        try {
+            const tab = await getUserList(props.room.id)
+            setUserList(tab)
+        }
+        catch(err){
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchUserList()
+    }, [])
+
     useEffect(() => {
         props.socket.on("receiveMessage", (data: MessageData) => {
         setMessageList((list) => [...list, data])
@@ -83,7 +121,23 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             props.socket.off("reveiveMessage")
         })
     }, [props.socket])
+    //TODO faire en sorte que la userlist re render
     return (
+        <div>
+                    <mark>
+            <h2>User list</h2>
+        </mark>
+        {userList?.length > 0 && (
+        userList.map((userlist, index: number) => (
+            <div className="userlist" key={index}>
+                <div>
+                    <ul>
+                        <li>{userlist.username}</li>
+                    </ul>
+                </div>
+            </div>
+        ))
+        )}
         <><div>
             <Chakra.Button onClick={() => {
                     props.showChat(false)}}>
@@ -128,6 +182,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
         </form>
         </div>
-    </div></>
+    </div></></div>
     )
 }
