@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
@@ -9,6 +9,7 @@ import { UseInterceptors} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { read } from 'fs';
 import { authenticator } from 'otplib';
+import { FileTypeValidationPipe } from '../utils/file.validator';
 
 @Controller('auth')
 export class AuthController {
@@ -57,7 +58,14 @@ export class AuthController {
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AccessTokenGuard)
     @Post('register')
-    async register(@UploadedFile() file: any, @Body() body:any, @Res() res:any, @Req() req:any) {
+    async register(
+      @UploadedFile(
+        new FileTypeValidationPipe()
+      ) file: Express.Multer.File,
+      @Body() body:any,
+      @Res() res:any,
+      @Req() req:any)
+    {
       await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
       await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
       res.send("ok")
@@ -73,7 +81,6 @@ export class AuthController {
     }
 
 
-    // SET 2FA A FALSE QUAND DISCONNECT
     @UseGuards(AccessTokenGuard)
     @Post('2fa/login')
     async twoFactorAuthenticationLogin(@Req() req: any, @Res() res:any, @Body() body:any) {
