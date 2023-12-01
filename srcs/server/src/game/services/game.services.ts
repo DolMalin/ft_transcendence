@@ -5,7 +5,6 @@ import {
   GameState,
   GameInfo,
   GameMetrics,
-  Paddle,
   } from '../globals/interfaces'
 import { 
   willBallCollideWithWall,
@@ -17,6 +16,8 @@ import {
   ballRelaunch
   } from './BallMoves';
 import * as Constants from '../globals/const'
+import { MatchHistoryService } from './match.history.services';
+import { UsersService } from 'src/users/services/users.service';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -39,6 +40,12 @@ export function roomNameGenerator(lenght : number, map : Map<string, Set<string>
 
 @Injectable()
 export class MatchmakingService {
+
+  constructor(
+
+    private readonly matchHistoryServices : MatchHistoryService,
+    private readonly userService : UsersService
+) {}
 
     /**
      * @description add client to existing room, fill the GameServDTO
@@ -65,7 +72,8 @@ export class MatchmakingService {
           isPaused : true,
           clientOneScore : 0,
           clientTwoScore : 0,
-          Victor : '',
+          winner : undefined,
+          looser : undefined,
           gameType  : gameType,
           paddleOne : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
@@ -113,7 +121,7 @@ export class MatchmakingService {
 
         for (const [key, value] of gamesMap) 
         {
-          if (value.gameIsFull === false && value.gameType === gameType)
+          if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
           {
             this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
@@ -136,7 +144,19 @@ export class MatchmakingService {
       let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
         return ;
+      
+      if (data.playerId === '1' && game.clientOne.socket.id != client.id)
+      {
+        console.log('socket meddling in leaveGame');
+        return ;
+      }
+      else if (data.playerId === '2' && game.clientTwo.socket.id != client.id)
+      {
+        console.log('socket meddling in leaveGame');
+        return ;
+      }
 
+      clearInterval(game.ballRefreshInterval);
       if (game.gameIsFull === false)
       {
         client.leave(data.roomName);
@@ -144,22 +164,62 @@ export class MatchmakingService {
       }
       else if (data.playerId === '1')
       {
-        console.log('here')
-        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        if (game.winner === undefined)
+        {
+          game.winner = game.clientTwo.id;
+          game.looser = game.clientOne.id;
+        }
+      
         server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
-        gamesMap.delete(data.roomName);
       }
       else if (data.playerId === '2')
       {
-        console.log('there')
-
-        // set players 2 as winner, send it to DB, PATCH its profile and the leaderboard
+        if (game.winner === undefined)
+        {
+          game.winner = game.clientOne.id;
+          game.looser = game.clientTwo.id;
+        }
         server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
+      }
+      this.matchHistoryServices.storeGameResults(game);
+      gamesMap.delete(data.roomName);
+    }
+
+    leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
+
+      const game = gamesMap.get(data.roomName);
+      if (game === undefined)
+      {
+        console.log('undefined game in leaveQueue', data.roomName)
+        return;
+      }
+
+      if (game.clientOne.socket.id === client.id)
+      {
         gamesMap.delete(data.roomName);
+        
+        client.leave(data.roomName);
+        try {
+          this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+    
+            this.userService.update(user.id, {isAvailable : true});
+            user.gameSockets.forEach((value) => {
+              server.to(value).emit('isAvailable', true);
+            })
+          })
+        }
+        catch(e) {
+          console.log('in availability change ERROR : ', e);
+        }
+      }
+      else
+      {
+        console.log('socket meddling in leave queue')
+        return ;
       }
     }
 }
@@ -167,15 +227,31 @@ export class MatchmakingService {
 @Injectable()
 export class GamePlayService {
 
+  constructor(
+
+    private readonly usersService : UsersService
+) {}
+
   // ********************************* PADDLE ********************************* //
 
 
-  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}) {
+  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
 
-    switch (data.key)
+    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStarted')
+      return ;
+    }
+    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStarted')
+      return ;
+    }
+
+    switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
         data.playerId === '1' ?  game.paddleOne.movingRight = true : game.paddleTwo.movingRight = true;
@@ -188,12 +264,23 @@ export class GamePlayService {
     }
   }
 
-  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}) {
+  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
 
-    switch (data.key)
+    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStopped')
+      return ;
+    }
+    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStopped')
+      return ;
+    }
+
+    switch (data.key.toLowerCase())
     {
       case Constants.RIGHT :
         data.playerId === '1' ?  game.paddleOne.movingRight = false : game.paddleTwo.movingRight = false;
@@ -237,13 +324,25 @@ export class GamePlayService {
   handleBallMovement(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     if (game === undefined)
-      return ('gamrOver');
+    {
+      console.log("TEST TEST TEST")
+      return ('gameOver');
+    }
 
     if (goal(server, game,data.roomName, game.ball))
     {
-      if (game.clientOneScore >= Constants.SCORE_TO_REACH || game.clientTwoScore >= Constants.SCORE_TO_REACH)
+      if (game.clientOneScore >= Constants.SCORE_TO_REACH)
+      {
+        game.winner = game.clientOne.id;
+        game.looser = game.clientTwo.id;
         return ('gameOver')
-
+      }
+      else if (game.clientTwoScore >= Constants.SCORE_TO_REACH)
+      {
+        game.winner = game.clientTwo.id;
+        game.looser = game.clientOne.id;
+        return ('gameOver')
+      }
       ballReset(game.ball);
       return ('goal')
     }
@@ -286,15 +385,26 @@ export class GamePlayService {
         ct --
     }, 1000);
   }
+
+  async getUserBasicInfos(id : string) {
+    try {
+      const res = await this.usersService.findOneById(id);
+      return ({id : id, username : res.username});    
+    }
+    catch (e) {
+      console.log(e);
+    } 
+  }
   
-  gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
+  async gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     let ballEvents : string = 'start';
 
     if (game === undefined)
       return ;
 
-    server.to(data.roomName).emit('gameStarted');
+    server.to(data.roomName).emit('gameStarted', 
+    await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
     
     game.ballRefreshInterval = setInterval(() => {
       
@@ -314,13 +424,7 @@ export class GamePlayService {
         }
         else if (ballEvents === 'gameOver')
         {
-          server.to(data.roomName).emit('gameOver',
-          // MAYBE PROBLE WITH WINNER / LOOSER
-          client.id === game.clientOne.socket.id ? game.clientOne.socket.id : game.clientTwo.socket.id);
-          // TO DO add loose and win to players history
-          game.clientOne.socket.leave(data.roomName);
-          game.clientTwo.socket.leave(data.roomName);
-          gamesMap.delete(data.roomName);
+          server.to(data.roomName).emit('gameOver', game.winner);
           return (clearInterval(game.ballRefreshInterval))
         }
         else

@@ -6,6 +6,8 @@ import axios from 'axios'
 import * as argon2 from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { roomNameGenerator } from 'src/game/services/game.services';
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode'
 
 
 @Injectable()
@@ -52,7 +54,6 @@ export class AuthService {
           bodyParameters,
           config
         ).then((res) => {
-          console.log("bjr")
           resolve(res.data.access_token as string)
         }, (err) => {
           console.log(err)
@@ -104,7 +105,7 @@ export class AuthService {
   async createAccessToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'15m'
+      expiresIn:'7d'
     })
   }
 
@@ -132,8 +133,9 @@ export class AuthService {
   /**
    * @description Check the validity of a given `jwt`, and returns its `payload`
    */
-  async validateJwt(token: string): Promise<any> {
-      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_SECRET})
+  async validateAccessJwt(token: string): Promise<any> {
+      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_ACCESS_SECRET})
+      console.log(payload)
       return payload
   }
 
@@ -162,8 +164,8 @@ export class AuthService {
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.redirect("http://127.0.0.1:4343")
-
   }
+
 
   async refresh(req: any, res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
@@ -208,6 +210,8 @@ export class AuthService {
 
     if (!user)
       throw new ForbiddenException('access denied')
+
+    await this.usersService.update(user.id, {isTwoFactorAuthenticated: false})
     
     res.clearCookie("refreshToken").sendStatus(200)
     Logger.log(`User #${user.id} logged out`)
@@ -215,6 +219,7 @@ export class AuthService {
   }
   
 
+  // @TODO: CHECK VALUES IS SEND BACK IN USER
   async validate(@Req() req: any, @Res() res: any) {
     const user = await this.usersService.findOneById(req.user?.id)
     if (!user)
@@ -227,10 +232,31 @@ export class AuthService {
   //   return req.body
   
   async register(body: any) { 
-    console.log(body)
     // await this.usersService.add
     return "ok"
-
   }
+
+  async generateTwoFactorAuthenticationSecret(user: User) {
+    const secret = authenticator.generateSecret()
+    const otpAuthUrl = authenticator.keyuri(user.id, process.env.APP_NAME, secret)
+    await this.usersService.update(user.id, {twoFactorAuthenticationSecret:secret})
+    return {secret, otpAuthUrl}
+  }
+
+  
+  async generateQrCodeDataURL(otpAuthUrl: string) {
+    return toDataURL(otpAuthUrl)
+  }
+
+  isTwoFactorAuthenticationValid(twoFactorAuthenticationCode: string, user:User) {
+    return authenticator.verify({
+      token:twoFactorAuthenticationCode,
+      secret:user?.twoFactorAuthenticationSecret
+    })
+  }
+
+
+
+
 
 }

@@ -9,6 +9,7 @@ import {
 } from '@chakra-ui/react';
 import * as Constants from '../globals/const';
 import '../../fonts.css'
+import authService from '../../auth/auth.service';
 
 function PlayBox(props : {dispatch : Function}) {
 
@@ -74,7 +75,8 @@ function PlayBox(props : {dispatch : Function}) {
                     <Button fontWeight={'normal'} onClick={() => {
                         props.dispatch({type : 'SET_PLAY', payload : false});
                         props.dispatch({type : 'SET_GAME_MOD', payload : true});
-                    }} _hover={{transform: 'scale(1.5)'}} className='bionic'> 
+                    }} _hover={{transform: 'scale(1.5)'}} className='bionic'
+                    > 
                     Play</Button>
                 </Box>
 

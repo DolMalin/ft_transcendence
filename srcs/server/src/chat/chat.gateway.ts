@@ -22,13 +22,13 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     // for (const id of userBlocked){
       // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
     // }
+
     if (client.handshake.headers.authorization) {
       const token = client.handshake.headers.authorization.split(' ');
       if (token.length == 2) {
         //TODO not decode but verify
         const payload = this.jwtService.decode(token[1]) as {id: string};
-        console.log(" payload", payload.id)
-        client.userId = payload.id;
+        client.userId = payload?.id;
       }
     }
     // TODO else disconnect

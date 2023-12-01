@@ -1,20 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-
 import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
-import { leaderboardStats } from 'src/game/globals/interfaces';
+import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
+import { CreateGameDto } from 'src/game/dto/create.game.dto';
+import { Game } from 'src/game/entities/game-entity';
+import { UpdateGameDto } from 'src/game/dto/update.game.dto';
+import { Avatar } from '../entities/avatar.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
-    private readonly avatarService: AvatarService
+
+    private readonly avatarService: AvatarService,
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -24,7 +28,7 @@ export class UsersService {
   }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userRepository.find({relations :{playedGames: true}});
   }
 
   findOneById(id: string) {
@@ -70,7 +74,31 @@ export class UsersService {
     });
   }
 
-  async returnScoreList(){
+  /**
+ * @description remove a socket Id from an array of string stored in user entity and update the user
+ */
+  removeSocketId(socketId : string, socketIdArray : string[], user : User) {
+
+    user.gameSockets = socketIdArray?.filter((value) => value != socketId)
+    return (this.update(user.id, { gameSockets : user.gameSockets}))
+  }
+
+    /**
+ * @description add a socket Id to an array of string stored in user entity and update the user
+ */
+  addSocketId(socketId : string, socketIdArray : string[], user : User) {
+
+    if (socketIdArray === null)
+      socketIdArray = [];
+    socketIdArray?.push(socketId);
+    user.gameSockets = socketIdArray;
+    return (this.update(user.id, {gameSockets : user.gameSockets}));
+  }
+
+  /**
+ * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
+ */ 
+  returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {
         
@@ -82,12 +110,15 @@ export class UsersService {
       let ratio = w * 100 / (w + l);
 
       return (ratio)
-  }
+    }
 
+    
     return (this.findAll().then((res : User[]) => {
-        let scoreList : leaderboardStats[] = []; 
-        res.forEach((value) => {
-        scoreList.push({username : value.id, winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
+      let scoreList : leaderboardStats[] = []; 
+
+      res?.forEach(async (value) => {
+
+        scoreList.push({username : value.username, id : value.id,winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
         WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
       })
       return (scoreList);
