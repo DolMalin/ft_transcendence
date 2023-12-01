@@ -39,10 +39,32 @@ export interface GameMetrics {
   ball : Ball,
 }
 
+export interface userBasicInfos {
+  id : string,
+  username : string
+}
+
+export interface Avatar {
+  id : string,
+  filename : string
+  data : Uint8Array
+}
+
 export interface leaderboardStats {
 
   username: string
+  id : string
   winsAmount: number
   loosesAmount: number
   WLRatio : number
+}
+
+export interface DBGame {
+  id: string
+  winnerId : string
+  winnerUsername : string
+  looserId : string
+  looserUsername : string
+  winnerScore : number
+  looserScore : number
 }

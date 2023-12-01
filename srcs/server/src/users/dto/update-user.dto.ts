@@ -11,4 +11,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	isTwoFactorAuthenticated?: boolean
 	winsAmount?: number
 	loosesAmount?: number
+	isAvailable?: boolean
+	gameSockets?: string[]
 }

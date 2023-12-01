@@ -6,17 +6,18 @@ Flex
  } from "@chakra-ui/react"
 import { Socket } from "socket.io-client";
 import * as Constants from '../globals/const'
+import authService from "../../auth/auth.service";
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
-        
+    
     function leaveQueue() {
-        
-        props.sock.emit('leaveQueue', props.roomName);
 
-        props.dispatch({type : 'SET_LF_GAME', payload : false});
-        props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
-        props.dispatch({type : 'SET_GAME_TYPE', payload : ''})
-        props.dispatch({type : 'SET_PLAY', payload : true});
+      props.sock.emit('leaveQueue', {roomName : props.roomName});
+
+      props.dispatch({type : 'SET_LF_GAME', payload : false});
+      props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+      props.dispatch({type : 'SET_GAME_TYPE', payload : ''})
+      props.dispatch({type : 'SET_PLAY', payload : true});
     }
 
     const [dot, setDot] = useState('.');
