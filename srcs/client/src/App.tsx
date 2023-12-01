@@ -73,7 +73,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       setSwitchingFrom(false); 
       window.dispatchEvent(new Event('resize'));
     }}
-      bgColor={Constants.BG_COLOR}
     >
 
       <TabList border='none' mb='2em' 
@@ -131,7 +130,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {<Profile state={props.state} dispatch={props.dispatch}/>}
+          {<Profile state={props.state} dispatch={props.dispatch} gameSock={props.gameSock}/>}
         </TabPanel>
 
     </TabPanels>

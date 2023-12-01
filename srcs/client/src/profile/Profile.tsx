@@ -7,9 +7,10 @@ import AuthService from '../auth/auth.service';
 import { stateType} from '../auth/components/reducer';
 import reducer from '../auth/components/reducer';
 import Auth from '../auth/Auth';
+import { Socket } from 'socket.io-client';
 
 
-function Profile(props : {state: stateType, dispatch: Function}) {
+function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
 	const [qrCode, setQrCode] = useState('')
 	const [displayActivate2FA, setDisplayActivate2FA] = useState(false)
 	const [displayDeactivate2FA, setDisplayDeactivate2FA] = useState(false)
@@ -55,7 +56,7 @@ function Profile(props : {state: stateType, dispatch: Function}) {
 			
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
-			await AuthService.logout(state.isTwoFactorAuthenticated)
+			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
 		}

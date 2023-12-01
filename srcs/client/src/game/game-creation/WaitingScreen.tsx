@@ -10,7 +10,6 @@ import authService from "../../auth/auth.service";
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
     
-    console.log('roomname : ', props.roomName)
     function leaveQueue() {
 
       props.sock.emit('leaveQueue', {roomName : props.roomName});

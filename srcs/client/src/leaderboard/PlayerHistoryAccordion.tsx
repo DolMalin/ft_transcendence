@@ -38,8 +38,6 @@ function PlayerHistoryAccordion(props : {userId : string}) {
         getHistory(props.userId);
     }, [props.userId])
 
-    console.log('rerendering');
-
     return (<>
         <Accordion allowToggle 
         marginTop={'40px'}
