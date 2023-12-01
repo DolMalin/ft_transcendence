@@ -11,7 +11,6 @@ import WaitingScreen from './WaitingScreen';
 import { Box } from '@chakra-ui/react'
 import * as Constants from '../globals/const'
 import axios from 'axios';
-import authService from '../../auth/auth.service';
 
 type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}
@@ -130,14 +129,6 @@ function CreateGame(props : {sock : Socket}) {
             sock.off('gameOver');
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
-    
-    try {
-        axios.get('http://127.0.0.1:4545/users/currentUser')
-      }
-      catch (err)
-      {
-        console.log(err.message)
-      }
 
     return (<>
             <Box id={Constants.GAME_ZONE}
