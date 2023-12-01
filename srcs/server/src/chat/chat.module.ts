@@ -9,11 +9,15 @@ import { MessageController } from "./controllers/message.controller";
 import { Message } from "./entities/message.entity";
 import { AuthModule } from "src/auth/auth.module";
 import { AuthService } from "src/auth/services/auth.service";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
+import { UsersService } from "src/users/services/users.service";
+import { User } from "src/users/entities/user.entity";
+import { Avatar } from "src/users/entities/avatar.entity";
+import { AvatarService } from "src/users/services/avatar.service";
 @Module({
-    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule] ,
+    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule, TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar])] ,
     controllers: [RoomController, MessageController],
-    providers: [ChatGateway, RoomService, MessageService],
+    providers: [ChatGateway, RoomService, MessageService, JwtService, UsersService, AuthService, AvatarService],
     exports: [RoomService, MessageService]
     //Export roomService si besoin est
 })

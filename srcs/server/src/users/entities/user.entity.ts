@@ -70,4 +70,7 @@ export class User {
 
 	@Column({type : 'text', default : null, array : true, nullable : true})
 	gameSockets : string[];
+
+	@Column({type : 'text', default : null, array : true, nullable : true})
+	chatSockets : string[];
 }
