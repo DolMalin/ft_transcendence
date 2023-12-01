@@ -10,10 +10,9 @@ import GameMode from './GameMode';
 import WaitingScreen from './WaitingScreen';
 import { Box } from '@chakra-ui/react'
 import * as Constants from '../globals/const'
-import axios from 'axios';
 import authService from '../../auth/auth.service';
 
-type actionType = 
+export type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}
 | {type : 'SET_GAME_MOD'; payload :boolean}
 | {type : 'SET_GAME'; payload :boolean}
@@ -23,7 +22,7 @@ type actionType =
 | {type : 'SET_V_SCREEN'; payload :boolean}
 | {type : 'SET_GAME_TYPE'; payload :string};
 
-type stateType = {
+export type stateType = {
     playButtonVisible : boolean,
     gameModVisible : boolean,
     gameVisible : boolean,
@@ -85,59 +84,57 @@ function CreateGame(props : {sock : Socket}) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
-            // const dbUserID = authService.
-
-            sock.emit("joinGame", {gameType : state.selectedGameType, dbUserId : 'feur'});
+            sock?.emit("joinGame", {gameType : state.selectedGameType});
             dispatch({type : 'SET_GAME_MOD', payload : false});
             dispatch({type : 'SET_WAITING_SCREEN', payload : true});
 
-            sock.on('roomFilled', () => {
+            sock?.on('roomFilled', () => {
 
                 dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+                dispatch({type : 'SET_LF_GAME', payload : false})
                 dispatch({type : 'SET_GAME', payload : true});
             })
 
-            sock.on('playerId', (side) => {
+            sock?.on('playerId', (side) => {
 
                 setPlayerId(side);
             })
 
-            sock.on('roomName', (roomName) => {
+            sock?.on('roomName', (roomName) => {
 
                 setGameRoom(roomName);
             })
 
             return (() => {
-                sock.off('roomFilled');
-                sock.off('roomName');
-                sock.off('playerId');
+                sock?.off('roomFilled');
+                sock?.off('roomName');
+                sock?.off('playerId');
             })
         }
     }, [state.lookingForGame])
 
     useEffect(() => {
-        sock.on('gameOver', (winner : string) => {
-            if (sock.id === winner)
+        sock?.on('gameOver', (winner : string) => {
+            if (sock?.id === winner)
                 dispatch({type : 'SET_V_SCREEN', payload : true});
             else
                 dispatch({type : 'SET_L_SCREEN', payload : true});
 
             dispatch({type : 'SET_GAME', payload : false});
+            try {
+                authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+                props.sock.emit('availabilityChange', true);
+            }
+            catch (e) {
+                console.log('setting is Available to false returned : ', e.message);
+            }
         });
 
 
         return (() => {
-            sock.off('gameOver');
+            sock?.off('gameOver');
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
-    
-    try {
-        axios.get('http://127.0.0.1:4545/users/currentUser')
-      }
-      catch (err)
-      {
-        console.log(err.message)
-      }
 
     return (<>
             <Box id={Constants.GAME_ZONE}
@@ -151,7 +148,7 @@ function CreateGame(props : {sock : Socket}) {
         background={Constants.BG_COLOR}
         >
             {state.playButtonVisible && <PlayBox dispatch={dispatch}/>}
-            {state.gameModVisible && <GameMode dispatch={dispatch}/>}
+            {state.gameModVisible && <GameMode dispatch={dispatch} sock={props.sock}/>}
             {state.waitingScreenVisible && <WaitingScreen dispatch={dispatch} sock={sock} roomName={gameRoom} />}
             {state.gameVisible && <Game gameType={state.selectedGameType} sock={sock} playerId={playerId} gameRoom={gameRoom}/>}
             {state.victoryScreenVisible && <VictoryScreen dispatch={dispatch}/>}

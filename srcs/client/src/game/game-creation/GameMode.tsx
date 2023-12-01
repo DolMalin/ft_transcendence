@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box,
 Button,
 Flex,
@@ -6,8 +6,35 @@ Divider,
  } from "@chakra-ui/react"
 import * as Constants from '../globals/const'
 import { LeftBracket, RightBracket } from "./Brackets";
+import authService from "../../auth/auth.service";
+import { Socket } from "socket.io-client";
 
-function GameMode(props : {dispatch : Function}) {
+function GameMode(props : {dispatch : Function, sock : Socket}) {
+
+    const [playerAvailable, setPlayerAvalaible] = useState(false);
+
+    useEffect(() => {async function checkPlayerAvailability() {
+
+        try {
+            const res = await authService.get('http://127.0.0.1:4545/users/isAvailable');
+            setPlayerAvalaible(res.data);
+        }
+        catch (e) {
+            console.log('IsAvalaible returned : ', e)
+        }
+    }
+    checkPlayerAvailability();
+    }, [])
+
+    useEffect(() => {
+
+        props.sock.on('isAvailable', (bool) => {
+            setPlayerAvalaible(bool);
+        })
+        return (() => {
+            props.sock.off('isAvailable');
+        })
+    }, []);
 
     return (<>
         <Flex flexDir={'column'} wrap={'nowrap'}
@@ -33,8 +60,18 @@ function GameMode(props : {dispatch : Function}) {
                     h={'100px'}
                     borderRadius={'0px'}
                     _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
-                    props.dispatch({type : 'SET_LF_GAME', payload : true})}}> 
+                    isDisabled={playerAvailable ? false : true}
+                    onClick={() => {
+                        props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
+                        props.dispatch({type : 'SET_LF_GAME', payload : true});
+                        try {
+                            authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            props.sock.emit('availabilityChange', false);
+                        }
+                        catch (e) {
+                            console.log('setting is Available to false returned : ', e.message);
+                        }
+                    }}> 
                         {Constants.GAME_TYPE_ONE} 
                     </Button>
 
@@ -79,8 +116,19 @@ function GameMode(props : {dispatch : Function}) {
                     h={'100px'}
                     borderRadius={'0px'}
                     _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => {props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_TWO}); 
-                    props.dispatch({type : 'SET_LF_GAME', payload : true})}}>
+                    isDisabled={playerAvailable ? false : true}
+                    onClick={() => {
+                        props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_TWO}); 
+                        props.dispatch({type : 'SET_LF_GAME', payload : true})
+                        try {
+                            authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            props.sock.emit('availabilityChange', false);
+                        }
+                        catch (e) {
+                            console.log('setting is Available to false returned : ', e);
+                        }
+                    }}
+                    >
                         {Constants.GAME_TYPE_TWO}
                     </Button>
 

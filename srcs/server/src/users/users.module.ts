@@ -8,10 +8,12 @@ import { JwtService } from '@nestjs/jwt';
 import { AvatarService } from './services/avatar.service';
 import { Avatar
  } from './entities/avatar.entity';
+import { MatchHistoryService } from 'src/game/services/match.history.services';
+import { Game } from 'src/game/entities/game-entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar])],
+  imports: [TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar]), TypeOrmModule.forFeature([Game])],
   controllers: [UsersController],
-  providers: [UsersService, AuthService, JwtService, AvatarService],
+  providers: [UsersService, AuthService, JwtService, AvatarService, MatchHistoryService],
   exports: [UsersService]
 })
 export class UsersModule {}
