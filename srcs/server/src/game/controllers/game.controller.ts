@@ -3,11 +3,7 @@ import { MatchHistoryService } from "../services/match.history.services";
 import { Game } from "../entities/game-entity";
 import { UsersService } from "src/users/services/users.service";
 import { User } from "src/users/entities/user.entity";
-import { CreateGameDto } from "../dto/create.game.dto";
 import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
-import { GetUser } from "src/users/decorator/user.decorator";
-import { UpdateGameDto } from "../dto/update.game.dto";
-import { GameState } from "../globals/interfaces";
 
 @Controller('games')
 export class GamesController {

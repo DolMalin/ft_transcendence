@@ -23,11 +23,9 @@ async function bootstrap() {
       "Access-Control-Allow-Headers",
       "X-Requested-With",
     ]
-});
-
-  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  })
   app.useGlobalPipes(new ValidationPipe());
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
   await app.listen(process.env.PORT);
-
 }
 bootstrap();

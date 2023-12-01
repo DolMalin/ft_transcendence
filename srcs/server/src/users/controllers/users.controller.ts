@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, StreamableFile, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
+import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
@@ -14,15 +16,8 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly matchHistoryService: MatchHistoryService
     ) {}
-  
-  // TO DO : Can't get this to work
-  // @UseGuards(AccessTokenGuard)
-  // @Get('currentUser')
-  // findCurrentUser(@Req() req : any) {
-  //   console.log('current user : ', req.user)
-  //   return ('feur')
-  // }
-  @UseGuards(AccessTokenGuard)
+
+  @UseGuards(AccessToken2FAGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -71,6 +66,14 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
+
+  @UseGuards(AccessTokenGuard)
+  @Get('me')
+  getUserInfo(@GetUser() user: User){
+    return {username: user.username, id: user.id}
+  }
+
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOneById(id);
@@ -102,7 +105,6 @@ export class UsersController {
     @Req() req:any,
     @Body() updateUserDto: UpdateUserDto)
     : Promise<User> {
-      // console.log('user in Patch update : ', req.user)
     return this.usersService.update(req.user.id, updateUserDto);
   }
 

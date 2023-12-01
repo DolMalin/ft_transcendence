@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState, useReducer} from 'react';
 
 import Auth from "./auth/Auth"
+import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
@@ -17,16 +18,20 @@ import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
-import axios from 'axios';
+import Profile from './profile/Profile';
+import reducer from './auth/components/reducer'
+import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
 
-function Malaise(props : {gameSock : Socket}) {
+
+function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
   const [switchingFrom, setSwitchingFrom] = useState(false)
   const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
 
+  
   useEffect(function DOMEvents() {
 
     function handleResize() {
@@ -118,7 +123,7 @@ function Malaise(props : {gameSock : Socket}) {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          CECI EST UN CHAT
+          <Chat socket={chatSocket}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -126,7 +131,7 @@ function Malaise(props : {gameSock : Socket}) {
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          CECI EST UN PROFIL
+          {<Profile state={props.state} dispatch={props.dispatch}/>}
         </TabPanel>
 
     </TabPanels>
@@ -134,17 +139,26 @@ function Malaise(props : {gameSock : Socket}) {
   )
 }
 
+const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+
 function App() {
+
+
+  const [state, dispatch] = useReducer(reducer, {
+    isAuthenticated: false,
+    isRegistered: false,
+    isTwoFactorAuthenticated: false,
+    isTwoFactorAuthenticationEnabled: false
+  })
   
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isRegistered, setIsRegistered] = useState(false)
   const [gameSock, setGameSock] = useState<Socket>(null)
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-        setIsAuthenticated(false);
+        // setIsAuthenticated(false);
+        dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
       })
 
       return (() => {
@@ -198,8 +212,10 @@ function App() {
   return (<>
     <ChakraProvider>
 
-      <Auth isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} isRegistered={isRegistered} setIsRegistered={setIsRegistered} gameSock={gameSock}/>
-      {isAuthenticated && isRegistered && gameSock && <Malaise gameSock={gameSock}/>}
+      <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
+      
+      {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) 
+      && <Malaise state={state} dispatch={dispatch} gameSock={gameSock}/>}
     </ChakraProvider>
   </>
   );

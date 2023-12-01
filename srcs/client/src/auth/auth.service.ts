@@ -101,13 +101,13 @@ class AuthService {
 		}
 	}
 
-
-
-	async logout(gameSock : Socket) {
+	async logout(isTwoFactorAuthenticated: boolean, gameSock : Socket) {
 		const cookies = new Cookies()
-
+		const url = isTwoFactorAuthenticated ? `http://127.0.0.1:4545/auth/logout-2fa` : `http://127.0.0.1:4545/auth/logout`
 		try {
-			const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
+			// const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
+			
+			const res:any = await this.get(url)
 			gameSock.emit('logout');
 			cookies.remove("accessToken")
 			cookies.remove("refreshToken")
@@ -116,6 +116,7 @@ class AuthService {
 			return err.response.status
 		}
 	}
+
 
 	async refresh() {
 		try {
@@ -155,6 +156,41 @@ class AuthService {
 		}
 	}
 
+	async twoFactorAuthenticationLogin(data:any) {
+		try {
+			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/login`, {twoFactorAuthenticationCode:data})
+			return res.status
+		} catch(err) {
+			throw err
+		}
+	}
+
+	async twoFactorAuthenticationGenerate() {
+		try {
+			let res: any = await this.get(`http://127.0.0.1:4545/auth/2fa/generate`)
+			return res
+		} catch(err) {
+			throw err
+		}
+	}
+
+	async twoFactorAuthenticationTurnOn(data:any) {
+		try {
+			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/turn-on`, data)
+			return res
+		} catch(err) {
+			throw err
+		}
+	}
+
+	async twoFactorAuthenticationTurnOff(data:any) {
+		try {
+			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/turn-off`, data)
+			return res
+		} catch(err) {
+			throw err
+		}
+	}
 }
 
 export default new AuthService()

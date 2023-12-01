@@ -1,13 +1,14 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt"
 import { Injectable, Req} from "@nestjs/common";
+import { UsersService } from "src/users/services/users.service";
 
 @Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-	constructor() {
+export class RefreshToken2FAStrategy extends PassportStrategy(Strategy, 'jwt-refresh-2fa') {
+	constructor(private userService: UsersService) {
 		super({
 			jwtFromRequest:ExtractJwt.fromExtractors([
-				RefreshTokenStrategy.extractJWT
+				RefreshToken2FAStrategy.extractJWT
 			  ]),
 			secretOrKey: process.env.JWT_REFRESH_SECRET,
 		})
@@ -25,6 +26,13 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
 	  }
 
 	async validate(@Req() req: any, payload: any) {
-		return {payload}
+		const user = await this.userService.findOneById(payload.id)
+			
+		if (!user?.isTwoFactorAuthenticationEnabled)
+			return user
+		
+		if (user?.isTwoFactorAuthenticated)
+			return user
+
 	}
 }
