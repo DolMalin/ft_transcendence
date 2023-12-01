@@ -102,11 +102,12 @@ class AuthService {
 		}
 	}
 
-	async logout() {
+	async logout(isTwoFactorAuthenticated: boolean) {
 		const cookies = new Cookies()
-
+		const url = isTwoFactorAuthenticated ? `http://127.0.0.1:4545/auth/logout-2fa` : `http://127.0.0.1:4545/auth/logout`
 		try {
-			const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
+			
+			const res:any = await this.get(url)
 			cookies.remove("accessToken")
 			cookies.remove("refreshToken")
 			return res.status
@@ -114,6 +115,7 @@ class AuthService {
 			return err.response.status
 		}
 	}
+
 
 	async refresh() {
 		try {

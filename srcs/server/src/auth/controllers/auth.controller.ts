@@ -34,7 +34,13 @@ export class AuthController {
       return this.authService.refresh(req, res)
     }
 
-    @UseGuards(RefreshToken2FAGuard)
+    @UseGuards(AccessToken2FAGuard)
+    @Get('logout-2fa')
+    logout2fa(@Req() req: any, @Res() res: any) {
+      return this.authService.logout(req, res)
+    }
+
+    @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
       return this.authService.logout(req, res)

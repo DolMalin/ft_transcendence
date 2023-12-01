@@ -55,7 +55,7 @@ function Profile(props : {state: stateType, dispatch: Function}) {
 			
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
-			await AuthService.logout()
+			await AuthService.logout(state.isTwoFactorAuthenticated)
 			window.location.reload()
 		} catch(err) {
 		}
