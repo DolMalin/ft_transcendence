@@ -131,8 +131,9 @@ export class AuthService {
   /**
    * @description Check the validity of a given `jwt`, and returns its `payload`
    */
-  async validateJwt(token: string): Promise<any> {
-      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_SECRET})
+  async validateAccessJwt(token: string): Promise<any> {
+      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_ACCESS_SECRET})
+      console.log(payload)
       return payload
   }
 

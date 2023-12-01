@@ -5,7 +5,6 @@ import {
   GameState,
   GameInfo,
   GameMetrics,
-  Paddle,
   } from '../globals/interfaces'
 import { 
   willBallCollideWithWall,
@@ -44,7 +43,8 @@ export class MatchmakingService {
 
   constructor(
 
-    private readonly matchHistoryServices : MatchHistoryService
+    private readonly matchHistoryServices : MatchHistoryService,
+    private readonly userService : UsersService
 ) {}
 
     /**
@@ -121,7 +121,7 @@ export class MatchmakingService {
 
         for (const [key, value] of gamesMap) 
         {
-          if (value.gameIsFull === false && value.gameType === gameType /*&& dbUserId !== value.clientOne.id*/)
+          if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
           {
             this.addClientToRoom(gamesMap, key, client, dbUserId)
             server.to(key).emit('roomFilled');
@@ -145,6 +145,18 @@ export class MatchmakingService {
       if (game === undefined)
         return ;
       
+      if (data.playerId === '1' && game.clientOne.socket.id != client.id)
+      {
+        console.log('socket meddling in leaveGame');
+        return ;
+      }
+      else if (data.playerId === '2' && game.clientTwo.socket.id != client.id)
+      {
+        console.log('socket meddling in leaveGame');
+        return ;
+      }
+
+      clearInterval(game.ballRefreshInterval);
       if (game.gameIsFull === false)
       {
         client.leave(data.roomName);
@@ -176,6 +188,40 @@ export class MatchmakingService {
       this.matchHistoryServices.storeGameResults(game);
       gamesMap.delete(data.roomName);
     }
+
+    leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
+
+      const game = gamesMap.get(data.roomName);
+      if (game === undefined)
+      {
+        console.log('undefined game in leaveQueue', data.roomName)
+        return;
+      }
+
+      if (game.clientOne.socket.id === client.id)
+      {
+        gamesMap.delete(data.roomName);
+        
+        client.leave(data.roomName);
+        try {
+          this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
+    
+            this.userService.update(user.id, {isAvailable : true});
+            user.gameSockets.forEach((value) => {
+              server.to(value).emit('isAvailable', true);
+            })
+          })
+        }
+        catch(e) {
+          console.log('in availability change ERROR : ', e);
+        }
+      }
+      else
+      {
+        console.log('socket meddling in leave queue')
+        return ;
+      }
+    }
 }
 
 @Injectable()
@@ -189,10 +235,21 @@ export class GamePlayService {
   // ********************************* PADDLE ********************************* //
 
 
-  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}) {
+  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
+
+    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStarted')
+      return ;
+    }
+    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStarted')
+      return ;
+    }
 
     switch (data.key.toLowerCase())
     {
@@ -207,10 +264,21 @@ export class GamePlayService {
     }
   }
 
-  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}) {
+  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
+
+    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStopped')
+      return ;
+    }
+    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    {
+      console.log('socket meddling in movingStopped')
+      return ;
+    }
 
     switch (data.key.toLowerCase())
     {

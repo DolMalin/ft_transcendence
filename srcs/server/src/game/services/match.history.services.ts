@@ -6,8 +6,6 @@ import { CreateGameDto } from '../dto/create.game.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { GameState } from '../globals/interfaces';
-import { UpdateGameDto } from '../dto/update.game.dto';
-import { windowTime } from 'rxjs';
 
 
 @Injectable()

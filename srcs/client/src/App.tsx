@@ -69,8 +69,6 @@ function Malaise(props : {gameSock : Socket}) {
       window.dispatchEvent(new Event('resize'));
     }}
       bgColor={Constants.BG_COLOR}
-      // width={'100vw'}
-      // height={'100vh'}
     >
 
       <TabList border='none' mb='2em' 
@@ -191,6 +189,7 @@ function App() {
           setGameSock (io('http://localhost:4545/', {
             query : {
               userId : userId,
+              token : authService.getAccessToken()
             }
           }));
         }
