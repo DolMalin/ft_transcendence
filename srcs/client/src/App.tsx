@@ -24,7 +24,7 @@ import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
 
 
-function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
+function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
@@ -122,7 +122,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <Chat socket={chatSocket}/>
+          <Chat socket={props.chatSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -138,7 +138,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   )
 }
 
-const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+// const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
 
@@ -151,6 +151,7 @@ function App() {
   })
   
   const [gameSock, setGameSock] = useState<Socket>(null)
+  const [chatSock, setChatSock] = useState<Socket>(null)
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
@@ -199,6 +200,12 @@ function App() {
         getUserId();
         if (userId != '')
         {
+          setChatSock (io('http://localhost:4545/', {
+            query : {
+              userId : userId,
+              token : authService.getAccessToken()
+            }
+          }));
           setGameSock (io('http://localhost:4545/', {
             query : {
               userId : userId,
@@ -214,7 +221,7 @@ function App() {
       <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
       
       {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) 
-      && <Malaise state={state} dispatch={dispatch} gameSock={gameSock}/>}
+      && <Malaise state={state} dispatch={dispatch} gameSock={gameSock} chatSock={chatSock}/>}
     </ChakraProvider>
   </>
   );

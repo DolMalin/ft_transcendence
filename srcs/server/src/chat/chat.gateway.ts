@@ -1,7 +1,9 @@
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
+import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
 import { Room } from './entities/room.entity';
 
@@ -11,37 +13,46 @@ class ChatDTO {
 
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
-  constructor(private jwtService: JwtService){}
+  constructor(
+    private jwtService: JwtService,
+    private readonly userService : UsersService,
+    private readonly authService : AuthService
+    ){}
 
   chatDTO: ChatDTO = new ChatDTO;
   @WebSocketServer()
   server : Server;
 
-  handleConnection (client: any) {
+  async handleConnection (client: Socket) {
     // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
     // for (const id of userBlocked){
       // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
     // }
+    try {
+      const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
+    //  console.log(payload);
+        this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
 
-    if (client.handshake.headers.authorization) {
-      const token = client.handshake.headers.authorization.split(' ');
-      if (token.length == 2) {
-        //TODO not decode but verify
-        const payload = this.jwtService.decode(token[1]) as {id: string};
-        client.userId = payload?.id;
-      }
+        this.userService.addSocketId(client.id, user.chatSockets, user);
+      })
     }
-    // TODO else disconnect
-    
-    console.log("Connection of socket ID : " + client.id);
-    this.chatDTO.clientID.push(client.id);
-    this.server.emit("clientList", this.chatDTO.clientID);
+    catch(e) {
+      client.disconnect();
+      console.log('handle connection ERROR : ', e);
+    }
+
   }
 
-  handleDisconnect(client: any) {
-  console.log("Disonnection of socket ID : " + client.id);
-  this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
-  this.server.emit("clientList", this.chatDTO.clientID);
+  handleDisconnect(client: Socket) {
+    try {
+      this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
+
+        this.userService.removeSocketId(client.id, user.chatSockets, user)
+      })
+    }
+    catch(e) {
+      console.log('handle connection ERROR : ', e);
+    }
 }
 
   @SubscribeMessage('message')

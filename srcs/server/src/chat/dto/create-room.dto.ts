@@ -8,4 +8,8 @@ export class CreateRoomDto {
     privChan: boolean
 
     password: string
+
+    owner: User
+
+    administrator: User[]
 }

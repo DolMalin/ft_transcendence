@@ -117,7 +117,6 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-
 		return (
 			<Flex bgColor={Constants.BG_COLOR} width="half" align="center" justifyContent="center">
 				<Box h="100vh" p={2}>
