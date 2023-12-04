@@ -17,8 +17,9 @@ import * as Constants from '../game/globals/const'
 import { leaderboardStats } from "../game/globals/interfaces";
 import authService from "../auth/auth.service";
 import ProfileModal from "./ProfileModal";
+import { Socket } from "socket.io-client";
 
-function LeaderBoard() {
+function LeaderBoard(props : {gameSock : Socket}) {
 
     const [scoreList, setScoreList] = useState<leaderboardStats[]>([]);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -139,7 +140,7 @@ function LeaderBoard() {
                     })}
                 </Tbody>
             </Table>
-            <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen}/>
+            <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} gameSock={props.gameSock}/>
         </Box>
     </>)
   }

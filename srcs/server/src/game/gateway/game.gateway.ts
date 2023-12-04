@@ -17,6 +17,7 @@ import { UsersService } from 'src/users/services/users.service';
 import { type } from 'os';
 import { AuthService } from 'src/auth/services/auth.service';
 import { IsJWT } from 'class-validator';
+import { subscribe } from 'superagent';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
@@ -147,6 +148,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     else
       this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
+  }
+
+  @SubscribeMessage('gameInvite')
+  gameInvite(@MessageBody() data : {targetId : string}, @ConnectedSocket() client : Socket) {
+
+    if (data === undefined || data === null || typeof data.targetId != 'string')
+    {
+      console.log('')
+      return ;
+    }
   }
 
   @SubscribeMessage('availabilityChange')

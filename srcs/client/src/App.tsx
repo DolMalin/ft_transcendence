@@ -122,11 +122,11 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <Chat socket={chatSocket}/>
+          {/* <Chat socket={chatSocket}/> */}
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <LeaderBoard/>
+          <LeaderBoard gameSock={props.gameSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -138,7 +138,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   )
 }
 
-const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+// const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
 

@@ -14,11 +14,15 @@ import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
 import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
+import { Socket } from "socket.io-client";
 
-function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void}) {
+function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock : Socket}) {
 
     const [user, setUser] = useState<any>(null);
 
+    function sendDuelInvite() {
+        props.gameSock.emit('gameInvite', props.userId)
+    }
     
     useEffect(() => {
         if (!props.userId)
@@ -102,6 +106,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     fontWeight={'normal'}
                     borderRadius={'none'}
                     _hover={{background : 'white', textColor: 'black'}}
+                    onClick={sendDuelInvite}
                     >
                         Defy Them !
                     </Button>
