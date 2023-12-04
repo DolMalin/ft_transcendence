@@ -168,6 +168,7 @@ export class AuthService {
 
 
   async refresh(req: any, res: any) {
+    console.log('start')
     const user = await this.usersService.findOneById(req.user?.id)
     
     if (!user || !user.refreshToken)

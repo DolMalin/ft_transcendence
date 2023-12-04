@@ -26,7 +26,7 @@ export class Room {
 
     @ManyToMany(() => User, user => user.room)
     @JoinTable()
-    users: User
+    users: User[]
 
     @OneToMany(() => Message, message => message.room/* , {onDelete:'CASCADE'} */)
     message: Message[]

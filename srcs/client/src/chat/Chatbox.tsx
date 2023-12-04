@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef} from "react"
 import ScrollToBottom from 'react-scroll-to-bottom'
 import * as Chakra from '@chakra-ui/react'
-import axios from "axios"
 import authService from "../auth/auth.service"
 import { MessageData, Room } from "./Chat"
 import { Socket } from "socket.io-client"
+import { useForm } from "react-hook-form"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -24,105 +24,164 @@ function timeOfDay(timestampz: string | Date){
     else
         tmp2 = day.toString()
     let date = hour.toString() + ":" + tmp + " " + tmp2 + "/" + month + "/" + year;
-    console.log(date);
     return (date);
 }
 
-export function Chatbox(props: {socket: Socket, room: Room}) {
+async function getUserList(id: number){
+    let userlist : {
+        id : string,
+        username: string
+    }[]
+    try{
+        const res =  await authService.get('http://127.0.0.1:4545/room/userlist/' + id)
+        userlist = res.data
+    }
+    catch(err){
+        console.log(err)
+    }
+    return userlist
+}
 
-    const [currentMessage, setCurrentMessage] = useState("");
+export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
+
     const [messageList, setMessageList] = useState<MessageData[]>([]);
-    const inputRef = useRef<HTMLInputElement | null>(null)
-    const [me, setMe] = useState<{id: string, username: string} | undefined>(undefined)
-    const [date, setDate] = useState<Date>(undefined)
-    
+    const [me, setMe] = useState
+    <{
+        id: string, 
+        username: string
+    } | undefined>(undefined)
+    const [userList, setUserList] = useState
+    <{
+        id: string, 
+        username: string
+    }[]>([])
+    const { 
+        register, 
+        handleSubmit, 
+        reset, 
+        formState: { errors }} = useForm()
+
+    const onSubmit = (data: {message: string}) => {
+        sendMessage(data.message)
+        reset()
+    }
+
     useEffect(()  => {
-        if (props.room.message){
-            props.room.message.reverse()
-        }
-        setMessageList(props.room.message.reverse()? props.room.message: [])
+        console.log('msg', props.room.message)
+        setMessageList(props.room.message? props.room.message: [])
         const res = getMe()
         res.then(response => {
             setMe(response.data)
         })
     }, [])
-
-    const wipeInput = () => {
-        if (inputRef.current){
-            inputRef.current.value = ""
-        }
-    }
-
+    
     const getMe = async () => {
         try{
             const me = await authService.get('http://127.0.0.1:4545/users/me')
-            console.log(me.data)
             return me
         }catch(err){
             console.log(err)
         }}
-    
-    const sendMessage = async () => {
+        
+    const sendMessage = async (currentMessage: string) => {
         
         try {
-            if (currentMessage !== ""){
-                const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: props.socket.id})
-                const message = res.data;
-                console.log(message)
-                props.socket.emit("sendMessage", message);
-                setMessageList((list) => [...list, message])
-                setCurrentMessage("") 
-                wipeInput()
-            }
-        } 
+            const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
+            const message = res.data;
+            props.socket.emit("sendMessage", message);
+            setMessageList((list) => [...list, message])
+        }
         catch(err){
             console.log(err)
         }
+        return (() => {
+            props.socket.off("sendMessage")
+        })
+    }
 
-        
-    };
+    const fetchUserList = async () => {
+        try {
+            const tab = await getUserList(props.room.id)
+            setUserList(tab)
+        }
+        catch(err){
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        fetchUserList()
+    }, [])
+
     useEffect(() => {
         props.socket.on("receiveMessage", (data: MessageData) => {
         setMessageList((list) => [...list, data])
-        })  
+        })
+        return (() => {
+            props.socket.off("reveiveMessage")
+        })
     }, [props.socket])
-
+    //TODO faire en sorte que la userlist re render
     return (
-        <div className="chat-window">
-            <div className="chat-header">
-                <p>channel: {props.room.name}</p>
+        <div>
+                    <mark>
+            <h2>User list</h2>
+        </mark>
+        {userList?.length > 0 && (
+        userList.map((userlist, index: number) => (
+            <div className="userlist" key={index}>
+                <div>
+                    <ul>
+                        <li>{userlist.username}</li>
+                    </ul>
+                </div>
             </div>
-            <div className="chat-body">
-                <ScrollToBottom className="message-container">
-                {messageList.map((messageContent) => {
-                    return  <div className="message" key={messageContent.id}  id={messageContent.author.id  === me?.id  ? "other" : "you"}>
-                                <div>
-                                    <div className="message-content">
-                                        <p>{messageContent.content}</p>
-                                    </div>
-                                    <div className="message-meta">
-                                        <p id="time">{timeOfDay(messageContent.sendAt)}</p>
-                                        <p id="author">{me?.id}</p>
-                                    </div>
-                                </div>
-                            </div>
-                })}
-                </ScrollToBottom>
-            </div>
-            <div className="chat-footer">
-                <Chakra.Input 
-                    type="text" 
-                    ref={inputRef}
-                    placeholder="message..." 
-                    onChange={(event) => {setCurrentMessage(event.target.value)}}
-                    onKeyPress={(event) => {event.key === "Enter" && sendMessage()}}
-                    />
-                <Chakra.Button onClick={sendMessage}>
-                    <>
-                    &#9658;
-                    </>
-                </Chakra.Button>
-            </div>
+        ))
+        )}
+        <><div>
+            <Chakra.Button onClick={() => {
+                    props.showChat(false)}}>
+                back
+            </Chakra.Button>
+        </div><div className="chat-window">
+        <div className="chat-header">
+            <p>channel: {props.room.name}</p>
         </div>
+        <div className="chat-body">
+            <ScrollToBottom className="message-container">
+                {messageList.map((messageContent, index) => {
+                    return <div className="message" key={index} id={messageContent.author.id === me?.id ? "other" : "you"}>
+                        <div>
+                            <div className="message-content">
+                                <p>{messageContent.content}</p>
+                            </div>
+                            <div className="message-meta">
+                                <p id="time">{timeOfDay(messageContent.sendAt)}</p>
+                                <p id="author">{messageContent.author.username}</p>
+                            </div>
+                        </div>
+                    </div>
+                })}
+            </ScrollToBottom>
+        </div>
+        <div className="chat-footer">
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Chakra.FormControl isRequired>
+                <Chakra.Input
+                    type="text"
+                    placeholder="type your message..."
+                    {
+                        ...register("message", {
+                            required: "enter message",
+                            minLength: 1,
+                            maxLength: 1000 //todo regarder regle de convention
+                        })
+                    }
+                />
+            </Chakra.FormControl>
+            <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
+        </form>
+        </div>
+    </div></></div>
     )
 }
