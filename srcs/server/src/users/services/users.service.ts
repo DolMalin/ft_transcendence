@@ -83,18 +83,25 @@ export class UsersService {
     return (this.update(user.id, { gameSockets : user.gameSockets}))
   }
 
-    /**
- * @description add a socket Id to an array of string stored in user entity and update the user
- */
-  addSocketId(socketId : string, socketIdArray : string[], user : User) {
 
-    if (socketIdArray === null)
-      socketIdArray = [];
-    socketIdArray?.push(socketId);
-    user.gameSockets = socketIdArray;
-    return (this.update(user.id, {gameSockets : user.gameSockets}));
-  }
+  addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
 
+      if (socketIdArray === null || socketIdArray === undefined)
+        socketIdArray = [];
+      socketIdArray?.push(socketId);
+      user.gameSockets = socketIdArray;
+      return (this.update(user.id, {gameSockets : user.gameSockets}));
+    }
+
+    addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
+
+      if (socketIdArray === null || socketIdArray === undefined)
+        socketIdArray = [];
+      socketIdArray?.push(socketId);
+      user.chatSockets = socketIdArray;
+      return (this.update(user.id, {chatSockets : user.chatSockets}))
+    }
+    
   /**
  * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
  */ 

@@ -24,16 +24,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   server : Server;
 
   async handleConnection (client: Socket) {
-    // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
-    // for (const id of userBlocked){
-      // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
-    // }
     try {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-    //  console.log(payload);
+      
         this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
 
-        this.userService.addSocketId(client.id, user.chatSockets, user);
+        this.userService.addChatSocketId(client.id, user.chatSockets, user);
       })
     }
     catch(e) {
