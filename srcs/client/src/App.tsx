@@ -141,7 +141,7 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
   )
 }
 
-const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
+const chatSocket = io(`${process.env.REACT_APP_SERVER_URL}`, {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
 

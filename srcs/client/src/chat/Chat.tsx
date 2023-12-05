@@ -31,7 +31,7 @@ export function Chat(props: any){
         {
             let data = {name: roomPlaceholder, password: password, privChan: privateChan}
             try{
-                await authService.post('http://127.0.0.1:4545/room', data)
+                await authService.post(`${process.env.REACT_APP_SERVER_URL}/room`, data)
                 joinRoom()
             }
             catch(err){
@@ -43,7 +43,7 @@ export function Chat(props: any){
     const  joinRoom = async () => {
 
         try{
-            const res = await authService.post('http://127.0.0.1:4545/room/joinRoom', {name: roomPlaceholder, password: password})
+            const res = await authService.post(`${process.env.REACT_APP_SERVER_URL}/room/joinRoom`, {name: roomPlaceholder, password: password})
             console.log('res', res)
             setRoom(res.data)
             props.socket.emit("joinRoom", res.data.id)

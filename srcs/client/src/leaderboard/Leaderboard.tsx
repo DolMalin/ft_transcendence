@@ -59,7 +59,7 @@ function LeaderBoard() {
 
     async function getScoreList() {
         try {
-            const res = await axios.get('http://127.0.0.1:4545/users/scoreList')
+            const res = await axios.get(`${process.env.REACT_APP_SERVER_URL}/users/scoreList`)
 
             setScoreList(sortScoreList(res.data))
         }
@@ -76,7 +76,7 @@ function LeaderBoard() {
 
     async function createUser() {
         try {
-            const res = await axios.get('http://127.0.0.1:4545/auth/newUserDebug')
+            const res = await axios.get(`${process.env.REACT_APP_SERVER_URL}/auth/newUserDebug`)
         }
         catch (e) {
             console.log(e);

@@ -21,7 +21,7 @@ function Auth(props : {state: stateType, dispatch: Function}) {
 	// move in service
 	const fetchAuthUrl = async () => {
 		try {
-			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
+			const res = await axios.get(`${process.env.REACT_APP_SERVER_URL}/auth/redirect`)
 			setAuthUrl(res.data.url)
 		} catch (err) {
 		}

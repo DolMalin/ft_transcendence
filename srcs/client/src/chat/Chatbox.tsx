@@ -55,7 +55,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
 
     const getMe = async () => {
         try{
-            const me = await authService.get('http://127.0.0.1:4545/users/me')
+            const me = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`)
             console.log(me.data)
             return me
         }catch(err){
@@ -66,7 +66,7 @@ export function Chatbox(props: {socket: Socket, room: Room}) {
         
         try {
             if (currentMessage !== ""){
-                const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, author: props.socket.id})
+                const res = await authService.post(`${process.env.REACT_APP_SERVER_URL}/room/message`, {roomId: props.room.id ,content: currentMessage, author: props.socket.id})
                 const message = res.data;
                 console.log(message)
                 props.socket.emit("sendMessage", message);

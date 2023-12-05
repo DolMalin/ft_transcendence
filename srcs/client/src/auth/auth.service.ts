@@ -104,7 +104,7 @@ class AuthService {
 
 	async logout(isTwoFactorAuthenticated: boolean) {
 		const cookies = new Cookies()
-		const url = isTwoFactorAuthenticated ? `http://127.0.0.1:4545/auth/logout-2fa` : `http://127.0.0.1:4545/auth/logout`
+		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/logout-2fa` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
 		try {
 			
 			const res:any = await this.get(url)
@@ -119,7 +119,7 @@ class AuthService {
 
 	async refresh() {
 		try {
-			const res:any = await this.api.get(`http://127.0.0.1:4545/auth/refresh`)
+			const res:any = await this.api.get(`${process.env.REACT_APP_SERVER_URL}/auth/refresh`)
 			return res
 		} catch(err:any) {
 			throw err
@@ -139,7 +139,7 @@ class AuthService {
 
 	async validate() {
 		try {
-			const res: any  = await this.get(`http://127.0.0.1:4545/auth/validate`)
+			const res: any  = await this.get(`${process.env.REACT_APP_SERVER_URL}/auth/validate`)
 			return res
 		} catch(err) {
 			throw err
@@ -148,7 +148,7 @@ class AuthService {
 
 	async register(data:any) {
 		try {
-			let res: any = await this.postForm(`http://127.0.0.1:4545/auth/register`, data)
+			let res: any = await this.postForm(`${process.env.REACT_APP_SERVER_URL}/auth/register`, data)
 			return res.status
 		} catch(err) {
 			throw err
@@ -157,7 +157,7 @@ class AuthService {
 
 	async twoFactorAuthenticationLogin(data:any) {
 		try {
-			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/login`, {twoFactorAuthenticationCode:data})
+			let res: any = await this.post(`${process.env.REACT_APP_SERVER_URL}/auth/2fa/login`, {twoFactorAuthenticationCode:data})
 			return res.status
 		} catch(err) {
 			throw err
@@ -166,7 +166,7 @@ class AuthService {
 
 	async twoFactorAuthenticationGenerate() {
 		try {
-			let res: any = await this.get(`http://127.0.0.1:4545/auth/2fa/generate`)
+			let res: any = await this.get(`${process.env.REACT_APP_SERVER_URL}/auth/2fa/generate`)
 			return res
 		} catch(err) {
 			throw err
@@ -175,7 +175,7 @@ class AuthService {
 
 	async twoFactorAuthenticationTurnOn(data:any) {
 		try {
-			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/turn-on`, data)
+			let res: any = await this.post(`${process.env.REACT_APP_SERVER_URL}/auth/2fa/turn-on`, data)
 			return res
 		} catch(err) {
 			throw err
@@ -184,7 +184,7 @@ class AuthService {
 
 	async twoFactorAuthenticationTurnOff(data:any) {
 		try {
-			let res: any = await this.post(`http://127.0.0.1:4545/auth/2fa/turn-off`, data)
+			let res: any = await this.post(`${process.env.REACT_APP_SERVER_URL}/auth/2fa/turn-off`, data)
 			return res
 		} catch(err) {
 			throw err
