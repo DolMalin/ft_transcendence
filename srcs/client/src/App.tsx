@@ -138,7 +138,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   )
 }
 
-// const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
 
 function App() {
 
@@ -200,20 +199,20 @@ function App() {
         getUserId();
         if (userId != '')
         {
-          setChatSock (io('http://localhost:4545/', {
+          setChatSock (io(`${process.env.REACT_APP_SERVER_URL}`, {
             query : {
               userId : userId,
               token : authService.getAccessToken()
             }
           }));
-          setGameSock (io('http://localhost:4545/', {
+          setGameSock (io(`${process.env.REACT_APP_SERVER_URL}`, {
             query : {
               userId : userId,
               token : authService.getAccessToken()
             }
           }));
         }
-  }, [userId]); 
+  }, [userId]);
 
   return (<>
     <ChakraProvider>

@@ -42,10 +42,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
    try {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-    //  console.log(payload);
+      // const user = await this.userService.findOneById(client.handshake.query?.userId as string)
+
       this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
 
-        this.userService.addSocketId(client.id, user.gameSockets, user);
+        this.userService.addGameSocketId(client.id, user.gameSockets, user);
       })
     }
     catch(e) {

@@ -13,4 +13,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	loosesAmount?: number
 	isAvailable?: boolean
 	gameSockets?: string[]
+	chatSockets?: string[]
 }
