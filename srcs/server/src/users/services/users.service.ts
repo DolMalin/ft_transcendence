@@ -11,6 +11,7 @@ import { CreateGameDto } from 'src/game/dto/create.game.dto';
 import { Game } from 'src/game/entities/game-entity';
 import { UpdateGameDto } from 'src/game/dto/update.game.dto';
 import { Avatar } from '../entities/avatar.entity';
+import { Server, Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
@@ -40,6 +41,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+
     await this.userRepository.update(id, updateUserDto)
     const newUser = await this.findOneById(id)
     if (newUser)
@@ -83,16 +85,54 @@ export class UsersService {
     return (this.update(user.id, { gameSockets : user.gameSockets}))
   }
 
-    /**
+  /**
  * @description add a socket Id to an array of string stored in user entity and update the user
  */
-  addSocketId(socketId : string, socketIdArray : string[], user : User) {
+  addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
 
-    if (socketIdArray === null)
+    if (socketIdArray === null || socketIdArray === undefined)
       socketIdArray = [];
     socketIdArray?.push(socketId);
     user.gameSockets = socketIdArray;
     return (this.update(user.id, {gameSockets : user.gameSockets}));
+  }
+
+  /**
+  * @description add a socket Id to an array of string stored in user entity and update the user
+  */
+   addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
+ 
+     if (socketIdArray === null || socketIdArray === undefined)
+       socketIdArray = [];
+     socketIdArray?.push(socketId);
+     user.chatSockets = socketIdArray;
+     return (this.update(user.id, {chatSockets : user.chatSockets}));
+   }
+
+   async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
+
+    socketIdArray.forEach((socketId) => {
+      if (payload === undefined) 
+        server.to(socketId).emit(eventName);
+      else
+        server.to(socketId).emit(eventName, payload);
+    });
+   }
+
+   async doesSocketBelongToUser(client : Socket) {
+    try {
+      const user = await this.findOneById(client.handshake.query.userId as string);
+      const socketId = user.gameSockets.filter((value) => value === client.id);
+      
+      console.log('socket : ', socketId)
+      if (socketId === undefined)
+        return (false);
+      else
+        return (true);
+    }
+    catch(e) {
+      console.log('Error in socketBelongToUser :', e)
+    }
   }
 
   /**

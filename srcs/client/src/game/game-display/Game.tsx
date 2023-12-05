@@ -97,7 +97,6 @@ function Game(props : GameProps) {
         sock?.on('gameStarted', (userOneInfo : userBasicInfos, userTwoInfo : userBasicInfos) => {
             setUserOne(userOneInfo);
             setUserTwo(userTwoInfo);
-            console.log('info : ',userOneInfo, 'user : ', userOne)
         })
 
         return (() => {
@@ -200,9 +199,11 @@ function Game(props : GameProps) {
         window.addEventListener("beforeunload", leaveGameOnRefresh);
         window.addEventListener("blur", handleFocusOut)
 
-        console.log('game info : ', gameInfo);
-        if (props.playerId === '1')
+        console.log('game info before game loop : ', gameInfo, ' player id : ', props.playerId)
+        if (props.playerId === '2')
+        {
             sock.emit('startGameLoop', gameInfo);
+        }
         return (() => {
             document.removeEventListener('keydown', handleKeydown);
             document.removeEventListener('keyup', handleKeyup);
@@ -217,7 +218,7 @@ function Game(props : GameProps) {
         const context : CanvasRenderingContext2D = canvas.getContext('2d');
         const canvasBounding : DOMRect = canvas.getBoundingClientRect();
 
-        sock.on('pointScored', (playerId, newScore) => {
+        sock?.on('pointScored', (playerId, newScore) => {
 
             if (playerId === 1)
                 setPlayerOneScore(newScore);
@@ -225,7 +226,7 @@ function Game(props : GameProps) {
                 setPlayerTwoScore(newScore);
         });
 
-        sock.on('gameMetrics', (pOneMetrics : GameMetrics, pTwoMetrics : GameMetrics) => {
+        sock?.on('gameMetrics', (pOneMetrics : GameMetrics, pTwoMetrics : GameMetrics) => {
             
             if(props.playerId === '1')
                 setGameMetrics(pOneMetrics);
@@ -234,19 +235,19 @@ function Game(props : GameProps) {
             setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
         });
 
-        sock.on('midPointCt', (ct : number) => {
+        sock?.on('midPointCt', (ct : number) => {
             setMidPointCTOn(true);
             setMidPointCT(ct);
             setCtSizeModifier(1);
         });
 
-        sock.on('midPointCtEnd', () => {
+        sock?.on('midPointCtEnd', () => {
             setMidPointCTOn(false);
             setMidPointCT(0);
             setCtSizeModifier(1);
         });
 
-        sock.once('gameOver', () => {
+        sock?.once('gameOver', () => {
             sock.emit('leaveGame', gameInfo);
         })
         

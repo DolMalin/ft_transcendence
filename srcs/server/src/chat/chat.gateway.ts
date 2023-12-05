@@ -33,7 +33,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     //  console.log(payload);
         this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
 
-        this.userService.addSocketId(client.id, user.chatSockets, user);
+        this.userService.addChatSocketId(client.id, user.chatSockets, user);
       })
     }
     catch(e) {

@@ -35,12 +35,12 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    if (data.playerId === '1' && !this.usersService.doesSocketBelongToUser(game.clientOne.socket))
     {
       console.log('socket meddling in movingStarted')
       return ;
     }
-    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    else if (data.playerId === '2' && !this.usersService.doesSocketBelongToUser(game.clientTwo.socket))
     {
       console.log('socket meddling in movingStarted')
       return ;
@@ -64,12 +64,12 @@ export class GamePlayService {
     if (game === undefined)
       return ;
 
-    if (data.playerId === '1' && game.clientOne.socket.id != clientId)
+    if (data.playerId === '1' && !this.usersService.doesSocketBelongToUser(game.clientOne.socket))
     {
       console.log('socket meddling in movingStopped')
       return ;
     }
-    else if (data.playerId === '2' && game.clientTwo.socket.id != clientId)
+    else if (data.playerId === '2' && !this.usersService.doesSocketBelongToUser(game.clientTwo.socket))
     {
       console.log('socket meddling in movingStopped')
       return ;
@@ -119,10 +119,7 @@ export class GamePlayService {
   handleBallMovement(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     if (game === undefined)
-    {
-      console.log("TEST TEST TEST")
       return ('gameOver');
-    }
 
     if (goal(server, game,data.roomName, game.ball))
     {
@@ -195,8 +192,7 @@ export class GamePlayService {
     
     let ballEvents : string = 'start';
 
-    if (game === undefined)
-      return ;
+    console.log('Getting in game loop')
 
     server.to(data.roomName).emit('gameStarted', 
     await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
@@ -219,14 +215,14 @@ export class GamePlayService {
         }
         else if (ballEvents === 'gameOver')
         {
-          server.to(data.roomName).emit('gameOver', game.winner);
+          server.to(data.roomName).emit('gameOver', {winner : game.winner});
           return (clearInterval(game.ballRefreshInterval))
         }
         else
         {
-          let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball}
-          let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball}
-          server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics)
+          let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball};
+          let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball};
+          server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics);
         }
         if (client.rooms.size === 0) //TO DO Changer cette immondice
           return (clearInterval(game.ballRefreshInterval))

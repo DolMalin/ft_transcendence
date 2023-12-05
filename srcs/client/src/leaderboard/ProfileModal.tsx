@@ -20,8 +20,9 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     const [user, setUser] = useState<any>(null);
 
-    function sendDuelInvite() {
-        props.gameSock.emit('gameInvite', props.userId)
+    function sendDuelInvite(gameType : string) {
+
+        props.gameSock.emit('gameInvite', {targetId : props.userId, gameType : gameType})
     }
     
     useEffect(() => {
@@ -106,9 +107,18 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     fontWeight={'normal'}
                     borderRadius={'none'}
                     _hover={{background : 'white', textColor: 'black'}}
-                    onClick={sendDuelInvite}
+                    onClick={() => (sendDuelInvite(Constants.GAME_TYPE_ONE))}
                     >
-                        Defy Them !
+                        {Constants.GAME_TYPE_ONE} Duel !
+                    </Button>
+
+                    <Button colorScheme='none'
+                    fontWeight={'normal'}
+                    borderRadius={'none'}
+                    _hover={{background : 'white', textColor: 'black'}}
+                    onClick={() => (sendDuelInvite(Constants.GAME_TYPE_TWO))}
+                    >
+                        {Constants.GAME_TYPE_TWO} Duel !
                     </Button>
                 </ModalFooter>
                 <PlayerHistoryAccordion userId={user?.id}/>

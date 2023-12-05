@@ -11,6 +11,7 @@ import {
 import * as Constants from '../globals/const'
 import { MatchHistoryService } from './match.history.services';
 import { UsersService } from 'src/users/services/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 
@@ -38,7 +39,6 @@ export class MatchmakingService {
     private readonly matchHistoryServices : MatchHistoryService,
     private readonly userService : UsersService
 ) {}
-
     /**
      * @description add client to existing room, fill the GameServDTO
      */
@@ -46,7 +46,6 @@ export class MatchmakingService {
         
         gamesMap.get(roomName).clientTwo = {socket : client, id : dbUserId};
         gamesMap.get(roomName).gameIsFull = true;
-        client.emit('roomName', roomName);
         client.join(roomName);
       }
 
@@ -101,34 +100,40 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    gameCreation (server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
+    async gameCreation (server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
-        if (client.rooms.size >= 2)
-        {
-          client.emit('allreadyInGame', "You are allready in a game you Gourmand !")
-          return ;
-        }
-        
         // look for open rooms and join them
-
-        for (const [key, value] of gamesMap) 
+        try 
         {
-          if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
+          const user = await this.userService.findOneById(client.handshake.query.userId as string);
+          for (const [key, value] of gamesMap) 
           {
-            this.addClientToRoom(gamesMap, key, client, dbUserId)
-            server.to(key).emit('roomFilled');
-            client.emit('playerId', '2'); // was one not 2 might cause trouble
-            return ;
+            if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
+            {
+              // server.to(key).emit('playerId', {id : '2'});
+              // server.to(key).emit('roomName', {roomName : key});
+              this.addClientToRoom(gamesMap, key, client, dbUserId)
+              this.userService.emitToAllSockets(server, user.gameSockets, 'playerId', {id : '2'})
+              this.userService.emitToAllSockets(server, user.gameSockets, 'roomName', {roomName : key})
+              server.to(key).emit('roomFilled', {gameType : gameType});
+                // this.userService.emitToAllSockets(server, user.gameSockets, 'roomFilled', {gameType : gameType})
+                return ;
+              }
+            }
+            
+            //  if none exist, create one
+            
+            let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
+            
+            this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
+            // server.to(roomName).emit('playerId', {id : '1'});
+            // server.to(roomName).emit('roomName', {roomName : roomName});
+            this.userService.emitToAllSockets(server, user.gameSockets, 'playerId', {id : '1'})
+            this.userService.emitToAllSockets(server, user.gameSockets, 'roomName', {roomName : roomName})
           }
+        catch(e) {
+          console.log('Error in game creation : ', e)
         }
-
-        //  if none exist, create one
-        
-        let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
-        
-        this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
-        client.emit('roomName', roomName);
-        client.emit('playerId', '1');
     }
 
     leaveGame(server : Server, client : Socket, gamesMap : Map <string, GameState>, data : GameInfo) {
@@ -137,12 +142,12 @@ export class MatchmakingService {
       if (game === undefined)
         return ;
       
-      if (data.playerId === '1' && game.clientOne.socket.id != client.id)
+      if (data.playerId === '1' && !this.userService.doesSocketBelongToUser(game.clientOne.socket))
       {
         console.log('socket meddling in leaveGame');
         return ;
       }
-      else if (data.playerId === '2' && game.clientTwo.socket.id != client.id)
+      else if (data.playerId === '2' && !this.userService.doesSocketBelongToUser(game.clientTwo.socket))
       {
         console.log('socket meddling in leaveGame');
         return ;
@@ -162,7 +167,7 @@ export class MatchmakingService {
           game.looser = game.clientOne.id;
         }
       
-        server.to(data.roomName).emit('gameOver', game.clientTwo.socket.id);
+        server.to(data.roomName).emit('gameOver', {winner : game.clientTwo.socket.id});
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
       }
@@ -173,7 +178,7 @@ export class MatchmakingService {
           game.winner = game.clientOne.id;
           game.looser = game.clientTwo.id;
         }
-        server.to(data.roomName).emit('gameOver', game.clientOne.socket.id);
+        server.to(data.roomName).emit('gameOver', {winner : game.clientOne.socket.id});
         game.clientOne.socket.leave(data.roomName);
         game.clientTwo.socket.leave(data.roomName);
       }
@@ -181,7 +186,7 @@ export class MatchmakingService {
       gamesMap.delete(data.roomName);
     }
 
-    leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
+    async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
 
       const game = gamesMap.get(data.roomName);
       if (game === undefined)
@@ -190,19 +195,15 @@ export class MatchmakingService {
         return;
       }
 
-      if (game.clientOne.socket.id === client.id)
+      if (this.userService.doesSocketBelongToUser(game.clientOne.socket))
       {
         gamesMap.delete(data.roomName);
         
         client.leave(data.roomName);
         try {
-          this.userService.findOneById(client.handshake.query.userId as string)?.then((user) => {
-    
-            this.userService.update(user.id, {isAvailable : true});
-            user.gameSockets.forEach((value) => {
-              server.to(value).emit('isAvailable', true);
-            })
-          })
+          const user = await this.userService.findOneById(client.handshake.query.userId as string);
+          this.userService.update(user.id, {isAvailable : true});
+          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
         }
         catch(e) {
           console.log('in availability change ERROR : ', e);
@@ -213,5 +214,146 @@ export class MatchmakingService {
         console.log('socket meddling in leave queue')
         return ;
       }
+    }
+
+    async gameInvite(server : Server,senderId : string, targetId : string, gameType : string) {
+
+        try {
+            const target : User = await this.userService.findOneById(targetId);
+            if (target === undefined)
+            {
+                console.log('invite target undefined')
+                return ;
+            }
+
+            
+            const sender : User = await this.userService.findOneById(senderId);
+            if (sender === undefined)
+            {
+                console.log('invite sender undefined')
+                return ;
+            }
+
+            if (target.isAvailable === false)
+            {
+              this.userService.emitToAllSockets(server, sender.gameSockets, 'isBusy', {username : target.username})
+              return ;
+            }
+
+            this.userService.emitToAllSockets(server, target.gameSockets, 'gotInvited',
+            {senderId : sender.id, senderUsername : sender.username, gameType : gameType})
+        }
+        catch (e) {
+            console.log('Game Invite Error : ', e.message)
+        }
+    }
+
+    async inviteWasDeclined(server : Server, senderId : string, targetId : string) {
+        try {
+            const target : User = await this.userService.findOneById(targetId);
+            if (target === undefined)
+            {
+                console.log('invite target undefined')
+                return ;
+            }
+            
+            const sender : User = await this.userService.findOneById(senderId);
+            if (sender === undefined)
+            {
+                console.log('invite sender undefined')
+                return ;
+            }
+            this.userService.emitToAllSockets(server, sender.gameSockets, 'inviteDeclined', {username : target.username})
+        }
+        catch (e) {
+            console.log('Game Invite Declined Error : ', e.message)
+        }
+    }
+
+    async inviteWasAccepted(server : Server, senderId : string, targetId : string, gameType : string) {
+        try {
+            const target : User = await this.userService.findOneById(targetId);
+            if (target === undefined)
+            {
+                console.log('invite target undefined')
+                return ;
+            }
+            
+            const sender : User = await this.userService.findOneById(senderId);
+            if (sender === undefined)
+            {
+                console.log('invite sender undefined')
+                return ;
+            }
+
+            if (sender.isAvailable === false || target.isAvailable === false) 
+            {
+                console.log('one of the players is unavailable');
+                return ;
+            }
+            else
+            {
+              const roomName = roomNameGenerator(20, server.sockets.adapter.rooms);
+
+              await this.userService.update(sender.id, {isAvailable : false});
+              this.userService.emitToAllSockets(server, sender.gameSockets,
+              'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
+
+              await this.userService.update(target.id, {isAvailable : false});
+              this.userService.emitToAllSockets(server, target.gameSockets,
+              'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
+            }
+        }
+        catch (e) {
+            console.log('Game Invite Declined Error : ', e.message)
+        }
+    }
+
+    duelCreation(server : Server, gamesMap : Map<string, GameState>, client : Socket, data : GameInfo) {
+        
+        client.join(data.roomName);
+
+        let game : GameState = {
+          clientOne : {socket : client, id : client.handshake.query?.userId as string},
+          clientTwo : undefined,
+          gameIsFull : true, // true to avoid other from joining
+          isPaused : true,
+          clientOneScore : 0,
+          clientTwoScore : 0,
+          winner : undefined,
+          looser : undefined,
+          gameType  : data.gameType,
+          paddleOne : {
+            x : 0.5 - Constants.PADDLE_WIDTH / 2,
+            y : 1 - Constants.PADDLE_HEIGHT,
+            movingLeft : false,
+            movingRight : false,
+            speed : Constants.PADDLE_SPEED,
+            width : data.gameType === Constants.GAME_TYPE_TWO ? Constants.PADDLE_WIDTH * 2: Constants.PADDLE_WIDTH,
+            height : Constants.PADDLE_HEIGHT,
+            hitCount : 0,
+          },
+          paddleTwo : {
+            x : 0.5 - Constants.PADDLE_WIDTH / 2,
+            y : 0,
+            movingLeft : false,
+            movingRight : false,
+            speed : Constants.PADDLE_SPEED,
+            width : data.gameType === Constants.GAME_TYPE_TWO ? Constants.PADDLE_WIDTH * 2: Constants.PADDLE_WIDTH,
+            height : Constants.PADDLE_HEIGHT,
+            hitCount : 0,
+          },
+          ball : {
+            x : 0.5,
+            y : 0.5,
+            size : Constants.BALL_SIZE,
+            color : 'white',
+            angle : randomizeBallAngle(),
+            speed : Constants.BALL_SPEED,
+          },
+          ballRefreshInterval : undefined,
+        }
+        
+        gamesMap.set(data.roomName, game);
     }
 }

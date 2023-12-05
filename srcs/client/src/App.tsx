@@ -12,6 +12,9 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  useToast,
+  Button,
+  CloseButton
  } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
@@ -30,6 +33,18 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   const [tab, setTab] = useState(0);
   const [switchingFrom, setSwitchingFrom] = useState(false)
   const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
+  const toast = useToast();
+
+  function acceptInvite(senderId : string, gameType : string) {
+    
+    toast.closeAll();
+    props.gameSock?.emit('acceptedInvite', {senderId : senderId, gameType : gameType});
+  }
+
+  function close(senderId : string) {
+      toast.closeAll();
+      props.gameSock.emit('declinedInvite', {senderId : senderId});
+  }
 
   
   useEffect(function DOMEvents() {
@@ -54,13 +69,62 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
 
       props.gameSock?.on('gameStarted', () => {
       
+        console.log('getting game started')
       setSwitchingFrom(true);
       setTab(0)
       // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
       window.dispatchEvent(new Event('resize'))
+    });
+
+    props.gameSock?.on('isBusy', ({username}) => {
+
+      toast({
+        title: 'isBusy',
+        description: username + ' is busy',
+        status: 'info',
+        duration: 5000,
+        isClosable: true
+      })
+    })
+    props.gameSock?.on('inviteDeclined', ({username}) => {
+
+      toast({
+        title: 'Invite Declined',
+        description: username + ' declined your invitation',
+        status: 'info',
+        duration: 5000,
+        isClosable: true
+      })
+    })
+    props.gameSock?.on('gotInvited', ({senderId, senderUsername, gameType}) => {
+
+      toast({
+        title: 'Got Invited',
+        description: "Got invited by " + senderUsername + " to play a " + gameType + " game !",
+        status: 'info',
+        duration: null,
+        render : () => (
+          <Box w={'350px'}
+          h={'60px'}
+          bgColor={'white'}>
+            <Button onClick={() => {close(senderId)}}> No thanks !</Button>
+            <Button onClick={() => {acceptInvite(senderId, gameType)}}> Yes please ! </Button>
+          </Box>
+        ),
+        isClosable: true,
+      })
     })
 
+    props.gameSock?.on('duelAccepted', ({gameType, roomName, playerId}) => {
+      
+      props.gameSock?.emit('joinDuel', {gameType : gameType, roomName : roomName, playerId : playerId})
+    })
+    
     return(() => {
+      props.gameSock?.off('isBusy');
+      props.gameSock?.off('inviteDeclined');
+      props.gameSock?.off('gotInvited');
+      props.gameSock?.off('duelAccepted');
       props.gameSock?.off('gameStarted')
     })
   }, [tab, tabsRef?.current?.tabIndex])
@@ -138,8 +202,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   )
 }
 
-// const chatSocket = io('http://localhost:4545', {extraHeaders: {"authorization": `Bearer ${authService.getAccessToken()}`}});
-
 function App() {
 
 
@@ -157,9 +219,9 @@ function App() {
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-        // setIsAuthenticated(false);
+
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
-      })
+      });
 
       return (() => {
         gameSock?.off('logout');

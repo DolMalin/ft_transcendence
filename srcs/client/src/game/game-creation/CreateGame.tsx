@@ -84,46 +84,57 @@ function CreateGame(props : {sock : Socket}) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
+            console.log('test');
             sock?.emit("joinGame", {gameType : state.selectedGameType});
             dispatch({type : 'SET_GAME_MOD', payload : false});
             dispatch({type : 'SET_WAITING_SCREEN', payload : true});
-
-            sock?.on('roomFilled', () => {
-
-                dispatch({type : 'SET_WAITING_SCREEN', payload : false});
-                dispatch({type : 'SET_LF_GAME', payload : false})
-                dispatch({type : 'SET_GAME', payload : true});
-            })
-
-            sock?.on('playerId', (side) => {
-
-                setPlayerId(side);
-            })
-
-            sock?.on('roomName', (roomName) => {
-
-                setGameRoom(roomName);
-            })
-
-            return (() => {
-                sock?.off('roomFilled');
-                sock?.off('roomName');
-                sock?.off('playerId');
-            })
         }
-    }, [state.lookingForGame])
+
+        sock?.on('roomFilled', ({gameType}) => {
+
+            console.log('room was filled : ', gameType)
+            if (gameType != undefined)
+                dispatch({type : 'SET_GAME_TYPE', payload: gameType})
+            dispatch({type : 'SET_WAITING_SCREEN', payload : false});
+            dispatch({type : 'SET_LF_GAME', payload : false})
+            dispatch({type : 'SET_PLAY', payload : false})
+            dispatch({type : 'SET_L_SCREEN', payload : false});
+            dispatch({type : 'SET_V_SCREEN', payload : false});
+            dispatch({type : 'SET_GAME_MOD', payload : false});
+            dispatch({type : 'SET_GAME', payload : true});
+        })
+
+        sock?.on('playerId', ({id}) => {
+            console.log('getting in id :', id);
+            setPlayerId(id);
+        })
+
+        sock?.on('roomName', ({roomName}) => {
+            console.log('getting in roomname : ', roomName);
+
+            setGameRoom(roomName);
+        })
+
+        return (() => {
+            sock?.off('roomFilled');
+            sock?.off('roomName');
+            sock?.off('playerId');
+        })
+    }, [state.lookingForGame, props.sock])
 
     useEffect(() => {
-        sock?.on('gameOver', (winner : string) => {
-            if (sock?.id === winner)
-                dispatch({type : 'SET_V_SCREEN', payload : true});
-            else
-                dispatch({type : 'SET_L_SCREEN', payload : true});
-
-            dispatch({type : 'SET_GAME', payload : false});
+        sock?.on('gameOver', async ({winner}) => {
             try {
-                authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+                // TO DO FIX THAT SHIT
+                const res = await authService.get('http://127.0.0.1:4545/me');
+                if (res.id === winner)
+                    dispatch({type : 'SET_V_SCREEN', payload : true});
+                else
+                    dispatch({type : 'SET_L_SCREEN', payload : true});
+                dispatch({type : 'SET_GAME', payload : false});
+                await authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
                 props.sock.emit('availabilityChange', true);
+                
             }
             catch (e) {
                 console.log('setting is Available to false returned : ', e.message);
@@ -135,7 +146,7 @@ function CreateGame(props : {sock : Socket}) {
             sock?.off('gameOver');
         })
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
-
+    
     return (<>
             <Box id={Constants.GAME_ZONE}
         width={'100vw'}
