@@ -7,5 +7,6 @@ export class RoomDto {
     name: string
 
     @IsString()
-    password: string
+    @IsOptional()
+    password: string | null
 }

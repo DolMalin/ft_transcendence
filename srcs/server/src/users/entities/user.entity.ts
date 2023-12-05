@@ -44,15 +44,22 @@ export class User {
 	@Column({type : 'int', default : 0, nullable: true})
 	loosesAmount : number
 
-	@Column({type : 'bool', default: false})
-	isInQueue : boolean
-
-	@Column({type : 'bool', default: false})
-	isInGame : boolean
-
-    @ManyToMany(() => Game)
-	@JoinTable()
-	playedGames : Game[];
+	@Column({type : 'bool', default: true})
+	isAvailable : boolean
+	
+	@ManyToMany(() => Game)
+    @JoinTable({
+		name: 'user_history',
+		joinColumn : {
+			name: 'user_id',
+			referencedColumnName : 'id'
+		},
+		inverseJoinColumn: {
+			name: 'game_id',
+			referencedColumnName: 'id'
+		}
+	})
+	playedGames?: Game[];
 
 	@JoinColumn({name: 'avatarId'})
 	@OneToOne(() => Avatar, {nullable:true})
@@ -60,4 +67,10 @@ export class User {
 
 	@Column({nullable: true})
 	avatarId?: string
+
+	@Column({type : 'text', default : null, array : true, nullable : true})
+	gameSockets : string[];
+
+	@Column({type : 'text', default : null, array : true, nullable : true})
+	chatSockets : string[];
 }

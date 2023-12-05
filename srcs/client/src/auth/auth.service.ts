@@ -1,4 +1,5 @@
 import axios from "axios"
+import { Socket } from "socket.io-client";
 import Cookies from 'universal-cookie';
 
 
@@ -33,7 +34,6 @@ class AuthService {
 				Authorization: 'Bearer ' + this.getAccessToken(),
 				'Content-Type': 'multipart/form-data'
 			}})
-			console.log(res)
 			return res
 	 	} catch(err) {
 			if (err.response.status == 401 && retry) {
@@ -83,7 +83,6 @@ class AuthService {
 			const res: any = await this.api.patch(uri, params, {headers: {
 				Authorization: 'Bearer ' + this.getAccessToken(),
 			}})
-			console.log(res)
 			return res
 	 	} catch(err) {
 			if (err.response.status == 401 && retry) {
@@ -102,12 +101,14 @@ class AuthService {
 		}
 	}
 
-	async logout(isTwoFactorAuthenticated: boolean) {
+	async logout(isTwoFactorAuthenticated: boolean, gameSock : Socket) {
 		const cookies = new Cookies()
 		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/logout-2fa` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
 		try {
+			// const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
 			
 			const res:any = await this.get(url)
+			gameSock.emit('logout');
 			cookies.remove("accessToken")
 			cookies.remove("refreshToken")
 			return res.status

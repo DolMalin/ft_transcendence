@@ -3,12 +3,13 @@ import React, { Component, useEffect, useState, useReducer} from 'react'
 import AuthService from './auth.service'
 import { Button, Link, Input, FormControl, Flex, Box, Text} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
+import { Socket } from 'socket.io-client'
 import reducer, {stateType} from './components/reducer'
 import * as Constants from '../game/globals/const'
 import { LeftBracket, RightBracket} from '../game/game-creation/Brackets';
 
 
-function Auth(props : {state: stateType, dispatch: Function}) {
+function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
 	const [authUrl, setAuthUrl] = useState('')
 
 	const [state, dispatch] = useReducer(reducer, {
@@ -16,8 +17,18 @@ function Auth(props : {state: stateType, dispatch: Function}) {
 		isRegistered: props.state.isRegistered,
 		isTwoFactorAuthenticated: props.state.isTwoFactorAuthenticated,
 		isTwoFactorAuthenticationEnabled: props.state.isTwoFactorAuthenticationEnabled
-	  })
-	
+	})
+
+	useEffect(() => {
+
+		props.gameSock?.on('logout', () => {
+			dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
+		})
+
+		return (() => {
+			props.gameSock?.off('logout');
+		})
+	}, [props.gameSock])
 	// move in service
 	const fetchAuthUrl = async () => {
 		try {
@@ -62,7 +73,7 @@ function Auth(props : {state: stateType, dispatch: Function}) {
 			
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:false})
-			await AuthService.logout(state.isTwoFactorAuthenticated)
+			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
 		}
@@ -106,7 +117,6 @@ function Auth(props : {state: stateType, dispatch: Function}) {
 
 	function RegisterComponent() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-
 		return (
 			<Flex bgColor={Constants.BG_COLOR} width="half" align="center" justifyContent="center">
 				<Box h="100vh" p={2}>

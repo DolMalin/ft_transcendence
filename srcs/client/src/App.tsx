@@ -13,7 +13,7 @@ import {
   TabPanels,
   TabPanel,
  } from '@chakra-ui/react'
-import { io } from 'socket.io-client'
+import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
 import LeaderBoard from './leaderboard/Leaderboard';
 import './fonts.css'
@@ -23,11 +23,8 @@ import reducer from './auth/components/reducer'
 import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
 
-const gameSock = io('http://127.0.0.1:4545')
 
-
-
-function Malaise(props : {state: stateType, dispatch: Function}) {
+function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
 
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
@@ -55,7 +52,7 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
 
   useEffect(function socketEvents() {
 
-    gameSock.on('gameStarted', () => {
+      props.gameSock?.on('gameStarted', () => {
       
       setSwitchingFrom(true);
       setTab(0)
@@ -64,18 +61,18 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
     })
 
     return(() => {
-      gameSock.off('gameStarted')
+      props.gameSock?.off('gameStarted')
     })
   }, [tab, tabsRef?.current?.tabIndex])
 
-  console.log('tab on rerender : ', tab)
   return (
     <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
     index={tab} onChange={(index) => {
+
       switchingFrom ? setTab(0) : setTab(index); 
       setSwitchingFrom(false); 
-      // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
-      window.dispatchEvent(new Event('resize'));}}
+      window.dispatchEvent(new Event('resize'));
+    }}
     >
 
       <TabList border='none' mb='2em' 
@@ -121,19 +118,19 @@ function Malaise(props : {state: stateType, dispatch: Function}) {
       <TabPanels margin={'0'} padding={'0'}>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <CreateGame sock={gameSock}/>
+          <CreateGame sock={props.gameSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <Chat socket={chatSocket}/>
+          <Chat socket={props.chatSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <LeaderBoard/>
+          <LeaderBoard gameSock={props.gameSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {<Profile state={props.state} dispatch={props.dispatch}/>}
+          {<Profile state={props.state} dispatch={props.dispatch} gameSock={props.gameSock}/>}
         </TabPanel>
 
     </TabPanels>
@@ -145,19 +142,86 @@ const chatSocket = io(`${process.env.REACT_APP_SERVER_URL}`, {extraHeaders: {"au
 
 function App() {
 
+
   const [state, dispatch] = useReducer(reducer, {
     isAuthenticated: false,
     isRegistered: false,
     isTwoFactorAuthenticated: false,
     isTwoFactorAuthenticationEnabled: false
   })
+  
+  const [gameSock, setGameSock] = useState<Socket>(null)
+  const [chatSock, setChatSock] = useState<Socket>(null)
+  const [userId, setUserId] = useState('');
 
+  useEffect(() => {
+
+      gameSock?.on('logout', () => {
+        // setIsAuthenticated(false);
+        dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
+      })
+
+      return (() => {
+        gameSock?.off('logout');
+      })
+  }, [gameSock])
+  
+  useEffect(() => {
+    async function handleUnload() {
+      if (gameSock != null)
+      {
+        try {
+          await authService.patch('http://127.0.0.1:4545/users/removeGameSocket', [gameSock?.id]);
+          gameSock.emit('availabilityChange', true);
+        }
+        catch (e) {
+          console.log(e.message);
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', handleUnload);
+    return (() => {window.removeEventListener('beforeunload', handleUnload)})
+}, [gameSock])
+
+  async function getUserId() {
+    try {
+      const res = await authService.get('http://127.0.0.1:4545/users/current');
+      setUserId(res.data.id);
+
+    }
+    catch(e) {
+      console.log('Error on game socket creation : ', e.message);
+    }
+  }
+
+  useEffect(() => {
+
+        getUserId();
+        if (userId != '')
+        {
+          setChatSock (io('http://localhost:4545/', {
+            query : {
+              userId : userId,
+              token : authService.getAccessToken()
+            }
+          }));
+          setGameSock (io('http://localhost:4545/', {
+            query : {
+              userId : userId,
+              token : authService.getAccessToken()
+            }
+          }));
+        }
+  }, [userId]); 
 
   return (<>
     <ChakraProvider>
 
-      <Auth dispatch={dispatch} state={state}/>
-      {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) && <Malaise state={state} dispatch={dispatch}/>}
+      <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
+      
+      {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) 
+      && <Malaise state={state} dispatch={dispatch} gameSock={gameSock} chatSock={chatSock}/>}
     </ChakraProvider>
   </>
   );
