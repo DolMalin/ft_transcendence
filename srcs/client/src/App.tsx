@@ -156,7 +156,6 @@ function App() {
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-        // setIsAuthenticated(false);
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
       })
 
@@ -170,7 +169,7 @@ function App() {
       if (gameSock != null)
       {
         try {
-          await authService.patch('http://127.0.0.1:4545/users/removeGameSocket', [gameSock?.id]);
+          await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
           gameSock.emit('availabilityChange', true);
         }
         catch (e) {
@@ -185,7 +184,7 @@ function App() {
 
   async function getUserId() {
     try {
-      const res = await authService.get('http://127.0.0.1:4545/users/current');
+      const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
       setUserId(res.data.id);
 
     }
