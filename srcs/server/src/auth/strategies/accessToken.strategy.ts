@@ -30,8 +30,8 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 	async validate(payload: any) {
 		const user = await this.userService.findOneById(payload.id)
-			
-		return user
+
+		return false
 		
 	}
 }

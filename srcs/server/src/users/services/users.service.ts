@@ -7,11 +7,7 @@ import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
 import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
-import { CreateGameDto } from 'src/game/dto/create.game.dto';
-import { Game } from 'src/game/entities/game-entity';
-import { UpdateGameDto } from 'src/game/dto/update.game.dto';
-import { Avatar } from '../entities/avatar.entity';
-
+import { GameGateway } from 'src/game/gateway/game.gateway';
 @Injectable()
 export class UsersService {
   constructor(
@@ -19,6 +15,7 @@ export class UsersService {
 		private userRepository: Repository<User>,
 
     private readonly avatarService: AvatarService,
+    // private readonly gameGateway: GameGateway,
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -64,6 +61,16 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOneById(id)
+    // user.gameSockets.forEach((socketId) => {
+    //   this.gameGateway.server.to(socketId).emit('logout')
+    // })
+
+    // user.chatSockets.forEach((socketId) => {
+    //   this.gameGateway.server.to(socketId).emit('logout')
+    // })
+
+
+    console.log("TOUT VA BIEN")
     return this.userRepository.remove(user)
   }
 
