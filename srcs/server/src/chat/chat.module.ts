@@ -18,7 +18,7 @@ import { AvatarService } from "src/users/services/avatar.service";
     imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule, TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar])] ,
     controllers: [RoomController, MessageController],
     providers: [ChatGateway, RoomService, MessageService, JwtService, UsersService, AuthService, AvatarService],
-    exports: [RoomService, MessageService]
+    exports: [RoomService, MessageService, ChatGateway]
     //Export roomService si besoin est
 })
 export class ChatModule {}

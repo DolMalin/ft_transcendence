@@ -24,13 +24,13 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   server : Server;
 
   async handleConnection (client: Socket) {
+
     try {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-      
-        this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
-
-        this.userService.addChatSocketId(client.id, user.chatSockets, user);
-      })
+      if (client.handshake.query.type !== 'chat')
+        return ;
+      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
     }
     catch(e) {
       client.disconnect();
@@ -39,17 +39,18 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     try {
-      this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
-
-        this.userService.removeSocketId(client.id, user.chatSockets, user)
-      })
+      if (client.handshake.query.type !== 'chat')
+        return ;
+      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
     }
     catch(e) {
       console.log('handle connection ERROR : ', e);
     }
-}
+  }
+
 
   @SubscribeMessage('message')
   message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {
