@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -7,7 +7,11 @@ import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
 import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
-import { GameGateway } from 'src/game/gateway/game.gateway';
+import { CreateGameDto } from 'src/game/dto/create.game.dto';
+import { Game } from 'src/game/entities/game-entity';
+import { UpdateGameDto } from 'src/game/dto/update.game.dto';
+import { Avatar } from '../entities/avatar.entity';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -15,7 +19,6 @@ export class UsersService {
 		private userRepository: Repository<User>,
 
     private readonly avatarService: AvatarService,
-    // private readonly gameGateway: GameGateway,
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -53,17 +56,23 @@ export class UsersService {
   }
 
   async getAvatar(id: string) {
+    
     const user = await this.userRepository.findOneBy({id})
-    if (user.avatarId == null)
-      throw new HttpException('No avatar found', HttpStatus.NOT_FOUND)
+
+    if (!user)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'The user do not exist in database'})
+
     const avatar = await this.avatarService.getAvatarById(user.avatarId)
+
+    if (!avatar)
+      throw new NotFoundException('Avatar not found', {cause: new Error(), description: 'The avatar do not exist in database (probably not setup yet)'})
+    
     return avatar
   }
 
 
   async remove(id: string) {
     const user = await this.findOneById(id)
-
     return this.userRepository.remove(user)
   }
 

@@ -9,6 +9,8 @@ import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
+import { isUUID } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
@@ -72,6 +74,10 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('avatar/:id')
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
+
+    if(id && !isUUID(id))
+      throw new BadRequestException('Invalid id', {cause: new Error(), description: `ID '${id}' is not an UUID`})
+
     try {
       const avatar = await this.usersService.getAvatar(id)
       const stream = Readable.from(avatar?.data)

@@ -11,6 +11,7 @@ import { read } from 'fs';
 import { authenticator } from 'otplib';
 import { FileTypeValidationPipe } from '../utils/file.validator';
 
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -44,7 +45,6 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('logout')
     logout(@Req() req: any, @Res() res: any) {
-
       return this.authService.logout(req, res)
     }
 
@@ -89,7 +89,7 @@ export class AuthController {
     async twoFactorAuthenticationLogin(@Req() req: any, @Res() res:any, @Body() body:any) {
 
       if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code')
+        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
 
       await this.usersService.update(req.user.id, {isTwoFactorAuthenticated: true})
       res.send("OK")
@@ -100,8 +100,7 @@ export class AuthController {
     async turnOnTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
 
       if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code')
-      
+        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
 
       await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true})
       res.send("OK")
@@ -112,7 +111,7 @@ export class AuthController {
     async turnOffTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
 
       if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code')
+        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
 
       await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: false})
       res.send("OK")
