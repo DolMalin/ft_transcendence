@@ -67,7 +67,9 @@ export class AuthController {
       @Res() res:any,
       @Req() req:any)
     {
-      await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
+      if (file)
+        await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
+        
       await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
       res.send("ok")
     }

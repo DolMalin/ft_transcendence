@@ -229,8 +229,6 @@ export class AuthService {
   }
 
 
-  // async register(@Req() req:any, @Res() res:any) { 
-  //   return req.body
   
   async register(body: any) { 
     // await this.usersService.add

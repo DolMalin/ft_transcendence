@@ -54,6 +54,8 @@ export class UsersService {
 
   async getAvatar(id: string) {
     const user = await this.userRepository.findOneBy({id})
+    if (user.avatarId == null)
+      throw new HttpException('No avatar found', HttpStatus.NOT_FOUND)
     const avatar = await this.avatarService.getAvatarById(user.avatarId)
     return avatar
   }
@@ -61,16 +63,7 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOneById(id)
-    // user.gameSockets.forEach((socketId) => {
-    //   this.gameGateway.server.to(socketId).emit('logout')
-    // })
 
-    // user.chatSockets.forEach((socketId) => {
-    //   this.gameGateway.server.to(socketId).emit('logout')
-    // })
-
-
-    console.log("TOUT VA BIEN")
     return this.userRepository.remove(user)
   }
 

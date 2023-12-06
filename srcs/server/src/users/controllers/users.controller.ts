@@ -84,8 +84,7 @@ export class UsersController {
       return new StreamableFile(stream)
     }
     catch (e) {
-      console.log('get User Avatar : ', e);
-      throw Error
+      throw e
     }
   }
 
