@@ -65,11 +65,11 @@ export class UsersController {
     return (this.usersService.update(user.id, updateDto));
   }
 
-  @UseGuards(AccessTokenGuard)
 
   @UseGuards(AccessTokenGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
+    console.log("HELLO")
     return {username: user.username, id: user.id}
   }
 
