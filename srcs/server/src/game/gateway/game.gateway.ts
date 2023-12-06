@@ -38,46 +38,31 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server : Server;
 
-  isUserInGame(client : Socket) {
-    this.gamesMap.forEach((game, key) => {
-      if (game.clientOne.id === client.handshake.query.userId as string ||
-        game.clientTwo.id === client.handshake.query.userId as string)
-      {
-        client.join(key);
-      }
-    })
-  }
-
-  async doesSocketBelongToUser(client : Socket) {
-    try {
-      const user = await this.userService.findOneById(client.handshake.query.userId as string);
-      const socketId = user.gameSockets.filter((value) => value === client.id);
-      
-      console.log('socket : ', socketId)
-      if (socketId === undefined)
-        return (false);
-      else
-        return (true);
-    }
-    catch(e) {
-      console.log('Error in socketBelongToUser :', e)
-    }
-  }
+  // isUserInGame(client : Socket) {
+  //   this.gamesMap.forEach((game, key) => {
+  //     if (game.clientOne.id === client.handshake.query.userId as string ||
+  //       game.clientTwo.id === client.handshake.query.userId as string)
+  //     {
+  //       client.join(key);
+  //     }
+  //   })
+  // }
 
  async handleConnection(client: Socket) {
 
    try {
-      const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-      if (client.handshake.query?.userId as string === undefined)
-      {
-        client.disconnect();
-        return ;
+     const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
+     if (client.handshake.query?.userId as string === undefined)
+     {
+       client.disconnect();
+       return ;
       }
-      this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
+      if (client.handshake.query.type !== 'game')
+        return;
 
-        this.userService.addGameSocketId(client.id, user.gameSockets, user);
-        this.isUserInGame(client);
-      })
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addGameSocketId(client.id, user.gameSockets, user);
+      // console.log('socket tab in connection : ', user.gameSockets);
     }
     catch(e) {
       client.disconnect();
@@ -85,13 +70,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
   
-  handleDisconnect(client: Socket){
+  async handleDisconnect(client: Socket){
 
     try {
-      this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
-
-        this.userService.removeSocketId(client.id, user.gameSockets, user)
-      })
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      if (client.handshake.query.type !== 'game')
+        return ;
+      // console.log('socket to remove : ', client.id)
+      await this.userService.removeSocketId(client.id, user.gameSockets, user)
+      // console.log('socket tab in disconnection : ', user.gameSockets);
     }
     catch(e) {
       console.log('handle connection ERROR : ', e);
@@ -101,17 +88,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() data : {gameType : string},@ConnectedSocket() client: Socket) {
 
-    if (client.handshake.query.userId === undefined) {
-      console.log('failed auth in joinGame', typeof data?.gameType)
-      return ;
-    }
     if (typeof data?.gameType !== 'string')
     {
       console.log('wrong data type in joinGame : ', typeof data?.gameType)
       return ;
     }
 
-    this.matchmakingService.gameCreation(this.server, client, client.handshake.query?.userId as string, this.gamesMap, data.gameType);
+    this.matchmakingService.joinGame(this.server, client, client.handshake.query?.userId as string, this.gamesMap, data.gameType);
   }
 
   @SubscribeMessage('joinDuel')
@@ -121,32 +104,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       console.log('wrong type in joinDuel')
       return ;
     }
-    
-    try {
-      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      
-      if (this.gamesMap.get(data.roomName) === undefined)
-      {
-        this.matchmakingService.duelCreation(this.server, this.gamesMap, client, data);
-        // this.server.to(data.roomName).emit('playerId', {id : '1'});
-        // this.server.to(data.roomName).emit('roomName', {roomName : data.roomName});
-        this.userService.emitToAllSockets(this.server, user.gameSockets, 'playerId', {id : '1'});
-        this.userService.emitToAllSockets(this.server, user.gameSockets, 'roomName', {roomName : data.roomName});
-      }
-      else 
-      {
-        this.matchmakingService.addClientToRoom(this.gamesMap, data.roomName, client, client.handshake.query?.userId as string);
-        // this.server.to(data.roomName).emit('playerId', {id : '1'});
-        // this.server.to(data.roomName).emit('roomName', {roomName : data.roomName});
-        // this.userService.emitToAllSockets(this.server, user.gameSockets, 'roomFilled', {gameType : data.gameType})
-        this.server.to(data.roomName).emit('roomFilled', {gameType : data.gameType});
-        this.userService.emitToAllSockets(this.server, user.gameSockets, 'playerId', {id : '2'});
-        this.userService.emitToAllSockets(this.server, user.gameSockets, 'roomName', {roomName : data.roomName});
-      }
-    }
-    catch (e) {
-      console.log('Error in join duel : ', e);
-    }
+
+    this.matchmakingService.joinDuel(this.server, client, this.gamesMap, data);
   }
 
   @SubscribeMessage('leaveGame') // Protected against socket meddling
@@ -158,8 +117,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return ;
     }
      
-    // clearInterval(this.gamesMap.get(data.roomName)?.ballRefreshInterval);
-    // client.leave(data.roomName);
     this.matchmakingService.leaveGame(this.server, client, this.gamesMap, data);
   }
 
@@ -197,7 +154,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('startGameLoop') // Protected against socket meddling
-  startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
+  async startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
     
     console.log('room Name in startGameLoop :', data.roomName)
     if (data === undefined || data === null || 
@@ -214,13 +171,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return ; // TO DO : emit something saying game crashed
     }
 
-    if (!this.userService.doesSocketBelongToUser(game.clientTwo.socket))
-    {
-      console.log('socket meddling in startGameLoop', client.id)
-      return;
-    }
+    // if (await !this.userService.doesSocketBelongToUser(game.clientTwo.socket))
+    // {
+    //   console.log('socket meddling in startGameLoop', client.id)
+    //   return;
+    // }
     else
-      this.gamePlayService.gameLoop(this.gamesMap, this.gamesMap.get(data.roomName), data, client, this.server);
+      await this.gamePlayService.gameLoop(this.gamesMap.get(data.roomName), data, client, this.server);
   }
 
   @SubscribeMessage('availabilityChange')
@@ -237,15 +194,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (bool === true) {
         this.userService.update(user.id, {isAvailable : bool});
       }
-      this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool :bool})
-      this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool})
-      // this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
-
-        
-      //   user.gameSockets.forEach((value) => {
-      //     this.server.to(value).emit('isAvailable', bool);
-      //   })
-      // })
+      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool :bool})
+      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool})
     }
     catch(e) {
       console.log('in availability change ERROR : ', e);
@@ -259,7 +209,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.handleDisconnect(client);
     try {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
+      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
         // this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
 
         // user.gameSockets.forEach((value) => {
@@ -280,7 +230,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('gameInvite')
-  gameInvite(@MessageBody() data : {targetId : string, gameType : string}, @ConnectedSocket() client : Socket) {
+  async gameInvite(@MessageBody() data : {targetId : string, gameType : string}, @ConnectedSocket() client : Socket) {
 
     if (data === undefined || data === null || typeof data.targetId != 'string' || typeof data.gameType != 'string')
     {
@@ -288,29 +238,30 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return ;
     }
 
-    this.matchmakingService.gameInvite(this.server,
+    await this.matchmakingService.gameInvite(this.server, client.id,
     client.handshake.query.userId as string, data.targetId, data.gameType);
   }
 
   @SubscribeMessage('acceptedInvite')
-  acceptedInvite(@MessageBody() data : {senderId : string, gameType : string}, @ConnectedSocket() client : Socket) {
+  async acceptedInvite(@MessageBody() data : {senderSocketId : string, senderId : string, gameType : string}, @ConnectedSocket() client : Socket) {
     
-    if (data === undefined || data === null || typeof data.senderId != 'string' || typeof data.gameType != 'string')
+    if (data === undefined || data === null || typeof data.senderSocketId != 'string' || typeof data.senderId != 'string' || typeof data.gameType != 'string')
     {
       console.log('type error in acceptedInvite : ')
       return ;
     }
-    this.matchmakingService.inviteWasAccepted(this.server, data.senderId, client.handshake.query.userId as string, data.gameType)
+    await this.matchmakingService.inviteWasAccepted(this.server, data.senderSocketId, client.id,
+      data.senderId, client.handshake.query.userId as string, data.gameType)
   }
 
   @SubscribeMessage('declinedInvite')
-  declinedInvite(@MessageBody() data : {senderId : string}, @ConnectedSocket() client : Socket) {
+  async declinedInvite(@MessageBody() data : {senderId : string}, @ConnectedSocket() client : Socket) {
     if (data === undefined || data === null || typeof data.senderId != 'string')
     {
       console.log('type error in declinedInvite : ')
       return ;
     }
-    this.matchmakingService.inviteWasDeclined(this.server, data.senderId, client.handshake.query.userId as string)
+    await this.matchmakingService.inviteWasDeclined(this.server, data.senderId, client.handshake.query.userId as string)
   }
 }
 

@@ -28,13 +28,13 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
 
     useEffect(() => {
 
-        props.sock.on('isAvailable', ({bool}) => {
+        props.sock?.on('isAvailable', ({bool}) => {
 
             console.log('setting player availability')
             setPlayerAvalaible(bool);
         })
         return (() => {
-            props.sock.off('isAvailable');
+            props.sock?.off('isAvailable');
         })
     }, []);
 

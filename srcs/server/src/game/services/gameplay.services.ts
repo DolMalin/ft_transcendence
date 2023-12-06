@@ -30,17 +30,17 @@ export class GamePlayService {
   // ********************************* PADDLE ********************************* //
 
 
-  movingStarted(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
+  async movingStarted(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
 
-    if (data.playerId === '1' && !this.usersService.doesSocketBelongToUser(game.clientOne.socket))
+    if (data.playerId === '1' && clientId !== game.clientOne.socket.id)
     {
       console.log('socket meddling in movingStarted')
       return ;
     }
-    else if (data.playerId === '2' && !this.usersService.doesSocketBelongToUser(game.clientTwo.socket))
+    else if (data.playerId === '2' && clientId !== game.clientTwo.socket.id)
     {
       console.log('socket meddling in movingStarted')
       return ;
@@ -59,17 +59,17 @@ export class GamePlayService {
     }
   }
 
-  movingStopped(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
+  async movingStopped(game : GameState, data: {key : string, playerId : string, room : string}, clientId : string) {
 
     if (game === undefined)
       return ;
 
-    if (data.playerId === '1' && !this.usersService.doesSocketBelongToUser(game.clientOne.socket))
+    if (data.playerId === '1' && clientId !== game.clientOne.socket.id)
     {
       console.log('socket meddling in movingStopped')
       return ;
     }
-    else if (data.playerId === '2' && !this.usersService.doesSocketBelongToUser(game.clientTwo.socket))
+    else if (data.playerId === '2' && clientId !== game.clientTwo.socket.id)
     {
       console.log('socket meddling in movingStopped')
       return ;
@@ -188,7 +188,7 @@ export class GamePlayService {
     } 
   }
   
-  async gameLoop(gamesMap : Map <string, GameState>,game : GameState, data: GameInfo, client : Socket, server : Server) {
+  async gameLoop(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     let ballEvents : string = 'start';
 
@@ -196,6 +196,10 @@ export class GamePlayService {
 
     server.to(data.roomName).emit('gameStarted', 
     await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
+    if (game.hasStarted === false)
+      game.hasStarted = true;
+    else
+      return ;
     
     game.ballRefreshInterval = setInterval(() => {
       

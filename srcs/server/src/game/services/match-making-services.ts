@@ -61,6 +61,7 @@ export class MatchmakingService {
           clientTwo : undefined,
           gameIsFull : false,
           isPaused : true,
+          hasStarted : false,
           clientOneScore : 0,
           clientTwoScore : 0,
           winner : undefined,
@@ -100,9 +101,8 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    async gameCreation (server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
+    async joinGame(server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
-        // look for open rooms and join them
         try 
         {
           const user = await this.userService.findOneById(client.handshake.query.userId as string);
@@ -110,30 +110,47 @@ export class MatchmakingService {
           {
             if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
             {
-              // server.to(key).emit('playerId', {id : '2'});
-              // server.to(key).emit('roomName', {roomName : key});
               this.addClientToRoom(gamesMap, key, client, dbUserId)
-              this.userService.emitToAllSockets(server, user.gameSockets, 'playerId', {id : '2'})
-              this.userService.emitToAllSockets(server, user.gameSockets, 'roomName', {roomName : key})
+              client.emit('playerId', {id : '2'});
+              client.emit('roomName', {roomName : key});
               server.to(key).emit('roomFilled', {gameType : gameType});
-                // this.userService.emitToAllSockets(server, user.gameSockets, 'roomFilled', {gameType : gameType})
                 return ;
               }
             }
             
-            //  if none exist, create one
-            
             let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
             
             this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
-            // server.to(roomName).emit('playerId', {id : '1'});
-            // server.to(roomName).emit('roomName', {roomName : roomName});
-            this.userService.emitToAllSockets(server, user.gameSockets, 'playerId', {id : '1'})
-            this.userService.emitToAllSockets(server, user.gameSockets, 'roomName', {roomName : roomName})
+            client.emit('playerId', {id : '1'});
+            client.emit('roomName', {roomName : roomName});
           }
         catch(e) {
           console.log('Error in game creation : ', e)
         }
+    }
+
+    async joinDuel(server : Server, client : Socket, gamesMap : Map<string, GameState>, data : GameInfo) {
+      
+      try {
+        const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+        
+        if (gamesMap.get(data.roomName) === undefined)
+        {
+          this.duelCreation(server, gamesMap, client, data);
+          client.emit('playerId', {id : '1'})
+          client.emit('roomName', {roomName : data.roomName})
+        }
+        else 
+        {
+          this.addClientToRoom(gamesMap, data.roomName, client, client.handshake.query?.userId as string);
+          client.emit('playerId', {id : '2'})
+          client.emit('roomName', {roomName : data.roomName})
+          server.to(data.roomName).emit('roomFilled', {gameType : data.gameType});
+        }
+      }
+      catch (e) {
+        console.log('Error in join duel : ', e);
+      }
     }
 
     leaveGame(server : Server, client : Socket, gamesMap : Map <string, GameState>, data : GameInfo) {
@@ -142,24 +159,26 @@ export class MatchmakingService {
       if (game === undefined)
         return ;
       
-      if (data.playerId === '1' && !this.userService.doesSocketBelongToUser(game.clientOne.socket))
+      if (data.playerId === '1' && client.id != game.clientOne.socket.id)
       {
         console.log('socket meddling in leaveGame');
         return ;
       }
-      else if (data.playerId === '2' && !this.userService.doesSocketBelongToUser(game.clientTwo.socket))
+      else if (data.playerId === '2' && client.id != game.clientTwo.socket.id)
       {
         console.log('socket meddling in leaveGame');
         return ;
       }
-
       clearInterval(game.ballRefreshInterval);
+
+      // WHAT PURPOSE DOES THIS SERVER, WHY DID YOU WRITE THAT YOU CUCK
       if (game.gameIsFull === false)
       {
         client.leave(data.roomName);
         gamesMap.delete(data.roomName);
+        return ;
       }
-      else if (data.playerId === '1')
+      if (data.playerId === '1')
       {
         if (game.winner === undefined)
         {
@@ -167,9 +186,7 @@ export class MatchmakingService {
           game.looser = game.clientOne.id;
         }
       
-        server.to(data.roomName).emit('gameOver', {winner : game.clientTwo.socket.id});
-        game.clientOne.socket.leave(data.roomName);
-        game.clientTwo.socket.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', {winner : game.clientTwo.id});
       }
       else if (data.playerId === '2')
       {
@@ -178,12 +195,12 @@ export class MatchmakingService {
           game.winner = game.clientOne.id;
           game.looser = game.clientTwo.id;
         }
-        server.to(data.roomName).emit('gameOver', {winner : game.clientOne.socket.id});
-        game.clientOne.socket.leave(data.roomName);
-        game.clientTwo.socket.leave(data.roomName);
+        server.to(data.roomName).emit('gameOver', {winner : game.clientOne.id});
       }
+
       this.matchHistoryServices.storeGameResults(game);
       gamesMap.delete(data.roomName);
+      client.leave(data.roomName);
     }
 
     async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
@@ -195,7 +212,7 @@ export class MatchmakingService {
         return;
       }
 
-      if (this.userService.doesSocketBelongToUser(game.clientOne.socket))
+      if (client.id === game.clientOne.socket.id)
       {
         gamesMap.delete(data.roomName);
         
@@ -216,7 +233,7 @@ export class MatchmakingService {
       }
     }
 
-    async gameInvite(server : Server,senderId : string, targetId : string, gameType : string) {
+    async gameInvite(server : Server, senderSocketId : string, senderId : string, targetId : string, gameType : string) {
 
         try {
             const target : User = await this.userService.findOneById(targetId);
@@ -241,7 +258,7 @@ export class MatchmakingService {
             }
 
             this.userService.emitToAllSockets(server, target.gameSockets, 'gotInvited',
-            {senderId : sender.id, senderUsername : sender.username, gameType : gameType})
+            {senderSocketId : senderSocketId,senderId : sender.id, senderUsername : sender.username, gameType : gameType})
         }
         catch (e) {
             console.log('Game Invite Error : ', e.message)
@@ -270,7 +287,7 @@ export class MatchmakingService {
         }
     }
 
-    async inviteWasAccepted(server : Server, senderId : string, targetId : string, gameType : string) {
+    async inviteWasAccepted(server : Server, senderSocketId : string, targetSocketId : string,senderId : string, targetId : string, gameType : string) {
         try {
             const target : User = await this.userService.findOneById(targetId);
             if (target === undefined)
@@ -295,13 +312,15 @@ export class MatchmakingService {
             {
               const roomName = roomNameGenerator(20, server.sockets.adapter.rooms);
 
-              await this.userService.update(sender.id, {isAvailable : false});
-              this.userService.emitToAllSockets(server, sender.gameSockets,
-              'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
-
-              await this.userService.update(target.id, {isAvailable : false});
-              this.userService.emitToAllSockets(server, target.gameSockets,
-              'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
+              this.userService.update(sender.id, {isAvailable : false});
+              server.to(senderSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
+              // this.userService.emitToAllSockets(server, sender.gameSockets,
+              // 'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
+              
+              server.to(targetSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
+              // this.userService.update(target.id, {isAvailable : false});
+              // this.userService.emitToAllSockets(server, target.gameSockets,
+              // 'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
             }
         }
         catch (e) {
@@ -318,6 +337,7 @@ export class MatchmakingService {
           clientTwo : undefined,
           gameIsFull : true, // true to avoid other from joining
           isPaused : true,
+          hasStarted : false,
           clientOneScore : 0,
           clientTwoScore : 0,
           winner : undefined,

@@ -84,7 +84,6 @@ function CreateGame(props : {sock : Socket}) {
     useEffect (function matchMaking() {
         if (state.lookingForGame === true)
         {
-            console.log('test');
             sock?.emit("joinGame", {gameType : state.selectedGameType});
             dispatch({type : 'SET_GAME_MOD', payload : false});
             dispatch({type : 'SET_WAITING_SCREEN', payload : true});
@@ -92,7 +91,7 @@ function CreateGame(props : {sock : Socket}) {
 
         sock?.on('roomFilled', ({gameType}) => {
 
-            console.log('room was filled : ', gameType)
+            // console.log('room was filled : ', gameType)
             if (gameType != undefined)
                 dispatch({type : 'SET_GAME_TYPE', payload: gameType})
             dispatch({type : 'SET_WAITING_SCREEN', payload : false});
@@ -105,12 +104,12 @@ function CreateGame(props : {sock : Socket}) {
         })
 
         sock?.on('playerId', ({id}) => {
-            console.log('getting in id :', id);
+            // console.log('getting in id :', id);
             setPlayerId(id);
         })
 
         sock?.on('roomName', ({roomName}) => {
-            console.log('getting in roomname : ', roomName);
+            // console.log('getting in roomname : ', roomName);
 
             setGameRoom(roomName);
         })
@@ -125,14 +124,14 @@ function CreateGame(props : {sock : Socket}) {
     useEffect(() => {
         sock?.on('gameOver', async ({winner}) => {
             try {
-                // TO DO FIX THAT SHIT
-                const res = await authService.get('http://127.0.0.1:4545/me');
-                if (res.id === winner)
+                const res = await authService.get('http://127.0.0.1:4545/users/me');
+                console.log('res : ', res.data.id, ' winner : ', winner)
+                if (res.data.id === winner)
                     dispatch({type : 'SET_V_SCREEN', payload : true});
                 else
                     dispatch({type : 'SET_L_SCREEN', payload : true});
                 dispatch({type : 'SET_GAME', payload : false});
-                await authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+                authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
                 props.sock.emit('availabilityChange', true);
                 
             }

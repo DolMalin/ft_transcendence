@@ -19,6 +19,7 @@ import { Socket } from "socket.io-client";
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock : Socket}) {
 
     const [user, setUser] = useState<any>(null);
+    const [isYourself, setIsYoursellf] = useState(false);
 
     function sendDuelInvite(gameType : string) {
 
@@ -28,17 +29,34 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     useEffect(() => {
         if (!props.userId)
             return ;
-        const fetchUserData = async () => {
+        const checkIfYourself = async (userId : string) => {
             try {
-                const response = await authService.get('http://127.0.0.1:4545/users/' + props.userId);
-                setUser(response.data);
+                const res = await authService.get('http://127.0.0.1:4545/users/me');
+                if (userId == res?.data?.id)
+                {
+                    setIsYoursellf(true);
+                }
+                else
+                    setIsYoursellf(false)
+            }
+            catch(error) {
+                console.error('Error checking if profile is my own:', error);
+            }
+        }
+        const fetchUserId = async () => {
+            try {
+                const res = await authService.get('http://127.0.0.1:4545/users/' + props.userId);
+                setUser(res?.data);
+                return (res?.data?.id)
     
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
         }
     
-        fetchUserData();
+        fetchUserId().then((userId) => {
+            checkIfYourself(userId);
+        });
     }, [props.userId])
 
     if (!props.userId)
@@ -95,32 +113,47 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
                 </ModalBody>
 
-                <ModalFooter>
-                    <Button colorScheme='none'
-                    fontWeight={'normal'}
-                    borderRadius={'none'}
-                    _hover={{background : 'white', textColor: 'black'}}>
-                        Message Them !
-                    </Button>
+                <Box display={'flex'} w={'448px'} h={'160px'} flexDir={'column'} flex={'wrap'} overflow={'clip'}
+                alignContent={'center'}
+                alignItems={'center'}
+                overflowWrap={'normal'}
+                >
+                    <Box w={'224px'}>
 
-                    <Button colorScheme='none'
-                    fontWeight={'normal'}
-                    borderRadius={'none'}
-                    _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => (sendDuelInvite(Constants.GAME_TYPE_ONE))}
-                    >
-                        {Constants.GAME_TYPE_ONE} Duel !
-                    </Button>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        isDisabled={isYourself}
+                        >
+                            Message Them !
+                        </Button>
+                    </Box>
 
-                    <Button colorScheme='none'
-                    fontWeight={'normal'}
-                    borderRadius={'none'}
-                    _hover={{background : 'white', textColor: 'black'}}
-                    onClick={() => (sendDuelInvite(Constants.GAME_TYPE_TWO))}
-                    >
-                        {Constants.GAME_TYPE_TWO} Duel !
-                    </Button>
-                </ModalFooter>
+                    <Box  w={'224px'}>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (sendDuelInvite(Constants.GAME_TYPE_ONE))}
+                        isDisabled={isYourself}
+                        >
+                            {Constants.GAME_TYPE_ONE} Duel !
+                        </Button>
+                    </Box>
+
+                    <Box w={'448px'}>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (sendDuelInvite(Constants.GAME_TYPE_TWO))}
+                        isDisabled={isYourself}
+                        >
+                            {Constants.GAME_TYPE_TWO} Duel !
+                        </Button>
+                    </Box>
+                </Box>
                 <PlayerHistoryAccordion userId={user?.id}/>
 
             </ModalContent>

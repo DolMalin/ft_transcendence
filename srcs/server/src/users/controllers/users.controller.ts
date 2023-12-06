@@ -66,11 +66,9 @@ export class UsersController {
   }
 
   @UseGuards(AccessTokenGuard)
-
-  @UseGuards(AccessTokenGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
-    return {username: user.username, id: user.id}
+    return {username: user?.username, id: user?.id}
   }
 
 

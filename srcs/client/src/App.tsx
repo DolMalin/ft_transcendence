@@ -35,10 +35,10 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
   const toast = useToast();
 
-  function acceptInvite(senderId : string, gameType : string) {
+  function acceptInvite(senderSocketId : string,senderId : string, gameType : string) {
     
     toast.closeAll();
-    props.gameSock?.emit('acceptedInvite', {senderId : senderId, gameType : gameType});
+    props.gameSock?.emit('acceptedInvite', {senderSocketId : senderSocketId, senderId : senderId, gameType : gameType});
   }
 
   function close(senderId : string) {
@@ -67,9 +67,9 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
 
   useEffect(function socketEvents() {
 
-      props.gameSock?.on('gameStarted', () => {
-      
-        console.log('getting game started')
+    props.gameSock?.on('gameStarted', () => {
+    
+      console.log('getting game started')
       setSwitchingFrom(true);
       setTab(0)
       // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
@@ -96,7 +96,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         isClosable: true
       })
     })
-    props.gameSock?.on('gotInvited', ({senderId, senderUsername, gameType}) => {
+    props.gameSock?.on('gotInvited', ({senderSocketId, senderId, senderUsername, gameType}) => {
 
       toast({
         title: 'Got Invited',
@@ -108,7 +108,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
           h={'60px'}
           bgColor={'white'}>
             <Button onClick={() => {close(senderId)}}> No thanks !</Button>
-            <Button onClick={() => {acceptInvite(senderId, gameType)}}> Yes please ! </Button>
+            <Button onClick={() => {acceptInvite(senderSocketId, senderId, gameType)}}> Yes please ! </Button>
           </Box>
         ),
         isClosable: true,
@@ -247,13 +247,18 @@ function App() {
 }, [gameSock])
 
   async function getUserId() {
+
+    console.log('in get user ID')
     try {
-      const res = await authService.get('http://127.0.0.1:4545/users/current');
-      setUserId(res.data.id);
+      console.log('before')
+
+      const res = await authService.get('http://127.0.0.1:4545/users/me');
+      console.log('after')
+      setUserId(res?.data?.id);
 
     }
     catch(e) {
-      console.log('Error on game socket creation : ', e.message);
+      console.log('Error on game socket creation : ', e?.message);
     }
   }
 
@@ -265,13 +270,15 @@ function App() {
           setChatSock (io('http://localhost:4545/', {
             query : {
               userId : userId,
-              token : authService.getAccessToken()
+              token : authService.getAccessToken(),
+              type : 'chat'
             }
           }));
           setGameSock (io('http://localhost:4545/', {
             query : {
               userId : userId,
-              token : authService.getAccessToken()
+              token : authService.getAccessToken(),
+              type : 'game'
             }
           }));
         }

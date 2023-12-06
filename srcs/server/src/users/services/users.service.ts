@@ -119,21 +119,21 @@ export class UsersService {
     });
    }
 
-   async doesSocketBelongToUser(client : Socket) {
-    try {
-      const user = await this.findOneById(client.handshake.query.userId as string);
-      const socketId = user.gameSockets.filter((value) => value === client.id);
+  //  async doesSocketBelongToUser(client : Socket) {
+  //   try {
+  //     const user = await this.findOneById(client.handshake.query.userId as string);
+  //     const socketId = user.gameSockets.filter((value) => value === client.id);
       
-      console.log('socket : ', socketId)
-      if (socketId === undefined)
-        return (false);
-      else
-        return (true);
-    }
-    catch(e) {
-      console.log('Error in socketBelongToUser :', e)
-    }
-  }
+  //     console.log('socket : ', socketId)
+  //     if (socketId === undefined)
+  //       return (false);
+  //     else
+  //       return (true);
+  //   }
+  //   catch(e) {
+  //     console.log('Error in socketBelongToUser :', e)
+  //   }
+  // }
 
   /**
  * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
