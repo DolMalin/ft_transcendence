@@ -66,7 +66,7 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
-    return {username: user.username, id: user.id}
+    return {username: user?.username, id: user?.id}
   }
 
 

@@ -3,7 +3,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, ManyToMany, JoinTable, OneToOne } from 'typeorm'
 import { Message } from './message.entity';
 
-enum roomType {
+export enum roomType {
     directMessage = 'dm',
     groupMessage = 'gm'
 }
@@ -22,6 +22,7 @@ export class Room {
     @Column({type: Boolean, nullable: true})
     privChan: boolean
 
+    //surement changer en bool
     @Column({type: 'enum', enum: roomType, nullable: true})
     type: roomType
 

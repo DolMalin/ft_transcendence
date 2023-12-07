@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Req, Res } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -10,6 +10,8 @@ import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { RoomDto } from '../dto/room.dto'
+import { UsersService } from 'src/users/services/users.service'
+import { roomType } from '../entities/room.entity'
 
 @Injectable()
 export class RoomService {
@@ -21,7 +23,9 @@ export class RoomService {
         @InjectRepository(Message)
         private messageRepository: Repository<Message>,
         @InjectRepository(Message)
-        private userRepository: Repository<User>
+        private userRepository: Repository<User>,
+        private readonly userService : UsersService
+
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
@@ -34,6 +38,22 @@ export class RoomService {
         return await this.roomRepository.save(room);
     }
 
+    async createDM(user: User, targetId: string){
+        let user2: User;
+        try{
+            user2 = await this.userService.findOneById(targetId)
+        }
+        catch(err){
+            throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+        }
+        const name = user.id + user2.id
+        const directMessage = this.roomRepository.create({
+            name: name,
+            type: roomType.directMessage
+        })
+        return await this.roomRepository.save(directMessage)
+    }
+
     findAll() {
         return this.roomRepository.find();
     }
@@ -42,16 +62,6 @@ export class RoomService {
 
         return this.roomRepository.findOneBy({id})
     }
-
-    // async findAllUsers(){
-    //     const userList = await this.roomRepository
-    //         .createQueryBuilder('room')
-    //         .leftJoinAndSelect('room.users', 'user')
-    //         .getMany()
-
-    //     console.log('-------------------------------\n', userList)
-    //     return userList
-    // }
 
     async findAllUsersInRoom(id: number) {
         const room = await this.roomRepository
@@ -85,6 +95,7 @@ export class RoomService {
         const room = await this.findOneById(id)
         return this.roomRepository.remove(room)
     }
+
     
     async joinRoom(dto: RoomDto, user: User){
         

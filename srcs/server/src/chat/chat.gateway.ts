@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io'
 import { AuthService } from 'src/auth/services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
+import { RoomService } from './services/room.service';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -14,7 +15,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
     private jwtService: JwtService,
     private readonly userService : UsersService,
-    private readonly authService : AuthService
+    private readonly authService : AuthService,
+    private readonly roomService : RoomService
     ){}
 
   chatDTO: ChatDTO = new ChatDTO;
@@ -60,10 +62,10 @@ async handleDisconnect(client: Socket) {
   }
 
 
-  @SubscribeMessage('message')
-  message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {
-    client.to(data.targetId).emit("DM", data.message);
-  }
+  // @SubscribeMessage('message')
+  // message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {
+  //   client.to(data.targetId).emit("DM", data.message);
+  // }
   
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
@@ -77,5 +79,16 @@ async handleDisconnect(client: Socket) {
     //findbyID ou
     client.to(`room-${data.room.id}`).emit("receiveMessage", data)
     // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
+  }
+
+
+  @SubscribeMessage('DM')
+  directMessage(@MessageBody() data : {targetId : string}, @ConnectedSocket() client : Socket){
+    if (!data || data === undefined || typeof data.targetId != "string"){
+      console.error("wrong type for parameter")
+      return 
+      //TODO maybe le changer plus tard ?
+    }
+    this.roomService.
   }
 }

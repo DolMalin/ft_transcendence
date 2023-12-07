@@ -36,7 +36,7 @@ export class MatchHistoryService {
             
             let newGame = this.gameRepository.create(createDto);
             newGame = await this.gameRepository.save(newGame)
-            this.addGameToUsersPlayedGames(newGame)
+            await this.addGameToUsersPlayedGames(newGame)
             return (newGame)
         }
         catch (e) {
@@ -44,10 +44,10 @@ export class MatchHistoryService {
         }
     }
 
-    addGameToUsersPlayedGames(game : Game) {
+    async addGameToUsersPlayedGames(game : Game) {
         
-        this.addGameToLooserPlayedGames(game);
-        this.addGameToWinnerPlayedGames(game);
+        await this.addGameToLooserPlayedGames(game);
+        await this.addGameToWinnerPlayedGames(game);
     }
     
     async addGameToWinnerPlayedGames(game : Game) {

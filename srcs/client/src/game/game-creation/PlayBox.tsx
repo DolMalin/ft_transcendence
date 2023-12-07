@@ -47,8 +47,10 @@ function PlayBox(props : {dispatch : Function}) {
         >
             <Flex w={'95%'} h={'100%'}
             flexDirection={'column'}
-            alignItems={'center'}>
-                <Text w={'95%'} h={'30%'} as='h1' className='bionic'> Standard Mod </Text>
+            textAlign={'center'}
+            alignItems={'center'}
+            >
+                <Text w={'95%'} h={'30%'} as='h1' className='goma' fontSize={'2em'}> Standard Mod </Text>
 
                 <Text>
                     your average pong, except its vertically orientend. Angle redirection will also tend to make it
@@ -75,7 +77,9 @@ function PlayBox(props : {dispatch : Function}) {
                     <Button fontWeight={'normal'} onClick={() => {
                         props.dispatch({type : 'SET_PLAY', payload : false});
                         props.dispatch({type : 'SET_GAME_MOD', payload : true});
-                    }} _hover={{transform: 'scale(1.5)'}} className='bionic'
+                    }} _hover={{transform: 'scale(1.5)'}} className='goma'
+                    borderRadius={'0px'}
+                    size={'lg'}
                     > 
                     Play</Button>
                 </Box>
@@ -118,8 +122,10 @@ function PlayBox(props : {dispatch : Function}) {
         >
             <Flex w={'95%'} h={'100%'}
             flexDirection={'column'}
-            alignItems={'center'}>
-                <Text w={'95%'} h={'30%'} as='h1' className='bionic'> Randomode </Text>
+            textAlign={'center'}
+            alignItems={'center'}
+            >
+                <Text w={'95%'} h={'30%'} as='h1' className='goma' fontSize={'2em'}> Randomode </Text>
 
                 <Text>
                     Your paddle will shrink or grow on every hit ! never know what's coming huhuhu.

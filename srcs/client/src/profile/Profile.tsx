@@ -1,13 +1,15 @@
 import axios from 'axios'
 import React, { Component, useEffect, useState, useReducer} from 'react'
 import { Navigate } from "react-router-dom"
-import { Button, Link, Input, FormControl, Flex, Box, Image} from '@chakra-ui/react'
+import { Button, Link, Input, FormControl, Flex, Box, Image, Heading, Text, Divider} from '@chakra-ui/react'
+import {SettingsIcon} from '@chakra-ui/icons'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
 import { stateType} from '../auth/components/reducer';
 import reducer from '../auth/components/reducer';
 import Auth from '../auth/Auth';
 import { Socket } from 'socket.io-client';
+import * as Constants from '../game/globals/const';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
@@ -96,18 +98,34 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 
 	function LogoutComponent() {
 		return (
-			<div className="Log">
-				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>
-			</div>
+			<>
+				<Button onClick={logout}
+				fontWeight={'normal'}
+				borderRadius={'0px'}
+				bg={Constants.BG_COLOR}
+				textColor={'white'}
+				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+				>Logout</Button>
+			</>
 		)
 	}
 
 	async function activateTwoFactorAuthentication() {
-		const res = await AuthService.get('http://127.0.0.1:4545/auth/2fa/generate')
-		if (res.status === 200) {
-				setQrCode(res.data)
-				setDisplayActivate2FA(true)
+		if (displayActivate2FA === false) {
+			try {
+
+				const res = await AuthService.get('http://127.0.0.1:4545/auth/2fa/generate')
+				if (res.status === 200) {
+					setQrCode(res.data)
+					setDisplayActivate2FA(true)
+				}
 			}
+			catch(err) {
+				console.error(`${err.response.data.message} (${err.response.data.error})`)
+			}
+		}
+		else
+			setDisplayActivate2FA(false);
 	}
 
 	async function deactivateTwoFactorAuthentication() {
@@ -117,7 +135,6 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 	function ActivateTwoFactorAuthentication() {
 		
 		return(<>
-			<Image src={qrCode}></Image>
 			<ActivateTwoFactorAuthenticationForm/>
 		</>)
 	}
@@ -132,27 +149,48 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 
 
 	function TwoFactorAuthenticationButton() {
+
+		const text = displayActivate2FA ? "hmm maybe not" : "Activate 2FA"
 		if (!props.state.isTwoFactorAuthenticationEnabled) {
 			return (
-				<div>
-					<Button onClick={activateTwoFactorAuthentication} fontWeight={'normal'} >Activer 2FA</Button>
-				</div>
+				<>
+					<Button onClick={activateTwoFactorAuthentication}
+					fontWeight={'normal'}
+					borderRadius={'0px'}
+					bg={Constants.BG_COLOR_FADED}
+					textColor={'white'}
+					_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+					>
+					{text}
+					</Button>
+				</>
 			)
 		} else {
 			return (
-				<div>
-					<Button onClick={deactivateTwoFactorAuthentication}fontWeight={'normal'} >Désactiver 2FA</Button>
-				</div>
+				<>
+					<Button onClick={deactivateTwoFactorAuthentication}
+					fontWeight={'normal'}
+					borderRadius={'0px'}
+					bg={Constants.BG_COLOR_FADED}
+					textColor={'white'}
+					_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+					>
+						Disable 2FA
+					</Button>
+				</>
 			)
 		}
 	}
 
 	function ActivateTwoFactorAuthenticationForm() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
-		<Image src={qrCode}></Image>
-
+		
 		return (
-			<Flex width="half" align="center" justifyContent="center">
+			<Flex width="half" align="center" justifyContent="center" flexDir={'column'} paddingTop={'10px'}>
+				<Image src={qrCode}
+				boxSize={'200px'}
+				></Image>
+
 				<Box p={2}>
 					<form onSubmit={handleSubmit(onActivate2fa)}>
 						<FormControl isRequired>
@@ -188,7 +226,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
-			<Flex width="half" align="center" justifyContent="center">
+			<Flex width="half" alignItems="center" justifyContent="center">
 				<Box p={2}>
 					<form onSubmit={handleSubmit(onDeactivate2fa)}>
 						<FormControl isRequired>
@@ -224,10 +262,80 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 	useEffect(() => {async function  asyncWrapper() {validate()}; asyncWrapper()}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
-		{<TwoFactorAuthenticationButton />}
-		{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
-		{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
-		{<LogoutComponent />}
+		<Box 
+		width={'100vw'}
+        height={Constants.BODY_HEIGHT}
+        display={'flex'}
+        alignItems={'center'}
+        justifyContent={'center'}
+        overflow={'auto'}
+        flexWrap={'wrap'}
+        background={Constants.BG_COLOR}
+        padding={'30px'}
+        scrollBehavior={'smooth'}>
+
+			<Flex width={'360px'}
+			minH={'652px'}
+			bg={Constants.BG_COLOR_FADED}
+			padding={'10px'}
+			wrap={'wrap'}
+			flexDir={'column'}>
+
+				{/* <SettingsIcon color={'white'} /> */}
+
+				<Flex
+				wrap={'wrap'}
+				flexDir={'column'}>
+					<Flex minH={'180px'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					padding={'10px'}
+					flexDir={'column'}>
+						{<TwoFactorAuthenticationButton />}
+						{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
+						{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
+					</Flex>
+
+					<Divider></Divider>
+
+					<Flex minH={'180px'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					padding={'10px'}>
+						<Button
+						fontWeight={'normal'}
+						borderRadius={'0px'}
+						bg={Constants.BG_COLOR_FADED}
+						textColor={'white'}
+						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+						> 
+						Change Username 
+						</Button>
+					</Flex>
+
+					<Divider></Divider>
+
+					<Flex minH={'180px'}
+					alignItems={'center'}
+					justifyContent={'center'}
+					padding={'10px'}>
+						<Button
+						fontWeight={'normal'}
+						borderRadius={'0px'}
+						bg={Constants.BG_COLOR_FADED}
+						textColor={'white'}
+						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+						> 
+						Change Avatar 
+						</Button>
+					</Flex>
+				</Flex>
+
+
+
+			</Flex>
+			{<LogoutComponent />}
+		</Box>
 	</>)
 }
 

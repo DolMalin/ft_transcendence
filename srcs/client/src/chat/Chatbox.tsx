@@ -111,11 +111,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     }, [])
 
     useEffect(() => {
-        props.socket.on("receiveMessage", (data: MessageData) => {
+        props.socket?.on("receiveMessage", (data: MessageData) => {
         setMessageList((list) => [...list, data])
         })
         return (() => {
-            props.socket.off("reveiveMessage")
+            props.socket?.off("reveiveMessage")
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render

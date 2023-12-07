@@ -6,7 +6,7 @@ import './chat.css'
 import authService from "../auth/auth.service";
 import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
-import ProfileModal from "../leaderboard/ProfileModal";
+import ProfileModal from "../profile/ProfileModal";
 
 export interface MessageData {
     id: number;
@@ -58,6 +58,7 @@ export function Chat(props: {socket: Socket}){
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
+    const [id, setId] = useState("")
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
@@ -158,10 +159,9 @@ export function Chat(props: {socket: Socket}){
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
             <div className="userList" key={index}>
-                <ProfileModal userId={user.id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
                 <div>
                     <ul>
-                        <li><Chakra.Link onClick={() => onOpen()}>{user.username}</Chakra.Link></li>
+                        <li><Chakra.Link onClick={() => {onOpen() ; setId(user.id)}}>{user.username}</Chakra.Link></li>
                     </ul>
                 </div>
             </div>
@@ -247,7 +247,8 @@ export function Chat(props: {socket: Socket}){
             : (
             <Chatbox socket={props.socket} room={room} showChat={setShowChat}/>
             )}
-        </div>
+        </div>                
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
         </div>
     )
 }

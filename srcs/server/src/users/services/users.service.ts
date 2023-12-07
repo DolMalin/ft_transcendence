@@ -6,8 +6,10 @@ import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
-import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
+import { leaderboardStats } from 'src/game/globals/interfaces';
+import { Server} from 'socket.io';
 import { GameGateway } from 'src/game/gateway/game.gateway';
+
 @Injectable()
 export class UsersService {
 
@@ -51,6 +53,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+
     await this.userRepository.update(id, updateUserDto)
     const newUser = await this.findOneById(id)
     if (newUser)
@@ -106,16 +109,31 @@ export class UsersService {
       user.gameSockets = socketIdArray;
       return (this.update(user.id, {gameSockets : user.gameSockets}));
     }
-
-    addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
-
-      if (socketIdArray === null || socketIdArray === undefined)
-        socketIdArray = [];
-      socketIdArray?.push(socketId);
-      user.chatSockets = socketIdArray;
-      return (this.update(user.id, {chatSockets : user.chatSockets}))
-    }
     
+  /**
+  * @description add a socket Id to an array of string stored in user entity and update the user
+  */
+   addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
+ 
+     if (socketIdArray === null || socketIdArray === undefined)
+       socketIdArray = [];
+     socketIdArray?.push(socketId);
+     user.chatSockets = socketIdArray;
+     return (this.update(user.id, {chatSockets : user.chatSockets}));
+   }
+
+   async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
+
+    socketIdArray.forEach((socketId) => {
+      if (payload === undefined) 
+        server.to(socketId).emit(eventName);
+      else
+        server.to(socketId).emit(eventName, payload);
+    });
+   }
+
+  // }
+
   /**
  * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
  */ 
@@ -128,9 +146,9 @@ export class UsersService {
       if (l === 0)
           return (100);
 
-      let ratio = w * 100 / (w + l);
-
-      return (ratio)
+      const ratio = w * 100 / (w + l);
+      
+      return (Math.trunc(ratio))
     }
 
     
