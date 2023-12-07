@@ -1,11 +1,12 @@
 import React , {useState, useEffect} from "react";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, useDisclosure } from "@chakra-ui/react";
 import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
 import './chat.css'
 import authService from "../auth/auth.service";
 import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
+import ProfileModal from "../leaderboard/ProfileModal";
 
 export interface MessageData {
     id: number;
@@ -32,12 +33,27 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.log(err)
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
     }
     return roomList
 }
 
+async function getUserList(){
+    let userList: {
+        id: string,
+        username: string }[]
+    try{
+        const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/list`)
+        userList = res.data
+    }
+    catch(err){
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+    }
+    return userList
+}
+
 export function Chat(props: {socket: Socket}){
+    const { isOpen, onOpen, onClose } = useDisclosure()
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -47,6 +63,9 @@ export function Chat(props: {socket: Socket}){
         name: string
         password: string | null
         privChan: string | null }[]>([])
+    const [userList, setUserList] = useState
+    <{  id: string
+        username: string }[]>([])
     const { 
         register: registerJoin, 
         handleSubmit: handleSubmitJoin, 
@@ -57,7 +76,7 @@ export function Chat(props: {socket: Socket}){
         handleSubmit: handleSubmitCreate, 
         reset: resetCreate, 
         formState: { errors: errorCreate }} = useForm()
-    
+
     const createRoom = async (dt: {room: string, password: string}) => {
         if (dt.room !== "")
         {
@@ -101,14 +120,18 @@ export function Chat(props: {socket: Socket}){
     }
 
     const fetchRoom = async () => {
-        try{
-            const rooms = await getRoomList()
-            setRoomList(rooms)
-        }
-        catch(err){
-            console.log(err)
-        }
+        const rooms = await getRoomList()
+        setRoomList(rooms)
     }
+
+    const fetchUserList = async () => {
+        const userList = await getUserList()
+        setUserList(userList)
+    }
+
+    useEffect(() => {
+        fetchUserList()
+    }, [])
 
     useEffect(() => {
         fetchRoom()
@@ -116,7 +139,7 @@ export function Chat(props: {socket: Socket}){
     return (
         <div>
         <mark>
-            <h2>Channel list</h2>
+            <h1>------Channel list-------</h1>
         </mark>
         {roomList?.length > 0 && (
         roomList.map((room, index: number) => (
@@ -124,6 +147,21 @@ export function Chat(props: {socket: Socket}){
                 <div>
                     <ul>
                         <li>{room.name}</li>
+                    </ul>
+                </div>
+            </div>
+        ))
+        )}
+         <mark>
+            <h1>------User list------</h1>
+        </mark>
+        {userList?.length > 0 && (
+        userList.map((user, index: number) => (
+            <div className="userList" key={index}>
+                <ProfileModal userId={user.id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+                <div>
+                    <ul>
+                        <li><Chakra.Link onClick={() => onOpen()}>{user.username}</Chakra.Link></li>
                     </ul>
                 </div>
             </div>

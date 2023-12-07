@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -10,6 +10,7 @@ import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
 import { GameGateway } from 'src/game/gateway/game.gateway';
 @Injectable()
 export class UsersService {
+
   constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
@@ -27,7 +28,20 @@ export class UsersService {
   findAll() {
     return this.userRepository.find({relations :{playedGames: true}});
   }
-
+  
+  async findAllUsers() {
+    
+    let res = await this.userRepository.find()
+    if (!res || res === undefined){
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    }
+    const userList = res.map(user => ({
+      id: user.id,
+      username: user.username
+    }))
+    return userList
+  }
+  
   findOneById(id: string) {
     return this.userRepository.findOneBy({ id })
   }

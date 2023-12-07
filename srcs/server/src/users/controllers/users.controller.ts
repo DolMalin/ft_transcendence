@@ -17,14 +17,20 @@ export class UsersController {
     private readonly matchHistoryService: MatchHistoryService,
     ) {}
 
+  //TODO REMOVE
   @UseGuards(AccessToken2FAGuard)
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
+  //TODO changer nom route
+  @UseGuards(AccessToken2FAGuard)
+  @Get('list')
+  findAllUsers(){
+    return this.usersService.findAllUsers()
+  }
 
-  
   @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {

@@ -35,8 +35,6 @@ export class RoomService {
     }
 
     findAll() {
-
-        
         return this.roomRepository.find();
     }
 
@@ -55,7 +53,7 @@ export class RoomService {
     //     return userList
     // }
 
-    async findAllUsers(id: number) {
+    async findAllUsersInRoom(id: number) {
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')
