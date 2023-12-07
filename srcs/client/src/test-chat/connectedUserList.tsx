@@ -21,9 +21,13 @@ export function ConnectedUserList(props : any){
 
   const [list, setList] = useState<string[]>([])
   useEffect(() => {
-    props.socket.on("clientList", (clientList : string[]) => {
+    props.socket?.on("clientList", (clientList : string[]) => {
       setList(clientList);
     });
+
+    return (() => {
+      props.sock?.off("clientList");
+    })
   }, []);
 
   return (<>

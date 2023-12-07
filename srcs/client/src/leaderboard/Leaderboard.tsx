@@ -16,7 +16,7 @@ import {RepeatIcon} from '@chakra-ui/icons'
 import * as Constants from '../game/globals/const'
 import { leaderboardStats } from "../game/globals/interfaces";
 import authService from "../auth/auth.service";
-import ProfileModal from "./ProfileModal";
+import ProfileModal from "../profile/ProfileModal";
 import { Socket } from "socket.io-client";
 
 function LeaderBoard(props : {gameSock : Socket}) {
@@ -84,7 +84,7 @@ function LeaderBoard(props : {gameSock : Socket}) {
     return (<>
         <Box
         width={'100vw - 30px'}
-        height={'96vh'}
+        height={Constants.BODY_HEIGHT}
         display={'flex'}
         alignItems={'center'}
         justifyContent={'center'}

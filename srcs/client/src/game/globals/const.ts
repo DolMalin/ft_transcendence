@@ -53,3 +53,6 @@ export const SELECTED_TAB_COLOR = 'rgba(20, 20, 20, 1)';
 export const TABS_BORDER = '1px solid white';
 
 export const BOX_GRADIANT = 'linear(to-br, grey, lightgrey)';
+
+export const TOP_BAR_HEIGHT = '4vh';
+export const BODY_HEIGHT = '96vh';
