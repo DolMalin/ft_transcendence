@@ -259,82 +259,100 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 	}
 
 
-	useEffect(() => {async function  asyncWrapper() {validate()}; asyncWrapper()}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
+	useEffect(() => {
+		async function  asyncWrapper() {validate()};
+		asyncWrapper()
+	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
-		<Box 
-		width={'100vw'}
-        height={Constants.BODY_HEIGHT}
-        display={'flex'}
-        alignItems={'center'}
-        justifyContent={'center'}
-        overflow={'auto'}
-        flexWrap={'wrap'}
-        background={Constants.BG_COLOR}
-        padding={'30px'}
-        scrollBehavior={'smooth'}>
+		<Box width={'100vW'}
+		height={Constants.BODY_HEIGHT}
+		background={Constants.BG_COLOR}
+		>
+			<Box 
+			width={'100%'}
+			height={'95%'}
+			overflow={'auto'}
+			padding={'30px'}
+			scrollBehavior={'smooth'}
+			display={'flex'}
+			alignItems={'center'}
+			justifyContent={'center'}
+			gap={'10vw'}
+			flexDir={'row'}
+			flexWrap={'wrap'}
+			>
 
-			<Flex width={'360px'}
-			minH={'652px'}
-			bg={Constants.BG_COLOR_FADED}
-			padding={'10px'}
-			wrap={'wrap'}
-			flexDir={'column'}>
-
-				{/* <SettingsIcon color={'white'} /> */}
-
-				<Flex
+				<Flex minW={'360px'}
+				minH={'562px'}
+				width={'30vw'}
+				bg={Constants.BG_COLOR_FADED}
+				padding={'10px'}
 				wrap={'wrap'}
 				flexDir={'column'}>
-					<Flex minH={'180px'}
-					alignItems={'center'}
-					justifyContent={'center'}
-					padding={'10px'}
+					<Flex
+					wrap={'wrap'}
 					flexDir={'column'}>
-						{<TwoFactorAuthenticationButton />}
-						{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
-						{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
+						<Flex minH={'180px'}
+						alignItems={'center'}
+						justifyContent={'center'}
+						padding={'10px'}
+						flexDir={'column'}>
+							{<TwoFactorAuthenticationButton />}
+							{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
+							{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
+						</Flex>
+
+						<Divider></Divider>
+
+						<Flex minH={'180px'}
+						alignItems={'center'}
+						justifyContent={'center'}
+						padding={'10px'}>
+							<Button
+							fontWeight={'normal'}
+							borderRadius={'0px'}
+							bg={Constants.BG_COLOR_FADED}
+							textColor={'white'}
+							_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+							> 
+							Change Username 
+							</Button>
+						</Flex>
+
+						<Divider></Divider>
+
+						<Flex minH={'180px'}
+						alignItems={'center'}
+						justifyContent={'center'}
+						padding={'10px'}>
+							<Button
+							fontWeight={'normal'}
+							borderRadius={'0px'}
+							bg={Constants.BG_COLOR_FADED}
+							textColor={'white'}
+							_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+							> 
+							Change Avatar 
+							</Button>
+						</Flex>
 					</Flex>
 
-					<Divider></Divider>
 
-					<Flex minH={'180px'}
-					alignItems={'center'}
-					justifyContent={'center'}
-					padding={'10px'}>
-						<Button
-						fontWeight={'normal'}
-						borderRadius={'0px'}
-						bg={Constants.BG_COLOR_FADED}
-						textColor={'white'}
-						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-						> 
-						Change Username 
-						</Button>
-					</Flex>
-
-					<Divider></Divider>
-
-					<Flex minH={'180px'}
-					alignItems={'center'}
-					justifyContent={'center'}
-					padding={'10px'}>
-						<Button
-						fontWeight={'normal'}
-						borderRadius={'0px'}
-						bg={Constants.BG_COLOR_FADED}
-						textColor={'white'}
-						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-						> 
-						Change Avatar 
-						</Button>
-					</Flex>
 				</Flex>
-
-
-
-			</Flex>
-			{<LogoutComponent />}
+				<Flex minW={'360px'}
+				minH={'562px'}
+				width={'40vw'}
+				bg={Constants.BG_COLOR_FADED}
+				padding={'10px'}
+				wrap={'wrap'}
+				flexDir={'column'}>
+					
+				</Flex>
+			</Box>
+			<Box h={'5%'}>
+				{<LogoutComponent />}
+			</Box>
 		</Box>
 	</>)
 }

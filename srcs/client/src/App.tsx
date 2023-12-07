@@ -233,7 +233,7 @@ function App() {
         return
 
       try {
-        await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
+        // await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
         gameSock.emit('availabilityChange', true);
       }
       catch (e) {
