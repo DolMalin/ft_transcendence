@@ -38,42 +38,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server : Server;
 
-  async handleConnection(client: Socket) {
+ async handleConnection(client: Socket) {
+
+   try {
+     const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
+     if (client.handshake.query?.userId as string === undefined)
+     {
+       client.disconnect();
+       return ;
+      }
+      if (client.handshake.query.type !== 'game')
+        return;
+
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addGameSocketId(client.id, user.gameSockets, user);
+      // console.log('socket tab in connection : ', user.gameSockets);
+    }
+    catch(e) {
+      client.disconnect();
+      console.log('handle connection ERROR : ', e);
+    }
+  }
+  
+  async handleDisconnect(client: Socket){
 
     try {
-      const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-      if (client.handshake.query?.userId as string === undefined)
-      {
-        client.disconnect();
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      if (client.handshake.query.type !== 'game')
         return ;
-       }
-       if (client.handshake.query.type !== 'game')
-         return;
- 
-       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-       await this.userService.addGameSocketId(client.id, user.gameSockets, user);
-       // console.log('socket tab in connection : ', user.gameSockets);
-     }
-     catch(e) {
-       client.disconnect();
-       console.log('handle connection ERROR : ', e);
-     }
-   }
- 
-   async handleDisconnect(client: Socket){
- 
-     try {
-       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-       if (client.handshake.query.type !== 'game')
-         return ;
-       // console.log('socket to remove : ', client.id)
-       await this.userService.removeSocketId(client.id, user.gameSockets, user)
-       // console.log('socket tab in disconnection : ', user.gameSockets);
-     }
-     catch(e) {
-       console.log('handle connection ERROR : ', e);
-     }
-   }
+      // console.log('socket to remove : ', client.id)
+      await this.userService.removeSocketId(client.id, user.gameSockets, user)
+      // console.log('socket tab in disconnection : ', user.gameSockets);
+    }
+    catch(e) {
+      console.log('handle connection ERROR : ', e);
+    }
+  }
 
   @SubscribeMessage('joinGame')
   joinGame(@MessageBody() data : {gameType : string},@ConnectedSocket() client: Socket) {
