@@ -17,14 +17,14 @@ import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 
-function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock : Socket}) {
+function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket}) {
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
 
     function sendDuelInvite(gameType : string) {
 
-        props.gameSock.emit('gameInvite', {targetId : props.userId, gameType : gameType})
+        props.gameSock?.emit('gameInvite', {targetId : props.userId, gameType : gameType})
     }
     
     useEffect(() => {
