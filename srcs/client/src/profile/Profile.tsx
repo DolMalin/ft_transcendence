@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { Component, useEffect, useState, useReducer} from 'react'
 import { Navigate } from "react-router-dom"
-import { Button, Link, Input, FormControl, Flex, Box, Image, Heading, Text, Divider} from '@chakra-ui/react'
+import { Button, Link, Input, FormControl, Flex, Box, Image, Heading, Text, Divider, Avatar} from '@chakra-ui/react'
 import {SettingsIcon} from '@chakra-ui/icons'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
@@ -10,6 +10,8 @@ import reducer from '../auth/components/reducer';
 import Auth from '../auth/Auth';
 import { Socket } from 'socket.io-client';
 import * as Constants from '../game/globals/const';
+import authService from '../auth/auth.service'
+import { LeftBracket, RightBracket } from '../game/game-creation/Brackets'
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
@@ -258,6 +260,53 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 		)
 	}
 
+	function ProfileInfo() {
+		const [user, setUser] = useState<any>(undefined);
+		
+		useEffect(() => {
+			const fetchUserProfile = async () => {
+				try {
+					const user = await authService.get('http://127.0.0.1:4545/users/me')
+					console.log(user)
+					const res = await authService.get('http://127.0.0.1:4545/users/profile/' + user?.data?.id);
+					console.log(res)
+					return (res.data)
+		
+				} catch (err) {
+					console.error(`${err.response.data.message} (${err.response.data.error})`)
+				}
+			}
+		
+			fetchUserProfile().then((user) => {
+				setUser(user)
+			});
+		}, []);
+		return (<>
+			<Box display={'flex'} flexDir={'row'}
+			alignItems={'center'}
+			justifyContent={'center'}
+			width={'100%'}
+			marginBottom={'20px'}
+			>
+				<LeftBracket w={'16px'} h={'42px'} girth={'6px'} marginRight="-4px"/>
+					<Text fontWeight={'normal'} textAlign={'center'} padding={'0px'} fontSize={'2em'}
+					> 
+					{user?.username} 
+					</Text>
+				<RightBracket w={'16px'} h={'42px'} girth={'6px'} marginLeft="-4px"/>
+
+				<Box width={'50%'} height={'180px'}>
+                        <Avatar
+                        size='2xl'
+                        name={'avatar'}
+                        src={'http://127.0.0.1:4545/users/avatar/' + user?.id}
+                        marginRight={'10px'}
+                        >
+                        </Avatar>
+				</Box>
+			</Box>
+		</>)
+	}
 
 	useEffect(() => {
 		async function  asyncWrapper() {validate()};
@@ -265,34 +314,33 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
-		<Box width={'100vW'}
-		height={Constants.BODY_HEIGHT}
-		background={Constants.BG_COLOR}
-		>
 			<Box 
-			width={'100%'}
-			height={'95%'}
-			overflow={'auto'}
+			width={'100vw'}
+			height={Constants.BODY_HEIGHT}
+			background={Constants.BG_COLOR}
 			padding={'30px'}
 			scrollBehavior={'smooth'}
 			display={'flex'}
 			alignItems={'center'}
 			justifyContent={'center'}
-			gap={'10vw'}
 			flexDir={'row'}
 			flexWrap={'wrap'}
+			overflow={'auto'}
+			textColor={'white'}
 			>
 
 				<Flex minW={'360px'}
 				minH={'562px'}
-				width={'30vw'}
+				h={'80%'}
 				bg={Constants.BG_COLOR_FADED}
 				padding={'10px'}
 				wrap={'wrap'}
 				flexDir={'column'}>
-					<Flex
+					<Flex h={'100%'} w={'100%'}
 					wrap={'wrap'}
-					flexDir={'column'}>
+					flexDir={'column'}
+					justifyContent={'space-evenly'}
+					>
 						<Flex minH={'180px'}
 						alignItems={'center'}
 						justifyContent={'center'}
@@ -342,17 +390,19 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				</Flex>
 				<Flex minW={'360px'}
 				minH={'562px'}
+				height={'80%'}
 				width={'40vw'}
 				bg={Constants.BG_COLOR_FADED}
+				margin={'10vh'}
 				padding={'10px'}
 				wrap={'wrap'}
-				flexDir={'column'}>
-					
+				flexDir={'column'}
+				>
+					<ProfileInfo/>
 				</Flex>
-			</Box>
-			<Box h={'5%'}>
-				{<LogoutComponent />}
-			</Box>
+				<Flex w={'100%'}>
+					{<LogoutComponent />}
+				</Flex>
 		</Box>
 	</>)
 }
