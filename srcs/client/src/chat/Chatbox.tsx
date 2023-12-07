@@ -16,15 +16,15 @@ function timeOfDay(timestampz: string | Date){
     let tmp = ""
     let tmp2 = ""
     if (min < 10)
-        tmp = "0" + min.toString();
+        tmp = "0" + min.toString()
     else
-        tmp = min.toString();
+        tmp = min.toString()
     if (day < 10)
-        tmp2 = "0" + day.toString();
+        tmp2 = "0" + day.toString()
     else
         tmp2 = day.toString()
-    let date = hour.toString() + ":" + tmp + " " + tmp2 + "/" + month + "/" + year;
-    return (date);
+    let date = hour.toString() + ":" + tmp + " " + tmp2 + "/" + month + "/" + year
+    return (date)
 }
 
 async function getUserList(id: number){
@@ -44,7 +44,7 @@ async function getUserList(id: number){
 
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
 
-    const [messageList, setMessageList] = useState<MessageData[]>([]);
+    const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState
     <{
         id: string, 
@@ -94,9 +94,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         catch(err){
             console.log(err)
         }
-        return (() => {
-            props.socket.off("sendMessage")
-        })
     }
 
     const fetchUserList = async () => {
@@ -124,7 +121,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     //TODO faire en sorte que la userlist re render
     return (
         <div>
-                    <mark>
+        <mark>
             <h2>User list</h2>
         </mark>
         {userList?.length > 0 && (

@@ -81,7 +81,6 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            console.log('res', res)
             setRoom(res.data)
             props.socket.emit("joinRoom", res.data.id)
             setShowChat(true)
@@ -89,9 +88,6 @@ export function Chat(props: {socket: Socket}){
         catch(err){
             console.log(err)
         }
-        return (() => {
-            props.socket.off("joinRoom")
-        })
     }
 
     const onSubmitCreate = (data: {room: string, password: string}) => {

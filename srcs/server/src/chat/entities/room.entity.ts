@@ -17,6 +17,9 @@ export class Room {
     @Column({type: Boolean, nullable: true})
     privChan: boolean
 
+    @Column({type: String})
+    type: ["directMessage", "groupMessage"]
+
     @ManyToOne(() => User, user => user.id)
     owner: User
 

@@ -2,10 +2,8 @@ import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { AuthService } from 'src/auth/services/auth.service';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
-import { Room } from './entities/room.entity';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -24,6 +22,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   server : Server;
 
   async handleConnection (client: Socket) {
+    //TODO maybe find another way
+    console.log("Connection of socket ID : " + client.id);
+    this.chatDTO.clientID.push(client.id);
+    // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
+    // for (const id of userBlocked){
+    // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
     try {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
       
@@ -40,6 +44,9 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
+  //TODO maybe find another way
+  console.log("Disonnection of socket ID : " + client.id);
+  this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
     try {
       this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
 
@@ -65,7 +72,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   
   @SubscribeMessage('sendMessage')
   sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket): void {
-    //findbyID ou 
+    //findbyID ou
     client.to(`room-${data.room.id}`).emit("receiveMessage", data)
     // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
   }
