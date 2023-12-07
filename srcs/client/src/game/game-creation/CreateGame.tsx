@@ -149,7 +149,7 @@ function CreateGame(props : {sock : Socket}) {
     return (<>
             <Box id={Constants.GAME_ZONE}
         width={'100vw'}
-        height={'96vh'}
+        height={Constants.BODY_HEIGHT}
         display={'flex'}
         alignItems={'center'}
         justifyContent={'center'}

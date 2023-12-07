@@ -72,7 +72,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       props.gameSock?.emit('closeOpenedModals');
       setSwitchingFrom(true);
       setTab(0)
-      // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
       window.dispatchEvent(new Event('resize'));
     });
 
@@ -140,7 +139,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     >
 
       <TabList border='none' mb='2em' 
-      margin={'0'} padding={'0'} height={'4vh'} 
+      margin={'0'} padding={'0'} height={Constants.TOP_BAR_HEIGHT} 
       minH={'60px'} 
       textColor={'white'} className='goma'
       overflowX={'auto'} overflowY={'clip'}

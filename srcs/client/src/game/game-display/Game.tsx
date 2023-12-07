@@ -293,10 +293,12 @@ function Game(props : GameProps) {
             <Box display={'flex'} flexDirection={'row'}
                 height={dimension.height * 0.08}
                 width={dimension.width * 0.6}
+                overflow={'auto'}
             >
-                <WrapItem>
+                <WrapItem height={'100%'} width={'15%'}>
                     <Avatar
-                    size='lg'
+                    height={'100%'}
+                    width={'100%'}
                     name={userTwo?.username}
                     src={userTwo?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userTwo?.id : ''}
                     />{' '}
@@ -313,10 +315,12 @@ function Game(props : GameProps) {
             <Box display={'flex'} flexDirection={'row-reverse'}
                 height={dimension.height * 0.08}
                 width={dimension.width * 0.6}
+                overflow={'auto'}
             >
-                <WrapItem>
+                <WrapItem height={'100%'} width={'15%'}>
                     <Avatar
-                    size='lg'
+                    height={'100%'}
+                    width={'100%'}
                     name={userOne?.username}
                     src={userOne?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userOne?.id : ""}
                     />{' '}
