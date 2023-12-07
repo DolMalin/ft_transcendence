@@ -29,10 +29,11 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.gameSock?.off('logout');
 		})
 	}, [props.gameSock])
+
 	// move in service
 	const fetchAuthUrl = async () => {
 		try {
-			const res = await axios.get("http://127.0.0.1:4545/auth/redirect")
+			const res = await axios.get(`${process.env.REACT_APP_SERVER_URL}/auth/redirect`)
 			setAuthUrl(res.data.url)
 		} catch (err) {
 		}
@@ -90,10 +91,12 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 		}
 	}
 
-	const onSubmit = async (data:any) => {
+	const onSubmit = async (data:any, e:any) => {
+		e.preventDefault()
 		try {
 			const formData = new FormData()
-			formData.append("file", data.avatar[0])
+			if (data.avatar)
+				formData.append("file", data.avatar[0])
 			formData.append("username", data.username)
 			await AuthService.register(formData)
 
@@ -136,7 +139,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 										...register("username", {
 											required: "Please enter first name",
 											minLength: 3,
-											maxLength: 80
+											maxLength: 80,
 										})
 									}
 								/>
@@ -158,10 +161,10 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 										height="100%"
 										width="100%"
 										border="none"
+										required={false}
 										type="file"
 										{
 											...register("avatar", {
-												required: "Please enter avatar",
 											})
 										}
 										accept="image/*"

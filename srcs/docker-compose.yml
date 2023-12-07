@@ -13,6 +13,7 @@ services:
       context: ./client
       args:
         CLIENT_PORT: ${CLIENT_PORT}
+        SERVER_URL: ${SERVER_URL}
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
     env_file:

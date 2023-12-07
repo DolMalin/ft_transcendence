@@ -201,8 +201,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   )
 }
 
-function App() {
 
+function App() {
 
   const [state, dispatch] = useReducer(reducer, {
     isAuthenticated: false,
@@ -229,15 +229,15 @@ function App() {
   
   useEffect(() => {
     async function handleUnload() {
-      if (gameSock != null)
-      {
-        try {
-          await authService.patch('http://127.0.0.1:4545/users/removeGameSocket', [gameSock?.id]);
-          gameSock.emit('availabilityChange', true);
-        }
-        catch (e) {
-          console.log(e.message);
-        }
+      if (!gameSock)
+        return
+
+      try {
+        await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
+        gameSock.emit('availabilityChange', true);
+      }
+      catch (e) {
+        console.log(e.message);
       }
     }
 
@@ -249,12 +249,8 @@ function App() {
 
     console.log('in get user ID')
     try {
-      console.log('before')
-
-      const res = await authService.get('http://127.0.0.1:4545/users/me');
-      console.log('after')
-      setUserId(res?.data?.id);
-
+      const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
+      setUserId(res.data.id)
     }
     catch(e) {
       console.log('Error on game socket creation : ', e?.message);
@@ -264,24 +260,27 @@ function App() {
   useEffect(() => {
 
         getUserId();
-        if (userId != '')
-        {
-          setChatSock (io('http://localhost:4545/', {
+
+        if (!userId || userId.length <= 0) {
+          return
+        }
+
+          setChatSock (io(`${process.env.REACT_APP_SERVER_URL}`, {
             query : {
               userId : userId,
               token : authService.getAccessToken(),
               type : 'chat'
             }
           }));
-          setGameSock (io('http://localhost:4545/', {
+          setGameSock (io(`${process.env.REACT_APP_SERVER_URL}`, {
             query : {
               userId : userId,
               token : authService.getAccessToken(),
               type : 'game'
             }
           }));
-        }
-  }, [userId]); 
+
+  }, [userId]);
 
   return (<>
     <ChakraProvider>

@@ -15,6 +15,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    
     ) { }
   
 
@@ -113,7 +114,7 @@ export class AuthService {
   async createRefreshToken(payload: {id: string}): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn:'7d'
+      expiresIn:'1d'
     })
   }
 
@@ -228,8 +229,6 @@ export class AuthService {
   }
 
 
-  // async register(@Req() req:any, @Res() res:any) { 
-  //   return req.body
   
   async register(body: any) { 
     // await this.usersService.add

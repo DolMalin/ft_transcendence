@@ -6,13 +6,10 @@ import { Repository } from 'typeorm'
 import { User } from '../entities/user.entity'
 import { HttpException, HttpStatus} from '@nestjs/common'
 import { AvatarService } from './avatar.service';
-import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
-import { CreateGameDto } from 'src/game/dto/create.game.dto';
-import { Game } from 'src/game/entities/game-entity';
-import { UpdateGameDto } from 'src/game/dto/update.game.dto';
-import { Avatar } from '../entities/avatar.entity';
-import { Server, Socket } from 'socket.io';
+import { leaderboardStats } from 'src/game/globals/interfaces';
+import { Server} from 'socket.io';
 
+import { GameGateway } from 'src/game/gateway/game.gateway';
 @Injectable()
 export class UsersService {
   constructor(
@@ -20,6 +17,7 @@ export class UsersService {
 		private userRepository: Repository<User>,
 
     private readonly avatarService: AvatarService,
+    // private readonly gameGateway: GameGateway,
 	) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -59,6 +57,8 @@ export class UsersService {
 
   async getAvatar(id: string) {
     const user = await this.userRepository.findOneBy({id})
+    if (user.avatarId == null)
+      throw new HttpException('No avatar found', HttpStatus.NOT_FOUND)
     const avatar = await this.avatarService.getAvatarById(user.avatarId)
     return avatar
   }
@@ -66,6 +66,7 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOneById(id)
+
     return this.userRepository.remove(user)
   }
 
@@ -85,18 +86,16 @@ export class UsersService {
     return (this.update(user.id, { gameSockets : user.gameSockets}))
   }
 
-  /**
- * @description add a socket Id to an array of string stored in user entity and update the user
- */
+
   addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
 
-    if (socketIdArray === null || socketIdArray === undefined)
-      socketIdArray = [];
-    socketIdArray?.push(socketId);
-    user.gameSockets = socketIdArray;
-    return (this.update(user.id, {gameSockets : user.gameSockets}));
-  }
-
+      if (socketIdArray === null || socketIdArray === undefined)
+        socketIdArray = [];
+      socketIdArray?.push(socketId);
+      user.gameSockets = socketIdArray;
+      return (this.update(user.id, {gameSockets : user.gameSockets}));
+    }
+    
   /**
   * @description add a socket Id to an array of string stored in user entity and update the user
   */
