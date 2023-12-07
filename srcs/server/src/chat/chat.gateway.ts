@@ -28,13 +28,13 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
     // for (const id of userBlocked){
     // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
+
     try {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-      
-        this.userService.findOneById(client.handshake.query?.userId as string).then((user) => {
-
-        this.userService.addChatSocketId(client.id, user.chatSockets, user);
-      })
+      if (client.handshake.query.type !== 'chat')
+        return ;
+      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
     }
     catch(e) {
       client.disconnect();
@@ -43,20 +43,22 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   }
 
-  handleDisconnect(client: Socket) {
-  //TODO maybe find another way
-  console.log("Disonnection of socket ID : " + client.id);
-  this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
-    try {
-      this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
 
-        this.userService.removeSocketId(client.id, user.chatSockets, user)
-      })
+async handleDisconnect(client: Socket) {
+      //TODO maybe find another way
+      console.log("Disonnection of socket ID : " + client.id);
+    this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
+    try {
+      if (client.handshake.query.type !== 'chat')
+        return ;
+      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
+      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
     }
     catch(e) {
       console.log('handle connection ERROR : ', e);
     }
-}
+  }
+
 
   @SubscribeMessage('message')
   message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {

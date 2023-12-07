@@ -14,7 +14,7 @@ import { MatchHistoryService } from 'src/game/services/match.history.services';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly matchHistoryService: MatchHistoryService
+    private readonly matchHistoryService: MatchHistoryService,
     ) {}
 
   @UseGuards(AccessToken2FAGuard)
@@ -23,20 +23,16 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Get('current')
-  async current(@GetUser() user : User) : Promise<User> {
-    return (user);
-  }
+
   
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {
 
     return (this.usersService.returnScoreList());
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Get('history/:id')
   history(@Param('id') userId: string) {
 
@@ -44,30 +40,24 @@ export class UsersController {
       return (this.matchHistoryService.returnHistory(userId));
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Get('isAvailable')
   isAvailable(@GetUser() user : User) {
     
     return (user.isAvailable);
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Get('myself')
-  getMyself(@GetUser() user : User)
-  {
-    return (user)
-  }
+ 
   
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Patch('updateIsAvailable')
   updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
     
     return (this.usersService.update(user.id, updateDto));
   }
 
-  @UseGuards(AccessTokenGuard)
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
     return {username: user.username, id: user.id}
@@ -79,7 +69,7 @@ export class UsersController {
     return this.usersService.findOneById(id);
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Get('avatar/:id')
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
     try {
@@ -94,12 +84,11 @@ export class UsersController {
       return new StreamableFile(stream)
     }
     catch (e) {
-      console.log('get User Avatar : ', e);
-      throw Error
+      throw e
     }
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Patch()
   update(
     @Req() req:any,
@@ -108,14 +97,14 @@ export class UsersController {
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Patch('removeGameSocket')
   removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
 
     this.usersService.removeSocketId(gameSocketId, user.gameSockets, user);
   }
 
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
 
