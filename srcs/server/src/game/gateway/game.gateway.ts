@@ -222,13 +222,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-
-  // TO DO : Remove This
-  @SubscribeMessage('ping')
-  ping(@MessageBody() data : any, @ConnectedSocket() client: Socket) {
-    console.log('PINGED DATA : ', data)
-  }
-
   @SubscribeMessage('gameInvite')
   async gameInvite(@MessageBody() data : {targetId : string, gameType : string}, @ConnectedSocket() client : Socket) {
 
@@ -262,6 +255,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return ;
     }
     await this.matchmakingService.inviteWasDeclined(this.server, data.senderId, client.handshake.query.userId as string)
+  }
+
+  @SubscribeMessage('closeOpenedModals')
+  closeOpenedModals(@ConnectedSocket() client : Socket) {
+    client.emit('closeModal');
   }
 }
 

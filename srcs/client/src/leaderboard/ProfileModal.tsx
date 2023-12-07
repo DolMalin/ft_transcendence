@@ -9,6 +9,7 @@ import {
     ModalBody,
     ModalFooter,
     Text,
+    Flex,
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
@@ -58,6 +59,16 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             checkIfYourself(userId);
         });
     }, [props.userId])
+
+    useEffect(function socketEvent() {
+        props.gameSock?.on('closeModal', () => {
+            props.onClose();
+        })
+
+        return (() => {
+            props.gameSock?.off('closeModal');
+        })
+    }, [])
 
     if (!props.userId)
         return ;
@@ -113,36 +124,47 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
                 </ModalBody>
 
-                <Box display={'flex'} w={'448px'} h={'160px'} flexDir={'column'} flex={'wrap'} overflow={'clip'}
+                <Flex w={'448px'} h={'160px'} wrap={'wrap'} flexDir={'row'}
                 alignContent={'center'}
                 alignItems={'center'}
-                overflowWrap={'normal'}
+                justifyContent={'center'}
+                justifyItems={'center'}
                 >
-                    <Box w={'224px'}>
-
+                    <Box minW={'224px'} h={'80px'}
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
                         <Button colorScheme='none'
                         fontWeight={'normal'}
                         borderRadius={'none'}
                         _hover={{background : 'white', textColor: 'black'}}
                         isDisabled={isYourself}
+                        textAlign={'center'}
                         >
                             Message Them !
                         </Button>
                     </Box>
 
-                    <Box  w={'224px'}>
+                    <Box  minW={'224px'} h={'80px'}
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
                         <Button colorScheme='none'
                         fontWeight={'normal'}
                         borderRadius={'none'}
                         _hover={{background : 'white', textColor: 'black'}}
                         onClick={() => (sendDuelInvite(Constants.GAME_TYPE_ONE))}
                         isDisabled={isYourself}
+                        textAlign={'center'}
                         >
                             {Constants.GAME_TYPE_ONE} Duel !
                         </Button>
                     </Box>
 
-                    <Box w={'448px'}>
+                    <Box w={'448px'} h={'80px'} 
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
                         <Button colorScheme='none'
                         fontWeight={'normal'}
                         borderRadius={'none'}
@@ -153,7 +175,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                             {Constants.GAME_TYPE_TWO} Duel !
                         </Button>
                     </Box>
-                </Box>
+                </Flex>
                 <PlayerHistoryAccordion userId={user?.id}/>
 
             </ModalContent>

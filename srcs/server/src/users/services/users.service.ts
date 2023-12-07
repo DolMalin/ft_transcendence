@@ -119,20 +119,6 @@ export class UsersService {
     });
    }
 
-  //  async doesSocketBelongToUser(client : Socket) {
-  //   try {
-  //     const user = await this.findOneById(client.handshake.query.userId as string);
-  //     const socketId = user.gameSockets.filter((value) => value === client.id);
-      
-  //     console.log('socket : ', socketId)
-  //     if (socketId === undefined)
-  //       return (false);
-  //     else
-  //       return (true);
-  //   }
-  //   catch(e) {
-  //     console.log('Error in socketBelongToUser :', e)
-  //   }
   // }
 
   /**
@@ -147,9 +133,9 @@ export class UsersService {
       if (l === 0)
           return (100);
 
-      let ratio = w * 100 / (w + l);
-
-      return (ratio)
+      const ratio = w * 100 / (w + l);
+      
+      return (Math.trunc(ratio))
     }
 
     

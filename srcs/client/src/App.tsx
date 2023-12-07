@@ -68,12 +68,12 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   useEffect(function socketEvents() {
 
     props.gameSock?.on('gameStarted', () => {
-    
-      console.log('getting game started')
+
+      props.gameSock?.emit('closeOpenedModals');
       setSwitchingFrom(true);
       setTab(0)
       // seems pretty weird but on tab change window.inner{Size} is reseted and some Componants depends ont it
-      window.dispatchEvent(new Event('resize'))
+      window.dispatchEvent(new Event('resize'));
     });
 
     props.gameSock?.on('isBusy', ({username}) => {

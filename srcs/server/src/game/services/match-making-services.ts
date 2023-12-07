@@ -186,7 +186,7 @@ export class MatchmakingService {
           game.looser = game.clientOne.id;
         }
       
-        server.to(data.roomName).emit('gameOver', {winner : game.clientTwo.id});
+        server.to(data.roomName).emit('gameOver', {winner : game.winner});
       }
       else if (data.playerId === '2')
       {
@@ -195,7 +195,7 @@ export class MatchmakingService {
           game.winner = game.clientOne.id;
           game.looser = game.clientTwo.id;
         }
-        server.to(data.roomName).emit('gameOver', {winner : game.clientOne.id});
+        server.to(data.roomName).emit('gameOver', {winner : game.winner});
       }
 
       this.matchHistoryServices.storeGameResults(game);
