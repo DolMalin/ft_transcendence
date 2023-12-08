@@ -1,5 +1,5 @@
 import React , {useState, useEffect} from "react";
-import { ChakraProvider, useDisclosure } from "@chakra-ui/react";
+import { ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
 import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
 import './chat.css'
@@ -7,6 +7,7 @@ import authService from "../auth/auth.service";
 import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
+import { EmailIcon } from "@chakra-ui/icons";
 
 export interface MessageData {
     id: number;
@@ -102,7 +103,7 @@ export function Chat(props: {socket: Socket}){
                 password: dt.password
             })
             setRoom(res.data)
-            props.socket.emit("joinRoom", res.data.id)
+            props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
         }
         catch(err){
@@ -129,6 +130,17 @@ export function Chat(props: {socket: Socket}){
         const userList = await getUserList()
         setUserList(userList)
     }
+
+    useEffect(() => {
+        props.socket?.on('dmRoom', ({dm}) => {
+            props.socket?.emit("joinRoom", dm.id)
+            setRoom(dm)
+            setShowChat(true)
+        })
+        return (() => {
+            props.socket?.off()
+        })
+    })
 
     useEffect(() => {
         fetchUserList()
@@ -158,13 +170,22 @@ export function Chat(props: {socket: Socket}){
         </mark>
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
-            <div className="userList" key={index}>
+            <Chakra.Flex flexDir="row" >
+                   <div className="userList" key={index}>
                 <div>
                     <ul>
                         <li><Chakra.Link onClick={() => {onOpen() ; setId(user.id)}}>{user.username}</Chakra.Link></li>
+                        <Chakra.IconButton
+                            variant='outline'
+                            colorScheme='teal'
+                            aria-label='Send email'
+                            icon={<EmailIcon />}
+                            onClick={() => {}}
+                            />
                     </ul>
                 </div>
             </div>
+            </Chakra.Flex>
         ))
         )}
         <div className="Chat">
@@ -248,7 +269,7 @@ export function Chat(props: {socket: Socket}){
             <Chatbox socket={props.socket} room={room} showChat={setShowChat}/>
             )}
         </div>                
-        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket}/>
         </div>
     )
 }

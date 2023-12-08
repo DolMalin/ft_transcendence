@@ -28,6 +28,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     }
     
     function sendPrivateMessage(){
+        console.log('test from front')
+        console.log('socket', props.chatSocket)
         props.chatSocket?.emit('DM', {targetId: props.userId})
     }
 
@@ -144,7 +146,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         _hover={{background : 'white', textColor: 'black'}}
                         isDisabled={isYourself}
                         textAlign={'center'}
-
+                        onClick={() => (sendPrivateMessage())}
                         >
                             Message Them !
                         </Button>

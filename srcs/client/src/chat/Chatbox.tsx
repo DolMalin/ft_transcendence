@@ -119,9 +119,10 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
+    //TODO gere le fait que j ai un undefined chelou quand je join en tant que dm
     return (
         <div>
-        <mark>
+        {/* <mark>
             <h2>User list</h2>
         </mark>
         {userList?.length > 0 && (
@@ -134,7 +135,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 </div>
             </div>
         ))
-        )}
+        )} */}
         <><div>
             <Chakra.Button onClick={() => {
                     props.showChat(false)}}>

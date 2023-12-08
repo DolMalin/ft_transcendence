@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -83,12 +84,18 @@ async handleDisconnect(client: Socket) {
 
 
   @SubscribeMessage('DM')
-  directMessage(@MessageBody() data : {targetId : string}, @ConnectedSocket() client : Socket){
+  async directMessage(@MessageBody() data : {targetId : string}, @ConnectedSocket() client : Socket){
+    console.log('test from back')
     if (!data || data === undefined || typeof data.targetId != "string"){
       console.error("wrong type for parameter")
       return 
-      //TODO maybe le changer plus tard ?
     }
-    this.roomService.
+    try{
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      this.roomService.createDM(this.server, user, data.targetId)
+    }
+    catch(err){
+      throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+    }
   }
 }

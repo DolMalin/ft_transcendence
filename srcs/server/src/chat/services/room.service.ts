@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException, Req, Res } from '@ne
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
-import { FindOptionsOrder, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Room } from '../entities/room.entity'
 import { User } from '../../users/entities/user.entity'
 import { Message } from '../entities/message.entity'
@@ -11,7 +11,8 @@ import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { RoomDto } from '../dto/room.dto'
 import { UsersService } from 'src/users/services/users.service'
-import { roomType } from '../entities/room.entity'
+import { roomType} from '../entities/room.entity'
+import { Server } from 'socket.io'
 
 @Injectable()
 export class RoomService {
@@ -38,7 +39,11 @@ export class RoomService {
         return await this.roomRepository.save(room);
     }
 
-    async createDM(user: User, targetId: string){
+    async findOneByName(name: string){
+        return await this.roomRepository.findOneBy({name})
+    }
+
+    async createDM(server: Server, user: User, targetId: string){
         let user2: User;
         try{
             user2 = await this.userService.findOneById(targetId)
@@ -47,15 +52,21 @@ export class RoomService {
             throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
         }
         const name = user.id + user2.id
-        const directMessage = this.roomRepository.create({
+        let directMessage: Room
+        if (await this.findOneByName(name) !== undefined){
+            directMessage = this.roomRepository.create({
             name: name,
             type: roomType.directMessage
-        })
+        })}
+        this.userService.emitToAllSockets(server, user.chatSockets, 'dmRoom', {dm: directMessage})
+        this.userService.emitToAllSockets(server, user2.chatSockets, 'dmRoom', {dm: directMessage})
         return await this.roomRepository.save(directMessage)
     }
 
-    findAll() {
-        return this.roomRepository.find();
+    async findAll() {
+        let roomList = await this.roomRepository.find()
+        roomList = roomList.filter(room => room.type !== roomType.directMessage)
+        return roomList
     }
 
     findOneById(id: number){
@@ -64,6 +75,7 @@ export class RoomService {
     }
 
     async findAllUsersInRoom(id: number) {
+        console.log('id', id)
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')
