@@ -49,19 +49,31 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   
   useEffect(function DOMEvents() {
 
-    function handleResize() {
+    function debounce(func : Function, ms : number) {
+      let timer : string | number | NodeJS.Timeout;
+  
+      return ( function(...args : any) {
+          clearTimeout(timer);
+          timer = setTimeout( () => {
+              timer = null;
+              func.apply(this, args)
+          }, ms);
+      });
+    };
+
+    const debouncedHandleResize = debounce (function handleResize() {
       if (window.innerWidth > 1300)
         setFontSize('2em');
       else if (window.innerWidth > 1000)
         setFontSize('1.5em')
       else if (window.innerWidth < 800)
         setFontSize('1em')
-    }
+    }, 100)
 
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', debouncedHandleResize)
 
     return(() => {
-      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('resize', debouncedHandleResize)
     })
   }, [fontSize])
 

@@ -47,6 +47,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         const fetchUserProfile = async () => {
             try {
                 const res = await authService.get('http://127.0.0.1:4545/users/profile/' + props.userId);
+                console.log('fetch profile')
                 setUser(res?.data);
                 return (res?.data?.id)
     

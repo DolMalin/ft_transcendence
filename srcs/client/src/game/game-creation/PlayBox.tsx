@@ -19,18 +19,30 @@ function PlayBox(props : {dispatch : Function}) {
 
     useEffect(() => {
         
-        function handleResize() {
+        function debounce(func : Function, ms : number) {
+            let timer : string | number | NodeJS.Timeout;
+        
+            return ( function(...args : any) {
+                clearTimeout(timer);
+                timer = setTimeout( () => {
+                    timer = null;
+                    func.apply(this, args)
+                }, ms);
+            });
+        };
+
+        const debouncedHandleResize = debounce(function handleResize() {
             if (window.innerWidth < 1200)
                 setFlexDisplay('column');
             else if (window.innerWidth >= 1200)
                 setFlexDisplay('row');
-        }
-        window.addEventListener('resize', handleResize)
+        }, 100);
+        window.addEventListener('resize', debouncedHandleResize)
 
         return (() => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', debouncedHandleResize);
         })
-    },  [flexDisplay])
+    },  [flexDisplay]);
 
     return (
     <Flex flexDir={flexDisplay} wrap={'wrap'} overflow={'hidden'}>
