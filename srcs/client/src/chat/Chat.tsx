@@ -30,7 +30,7 @@ async function getRoomList(){
         password: string | null; 
         privChan: string | null }[]; 
     try{
-        const res = await authService.get('http://127.0.0.1:4545/room/')
+        const res = await authService.get('http://127.0.0.1:4545/room/list')
         roomList = res.data
     }
     catch(err){
@@ -102,6 +102,7 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
+            console.log('------res------', res.data)
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
@@ -134,6 +135,7 @@ export function Chat(props: {socket: Socket}){
     useEffect(() => {
         props.socket?.on('dmRoom', ({dm}) => {
             props.socket?.emit("joinRoom", dm.id)
+            console.log('---------dm---------', dm)
             setRoom(dm)
             setShowChat(true)
         })
@@ -149,6 +151,7 @@ export function Chat(props: {socket: Socket}){
     useEffect(() => {
         fetchRoom()
     }, [])
+    console.log('---------room----------', room)
     return (
         <div>
         <mark>

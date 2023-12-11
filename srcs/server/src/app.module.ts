@@ -26,7 +26,7 @@ import { Avatar } from './users/entities/avatar.entity';
       entities: [User, Room, Message, Avatar, Game],
       // entities: [User, Avatar, Game],
       synchronize: true,
-      // dropSchema: true,/*  wipe la db a chaque refresh */
+      //  dropSchema: true,/*  wipe la db a chaque refresh */
     }),
     UsersModule,
     GameModule,

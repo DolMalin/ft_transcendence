@@ -43,27 +43,68 @@ export class RoomService {
         return await this.roomRepository.findOneBy({name})
     }
 
-    async createDM(server: Server, user: User, targetId: string){
-        let user2: User;
-        try{
-            user2 = await this.userService.findOneById(targetId)
-        }
-        catch(err){
-            throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
-        }
-        const name = user.id + user2.id
+    async createDM(server: Server, user: User, user2: User, roomName: string){
         let directMessage: Room
-        if (await this.findOneByName(name) !== undefined){
-            directMessage = this.roomRepository.create({
-            name: name,
-            type: roomType.directMessage
-        })}
-        this.userService.emitToAllSockets(server, user.chatSockets, 'dmRoom', {dm: directMessage})
-        this.userService.emitToAllSockets(server, user2.chatSockets, 'dmRoom', {dm: directMessage})
-        return await this.roomRepository.save(directMessage)
+        directMessage = this.roomRepository.create({
+            name: roomName,
+            type: roomType.directMessage,
+            users: [user, user2]
+        })    
+        // await this.roomRepository.save(directMessage)
+        return this.joinDM(user, user2, roomName, directMessage, server)
     }
 
-    async findAll() {
+    async joinDM(user: User, user2: User, roomName: string, directMessage: Room, server: Server){
+        this.userService.emitToAllSockets(server, user.chatSockets, 'dmRoom', {dm: directMessage})
+        this.userService.emitToAllSockets(server, user2.chatSockets, 'dmRoom', {dm: directMessage})
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.name = :name', { name: roomName })
+            .orderBy('message.id', 'ASC')
+            .getOne();
+        if (!room)
+            throw new ForbiddenException('room does not exist');
+        this.roomRepository.save(room)
+        // console.log('----------room-----------', room)
+        console.log('room repository', this.roomRepository)
+        return room;
+    }
+    
+
+    async joinRoom(dto: RoomDto, user: User){
+        
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.name = :name', { name: dto.name })
+            .orderBy('message.id', 'ASC')
+            .getOne();
+        if (!room)
+            throw new ForbiddenException('room does not exist')
+        if (room.privChan === true)
+            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
+        if (room.password?.length > 0){
+            if (! await argon2.verify(room.password, dto.password))
+                throw new ForbiddenException('Password invalid')
+        }
+        if (room.users === undefined)
+            room.users = []
+        room.users.push(user)
+        this.roomRepository.save(room)
+        return room;
+    }
+
+
+    async findAll(){
+        return this.roomRepository.find()
+    }
+
+    async findAllWithoutDm() {
         let roomList = await this.roomRepository.find()
         roomList = roomList.filter(room => room.type !== roomType.directMessage)
         return roomList
@@ -73,7 +114,7 @@ export class RoomService {
 
         return this.roomRepository.findOneBy({id})
     }
-
+    
     async findAllUsersInRoom(id: number) {
         console.log('id', id)
         const room = await this.roomRepository
@@ -109,31 +150,6 @@ export class RoomService {
     }
 
     
-    async joinRoom(dto: RoomDto, user: User){
-        
-        const room = await this.roomRepository
-            .createQueryBuilder('room')
-            .leftJoinAndSelect('room.message', 'message')
-            .leftJoinAndSelect('message.author', 'author')
-            .leftJoinAndSelect('room.users', 'user')
-            .where('room.name = :name', { name: dto.name })
-            .orderBy('message.id', 'ASC')
-            .getOne();
-        if (!room)
-            throw new ForbiddenException('room does not exist')
-        if (room.privChan === true)
-            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
-        if (room.password?.length > 0){
-            if (! await argon2.verify(room.password, dto.password))
-                throw new ForbiddenException('Password invalid')
-        }
-        console.log('ALAID', room.users)
-        if (room.users === undefined)
-            room.users = []
-        room.users.push(user)
-        this.roomRepository.save(room)
-        return room;
-    }
 
     async postMessage(sender: User, dto: CreateMessageDto){
         

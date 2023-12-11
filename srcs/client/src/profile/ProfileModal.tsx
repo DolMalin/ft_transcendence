@@ -38,7 +38,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             return ;
         const checkIfYourself = async (userId : string) => {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/me');
+                const res = await authService.get('http://127.0.0.1:4545/users/me')
                 if (userId == res?.data?.id)
                 {
                     setIsYoursellf(true);

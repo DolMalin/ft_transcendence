@@ -106,9 +106,9 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
     }
 
-    useEffect(() => {
-        fetchUserList()
-    }, [])
+    // useEffect(() => {
+    //     fetchUserList()
+    // }, [])
 
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {

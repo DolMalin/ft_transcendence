@@ -33,6 +33,12 @@ export class RoomController {
     }
 
     @UseGuards(AccessToken2FAGuard)
+    @Get('list')
+    async getRoomListWithoutDm(){
+        return await this.roomService.findAllWithoutDm();
+    }
+
+    @UseGuards(AccessToken2FAGuard)
     @Get('userlist/:id')
     async getUserList(@Param("id") id: number){
         return await this.roomService.findAllUsersInRoom(id)

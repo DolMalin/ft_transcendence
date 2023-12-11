@@ -3,8 +3,10 @@ import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { AuthService } from 'src/auth/services/auth.service';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
+import { Room, roomType } from './entities/room.entity';
 import { RoomService } from './services/room.service';
 
 class ChatDTO {
@@ -61,12 +63,6 @@ async handleDisconnect(client: Socket) {
       console.log('handle connection ERROR : ', e);
     }
   }
-
-
-  // @SubscribeMessage('message')
-  // message(@MessageBody() data: { message : string, targetId : string}, @ConnectedSocket() client : Socket): void {
-  //   client.to(data.targetId).emit("DM", data.message);
-  // }
   
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
@@ -82,20 +78,37 @@ async handleDisconnect(client: Socket) {
     // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
   }
 
+@SubscribeMessage('DM')
+async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
+    console.log('Test from back');
 
-  @SubscribeMessage('DM')
-  async directMessage(@MessageBody() data : {targetId : string}, @ConnectedSocket() client : Socket){
-    console.log('test from back')
-    if (!data || data === undefined || typeof data.targetId != "string"){
-      console.error("wrong type for parameter")
-      return 
+    if (!data || typeof data.targetId !== "string") {
+        console.error("Wrong type for parameter");
+        return;
     }
-    try{
-      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      this.roomService.createDM(this.server, user, data.targetId)
+
+    try {
+        const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+        const user2 = await this.userService.findOneById(data.targetId)
+        await this.createOrJoinDMRoom(user, user2, this.server);
+
+    } catch (err) {
+       throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
     }
-    catch(err){
-      throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+}
+
+async createOrJoinDMRoom(user: User, user2: User, server: Server) {
+    const roomName1 = this.generateDMRoomName(user.id, user2.id)
+    const roomName2 = this.generateDMRoomName(user2.id, user.id)
+    const existingRoom = await this.roomService.findOneByName(roomName1) || await this.roomService.findOneByName(roomName2)
+    if (!existingRoom) {
+        await this.roomService.createDM(server, user, user2, this.generateDMRoomName(user.id, user2.id))
+    } else {
+      this.roomService.joinDM(user, user2, existingRoom?.name, existingRoom, server)
     }
-  }
+}
+
+generateDMRoomName(user1Id: string, user2Id: string): string {
+    return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
+}
 }
