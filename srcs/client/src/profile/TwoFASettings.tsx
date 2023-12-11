@@ -117,14 +117,15 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 	function TwoFactorAuthenticationButton() {
 
-		const text = displayActivate2FA ? "hmm maybe not" : "Activate 2FA"
+		const text = displayActivate2FA ? "maybe not" : "Activate 2FA"
 		if (!props.state.isTwoFactorAuthenticationEnabled) {
 			return (
 				<>
 					<Button onClick={activateTwoFactorAuthentication}
 					fontWeight={'normal'}
 					borderRadius={'0px'}
-					bg={Constants.BG_COLOR_FADED}
+					marginBottom={'10px'}
+					bg={'none'}
 					textColor={'white'}
 					_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 					>
@@ -138,7 +139,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 					<Button onClick={deactivateTwoFactorAuthentication}
 					fontWeight={'normal'}
 					borderRadius={'0px'}
-					bg={Constants.BG_COLOR_FADED}
+					bg={'none'}
 					textColor={'white'}
 					_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 					>
@@ -153,12 +154,12 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		const { register, handleSubmit, formState: { errors } } = useForm();
 		
 		return (
-			<Flex width="half" align="center" justifyContent="center" flexDir={'column'} paddingTop={'10px'}>
+			<>
 				<Image src={qrCode}
-				boxSize={'200px'}
+				boxSize={'180px'}
 				marginBottom={'10px'}
 				></Image>
-					<form onSubmit={handleSubmit(onActivate2fa)} style={{display: 'flex', flexDirection : 'column', justifyContent : 'center'}}>
+					<form onSubmit={handleSubmit(onActivate2fa)} style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
 						<FormControl isRequired>
 							<Input
 								type="text"
@@ -172,15 +173,16 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 										maxLength: 80
 									})
 								}
-							/>
+								/>
 
 						</FormControl>
 
 						<Button
 						fontWeight={'normal'}
+						w={'150px'}
 						borderRadius={'0px'}
 						textAlign={'center'}
-						bg={Constants.BG_COLOR_FADED}
+						bg={'none'}
 						textColor={'white'}
 						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 						type='submit'
@@ -188,7 +190,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 							Submit
 						</Button>
 					</form>
-			</Flex>
+			</>
 		)
 	}
 
@@ -196,37 +198,34 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
-			<Flex width="half" alignItems="center" justifyContent="center">
-				<Box p={2}>
-					<form onSubmit={handleSubmit(onDeactivate2fa)}>
-						<FormControl isRequired>
-							<Input
-								type="text"
-								placeholder="2fa code"
-								{
-									...register("twoFactorAuthenticationCode", {
-										required: "enter 2facode",
-										minLength: 3,
-										maxLength: 80
-									})
-								}
-							/>
+			<form onSubmit={handleSubmit(onDeactivate2fa)}>
+				<FormControl isRequired>
+					<Input
+						type="text"
+						placeholder="2fa code"
+						{
+							...register("twoFactorAuthenticationCode", {
+								required: "enter 2facode",
+								minLength: 3,
+								maxLength: 80
+							})
+						}
+					/>
 
-						</FormControl>
+				</FormControl>
 
-						<Button
-						fontWeight={'normal'}
-						borderRadius={'0px'}
-						bg={Constants.BG_COLOR_FADED}
-						textColor={'white'}
-						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-						type='submit'
-						>
-							Submit
-						</Button>
-					</form>
-				</Box>
-			</Flex>
+				<Button
+				fontWeight={'normal'}
+				borderRadius={'0px'}
+				w={'150px'}
+				bg={'none'}
+				textColor={'white'}
+				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+				type='submit'
+				>
+					Disable 2FA
+				</Button>
+			</form>
 		)
 	}
 
@@ -236,9 +235,15 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
     return (<>
-    {<TwoFactorAuthenticationButton />}
-    {displayActivate2FA && <ActivateTwoFactorAuthentication/>}
-    {displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
+		<Flex minH={'353px'}
+		alignItems={'center'}
+		justifyContent={'center'}
+		padding={'10px'}
+		flexDir={'column'}>
+			{<TwoFactorAuthenticationButton />}
+			{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
+			{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
+		</Flex>
     </>)
 }
 

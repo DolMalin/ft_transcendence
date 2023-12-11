@@ -9,6 +9,7 @@ import * as Constants from '../game/globals/const';
 import ProfileInfo from './ProfileInfo';
 import TwoFASettings from './TwoFASettings';
 import UsernameChange from './UsernameChange';
+import AvatarChange from './AvatarChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
@@ -69,7 +70,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				<Button onClick={logout}
 				fontWeight={'normal'}
 				borderRadius={'0px'}
-				bg={Constants.BG_COLOR}
+				bg={'none'}
 				textColor={'white'}
 				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 				>Logout</Button>
@@ -83,73 +84,43 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
-			<Box 
+			<Flex 
 			width={'100vw'}
 			height={Constants.BODY_HEIGHT}
 			background={Constants.BG_COLOR}
 			padding={'30px'}
 			scrollBehavior={'smooth'}
-			display={'flex'}
 			alignItems={'center'}
 			justifyContent={'center'}
 			flexDir={'row'}
-			flexWrap={'wrap'}
+			wrap={'wrap'}
 			overflow={'auto'}
 			textColor={'white'}
 			>
+				<Flex pos={'fixed'} bottom={'0'} right={'0'}>
+				{<LogoutComponent />}
+				</Flex>
 
 				<Flex minW={'360px'}
-				minH={'562px'}
 				h={'80%'}
+				minH={'1059px'}
 				bg={Constants.BG_COLOR_FADED}
 				padding={'10px'}
-				wrap={'wrap'}
+				marginTop={'15px'}
+				wrap={'nowrap'}
+				justifyContent={'space-evenly'}
 				flexDir={'column'}>
-					<Flex h={'100%'} w={'100%'}
-					wrap={'wrap'}
-					flexDir={'column'}
-					justifyContent={'space-evenly'}
-					>
-						<Flex minH={'180px'}
-						alignItems={'center'}
-						justifyContent={'center'}
-						padding={'10px'}
-						flexDir={'column'}>
-							<TwoFASettings state={props.state} dispatch={props.dispatch}/>
-						</Flex>
-
-						<Divider></Divider>
-
-						<Flex minH={'180px'}
-						alignItems={'center'}
-						justifyContent={'center'}
-						flexDir={'column'}
-						padding={'10px'}>
-							<UsernameChange/>
-						</Flex>
-
-						<Divider></Divider>
-
-						<Flex minH={'180px'}
-						alignItems={'center'}
-						justifyContent={'center'}
-						padding={'10px'}>
-							<Button
-							fontWeight={'normal'}
-							borderRadius={'0px'}
-							bg={Constants.BG_COLOR_FADED}
-							textColor={'white'}
-							_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-							> 
-							Change Avatar 
-							</Button>
-						</Flex>
-					</Flex>
-
-
+						<TwoFASettings state={props.state} dispatch={props.dispatch}/>
+						
+						<Divider/>
+						<UsernameChange/>
+						
+						<Divider/>
+						<AvatarChange/>
 				</Flex>
+
 				<Flex minW={'360px'}
-				minH={'562px'}
+				minH={'1059px'}
 				height={'80%'}
 				width={'40vw'}
 				bg={Constants.BG_COLOR_FADED}
@@ -160,10 +131,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				>
 					<ProfileInfo/>
 				</Flex>
-				<Flex w={'100%'}>
-					{<LogoutComponent />}
-				</Flex>
-		</Box>
+		</Flex>
 	</>)
 }
 
