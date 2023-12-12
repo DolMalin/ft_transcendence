@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -148,5 +148,17 @@ export class UsersService {
       })
       return (scoreList);
     }));
+  }
+
+  async returnProfile(userId : string) {
+    try {
+      const user = await this.findOneById(userId);
+      if (user === undefined)
+        throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+      return ({username : user.username, id : user.id, winsAmount : user.winsAmount, loosesAmount : user.loosesAmount})
+    }
+    catch (err) {
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    }
   }
 }

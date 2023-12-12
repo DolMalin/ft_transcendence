@@ -36,8 +36,14 @@ export class UsersController {
   @Get('history/:id')
   history(@Param('id') userId: string) {
 
-    console.log(userId)
       return (this.matchHistoryService.returnHistory(userId));
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('profile/:id')
+  profile(@Param('id') userId: string) {
+
+      return (this.usersService.returnProfile(userId));
   }
 
   @UseGuards(AccessToken2FAGuard)
