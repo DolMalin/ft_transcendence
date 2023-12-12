@@ -26,6 +26,7 @@ export interface Paddle {
     clientTwo : {socket : Socket, id : string},
     gameIsFull : boolean,
     isPaused : boolean,
+    hasStarted : boolean,
     clientOneScore : number,
     clientTwoScore : number,
     winner : string,

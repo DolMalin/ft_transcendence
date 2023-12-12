@@ -1,17 +1,18 @@
 import React, { Component, useEffect, useState, useReducer} from 'react'
-import { Button, Link, Input, FormControl, Flex, Box, Image} from '@chakra-ui/react'
+import { Button, Flex, Divider} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
 import { stateType} from '../auth/components/reducer';
 import reducer from '../auth/components/reducer';
 import { Socket } from 'socket.io-client';
+import * as Constants from '../game/globals/const';
+import ProfileInfo from './ProfileInfo';
+import TwoFASettings from './TwoFASettings';
+import UsernameChange from './UsernameChange';
+import AvatarChange from './AvatarChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
-	const [qrCode, setQrCode] = useState('')
-	const [displayActivate2FA, setDisplayActivate2FA] = useState(false)
-	const [displayDeactivate2FA, setDisplayDeactivate2FA] = useState(false)
-
 	const [state, dispatch] = useReducer(reducer, {
 		isAuthenticated: props.state.isAuthenticated,
 		isRegistered: props.state.isRegistered,
@@ -61,172 +62,75 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 		}
 	}
 
-	const onActivate2fa = async (data:any) => {
-
-		try {
-			await AuthService.twoFactorAuthenticationTurnOn({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
-
-			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
-			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
-
-			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
-			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
-
-			setDisplayActivate2FA(false)
-		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
-		}
-	}
-
-	const onDeactivate2fa = async (data:any) => {
-
-		try {
-			await AuthService.twoFactorAuthenticationTurnOff({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
-
-			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
-			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
-
-			setDisplayDeactivate2FA(false)
-		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
-		}
-	}
-
 
 	function LogoutComponent() {
 		return (
-			<div className="Log">
-				<Button fontWeight={'normal'} onClick={logout}>Logout</Button>
-			</div>
+			<>
+				<Button onClick={logout}
+				fontWeight={'normal'}
+				borderRadius={'0px'}
+				bg={'none'}
+				textColor={'white'}
+				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+				>Logout</Button>
+			</>
 		)
 	}
 
-	async function activateTwoFactorAuthentication() {
-		const res = await AuthService.get('http://127.0.0.1:4545/auth/2fa/generate')
-		if (res.status === 200) {
-				setQrCode(res.data)
-				setDisplayActivate2FA(true)
-			}
-	}
-
-	async function deactivateTwoFactorAuthentication() {
-			setDisplayDeactivate2FA(true)
-	}
-
-	function ActivateTwoFactorAuthentication() {
-		
-		return(<>
-			<Image src={qrCode}></Image>
-			<ActivateTwoFactorAuthenticationForm/>
-		</>)
-	}
-
-	function DeactivateTwoFactorAuthentication() {
-		
-		return(<>
-			<DeactivateTwoFactorAuthenticationForm/>
-		</>)
-	}
-
-
-
-	function TwoFactorAuthenticationButton() {
-		if (!props.state.isTwoFactorAuthenticationEnabled) {
-			return (
-				<div>
-					<Button onClick={activateTwoFactorAuthentication} fontWeight={'normal'} >Activer 2FA</Button>
-				</div>
-			)
-		} else {
-			return (
-				<div>
-					<Button onClick={deactivateTwoFactorAuthentication}fontWeight={'normal'} >Désactiver 2FA</Button>
-				</div>
-			)
-		}
-	}
-
-	function ActivateTwoFactorAuthenticationForm() {
-		const { register, handleSubmit, formState: { errors } } = useForm();
-		<Image src={qrCode}></Image>
-
-		return (
-			<Flex width="half" align="center" justifyContent="center">
-				<Box p={2}>
-					<form onSubmit={handleSubmit(onActivate2fa)}>
-						<FormControl isRequired>
-							<Input
-								type="text"
-								placeholder="2fa code"
-								{
-									...register("twoFactorAuthenticationCode", {
-										required: "enter 2facode",
-										minLength: 3,
-										maxLength: 80
-									})
-								}
-							/>
-
-						</FormControl>
-
-						<Button
-							fontWeight={'normal'}
-							mt={4}
-							colorScheme='teal'
-							type='submit'
-						>
-							Submit
-						</Button>
-					</form>
-				</Box>
-			</Flex>
-		)
-	}
-
-	function DeactivateTwoFactorAuthenticationForm() {
-		const { register, handleSubmit, formState: { errors } } = useForm();
-
-		return (
-			<Flex width="half" align="center" justifyContent="center">
-				<Box p={2}>
-					<form onSubmit={handleSubmit(onDeactivate2fa)}>
-						<FormControl isRequired>
-							<Input
-								type="text"
-								placeholder="2fa code"
-								{
-									...register("twoFactorAuthenticationCode", {
-										required: "enter 2facode",
-										minLength: 3,
-										maxLength: 80
-									})
-								}
-							/>
-
-						</FormControl>
-
-						<Button
-							fontWeight={'normal'}
-							mt={4}
-							colorScheme='teal'
-							type='submit'
-						>
-							Submit
-						</Button>
-					</form>
-				</Box>
-			</Flex>
-		)
-	}
-
-
-	useEffect(() => {async function  asyncWrapper() {validate()}; asyncWrapper()}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
+	useEffect(() => {
+		async function  asyncWrapper() {validate()};
+		asyncWrapper()
+	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
 	return (<>
-		{<TwoFactorAuthenticationButton />}
-		{displayActivate2FA && <ActivateTwoFactorAuthentication/>}
-		{displayDeactivate2FA && <DeactivateTwoFactorAuthentication/>}
-		{<LogoutComponent />}
+			<Flex 
+			width={'100vw'}
+			height={Constants.BODY_HEIGHT}
+			background={Constants.BG_COLOR}
+			padding={'30px'}
+			scrollBehavior={'smooth'}
+			alignItems={'center'}
+			justifyContent={'center'}
+			flexDir={'row'}
+			wrap={'wrap'}
+			overflow={'auto'}
+			textColor={'white'}
+			>
+				<Flex pos={'fixed'} bottom={'0'} right={'0'}>
+				{<LogoutComponent />}
+				</Flex>
+
+				<Flex minW={'360px'}
+				h={'80%'}
+				minH={'1059px'}
+				bg={Constants.BG_COLOR_FADED}
+				padding={'10px'}
+				marginTop={'15px'}
+				wrap={'nowrap'}
+				justifyContent={'space-evenly'}
+				flexDir={'column'}>
+						<TwoFASettings state={props.state} dispatch={props.dispatch}/>
+						
+						<Divider/>
+						<UsernameChange/>
+						
+						<Divider/>
+						<AvatarChange/>
+				</Flex>
+
+				<Flex minW={'360px'}
+				minH={'1059px'}
+				height={'80%'}
+				width={'40vw'}
+				bg={Constants.BG_COLOR_FADED}
+				margin={'60px'}
+				padding={'10px'}
+				wrap={'wrap'}
+				flexDir={'column'}
+				>
+					<ProfileInfo/>
+				</Flex>
+		</Flex>
 	</>)
 }
 

@@ -142,7 +142,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 										...register("username", {
 											required: "Please enter first name",
 											minLength: 3,
-											maxLength: 80,
+											maxLength: 20,
 										})
 									}
 								/>
@@ -193,7 +193,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 									type='submit'
 									className='goma'
 									>
-										Continuer
+										Forward !
 								</Button>
 							<RightBracket w={'20px'} h={'100px'} girth={'10px'}/>
 						</Box>
@@ -276,7 +276,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 									textColor={'white'}
 									className='goma'
 								>
-									<Text>Continuer</Text>
+									Forward !
 								</Button>
 							<RightBracket w={'20px'} h={'100px'} girth={'10px'}/>
 						</Box>

@@ -40,6 +40,13 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
+  @Get('profile/:id')
+  profile(@Param('id') userId: string) {
+
+      return (this.usersService.returnProfile(userId));
+  }
+
+  @UseGuards(AccessToken2FAGuard)
   @Get('isAvailable')
   isAvailable(@GetUser() user : User) {
     return (user.isAvailable);
@@ -57,7 +64,7 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
-    return {username: user.username, id: user.id}
+    return {username: user?.username, id: user?.id}
   }
 
 

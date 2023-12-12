@@ -9,6 +9,9 @@ import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
 import { isUUID } from 'class-validator';
 import { Readable } from 'stream';
 
+import { Server} from 'socket.io';
+
+import { GameGateway } from 'src/game/gateway/game.gateway';
 @Injectable()
 export class UsersService {
   constructor(
@@ -148,16 +151,31 @@ export class UsersService {
       user.gameSockets = socketIdArray;
       return (this.update(user.id, {gameSockets : user.gameSockets}));
     }
-
-    addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
-
-      if (socketIdArray === null || socketIdArray === undefined)
-        socketIdArray = [];
-      socketIdArray?.push(socketId);
-      user.chatSockets = socketIdArray;
-      return (this.update(user.id, {chatSockets : user.chatSockets}))
-    }
     
+  /**
+  * @description add a socket Id to an array of string stored in user entity and update the user
+  */
+   addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
+ 
+     if (socketIdArray === null || socketIdArray === undefined)
+       socketIdArray = [];
+     socketIdArray?.push(socketId);
+     user.chatSockets = socketIdArray;
+     return (this.update(user.id, {chatSockets : user.chatSockets}));
+   }
+
+   async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
+
+    socketIdArray.forEach((socketId) => {
+      if (payload === undefined) 
+        server.to(socketId).emit(eventName);
+      else
+        server.to(socketId).emit(eventName, payload);
+    });
+   }
+
+  // }
+
   /**
  * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
  */ 
@@ -170,9 +188,9 @@ export class UsersService {
       if (l === 0)
           return (100);
 
-      let ratio = w * 100 / (w + l);
-
-      return (ratio)
+      const ratio = w * 100 / (w + l);
+      
+      return (Math.trunc(ratio))
     }
 
     
@@ -187,5 +205,17 @@ export class UsersService {
       })
       return (scoreList);
     }));
+  }
+
+  async returnProfile(userId : string) {
+    try {
+      const user = await this.findOneById(userId);
+      if (user === undefined)
+        throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+      return ({username : user.username, id : user.id, winsAmount : user.winsAmount, loosesAmount : user.loosesAmount})
+    }
+    catch (err) {
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    }
   }
 }
