@@ -61,7 +61,7 @@ function LeaderBoard(props : {gameSock : Socket}) {
 
     async function getScoreList() {
         try {
-            const res = await authService.get('http://127.0.0.1:4545/users/scoreList');
+            const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/scoreList');
             setScoreList(sortScoreList(res?.data))
         }
         catch (err)
@@ -125,7 +125,7 @@ function LeaderBoard(props : {gameSock : Socket}) {
                                 <Avatar 
                                     size='md'
                                     name={value?.username}
-                                    src={'http://127.0.0.1:4545/users/avatar/' + value?.id}
+                                    src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + value?.id}
                                     marginRight={'10px'}
                                 ></Avatar>
 

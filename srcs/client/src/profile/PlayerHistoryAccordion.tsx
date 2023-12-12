@@ -26,7 +26,7 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean}) {
         if (props.userId != undefined)
         {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/history/' + id);
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/history/' + id);
                 setHistory(res.data);
             }
             catch (e) {

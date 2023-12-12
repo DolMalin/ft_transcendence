@@ -33,7 +33,7 @@ async function getUserList(id: number){
         username: string
     }[]
     try{
-        const res =  await authService.get('http://127.0.0.1:4545/room/userlist/' + id)
+        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
         userlist = res.data
     }
     catch(err){
@@ -77,7 +77,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     
     const getMe = async () => {
         try{
-            const me = await authService.get('http://127.0.0.1:4545/users/me')
+            const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
             return me
         }catch(err){
             console.log(err)
@@ -86,7 +86,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     const sendMessage = async (currentMessage: string) => {
         
         try {
-            const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
             props.socket.emit("sendMessage", message);
             setMessageList((list) => [...list, message])
