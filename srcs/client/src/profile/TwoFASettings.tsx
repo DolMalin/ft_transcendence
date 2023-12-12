@@ -81,7 +81,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		if (displayActivate2FA === false) {
 			try {
 
-				const res = await AuthService.get('http://127.0.0.1:4545/auth/2fa/generate')
+				const res = await AuthService.get(process.env.REACT_APP_SERVER_URL + '/auth/2fa/generate')
 				if (res.status === 200) {
 					setQrCode(res.data)
 					setDisplayActivate2FA(true)

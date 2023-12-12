@@ -161,14 +161,14 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain:"127.0.0.1",
+      domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain:"127.0.0.1",
+      domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
@@ -200,14 +200,14 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain:"127.0.0.1",
+      domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain:"127.0.0.1",
+      domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'})
 

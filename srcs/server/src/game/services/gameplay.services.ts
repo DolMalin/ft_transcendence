@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-// import { GameServDTO} from './game.gateway';
+import { Injectable, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import {
   GameState,
@@ -12,11 +11,9 @@ import {
   willBallOverlapPaddleTwo,
   goal,
   ballReset,
-  randomizeBallAngle,
   ballRelaunch
   } from './BallMoves';
 import * as Constants from '../globals/const'
-import { MatchHistoryService } from './match.history.services';
 import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
@@ -184,7 +181,7 @@ export class GamePlayService {
       return ({id : id, username : res.username});    
     }
     catch (e) {
-      console.log(e);
+      Logger.error('user not found in getUserBasicInfos : ', e?.message)
     } 
   }
   
@@ -192,44 +189,47 @@ export class GamePlayService {
     
     let ballEvents : string = 'start';
 
-    console.log('Getting in game loop')
-
-    server.to(data.roomName).emit('gameStarted', 
-    await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
-    if (game.hasStarted === false)
-      game.hasStarted = true;
-    else
-      return ;
-    
-    game.ballRefreshInterval = setInterval(() => {
+    try {
+      server.to(data.roomName).emit('gameStarted', 
+      await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
+      if (game.hasStarted === false)
+        game.hasStarted = true;
+      else
+        return ;
       
-        ballEvents = this.handleBallMovement(game, data, client, server);
-          
-        this.handlePaddleMovement(game);
-
-        if (game.isPaused === true)
-        {
-          game.isPaused = false;
-          ballReset(game.ball);
-          this.pauseBetweenPoints(game, server, data.roomName);
-        }
-        else if (ballEvents === 'goal')
-        {
-          this.pauseBetweenPoints(game, server, data.roomName);
-        }
-        else if (ballEvents === 'gameOver')
-        {
-          server.to(data.roomName).emit('gameOver', {winner : game.winner});
-          return (clearInterval(game.ballRefreshInterval))
-        }
-        else
-        {
-          let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball};
-          let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball};
-          server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics);
-        }
-        if (client.rooms.size === 0) //TO DO Changer cette immondice
-          return (clearInterval(game.ballRefreshInterval))
-      }, Constants.FRAME_RATE);
+      game.ballRefreshInterval = setInterval(() => {
+        
+          ballEvents = this.handleBallMovement(game, data, client, server);
+            
+          this.handlePaddleMovement(game);
+  
+          if (game.isPaused === true)
+          {
+            game.isPaused = false;
+            ballReset(game.ball);
+            this.pauseBetweenPoints(game, server, data.roomName);
+          }
+          else if (ballEvents === 'goal')
+          {
+            this.pauseBetweenPoints(game, server, data.roomName);
+          }
+          else if (ballEvents === 'gameOver')
+          {
+            server.to(data.roomName).emit('gameOver', {winner : game.winner});
+            return (clearInterval(game.ballRefreshInterval))
+          }
+          else
+          {
+            let playerOneMetrics : GameMetrics = {paddleOne : game.paddleOne, paddleTwo : game.paddleTwo, ball : game.ball};
+            let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball};
+            server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics);
+          }
+          if (client.rooms.size === 0) //TO DO Changer cette immondice
+            return (clearInterval(game.ballRefreshInterval))
+        }, Constants.FRAME_RATE);
     }
+    catch (e) {
+      Logger.error('a game loop could not start, basic infos were not retrievables :', e?.message)
+    }
+  }
 }
