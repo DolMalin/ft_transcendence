@@ -1,12 +1,9 @@
-import axios from 'axios'
 import React, { Component, useEffect, useState, useReducer} from 'react'
-import { Navigate } from "react-router-dom"
 import { Button, Link, Input, FormControl, Flex, Box, Image} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
 import { stateType} from '../auth/components/reducer';
 import reducer from '../auth/components/reducer';
-import Auth from '../auth/Auth';
 import { Socket } from 'socket.io-client';
 
 
@@ -45,7 +42,8 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
-			return 500
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			return err.response.status
 		}
 	}
 
@@ -59,6 +57,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 
@@ -75,7 +74,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 
 			setDisplayActivate2FA(false)
 		} catch(err) {
-			console.log(err)
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 
@@ -89,7 +88,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 
 			setDisplayDeactivate2FA(false)
 		} catch(err) {
-			console.log(err)
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 

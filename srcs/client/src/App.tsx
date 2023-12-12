@@ -169,11 +169,10 @@ function App() {
         return
 
       try {
-        await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
         gameSock.emit('availabilityChange', true);
       }
-      catch (e) {
-        console.log(e.message);
+      catch (err) {
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
       }
     }
 
@@ -186,8 +185,9 @@ function App() {
       const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
       setUserId(res.data.id)
     }
-    catch(e) {
-      console.log('Error on game socket creation : ', e.message);
+    catch(err) {
+      console.error(`${err.response.data.message} (${err.response.data.error})`)
+
     }
   }
 

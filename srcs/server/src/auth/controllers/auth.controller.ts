@@ -10,13 +10,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { read } from 'fs';
 import { authenticator } from 'otplib';
 import { FileTypeValidationPipe } from '../utils/file.validator';
-
-
+import { HttpCode } from '@nestjs/common';
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly usersService: UsersService
   ) { }
 
     @Get('redirect')
@@ -52,8 +50,7 @@ export class AuthController {
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
-      const user = await this.authService.validate(req, res)
-      res.send(user)
+      return await this.authService.validate(req, res)
     }
 
     @UseInterceptors(FileInterceptor('file'))
@@ -67,55 +64,31 @@ export class AuthController {
       @Res() res:any,
       @Req() req:any)
     {
-      if (file)
-        await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
-        
-      await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
-      res.send("ok")
+      return await this.authService.register(file, body, req, res)
     }
 
 
     @UseGuards(AccessTokenGuard)
     @Get('2fa/generate')
     async generateTwoFactorAuthenticationQRCode(@Req() req:any) {
-      let user = await this.authService.generateTwoFactorAuthenticationSecret(req.user)
-      let qrCodeDataURL = await this.authService.generateQrCodeDataURL(user.otpAuthUrl)
-      return qrCodeDataURL
+      return await this.authService.generateTwoFactorAuthenticationQRCode(req)
     }
-
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/login')
     async twoFactorAuthenticationLogin(@Req() req: any, @Res() res:any, @Body() body:any) {
-
-      if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
-
-      await this.usersService.update(req.user.id, {isTwoFactorAuthenticated: true})
-      res.send("OK")
+      return await this.authService.twoFactorAuthenticationLogin(req, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-on')
     async turnOnTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
-
-      if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
-
-      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true})
-      res.send("OK")
+      return await this.authService.turnOnTwoFactorAuthentication(req, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-off')
     async turnOffTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
-
-      if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-        throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
-
-      await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: false})
-      res.send("OK")
+      return await this.authService.turnOffTwoFactorAuthentication(req, res, body)
     }
-
-
 }

@@ -39,8 +39,8 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 		}
 	}
 
-	// @TODO: vrai status code stp
 	const validate = async () => {
+
 		try {
 			
 			const res = await AuthService.validate()
@@ -63,7 +63,9 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
-			return 500
+
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			return err.response.status
 		}
 	}
 
@@ -77,6 +79,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 
@@ -87,7 +90,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 		} catch(err) {
-			console.log(err)
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 
@@ -103,7 +106,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.dispatch({type:'SET_IS_REGISTERED', payload:true})
 			dispatch({type:'SET_IS_REGISTERED', payload:true})
 		} catch(err) {
-			console.log(err)
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 
