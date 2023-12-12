@@ -31,6 +31,12 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         console.log('test from front')
         console.log('socket', props.chatSocket)
         props.chatSocket?.emit('DM', {targetId: props.userId})
+        props.onClose()
+    }
+
+    function blockThem(){
+        props.chatSocket?.emit('block', {targetId: props.userId})
+        props.onClose()
     }
 
     useEffect(() => {
@@ -169,7 +175,22 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         </Button>
                     </Box>
 
-                    <Box w={'448px'} h={'80px'} 
+                    <Box w={'224px'} h={'80px'} 
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (blockThem())}
+                        isDisabled={isYourself}
+                        >
+                             Block them !
+                        </Button>
+                    </Box>
+
+                    <Box w={'224px'} h={'80px'} 
                     display={'flex'}
                     justifyContent={'center'}
                     alignItems={'center'}>

@@ -77,6 +77,12 @@ export class UsersService {
     return avatar
   }
 
+  blockTarget(user: User, user2: User){
+    //TODO
+    //check if already block
+    // user.blocked.push(user2)
+    // console.log('----user in block-----', user)
+  }
 
   async remove(id: string) {
     const user = await this.findOneById(id)
@@ -109,18 +115,6 @@ export class UsersService {
       user.gameSockets = socketIdArray;
       return (this.update(user.id, {gameSockets : user.gameSockets}));
     }
-    
-  /**
-  * @description add a socket Id to an array of string stored in user entity and update the user
-  */
-   addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
- 
-     if (socketIdArray === null || socketIdArray === undefined)
-       socketIdArray = [];
-     socketIdArray?.push(socketId);
-     user.chatSockets = socketIdArray;
-     return (this.update(user.id, {chatSockets : user.chatSockets}));
-   }
 
    async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
 

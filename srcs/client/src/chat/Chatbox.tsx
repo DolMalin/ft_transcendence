@@ -88,6 +88,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         try {
             const res = await authService.post('http://127.0.0.1:4545/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
+            console.log('----- in send Message ------', message)
             props.socket.emit("sendMessage", message);
             setMessageList((list) => [...list, message])
         }
@@ -110,8 +111,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     //     fetchUserList()
     // }, [])
 
+    //TODO celui qui cree le channel et envoie le premier message bah ca marche pas
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {
+        console.log('---------message--------', data)
+        //si bloque --> pas ca
         setMessageList((list) => [...list, data])
         })
         return (() => {

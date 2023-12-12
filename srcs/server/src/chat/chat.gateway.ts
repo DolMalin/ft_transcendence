@@ -38,8 +38,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
       if (client.handshake.query.type !== 'chat')
         return ;
-      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
-      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
+      client.join(`user-${payload.id}`)
+      console.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(e) {
       client.disconnect();
@@ -49,15 +49,13 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   }
 
 
-async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {  
       //TODO maybe find another way
       console.log("Disonnection of socket ID : " + client.id);
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
     try {
       if (client.handshake.query.type !== 'chat')
         return ;
-      const user = await  this.userService.findOneById(client.handshake.query?.userId as string);
-      await this.userService.addChatSocketId(client.id, user.chatSockets, user);
     }
     catch(e) {
       console.log('handle connection ERROR : ', e);
@@ -73,42 +71,52 @@ async handleDisconnect(client: Socket) {
   
   @SubscribeMessage('sendMessage')
   sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket): void {
-    //findbyID ou
     client.to(`room-${data.room.id}`).emit("receiveMessage", data)
     // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
   }
 
-@SubscribeMessage('DM')
-async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
-    console.log('Test from back');
+  @SubscribeMessage('DM')
+  async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
+      if (!data || typeof data.targetId !== "string") {
+          console.error("Wrong type for parameter");
+          return;
+      }
 
-    if (!data || typeof data.targetId !== "string") {
-        console.error("Wrong type for parameter");
-        return;
+      try {
+          const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+          const user2 = await this.userService.findOneById(data.targetId)
+          await this.createOrJoinDMRoom(user, user2, this.server);
+
+      } catch (err) {
+        throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+      }
+  }
+
+
+  async createOrJoinDMRoom(user: User, user2: User, server: Server) {
+    const roomName = this.generateDMRoomName(user.id, user2.id)
+    let room = await this.roomService.getRoom(roomName)
+    if (!room) {
+       room = await this.roomService.createDM(user, user2, roomName)
     }
+    server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
+}
 
+  generateDMRoomName(user1Id: string, user2Id: string): string {
+      return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
+  }
+  
+  @SubscribeMessage('block')
+  async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
     try {
-        const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-        const user2 = await this.userService.findOneById(data.targetId)
-        await this.createOrJoinDMRoom(user, user2, this.server);
-
-    } catch (err) {
-       throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+      const user2 = await this.userService.findOneById(data.targetId)
+      this.userService.blockTarget(user, user2)
+    } 
+    catch (err) {
+      throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
     }
-}
+    
+  }
 
-async createOrJoinDMRoom(user: User, user2: User, server: Server) {
-    const roomName1 = this.generateDMRoomName(user.id, user2.id)
-    const roomName2 = this.generateDMRoomName(user2.id, user.id)
-    const existingRoom = await this.roomService.findOneByName(roomName1) || await this.roomService.findOneByName(roomName2)
-    if (!existingRoom) {
-        await this.roomService.createDM(server, user, user2, this.generateDMRoomName(user.id, user2.id))
-    } else {
-      this.roomService.joinDM(user, user2, existingRoom?.name, existingRoom, server)
-    }
-}
-
-generateDMRoomName(user1Id: string, user2Id: string): string {
-    return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
-}
 }

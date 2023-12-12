@@ -37,6 +37,10 @@ export class User {
 	@ManyToMany(() => Room, room => room.users)
 	room: Room[];
 
+	@ManyToMany(() => User)
+	@JoinTable({ name: 'blocked_users' })
+	blocked: User[];
+
 	//rel vers user blocked
 	@Column({type : 'int', default : 0, nullable: true})
 	winsAmount : number
@@ -70,7 +74,4 @@ export class User {
 
 	@Column({type : 'text', default : null, array : true, nullable : true})
 	gameSockets : string[];
-
-	@Column({type : 'text', default : null, array : true, nullable : true})
-	chatSockets : string[];
 }

@@ -43,21 +43,20 @@ export class RoomService {
         return await this.roomRepository.findOneBy({name})
     }
 
-    async createDM(server: Server, user: User, user2: User, roomName: string){
+    async createDM(user: User, user2: User, roomName: string){
         let directMessage: Room
         directMessage = this.roomRepository.create({
             name: roomName,
             type: roomType.directMessage,
             users: [user, user2]
         })    
-        // await this.roomRepository.save(directMessage)
-        return this.joinDM(user, user2, roomName, directMessage, server)
+        await this.roomRepository.save(directMessage)
+        return this.getRoom(roomName)
     }
 
-    async joinDM(user: User, user2: User, roomName: string, directMessage: Room, server: Server){
-        this.userService.emitToAllSockets(server, user.chatSockets, 'dmRoom', {dm: directMessage})
-        this.userService.emitToAllSockets(server, user2.chatSockets, 'dmRoom', {dm: directMessage})
-        const room = await this.roomRepository
+    async getRoom(roomName: string){
+    
+        return await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
             .leftJoinAndSelect('message.author', 'author')
@@ -65,23 +64,23 @@ export class RoomService {
             .where('room.name = :name', { name: roomName })
             .orderBy('message.id', 'ASC')
             .getOne();
-        if (!room)
-            throw new ForbiddenException('room does not exist');
-        this.roomRepository.save(room)
-        // console.log('----------room-----------', room)
-        console.log('room repository', this.roomRepository)
-        return room;
     }
     
 
     async joinRoom(dto: RoomDto, user: User){
         
+        //recuperer tableau id blocked
+        //faire une query de zinzin
+        // const idsBlocked = user.blocked_user.map(user => user.id);
+
+        console.log('-----user----', user)
         const room = await this.roomRepository
             .createQueryBuilder('room')
-            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('room.message', 'message'/* , `message.author.id NOT IN ${idsBlocked}` */)
             .leftJoinAndSelect('message.author', 'author')
             .leftJoinAndSelect('room.users', 'user')
             .where('room.name = :name', { name: dto.name })
+
             .orderBy('message.id', 'ASC')
             .getOne();
         if (!room)
@@ -98,7 +97,6 @@ export class RoomService {
         this.roomRepository.save(room)
         return room;
     }
-
 
     async findAll(){
         return this.roomRepository.find()

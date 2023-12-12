@@ -82,7 +82,6 @@ export function Chat(props: {socket: Socket}){
     const createRoom = async (dt: {room: string, password: string}) => {
         if (dt.room !== "")
         {
-            console.log('dt', dt)
             let data = {name: dt.room, password: dt.password, privChan: privateChan}
             try{
                 await authService.post('http://127.0.0.1:4545/room', data)
@@ -102,7 +101,7 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            console.log('------res------', res.data)
+            
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
@@ -133,25 +132,21 @@ export function Chat(props: {socket: Socket}){
     }
 
     useEffect(() => {
-        props.socket?.on('dmRoom', ({dm}) => {
+        props.socket?.on('dmRoom', (dm) => {
             props.socket?.emit("joinRoom", dm.id)
-            console.log('---------dm---------', dm)
             setRoom(dm)
             setShowChat(true)
         })
         return (() => {
-            props.socket?.off()
+            props.socket?.off('dmRoom')
         })
     })
 
     useEffect(() => {
         fetchUserList()
-    }, [])
-
-    useEffect(() => {
         fetchRoom()
     }, [])
-    console.log('---------room----------', room)
+    
     return (
         <div>
         <mark>
