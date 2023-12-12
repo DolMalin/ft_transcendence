@@ -32,7 +32,7 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.log(err)
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
     }
     return roomList
 }
@@ -69,7 +69,7 @@ export function Chat(props: {socket: Socket}){
                 fetchRoom()
             }
             catch(err){
-                console.log('Channel', dt.room, 'already exists.')
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         }
     }
@@ -87,7 +87,7 @@ export function Chat(props: {socket: Socket}){
             setShowChat(true)
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
         return (() => {
             props.socket.off("joinRoom")

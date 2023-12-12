@@ -9,7 +9,7 @@ import { Message } from '../entities/message.entity'
 import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
-import { RoomDto } from '../dto/room.dto'
+import { JoinRoomDto } from '../dto/join-room.dto'
 
 @Injectable()
 export class RoomService {
@@ -45,15 +45,7 @@ export class RoomService {
         return this.roomRepository.findOneBy({id})
     }
 
-    // async findAllUsers(){
-    //     const userList = await this.roomRepository
-    //         .createQueryBuilder('room')
-    //         .leftJoinAndSelect('room.users', 'user')
-    //         .getMany()
 
-    //     console.log('-------------------------------\n', userList)
-    //     return userList
-    // }
 
     async findAllUsers(id: number) {
         const room = await this.roomRepository
@@ -88,8 +80,7 @@ export class RoomService {
         return this.roomRepository.remove(room)
     }
     
-    async joinRoom(dto: RoomDto, user: User){
-        
+    async joinRoom(dto: JoinRoomDto, user: User){
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
@@ -106,7 +97,6 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        console.log('ALAID', room.users)
         if (room.users === undefined)
             room.users = []
         room.users.push(user)

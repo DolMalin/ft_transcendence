@@ -1,19 +1,26 @@
-import { Field } from "@nestjs/graphql";
-import { IsNumber, IsString } from "class-validator";
-import { User } from "src/users/entities/user.entity";
-import { ManyToOne } from "typeorm";
-import { Room } from "../entities/room.entity";
+import { IsNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { TransformFnParams } from 'class-transformer'
+import { Transform} from 'class-transformer'
+import * as sanitizeHtml from 'sanitize-html'
 
 export class CreateMessageDto {
 
     @IsString()
+    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     content : string;
 
+    @IsNumber()
     roomId : number;
 
+    @IsString()
+	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
+	@MaxLength(1000)
     authorName: string
+
+    @IsNumber()
     authorId: number
 
+    @IsString()
 	sendAt: string;
     
 }
