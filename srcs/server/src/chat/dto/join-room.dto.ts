@@ -1,7 +1,7 @@
 import { Field } from "@nestjs/graphql";
 import { IsOptional, IsString } from "class-validator";
 
-export class RoomDto {
+export class JoinRoomDto {
     
     @IsString()
     name: string
