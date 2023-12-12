@@ -143,7 +143,7 @@ export class UsersService {
   }
 
 
-  addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
+  async addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
 
       if (socketIdArray === null || socketIdArray === undefined)
         socketIdArray = [];
@@ -155,7 +155,7 @@ export class UsersService {
   /**
   * @description add a socket Id to an array of string stored in user entity and update the user
   */
-   addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
+   async addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
  
      if (socketIdArray === null || socketIdArray === undefined)
        socketIdArray = [];
