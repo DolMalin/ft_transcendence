@@ -42,18 +42,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
  async handleConnection(client: Socket) {
 
    try {
-     const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
      if (client.handshake.query?.userId as string === undefined)
      {
        client.disconnect();
        return ;
-      }
+     }
+     const payload = await this.authService.validateAccessJwt(client.handshake.query?.token as string);
       if (client.handshake.query.type !== 'game')
         return;
 
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       await this.userService.addGameSocketId(client.id, user.gameSockets, user);
-      // console.log('socket tab in connection : ', user.gameSockets);
+      console.log('socket tab in connection : ', user.gameSockets);
     }
     catch(e) {
       client.disconnect();
@@ -67,9 +67,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       if (client.handshake.query.type !== 'game')
         return ;
-      // console.log('socket to remove : ', client.id)
+      console.log('socket to remove : ', client.id)
       await this.userService.removeSocketId(client.id, user.gameSockets, user)
-      // console.log('socket tab in disconnection : ', user.gameSockets);
+      console.log('socket tab in disconnection : ', user.gameSockets);
     }
     catch(e) {
     Logger.error('game gateway handle disconnection error: ', e?.message);
@@ -207,7 +207,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.matchmakingService.leaveGame(this.server, client, this.gamesMap, 
           {roomName : key, playerId : value.clientOne.id === user.id ? '1' : '2', gameType : value.gameType});
       })
-
+      user.gameSockets = [];
+      this.userService.save(user);
     }
     catch(e) {
       Logger.error('In logout : ', e?.message)

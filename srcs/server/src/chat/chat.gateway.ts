@@ -26,6 +26,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async handleConnection (client: Socket) {
 
     try {
+      if (client.handshake.query?.userId as string === undefined)
+      {
+        client.disconnect();
+        return ;
+      }
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
       if (client.handshake.query.type !== 'chat')
         return ;
