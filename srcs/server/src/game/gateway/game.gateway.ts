@@ -18,6 +18,7 @@ import { type } from 'os';
 import { AuthService } from 'src/auth/services/auth.service';
 import { IsJWT } from 'class-validator';
 import { subscribe } from 'superagent';
+import { NotFoundException } from '@nestjs/common';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit
@@ -197,19 +198,24 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     this.availabilityChange(true, client);
     this.handleDisconnect(client);
-    try {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
-        // this.userService.findOneById(client.handshake.query?.userId as string)?.then((user) => {
+      if (user === undefined)
+        throw new NotFoundException("Users not found", {cause: new Error(),
+          description: "cannot find any users in database"})
 
-        // user.gameSockets.forEach((value) => {
-        //   this.server.to(value).emit('logout');
-        // })
-      // })
-    }
-    catch(e) {
-      console.log('in availability change ERROR : ', e);
-    }
+      console.log('in gateway logout')
+      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
+
+      const game = this.gamesMap.forEach((value, key) => {
+        if (value.clientOne.id === user.id || value.clientTwo.id === user.id)
+          this.matchmakingService.leaveGame(this.server, client, this.gamesMap, 
+          {roomName : key, playerId : value.clientOne.id === user.id ? '1' : '2', gameType : value.gameType})
+      })
+  }
+
+  @SubscribeMessage('test')
+  test(@ConnectedSocket() client: Socket) {
+    console.log('test');
   }
 
   @SubscribeMessage('gameInvite')

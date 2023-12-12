@@ -186,12 +186,8 @@ function Game(props : GameProps) {
         }
 
         function leaveGameOnRefresh() {
-            try {
-                sock.emit('leaveGame', gameInfo);
-                sock.emit('availabilityChange', true)
-            } catch (e) {
-                alert(e.message);
-            }
+            sock.emit('leaveGame', gameInfo);
+            sock.emit('availabilityChange', true)
         }
 
         document.addEventListener("keydown", handleKeydown);

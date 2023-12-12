@@ -230,7 +230,6 @@ function App() {
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
       });
 
@@ -241,15 +240,8 @@ function App() {
   
   useEffect(() => {
     async function handleUnload() {
-      if (!gameSock)
-        return
 
-      try {
-        gameSock.emit('availabilityChange', true);
-      }
-      catch (err) {
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
-      }
+      gameSock?.emit('availabilityChange', true);
     }
 
     window.addEventListener('beforeunload', handleUnload);
@@ -263,9 +255,8 @@ function App() {
       const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
       setUserId(res.data.id)
     }
-    catch(err) {
-      console.error(`${err.response.data.message} (${err.response.data.error})`)
-
+    catch(e) {
+      console.log('Error on game socket creation : ', e?.message);
     }
   }
 
