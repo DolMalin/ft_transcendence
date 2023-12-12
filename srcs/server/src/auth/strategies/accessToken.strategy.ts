@@ -3,6 +3,7 @@ import { ExtractJwt, Strategy } from "passport-jwt"
 import { Injectable } from "@nestjs/common";
 import { UsersService } from "src/users/services/users.service";
 import { Repository } from "typeorm";
+import { ForbiddenException } from "@nestjs/common";
 
 
 @Injectable()
@@ -30,8 +31,8 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 	async validate(payload: any) {
 		const user = await this.userService.findOneById(payload.id)
-
-		return user
-		
+		if (user)
+			return user
+		throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
 	}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Game } from '../entities/game-entity';
 import { Repository } from 'typeorm';
@@ -14,34 +14,36 @@ export class MatchHistoryService {
     constructor(
         @InjectRepository(Game)
         private gameRepository: Repository<Game>,
-
-        @InjectRepository(User)
-		private userRepository: Repository<User>,
-
         private readonly usersService : UsersService
     ) {}
 
     async storeGameResults(game : GameState): Promise<Game> {
+        const winner = await this.usersService.findOneById(game.winner)
+        const looser = await this.usersService.findOneById(game.looser)
 
-        try {
+        if (!winner || !looser)
+            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
 
-            let createDto : CreateGameDto = {
-                winnerId : game.winner,
-                winnerUsername : (await this.usersService.findOneById(game.winner)).username,
-                winnerScore : game.winner === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
-                looserId : game.looser,
-                looserUsername : (await this.usersService.findOneById(game.looser)).username,
-                looserScore: game.looser === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
-            }
+        const createDto : CreateGameDto = {
+            winnerId : game.winner,
+            winnerUsername : winner.username,
+            winnerScore : game.winner === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
+            looserId : game.looser,
+            looserUsername : looser.username,
+            looserScore: game.looser === game.clientOne.id ? game.clientOneScore : game.clientTwoScore,
+        }
+        
+        let newGame = this.gameRepository.create(createDto)
+        if (!newGame)
+            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create game'})
+
+        newGame = await this.gameRepository.save(newGame)
+        if (!newGame)
+            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create game'})
             
-            let newGame = this.gameRepository.create(createDto);
-            newGame = await this.gameRepository.save(newGame)
-            await this.addGameToUsersPlayedGames(newGame)
-            return (newGame)
-        }
-        catch (e) {
-            console.log('ERROR in adding game to DB : ', e.message)
-        }
+        await this.addGameToUsersPlayedGames(newGame)
+        return (newGame)
+
     }
 
     async addGameToUsersPlayedGames(game : Game) {
@@ -52,39 +54,43 @@ export class MatchHistoryService {
     
     async addGameToWinnerPlayedGames(game : Game) {
 
-        const winner = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.winnerId }})
-    
+        const winner = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : game.winnerId }})
+        if (!winner)
+            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
+        
         if (winner.playedGames === undefined)
             winner.playedGames = [];
+            
         winner.playedGames.push(game);
         winner.winsAmount ++;
-        this.userRepository.save(winner);
+
+        return await this.usersService.save(winner)
 
     }
 
     async addGameToLooserPlayedGames(game : Game)
     {
         
-        const looser = await this.userRepository.findOne({relations : {playedGames: true},where: {id : game.looserId }});
+        const looser = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : game.looserId }})
+        if (!looser)
+            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
         
         if (looser.playedGames === undefined)
             looser.playedGames = [];
         looser.playedGames.push(game);
         looser.loosesAmount ++;
-        this.userRepository.save(looser);
+
+        return await this.usersService.save(looser)
+
     }
 
 
   async returnHistory(userId : string){
 
-    try {
-      
-      const res = await this.userRepository.findOne({relations : {playedGames: true},where: {id : userId}});
-      return (res.playedGames.reverse());
+      const user = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : userId}})
+      if (!user)
+        throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
+
+      return (user.playedGames.reverse());
     }
-    catch (e) {
-      console.log('Get History back : ', e.message)
-      throw Error
-    }
-  }
 }
