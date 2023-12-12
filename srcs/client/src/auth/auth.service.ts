@@ -105,7 +105,6 @@ class AuthService {
 		const cookies = new Cookies()
 		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/logout-2fa` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
 		try {
-			// const res:any = await this.get(`http://127.0.0.1:4545/auth/logout`)
 			
 			const res:any = await this.get(url)
 			gameSock.emit('logout');
@@ -113,7 +112,7 @@ class AuthService {
 			cookies.remove("refreshToken")
 			return res.status
 		} catch(err:any) {
-			return err.response.status
+			throw err
 		}
 	}
 

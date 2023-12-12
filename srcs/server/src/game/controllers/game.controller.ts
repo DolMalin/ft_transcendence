@@ -4,6 +4,7 @@ import { Game } from "../entities/game-entity";
 import { UsersService } from "src/users/services/users.service";
 import { User } from "src/users/entities/user.entity";
 import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
+import { NotFoundException } from "@nestjs/common";
 
 @Controller('games')
 export class GamesController {
@@ -13,18 +14,13 @@ export class GamesController {
     ) {}
 
     @UseGuards(AccessTokenGuard)
-    @Get()
-    async findAll(): Promise<Game[]> {
-        const gameArray : Game[]= []
-        return (gameArray)
-    }
-
-    @UseGuards(AccessTokenGuard)
     @Get(':id')
     async findUserHistory(@Param('id') id : string): Promise<Game[]>
     {
-        return (this.userService.findOneById(id).then((res : User) => {
-            return (res.playedGames);
-        }))
+        const user = await this.userService.findOneById(id)
+        if (!user)
+            throw new NotFoundException('Database error', {cause: new Error(), description: `Cannot find user`})
+
+        return (user.playedGames)
     }
 }

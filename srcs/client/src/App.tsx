@@ -230,8 +230,6 @@ function App() {
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-
-        gameSock.emit('test');
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
       });
 
