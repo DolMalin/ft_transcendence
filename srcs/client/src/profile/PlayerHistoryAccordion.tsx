@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import {
     Box,
+    Text,
     Accordion,
     AccordionButton,
     AccordionItem,
@@ -18,7 +19,7 @@ import authService from "../auth/auth.service";
 import { DBGame } from "../game/globals/interfaces";
 
 
-function PlayerHistoryAccordion(props : {userId : string}) {
+function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean}) {
     const [history, setHistory] = useState<DBGame[]>([]);
 
     async function getHistory(id : string) {
@@ -39,7 +40,7 @@ function PlayerHistoryAccordion(props : {userId : string}) {
     }, [props.userId])
 
     return (<>
-        <Accordion allowToggle 
+        <Accordion allowToggle defaultIndex={props.isOpen ? [0] : undefined}  
         marginTop={'40px'}
         maxHeight={'400px'} overflowY={'auto'}> 
             <AccordionItem border={'none'}>
@@ -61,7 +62,9 @@ function PlayerHistoryAccordion(props : {userId : string}) {
                             </Tr>
                         </Thead>
                         <Tbody>
-                        {history.map((value, index) => {
+                        {
+                            history.map((value, index) => {
+
                             return (<Tr key={index}>
                                 <Td> 
                                     {props.userId === value.winnerId ? value.winnerUsername : value.looserUsername} 

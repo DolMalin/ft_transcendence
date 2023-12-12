@@ -50,9 +50,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 console.error('Error checking if profile is my own:', error);
             }
         }
-        const fetchUserId = async () => {
+        const fetchUserProfile = async () => {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/' + props.userId);
+                const res = await authService.get('http://127.0.0.1:4545/users/profile/' + props.userId);
+                console.log('fetch profile')
                 setUser(res?.data);
                 return (res?.data?.id)
     
@@ -61,7 +62,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             }
         }
     
-        fetchUserId().then((userId) => {
+        fetchUserProfile().then((userId) => {
             checkIfYourself(userId);
         });
     }, [props.userId])
