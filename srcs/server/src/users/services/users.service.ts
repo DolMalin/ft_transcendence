@@ -65,6 +65,7 @@ export class UsersService {
 
   }
 
+  
   async addAvatar(id: string, dataBuffer: Buffer, filename: string) {
     const avatar = await this.avatarService.create(dataBuffer, filename)
     if (!avatar)
