@@ -5,7 +5,6 @@ import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
-import { Room } from './entities/room.entity';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -14,7 +13,6 @@ class ChatDTO {
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
-    private jwtService: JwtService,
     private readonly userService : UsersService,
     private readonly authService : AuthService
     ){}

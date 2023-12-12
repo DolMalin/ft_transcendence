@@ -17,9 +17,9 @@ export class CreateRoomDto {
     
     @IsString()
     @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-    @IsOptional()
     @MinLength(6)
     @MaxLength(20)
+    @IsOptional()
     password: string
 
     @Type(() => User)
