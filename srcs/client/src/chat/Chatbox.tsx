@@ -37,7 +37,8 @@ async function getUserList(id: number){
         userlist = res.data
     }
     catch(err){
-        console.log(err)
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+
     }
     return userlist
 }
@@ -58,16 +59,15 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     const { 
         register, 
         handleSubmit, 
-        reset, 
+        setValue, 
         formState: { errors }} = useForm()
 
     const onSubmit = (data: {message: string}) => {
         sendMessage(data.message)
-        reset()
+        setValue('message', '')
     }
 
     useEffect(()  => {
-        console.log('msg', props.room.message)
         setMessageList(props.room.message? props.room.message: [])
         const res = getMe()
         res.then(response => {
@@ -80,20 +80,20 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
             return me
         }catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
         }}
-        
+
     const sendMessage = async (currentMessage: string) => {
-        
         try {
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
-            console.log('----- in send Message ------', message)
             props.socket.emit("sendMessage", message);
             setMessageList((list) => [...list, message])
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
         }
     }
 
@@ -103,18 +103,16 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setUserList(tab)
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
-    // useEffect(() => {
-    //     fetchUserList()
-    // }, [])
+    useEffect(() => {
+        fetchUserList()
+    }, [])
 
-    //TODO celui qui cree le channel et envoie le premier message bah ca marche pas
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {
-        console.log('---------message--------', data)
         //si bloque --> pas ca
         setMessageList((list) => [...list, data])
         })
@@ -123,10 +121,9 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
-    //TODO gere le fait que j ai un undefined chelou quand je join en tant que dm
     return (
         <div>
-        {/* <mark>
+        <mark>
             <h2>User list</h2>
         </mark>
         {userList?.length > 0 && (
@@ -139,7 +136,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 </div>
             </div>
         ))
-        )} */}
+        )}
         <><div>
             <Chakra.Button onClick={() => {
                     props.showChat(false)}}>
@@ -175,8 +172,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                     {
                         ...register("message", {
                             required: "enter message",
-                            minLength: 1,
-                            maxLength: 1000 //todo regarder regle de convention
                         })
                     }
                 />

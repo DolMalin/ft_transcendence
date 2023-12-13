@@ -14,9 +14,7 @@ function ProfileInfo() {
         const fetchUserProfile = async () => {
             try {
                 const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
-                // console.log(user);
                 const user = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + me?.data?.id);
-                // console.log(user);
                 setUser(user.data)
     
             } catch (err) {

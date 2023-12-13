@@ -12,7 +12,7 @@ export class User {
 	@Column({type: 'int', unique: true})
 	ftId: number
 
-	@Column({type: 'varchar', length: 20, nullable: true})
+	@Column({type: 'varchar', length: 20, nullable: true, unique: true})
 	username: string
 
 	@Column({type: 'varchar', nullable: true})
@@ -74,4 +74,7 @@ export class User {
 
 	@Column({type : 'text', default : null, array : true, nullable : true})
 	gameSockets : string[];
+}
+function IsUnique(arg0: { message: string; }) {
+	throw new Error('Function not implemented.');
 }

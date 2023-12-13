@@ -250,13 +250,12 @@ function App() {
 
   async function getUserId() {
 
-    console.log('in get user ID')
     try {
       const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
       setUserId(res.data.id)
     }
-    catch(e) {
-      console.log('Error on game socket creation : ', e?.message);
+    catch(err) {
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
     }
   }
 

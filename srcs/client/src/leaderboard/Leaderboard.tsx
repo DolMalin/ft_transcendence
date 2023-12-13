@@ -66,7 +66,7 @@ function LeaderBoard(props : {gameSock : Socket}) {
         }
         catch (err)
         {
-            console.log(err);
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
             setScoreList([])
         }
     }

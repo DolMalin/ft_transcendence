@@ -168,8 +168,8 @@ export function Chat(props: {socket: Socket}){
         </mark>
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
-            <Chakra.Flex flexDir="row" >
-                   <div className="userList" key={index}>
+            <Chakra.Flex flexDir="row" key={index}>
+                   <div className="userList">
                 <div>
                     <ul>
                         <li><Chakra.Link onClick={() => {onOpen() ; setId(user.id)}}>{user.username}</Chakra.Link></li>

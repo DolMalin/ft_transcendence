@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException, ConflictException} from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt'
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode'
 import { Avatar } from 'src/users/entities/avatar.entity';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 
 @Injectable()
@@ -56,8 +57,7 @@ export class AuthService {
           config
         ).then((res) => {
           resolve(res.data.access_token as string)
-        }, (err) => {
-          console.log(err)
+        }, () => {
           resolve(null)
         })
     })
@@ -245,19 +245,22 @@ export class AuthService {
   }
 
   
-  async register(file: Express.Multer.File, body: any, req: any, res: any) {
+  async register(file: Express.Multer.File, dto: UpdateUserDto, res: any, user: User) {
 
     if (file) {
-     const avatar = await this.usersService.addAvatar(req.user.id, file.buffer, file.originalname)
+     const avatar = await this.usersService.addAvatar(user.id, file.buffer, file.originalname)
      if (!avatar)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create avatar'})
     }
-    
-    const user = await this.usersService.update(req.user.id, {username: body.username, isRegistered: true})
-    if (!user)
+
+    if (await this.usersService.findOneByUsername(dto.username))
+      throw new ConflictException('Database error', {cause: new Error(), description: 'username already exists'})
+
+    const newUser = await this.usersService.update(user.id, {username: dto.username, isRegistered: true})
+    if (!newUser)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
 
-    return res.status(200).send(body)
+    return res.status(200).send(dto)
   }
 
   async generateTwoFactorAuthenticationSecret(user: User) {

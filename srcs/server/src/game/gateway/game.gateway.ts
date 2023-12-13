@@ -53,7 +53,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       await this.userService.addGameSocketId(client.id, user.gameSockets, user);
-      console.log('socket tab in connection : ', user.gameSockets);
     }
     catch(e) {
       client.disconnect();
@@ -67,9 +66,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       if (client.handshake.query.type !== 'game')
         return ;
-      console.log('socket to remove : ', client.id)
       await this.userService.removeSocketId(client.id, user.gameSockets, user)
-      console.log('socket tab in disconnection : ', user.gameSockets);
     }
     catch(e) {
     Logger.error('game gateway handle disconnection error: ', e?.message);
@@ -150,7 +147,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('startGameLoop') // Protected against socket meddling
   async startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
     
-    console.log('room Name in startGameLoop :', data.roomName)
     if (data === undefined || data === null || 
     typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
     {
@@ -161,7 +157,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const game = this.gamesMap.get(data.roomName);
     if (game === undefined)
     {
-      console.log('game undefined in startGameLoop')
       Logger.error('game undefined in startGameLoop')
       return ;
     }
@@ -220,7 +215,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (data === undefined || data === null || typeof data.targetId != 'string' || typeof data.gameType != 'string')
     {
-      console.log('type error in GameInvite : ')
+      Logger.error('type error in GameInvite : ')
       return ;
     }
 
@@ -238,7 +233,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     if (data === undefined || data === null || typeof data.senderSocketId != 'string' || typeof data.senderId != 'string' || typeof data.gameType != 'string')
     {
-      console.log('type error in acceptedInvite : ')
+      Logger.error('type error in acceptedInvite : ')
       return ;
     }
 
@@ -255,7 +250,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async declinedInvite(@MessageBody() data : {senderId : string}, @ConnectedSocket() client : Socket) {
     if (data === undefined || data === null || typeof data.senderId != 'string')
     {
-      console.log('type error in declinedInvite : ')
+      Logger.error('type error in declinedInvite : ')
       return ;
     }
     try {

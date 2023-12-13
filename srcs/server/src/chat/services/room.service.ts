@@ -82,7 +82,6 @@ export class RoomService {
     }
     
     async findAllUsersInRoom(id: number) {
-        console.log('id', id)
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')

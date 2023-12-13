@@ -28,8 +28,6 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     }
     
     function sendPrivateMessage(){
-        console.log('test from front')
-        console.log('socket', props.chatSocket)
         props.chatSocket?.emit('DM', {targetId: props.userId})
         props.onClose()
     }
@@ -59,12 +57,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         const fetchUserProfile = async () => {
             try {
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + props.userId);
-                console.log('fetch profile')
                 setUser(res?.data);
                 return (res?.data?.id)
-    
-            } catch (error) {
-                console.error('Error fetching user data:', error);
+            } catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         }
     

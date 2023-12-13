@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -26,49 +26,40 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   async handleConnection (client: Socket) {
     //TODO maybe find another way
-    console.log("Connection of socket ID : " + client.id);
-    this.chatDTO.clientID.push(client.id);
     // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
     // for (const id of userBlocked){
-    // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
-
-    try {
-      if (client.handshake.query?.userId as string === undefined)
-      {
+        // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
+        
+    Logger.log("Connection of socket ID : " + client.id);
+    this.chatDTO.clientID.push(client.id);
+    try 
+    {
+        if (client.handshake.query.type !== 'chat')
+          return ;
+        if (client.handshake.query?.userId as string === undefined)
+        {
+            client.disconnect();
+            return ;
+        }
+        const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
+        client.join(`user-${payload.id}`)
+        Logger.log(`client ${client.id} joined user ${payload.id}`)
+    }
+        catch(err) {
         client.disconnect();
-        return ;
-      }
-      const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
-      if (client.handshake.query.type !== 'chat')
-        return ;
-      client.join(`user-${payload.id}`)
-      console.log(`client ${client.id} joined user ${payload.id}`)
+        Logger.error(`${err.response.data.message} (${err.response.data.error})`)
     }
-    catch(e) {
-      client.disconnect();
-      console.log('handle connection ERROR : ', e);
-    }
-
   }
 
-
   async handleDisconnect(client: Socket) {  
-      //TODO maybe find another way
-      console.log("Disonnection of socket ID : " + client.id);
+    Logger.log("Disonnection of socket ID : " + client.id);
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
-    try {
-      if (client.handshake.query.type !== 'chat')
-        return ;
-    }
-    catch(e) {
-      console.log('handle connection ERROR : ', e);
-    }
   }
   
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     client.join(`room-${roomId}`)
-    console.log(`User with ID: ${client.id} joined room ${roomId}`)
+    Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   
   }
   
@@ -81,7 +72,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('DM')
   async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
       if (!data || typeof data.targetId !== "string") {
-          console.error("Wrong type for parameter");
+          Logger.error("Wrong type for parameter");
           return;
       }
 

@@ -19,7 +19,6 @@ export class UsersController {
     private readonly matchHistoryService: MatchHistoryService,
     ) {}
 
-  //TODO REMOVE
   @UseGuards(AccessToken2FAGuard)
   @Get()
   findAll(): Promise<User[]> {

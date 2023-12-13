@@ -91,7 +91,6 @@ function CreateGame(props : {sock : Socket}) {
 
         sock?.on('roomFilled', ({gameType}) => {
 
-            // console.log('room was filled : ', gameType)
             if (gameType != undefined)
                 dispatch({type : 'SET_GAME_TYPE', payload: gameType})
             dispatch({type : 'SET_WAITING_SCREEN', payload : false});
@@ -104,13 +103,10 @@ function CreateGame(props : {sock : Socket}) {
         })
 
         sock?.on('playerId', ({id}) => {
-            // console.log('getting in id :', id);
             setPlayerId(id);
         })
 
         sock?.on('roomName', ({roomName}) => {
-            // console.log('getting in roomname : ', roomName);
-
             setGameRoom(roomName);
         })
 
@@ -125,7 +121,6 @@ function CreateGame(props : {sock : Socket}) {
         sock?.on('gameOver', async ({winner}) => {
             try {
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
-                console.log('res : ', res.data.id, ' winner : ', winner)
                 if (res.data.id === winner)
                     dispatch({type : 'SET_V_SCREEN', payload : true});
                 else
@@ -135,8 +130,8 @@ function CreateGame(props : {sock : Socket}) {
                 props.sock.emit('availabilityChange', true);
                 
             }
-            catch (e) {
-                console.log('setting is Available to false returned : ', e.message);
+            catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         });
 

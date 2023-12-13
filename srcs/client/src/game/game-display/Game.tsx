@@ -195,7 +195,6 @@ function Game(props : GameProps) {
         window.addEventListener("beforeunload", leaveGameOnRefresh);
         window.addEventListener("blur", handleFocusOut)
 
-        // console.log('game info before game loop : ', gameInfo, ' player id : ', props.playerId)
         if (props.playerId === '2')
         {
             sock.emit('startGameLoop', gameInfo);
