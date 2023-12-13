@@ -207,10 +207,6 @@ export class GamePlayService {
         
           if (server.sockets.adapter.rooms.get(data.roomName).size === 1)
           {
-            // console.log('client socket id : ', client.id);
-            // console.log('client one : ', game.clientOne.socket.id)
-            // console.log('client Two : ', game.clientTwo.socket.id)
-            // console.log('QUITTING : ', server.sockets.adapter.rooms.get(data.roomName).values().next().value)
             const winner = server.sockets.adapter.rooms.get(data.roomName).values().next().value === game.clientOne.socket.id ? game.clientOne.id : game.clientTwo.id;
             
             game.looser = winner === game.clientOne.id ? game.clientTwo.id : game.clientOne.id;

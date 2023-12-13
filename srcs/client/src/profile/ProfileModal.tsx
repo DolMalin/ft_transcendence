@@ -24,6 +24,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     function sendDuelInvite(gameType : string) {
 
+        console.log(props.gameSock)
         props.gameSock?.emit('gameInvite', {targetId : props.userId, gameType : gameType})
     }
     
@@ -75,6 +76,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         return ;
     return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
+        <ModalOverlay
+          bg='blackAlpha.300'
+          backdropFilter='blur(10px) hue-rotate(90deg)'
+        />
         <ModalOverlay />
             <ModalContent borderRadius={'0px'} bg={Constants.BG_COLOR_FADED} textColor={'white'} className="goma"
             paddingTop={'10px'} paddingBottom={'10px'}>

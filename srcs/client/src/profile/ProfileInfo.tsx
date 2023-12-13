@@ -4,19 +4,19 @@ import * as Constants from '../game/globals/const';
 import authService from '../auth/auth.service'
 import { LeftBracket, RightBracket } from '../game/game-creation/Brackets'
 import PlayerHistoryAccordion from './PlayerHistoryAccordion';
+import { Socket } from 'socket.io-client';
 
-function ProfileInfo() {
+function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
     const [user, setUser] = useState(undefined);
     const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1em');
+    const [accordionFontSize, setAccordionFontSize] = useState(window.innerWidth > 800 ? '1em' : '0.75em');
     const [secretImage, setSecretImage] = useState(false);
     
     useLayoutEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
-                // console.log(user);
                 const user = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + me?.data?.id);
-                // console.log(user);
                 setUser(user.data)
     
             } catch (err) {
@@ -47,7 +47,10 @@ function ProfileInfo() {
         else if (window.innerWidth > 1000)
           setFontSize('1.5em')
         else if (window.innerWidth < 800)
+        {
           setFontSize('1em')
+          setAccordionFontSize('0.75em')
+        }
       }, 100)
   
       window.addEventListener('resize', debouncedHandleResize)
@@ -115,7 +118,7 @@ function ProfileInfo() {
                 <Text textAlign={'center'} fontSize={fontSize}> {user?.loosesAmount} </Text>
               </Box>
               <Box width={'100%'}>
-                <PlayerHistoryAccordion userId={user?.id} isOpen={true}/>
+                <PlayerHistoryAccordion userId={user?.id} isOpen={true} fontSize={accordionFontSize} gameSocket={props.gameSock}/>
               </Box>
             </Flex>
         </Box>

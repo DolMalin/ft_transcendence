@@ -128,7 +128,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				wrap={'wrap'}
 				flexDir={'column'}
 				>
-					<ProfileInfo/>
+					<ProfileInfo gameSock={props.gameSock}/>
 				</Flex>
 		</Flex>
 	</>)
