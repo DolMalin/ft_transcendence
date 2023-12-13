@@ -189,9 +189,15 @@ export class GamePlayService {
     
     let ballEvents : string = 'start';
 
+    // console.log('rooms at game loop start : ', server.sockets.adapter.rooms.get(data.roomName))
+
     try {
-      server.to(data.roomName).emit('gameStarted', 
-      await this.getUserBasicInfos(game.clientOne.id), await this.getUserBasicInfos(game.clientTwo.id));
+
+      const userOneInfos = await this.getUserBasicInfos(game.clientOne.id);
+      const userTwoInfos = await this.getUserBasicInfos(game.clientTwo.id);
+
+      
+      server.to(data.roomName).emit('gameStarted', userOneInfos, userTwoInfos);
       if (game.hasStarted === false)
         game.hasStarted = true;
       else
@@ -199,6 +205,19 @@ export class GamePlayService {
       
       game.ballRefreshInterval = setInterval(() => {
         
+          if (server.sockets.adapter.rooms.get(data.roomName).size === 1)
+          {
+            // console.log('client socket id : ', client.id);
+            // console.log('client one : ', game.clientOne.socket.id)
+            // console.log('client Two : ', game.clientTwo.socket.id)
+            // console.log('QUITTING : ', server.sockets.adapter.rooms.get(data.roomName).values().next().value)
+            const winner = server.sockets.adapter.rooms.get(data.roomName).values().next().value === game.clientOne.socket.id ? game.clientOne.id : game.clientTwo.id;
+            
+            game.looser = winner === game.clientOne.id ? game.clientTwo.id : game.clientOne.id;
+            game.winner = winner;
+            server.to(data.roomName).emit('gameOver', {winner : winner});
+            return (clearInterval(game.ballRefreshInterval))
+          }
           ballEvents = this.handleBallMovement(game, data, client, server);
             
           this.handlePaddleMovement(game);
@@ -224,8 +243,6 @@ export class GamePlayService {
             let PlayerTwoMetrics : GameMetrics = {paddleOne : game.paddleTwo, paddleTwo : game.paddleOne, ball : game.ball};
             server.to(data.roomName).emit('gameMetrics', playerOneMetrics, PlayerTwoMetrics);
           }
-          if (client.rooms.size === 0) //TO DO Changer cette immondice
-            return (clearInterval(game.ballRefreshInterval))
         }, Constants.FRAME_RATE);
     }
     catch (e) {

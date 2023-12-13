@@ -81,12 +81,12 @@ function ProfileInfo() {
             flexDir={'row'}
             flexWrap={'wrap'}>
               <Box width={'160px'}>
-                {!secretImage && <Image
+                {!secretImage && <Avatar
                 boxSize={'160px'}
                 borderRadius={'full'}
                 src={user?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + user?.id : ""}
                 onClick={() => setSecretImage(true)}
-                ></Image>}
+                ></Avatar>}
                 {secretImage && <Image
                 boxSize={'160px'}
                 borderRadius={'full'}

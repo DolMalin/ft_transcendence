@@ -42,14 +42,21 @@ import authService from "../../auth/auth.service";
     }, [dot]);
 
     useEffect(() => {
+      console.log('getting through use effect')
         function handleUnload() {
-            leaveQueue();
+          console.log('handle unload')
+          if (props.roomName !== undefined && props.roomName !== '')
+          {
+            console.log('LEAVING : ', props)
+                leaveQueue();
+          }
         }
 
         window.addEventListener('beforeunload', handleUnload);
         return (() => {window.removeEventListener('beforeunload', handleUnload)})
-    }, [props.roomName])
+    }, [props.roomName]);
 
+    console.log('waiting list rendered AAAAAAAAAAAAAAAAAAAAAAAAAAA')
     return (
         <Flex w={'100%'} h={'100%'} minH={'sm'} minHeight={'sm'}
         wrap={'nowrap'}

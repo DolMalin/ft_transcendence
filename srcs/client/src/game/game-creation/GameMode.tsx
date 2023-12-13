@@ -30,7 +30,6 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
 
         props.sock?.on('isAvailable', ({bool}) => {
 
-            console.log('setting player availability')
             setPlayerAvalaible(bool);
         })
         return (() => {

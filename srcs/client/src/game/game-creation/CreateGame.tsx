@@ -81,17 +81,10 @@ function CreateGame(props : {sock : Socket}) {
         selectedGameType : '',
     });
 
-    useEffect (function matchMaking() {
-        if (state.lookingForGame === true)
-        {
-            sock?.emit("joinGame", {gameType : state.selectedGameType});
-            dispatch({type : 'SET_GAME_MOD', payload : false});
-            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
-        }
+    useEffect (function sockEvents() {
 
         sock?.on('roomFilled', ({gameType}) => {
 
-            // console.log('room was filled : ', gameType)
             if (gameType != undefined)
                 dispatch({type : 'SET_GAME_TYPE', payload: gameType})
             dispatch({type : 'SET_WAITING_SCREEN', payload : false});
@@ -104,12 +97,11 @@ function CreateGame(props : {sock : Socket}) {
         })
 
         sock?.on('playerId', ({id}) => {
-            // console.log('getting in id :', id);
+            
             setPlayerId(id);
         })
 
         sock?.on('roomName', ({roomName}) => {
-            // console.log('getting in roomname : ', roomName);
 
             setGameRoom(roomName);
         })
@@ -119,13 +111,21 @@ function CreateGame(props : {sock : Socket}) {
             sock?.off('roomName');
             sock?.off('playerId');
         })
-    }, [state.lookingForGame, props.sock])
+    }, [props.sock])
+
+    useEffect (function matchMaking() {
+        if (state.lookingForGame === true)
+        {
+            sock?.emit("joinGame", {gameType : state.selectedGameType});
+            dispatch({type : 'SET_GAME_MOD', payload : false});
+            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
+        }
+    }, [state.lookingForGame])
 
     useEffect(() => {
         sock?.on('gameOver', async ({winner}) => {
             try {
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
-                console.log('res : ', res.data.id, ' winner : ', winner)
                 if (res.data.id === winner)
                     dispatch({type : 'SET_V_SCREEN', payload : true});
                 else

@@ -134,11 +134,9 @@ export class UsersService {
  */
   async removeSocketId(socketId : string, socketIdArray : string[], user : User) {
     user.gameSockets = socketIdArray?.filter((value) => value != socketId)
-    console.log("ICI")
     const updatedUser = await this.update(user.id, { gameSockets : user.gameSockets})
     if (!updatedUser)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'})
-    console.log("et donc la")
     return updatedUser
   }
 
