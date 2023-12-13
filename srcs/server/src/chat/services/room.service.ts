@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -30,7 +30,8 @@ export class RoomService {
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
-
+        if (await this.findOneByName(createRoomDto.name))
+            throw new ConflictException("Channel already exists", {cause: new Error(), description: "channel name is unique, find another one"})
         const room = this.roomRepository.create({
             name: createRoomDto.name,
             password: createRoomDto?.password,
