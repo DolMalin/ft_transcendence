@@ -5,6 +5,8 @@ import authService from "../auth/auth.service"
 import { MessageData, Room } from "./Chat"
 import { Socket } from "socket.io-client"
 import { useForm } from "react-hook-form"
+import { useDisclosure } from "@chakra-ui/react"
+import ProfileModal from "../profile/ProfileModal"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -27,27 +29,43 @@ function timeOfDay(timestampz: string | Date){
     return (date)
 }
 
-async function getUserList(id: number){
+async function makeThemOp(targetId : string, roomName : string) {
+    try {
+        await this.authService.post(process.env.REACT_APP_SERVER_URL + '/room/giveAdminPrivileges', 
+        {targetId : targetId, roomName : roomName});
+    }
+    catch (err) {
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+    }
+};
+
+async function getUserList(id: number, me : {username: string, id: string}){
     let userlist : {
         id : string,
         username: string
     }[]
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
+        console.log('---me in getuserlistchatbox----', me)
+        console.log('res data', res.data)
         userlist = res.data
+        userlist = userlist.filter(user => user.id !== me?.id)
+        console.log('userlist after filter', userlist)
     }
     catch(err){
         console.error(`${err.response.data.message} (${err.response.data.error})`)
-
     }
     return userlist
 }
 
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
-
+    
+    const { isOpen, onOpen, onClose } = useDisclosure()
+    const [id, setId] = useState("")
+    const [privileges, setPrivileges] = useState('no')
     const [messageList, setMessageList] = useState<MessageData[]>([])
-    const [me, setMe] = useState
-    <{
+    const [me, setMe] = useState<
+    {
         id: string, 
         username: string
     } | undefined>(undefined)
@@ -67,28 +85,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         setValue('message', '')
     }
 
-    useEffect(()  => {
-        setMessageList(props.room.message? props.room.message: [])
-        const res = getMe()
-        res.then(response => {
-            setMe(response.data)
-        })
-    }, [])
-    
-    const getMe = async () => {
-        try{
-            const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
-            return me
-        }catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
-
-        }}
-
     const sendMessage = async (currentMessage: string) => {
         try {
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
-            props.socket.emit("sendMessage", message);
+            props.socket.emit("sendMessage", message)
             setMessageList((list) => [...list, message])
         }
         catch(err){
@@ -97,9 +98,9 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
     }
 
-    const fetchUserList = async () => {
+    const fetchUserList = async (me : {username: string, id: string}) => {
         try {
-            const tab = await getUserList(props.room.id)
+            const tab = await getUserList(props.room.id, me)
             setUserList(tab)
         }
         catch(err){
@@ -107,8 +108,21 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
     }
 
-    useEffect(() => {
-        fetchUserList()
+    useEffect(() => {        
+        const asyncWrapper = async () => {
+            try{
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
+                setMe(res.data)
+                fetchUserList(res.data)
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
+                {targetId : res.data.id, roomName : props.room.name})
+                setPrivileges(privi);
+            }
+            catch(err){
+                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+        }
+        setMessageList(props.room.message? props.room.message: [])
+        asyncWrapper()
     }, [])
 
     useEffect(() => {
@@ -121,64 +135,95 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
+    console.log(privileges)
     return (
         <div>
-        <mark>
+          <mark>
             <h2>User list</h2>
-        </mark>
-        {userList?.length > 0 && (
-        userList.map((userlist, index: number) => (
-            <div className="userlist" key={index}>
-                <div>
+          </mark>
+          {userList?.length > 0 && (
+            userList.map((user, index: number) => (
+              <Chakra.Flex flexDir="row" key={index}>
+                <div className="userList">
+                  <div>
                     <ul>
-                        <li>{userlist.username}</li>
+                      <li>
+                        <Chakra.Link>
+                          <Chakra.Popover>
+                            <Chakra.PopoverTrigger>
+                              <Chakra.Button>{user.username}</Chakra.Button>
+                            </Chakra.PopoverTrigger>
+                            <Chakra.Portal>
+                              <Chakra.PopoverContent>
+                                <Chakra.PopoverBody>
+                                  <Chakra.Button onClick={() => makeThemOp(user.id, props.room.name)}>
+                                    admin
+                                  </Chakra.Button>
+                                  <Chakra.Button onClick={() => ({})}>
+                                    ban
+                                  </Chakra.Button>
+                                  <Chakra.Button onClick={() => ({})}>
+                                    mute
+                                  </Chakra.Button>
+                                  <Chakra.Button onClick={() => ({})}>
+                                    kick
+                                  </Chakra.Button>
+                                </Chakra.PopoverBody>
+                              </Chakra.PopoverContent>
+                            </Chakra.Portal>
+                          </Chakra.Popover>
+                        </Chakra.Link>
+                      </li>
                     </ul>
+                  </div>
                 </div>
-            </div>
-        ))
-        )}
-        <><div>
-            <Chakra.Button onClick={() => {
-                    props.showChat(false)}}>
-                back
+              </Chakra.Flex>
+            ))
+          )}
+          <div>
+            <Chakra.Button onClick={() => props.showChat(false)}>
+              back
             </Chakra.Button>
-        </div><div className="chat-window">
-        <div className="chat-header">
-            <p>channel: {props.room.name}</p>
-        </div>
-        <div className="chat-body">
-            <ScrollToBottom className="message-container">
-                {messageList.map((messageContent, index) => {
-                    return <div className="message" key={index} id={messageContent.author.id === me?.id ? "other" : "you"}>
-                        <div>
-                            <div className="message-content">
-                                <p>{messageContent.content}</p>
-                            </div>
-                            <div className="message-meta">
-                                <p id="time">{timeOfDay(messageContent.sendAt)}</p>
-                                <p id="author">{messageContent.author.username}</p>
-                            </div>
-                        </div>
+          </div>
+          <div className="chat-window">
+            <div className="chat-header">
+              <p>channel: {props.room.name}</p>
+            </div>
+            <div className="chat-body">
+              <ScrollToBottom className="message-container">
+                {messageList.map((messageContent, index) => (
+                  <div className="message" key={index} id={messageContent.author.id === me?.id ? "other" : "you"}>
+                    <div>
+                      <div className="message-content">
+                        <p>{messageContent.content}</p>
+                      </div>
+                      <div className="message-meta">
+                        <p id="time">{timeOfDay(messageContent.sendAt)}</p>
+                        <p id="author">
+                          <Chakra.Link onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Chakra.Link>
+                        </p>
+                      </div>
                     </div>
-                })}
-            </ScrollToBottom>
-        </div>
-        <div className="chat-footer">
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <Chakra.FormControl isRequired>
-                <Chakra.Input
+                  </div>
+                ))}
+              </ScrollToBottom>
+            </div>
+            <div className="chat-footer">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <Chakra.FormControl isRequired>
+                  <Chakra.Input
                     type="text"
                     placeholder="type your message..."
-                    {
-                        ...register("message", {
-                            required: "enter message",
-                        })
-                    }
-                />
-            </Chakra.FormControl>
-            <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
-        </form>
+                    {...register("message", {
+                      required: "enter message",
+                    })}
+                  />
+                </Chakra.FormControl>
+                <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
+              </form>
+            </div>
+            <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} />
+          </div>
         </div>
-    </div></></div>
-    )
+      );
 }

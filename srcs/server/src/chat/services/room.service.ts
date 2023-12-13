@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -11,7 +11,6 @@ import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { UsersService } from 'src/users/services/users.service'
 import { roomType} from '../entities/room.entity'
-import { Server } from 'socket.io'
 import { JoinRoomDto } from '../dto/join-room.dto'
 
 @Injectable()
@@ -41,6 +40,10 @@ export class RoomService {
 
     async findOneByName(name: string){
         return await this.roomRepository.findOneBy({name})
+    }
+    
+    async findOneByNameWithRelations(name: string){
+        return await this.roomRepository.findOne({where : {name : name}, relations : ['owner', 'administrator', 'users', 'message']})
     }
 
     async createDM(user: User, user2: User, roomName: string){
@@ -155,4 +158,22 @@ export class RoomService {
         msgList.reverse()
         return msgList
     }
+
+    isAdmin(room : Room, user : User) {
+        
+        console.log(room.owner.username)
+        if (room.administrator?.find((userToFind : User) => userToFind?.id === user?.id))
+            return ('isAdmin');
+        else if (user.id === room.owner?.id)
+            return ('isOwner');
+        return ('no');
+    }
+
+    async save(room: Room) {
+        const newRoom = await this.roomRepository.save(room);
+        if (!newRoom)
+          throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}); 
+        return newRoom;
+    
+      }
 }
