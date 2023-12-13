@@ -6,7 +6,6 @@ Flex
  } from "@chakra-ui/react"
 import { Socket } from "socket.io-client";
 import * as Constants from '../globals/const'
-import authService from "../../auth/auth.service";
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
     
@@ -40,15 +39,6 @@ import authService from "../../auth/auth.service";
     
         return () => clearInterval(dotdotdot);
     }, [dot]);
-
-    useEffect(() => {
-        function handleUnload() {
-            leaveQueue();
-        }
-
-        window.addEventListener('beforeunload', handleUnload);
-        return (() => {window.removeEventListener('beforeunload', handleUnload)})
-    }, [props.roomName])
 
     return (
         <Flex w={'100%'} h={'100%'} minH={'sm'} minHeight={'sm'}

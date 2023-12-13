@@ -67,6 +67,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (client.handshake.query.type !== 'game')
         return ;
       await this.userService.removeSocketId(client.id, user.gameSockets, user)
+
+      this.gamesMap.forEach((game, key) => {
+        if (game.clientOne.socket.id === client.id)
+        {
+          this.matchmakingService.leaveGame(this.server, client, this.gamesMap, {gameType : game.gameType, playerId : '1', roomName : key});
+          this.userService.update(user.id, {isAvailable : true});
+        }
+        else if (game.clientTwo.socket.id === client.id)
+        {
+          this.matchmakingService.leaveGame(this.server, client, this.gamesMap, {gameType : game.gameType, playerId : '2', roomName : key});
+          this.userService.update(user.id, {isAvailable : true});
+        }
+      });
     }
     catch(e) {
     Logger.error('game gateway handle disconnection error: ', e?.message);
@@ -113,7 +126,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (data === null || data === undefined || typeof data?.roomName !== 'string')
     {
-      Logger.error('type error in leaveQueue')
+      Logger.error('type error in leaveQueue');
       return ;
     }
 
@@ -160,9 +173,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       Logger.error('game undefined in startGameLoop')
       return ;
     }
-
-    else
+    try {
       await this.gamePlayService.gameLoop(this.gamesMap.get(data.roomName), data, client, this.server);
+    }
+    catch(e) {
+      Logger.error('starting game loop failure');
+    }
   }
 
   @SubscribeMessage('availabilityChange')
@@ -194,14 +210,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.handleDisconnect(client);
     try {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-  
       await this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
-  
-      this.gamesMap.forEach((value, key) => {
-        if (value.clientOne.id === user.id || value.clientTwo.id === user.id)
-          this.matchmakingService.leaveGame(this.server, client, this.gamesMap, 
-          {roomName : key, playerId : value.clientOne.id === user.id ? '1' : '2', gameType : value.gameType});
-      })
       user.gameSockets = [];
       this.userService.save(user);
     }

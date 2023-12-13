@@ -81,13 +81,7 @@ function CreateGame(props : {sock : Socket}) {
         selectedGameType : '',
     });
 
-    useEffect (function matchMaking() {
-        if (state.lookingForGame === true)
-        {
-            sock?.emit("joinGame", {gameType : state.selectedGameType});
-            dispatch({type : 'SET_GAME_MOD', payload : false});
-            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
-        }
+    useEffect (function sockEvents() {
 
         sock?.on('roomFilled', ({gameType}) => {
 
@@ -103,6 +97,7 @@ function CreateGame(props : {sock : Socket}) {
         })
 
         sock?.on('playerId', ({id}) => {
+            
             setPlayerId(id);
         })
 
@@ -115,7 +110,16 @@ function CreateGame(props : {sock : Socket}) {
             sock?.off('roomName');
             sock?.off('playerId');
         })
-    }, [state.lookingForGame, props.sock])
+    }, [props.sock])
+
+    useEffect (function matchMaking() {
+        if (state.lookingForGame === true)
+        {
+            sock?.emit("joinGame", {gameType : state.selectedGameType});
+            dispatch({type : 'SET_GAME_MOD', payload : false});
+            dispatch({type : 'SET_WAITING_SCREEN', payload : true});
+        }
+    }, [state.lookingForGame])
 
     useEffect(() => {
         sock?.on('gameOver', async ({winner}) => {

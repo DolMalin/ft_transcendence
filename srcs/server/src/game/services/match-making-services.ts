@@ -101,55 +101,40 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    async joinGame(server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
+    joinGame(server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
-        try 
+      for (const [key, value] of gamesMap) 
+      {
+        if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
         {
-          const user = await this.userService.findOneById(client.handshake.query.userId as string);
-          for (const [key, value] of gamesMap) 
-          {
-            if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
-            {
-              this.addClientToRoom(gamesMap, key, client, dbUserId)
-              client.emit('playerId', {id : '2'});
-              client.emit('roomName', {roomName : key});
-              server.to(key).emit('roomFilled', {gameType : gameType});
-                return ;
-              }
-            }
-            
-            let roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
-            
-            this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
-            client.emit('playerId', {id : '1'});
-            client.emit('roomName', {roomName : roomName});
-          }
-        catch(e) {
-          Logger.error('In join game service : ', e?.message);
-        }
-    }
-
-    async joinDuel(server : Server, client : Socket, gamesMap : Map<string, GameState>, data : GameInfo) {
-      
-      try {
-        const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-        
-        if (gamesMap.get(data.roomName) === undefined)
-        {
-          this.duelCreation(server, gamesMap, client, data);
-          client.emit('playerId', {id : '1'})
-          client.emit('roomName', {roomName : data.roomName})
-        }
-        else 
-        {
-          this.addClientToRoom(gamesMap, data.roomName, client, client.handshake.query?.userId as string);
-          client.emit('playerId', {id : '2'})
-          client.emit('roomName', {roomName : data.roomName})
-          server.to(data.roomName).emit('roomFilled', {gameType : data.gameType});
+          this.addClientToRoom(gamesMap, key, client, dbUserId)
+          client.emit('playerId', {id : '2'});
+          client.emit('roomName', {roomName : key});
+          server.to(key).emit('roomFilled', {gameType : gameType});
+          return ;
         }
       }
-      catch (e) {
-        Logger.error('in join duel service : ', e?.message);
+      const roomName = roomNameGenerator(10, server.sockets.adapter.rooms);
+      
+      this.createRoom(gamesMap, roomName, client, dbUserId, gameType)
+      client.emit('playerId', {id : '1'});
+      client.emit('roomName', {roomName : roomName});
+    }
+
+    joinDuel(server : Server, client : Socket, gamesMap : Map<string, GameState>, data : GameInfo) {
+      
+      if (gamesMap.get(data.roomName) === undefined)
+      {
+        this.duelCreation(server, gamesMap, client, data);
+        client.emit('playerId', {id : '1'})
+        client.emit('roomName', {roomName : data.roomName})
+      }
+      else 
+      {
+        this.addClientToRoom(gamesMap, data.roomName, client, client.handshake.query?.userId as string);
+        client.emit('playerId', {id : '2'})
+        client.emit('roomName', {roomName : data.roomName})
+        server.to(data.roomName).emit('roomFilled', {gameType : data.gameType});
       }
     }
 
@@ -207,12 +192,12 @@ export class MatchmakingService {
       client.leave(data.roomName);
     }
 
-    async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
+      async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
 
       const game = gamesMap.get(data.roomName);
       if (game === undefined)
       {
-        Logger.error('undefined game in leaveQueue : ', data.roomName)
+        Logger.error('undefined game in leaveQueue :' + data.roomName)
         return;
       }
 
