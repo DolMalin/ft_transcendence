@@ -231,26 +231,16 @@ function App() {
 
       gameSock?.on('logout', () => {
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
+        gameSock?.disconnect();
       });
 
       return (() => {
         gameSock?.off('logout');
       })
   }, [gameSock])
-  
-  useEffect(() => {
-    async function handleUnload() {
-
-      gameSock?.emit('availabilityChange', true);
-    }
-
-    window.addEventListener('beforeunload', handleUnload);
-    return (() => {window.removeEventListener('beforeunload', handleUnload)})
-}, [gameSock])
 
   async function getUserId() {
 
-    console.log('in get user ID')
     try {
       const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
       setUserId(res.data.id)
