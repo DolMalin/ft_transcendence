@@ -272,7 +272,7 @@ export class MatchmakingService {
             this.userService.emitToAllSockets(server, sender.gameSockets, 'inviteDeclined', {username : target.username})
         }
         catch (e) {
-            console.log('Game Invite Declined Error : ', e.message)
+            Logger.error('game invite declined error : ', e.message)
         }
     }
 

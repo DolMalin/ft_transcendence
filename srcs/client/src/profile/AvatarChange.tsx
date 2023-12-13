@@ -20,7 +20,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 			await authService.register(formData);
             props.setFormVisible(false);
 		} catch(err) {
-			console.log(err);
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
 

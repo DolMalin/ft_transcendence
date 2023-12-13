@@ -35,9 +35,8 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/history/' + id);
                 setHistory(res.data);
             }
-            catch (e) {
-                console.log('get History front : ', e)
-            }
+            catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)}  
         }
     }
 

@@ -10,10 +10,11 @@ import { isUUID } from 'class-validator';
 import { Readable } from 'stream';
 
 import { Server} from 'socket.io';
-
 import { GameGateway } from 'src/game/gateway/game.gateway';
+
 @Injectable()
 export class UsersService {
+
   constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
@@ -38,7 +39,20 @@ export class UsersService {
   findAll() {
     return this.userRepository.find({relations :{playedGames: true}});
   }
-
+  
+  async findAllUsers() {
+    
+    let res = await this.userRepository.find()
+    if (!res || res === undefined){
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    }
+    const userList = res.map(user => ({
+      id: user.id,
+      username: user.username
+    }))
+    return userList
+  }
+  
   findOneById(id: string) {
     return this.userRepository.findOneBy({ id })
   }
@@ -46,6 +60,11 @@ export class UsersService {
   findOneByFtId(ftId: number) {
     return this.userRepository.findOneBy({ ftId })
   }
+
+  findOneByUsername(username: string) {
+    return this.userRepository.findOneBy({ username })
+  }
+
 
   findOneWitOptions(options: any) {
     return this.userRepository.findOne(options)
@@ -95,6 +114,12 @@ export class UsersService {
     return avatar
   }
 
+  blockTarget(user: User, user2: User){
+    //TODO
+    //check if already block
+    // user.blocked.push(user2)
+    // console.log('----user in block-----', user)
+  }
   async getUserAvatar( res: any, id: string) {
 
     if(id && !isUUID(id))
@@ -149,18 +174,6 @@ export class UsersService {
       user.gameSockets = socketIdArray;
       return (this.update(user.id, {gameSockets : user.gameSockets}));
     }
-    
-  /**
-  * @description add a socket Id to an array of string stored in user entity and update the user
-  */
-   async addChatSocketId(socketId : string, socketIdArray : string[], user : User) {
- 
-     if (socketIdArray === null || socketIdArray === undefined)
-       socketIdArray = [];
-     socketIdArray?.push(socketId);
-     user.chatSockets = socketIdArray;
-     return (this.update(user.id, {chatSockets : user.chatSockets}));
-   }
 
    async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
 

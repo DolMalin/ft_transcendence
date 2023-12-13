@@ -4,11 +4,11 @@ import { RoomService } from '../services/room.service';
 import { Room } from '../entities/room.entity';
 import { CreateRoomDto } from '../dto/create-room.dto';
 import { AuthService } from 'src/auth/services/auth.service';
-import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { GetUser } from 'src/users/decorator/user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { JoinRoomDto } from '../dto/join-room.dto';
+import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 
 
 @Controller('room')
@@ -16,11 +16,9 @@ export class RoomController {
     constructor(
         private readonly roomService: RoomService,
         private readonly authService: AuthService
-    ){
+    ){}
 
-    }
-
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessToken2FAGuard)
     @Post()
     async createRoom(@GetUser() user: User, @Body() createRoomDto: CreateRoomDto){
         if (createRoomDto.password?.length > 0)
@@ -29,37 +27,43 @@ export class RoomController {
         return await this.roomService.create(createRoomDto, user)
     }
 
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessToken2FAGuard)
     @Get()
     async getRoomList(){
         return await this.roomService.findAll();
     }
 
-    @UseGuards(AccessTokenGuard)
-    @Get('userlist/:id')
-    async getUserList(@Param("id") id: number){
-        return await this.roomService.findAllUsers(id)
+    @UseGuards(AccessToken2FAGuard)
+    @Get('list')
+    async getRoomListWithoutDm(){
+        return await this.roomService.findAllWithoutDm();
     }
 
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessToken2FAGuard)
+    @Get('userlist/:id')
+    async getUserList(@Param("id") id: number){
+        return await this.roomService.findAllUsersInRoom(id)
+    }
+
+    @UseGuards(AccessToken2FAGuard)
     @Post('joinRoom')
     async joinRoom(@GetUser() user: User, @Body() dto: JoinRoomDto){
         return await this.roomService.joinRoom(dto, user);
     }
 
-    @UseGuards(AccessTokenGuard)
-    @HttpCode(200)
+    @UseGuards(AccessToken2FAGuard)
     @Post('message')
     async postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
         return await this.roomService.postMessage(user, dto)
     }
 
+    @UseGuards(AccessToken2FAGuard)
     @Get('message')
     async getMessage(){
         return await this.roomService.getMessage()
     }
     
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(AccessToken2FAGuard)
     @Delete(':id')
     async removeRoom(@Param("id") id: number){
         return await this.roomService.remove(id)

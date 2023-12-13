@@ -25,8 +25,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  //TODO changer nom route
+  @UseGuards(AccessToken2FAGuard)
+  @Get('list')
+  findAllUsers(){
+    return this.usersService.findAllUsers()
+  }
 
-  
   @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {

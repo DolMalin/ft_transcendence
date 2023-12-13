@@ -33,15 +33,9 @@ export class GamePlayService {
       return ;
 
     if (data.playerId === '1' && clientId !== game.clientOne.socket.id)
-    {
-      console.log('socket meddling in movingStarted')
       return ;
-    }
     else if (data.playerId === '2' && clientId !== game.clientTwo.socket.id)
-    {
-      console.log('socket meddling in movingStarted')
       return ;
-    }
 
     switch (data.key.toLowerCase())
     {
@@ -62,15 +56,9 @@ export class GamePlayService {
       return ;
 
     if (data.playerId === '1' && clientId !== game.clientOne.socket.id)
-    {
-      console.log('socket meddling in movingStopped')
       return ;
-    }
     else if (data.playerId === '2' && clientId !== game.clientTwo.socket.id)
-    {
-      console.log('socket meddling in movingStopped')
       return ;
-    }
 
     switch (data.key.toLowerCase())
     {

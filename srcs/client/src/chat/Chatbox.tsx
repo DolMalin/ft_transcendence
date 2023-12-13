@@ -16,15 +16,15 @@ function timeOfDay(timestampz: string | Date){
     let tmp = ""
     let tmp2 = ""
     if (min < 10)
-        tmp = "0" + min.toString();
+        tmp = "0" + min.toString()
     else
-        tmp = min.toString();
+        tmp = min.toString()
     if (day < 10)
-        tmp2 = "0" + day.toString();
+        tmp2 = "0" + day.toString()
     else
         tmp2 = day.toString()
-    let date = hour.toString() + ":" + tmp + " " + tmp2 + "/" + month + "/" + year;
-    return (date);
+    let date = hour.toString() + ":" + tmp + " " + tmp2 + "/" + month + "/" + year
+    return (date)
 }
 
 async function getUserList(id: number){
@@ -37,14 +37,15 @@ async function getUserList(id: number){
         userlist = res.data
     }
     catch(err){
-        console.log(err)
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+
     }
     return userlist
 }
 
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
 
-    const [messageList, setMessageList] = useState<MessageData[]>([]);
+    const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState
     <{
         id: string, 
@@ -58,16 +59,15 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     const { 
         register, 
         handleSubmit, 
-        reset, 
+        setValue, 
         formState: { errors }} = useForm()
 
     const onSubmit = (data: {message: string}) => {
         sendMessage(data.message)
-        reset()
+        setValue('message', '')
     }
 
     useEffect(()  => {
-        console.log('msg', props.room.message)
         setMessageList(props.room.message? props.room.message: [])
         const res = getMe()
         res.then(response => {
@@ -80,11 +80,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
             return me
         }catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
         }}
-        
+
     const sendMessage = async (currentMessage: string) => {
-        
         try {
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
@@ -92,11 +92,9 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setMessageList((list) => [...list, message])
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
         }
-        return (() => {
-            props.socket.off("sendMessage")
-        })
     }
 
     const fetchUserList = async () => {
@@ -105,7 +103,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setUserList(tab)
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
@@ -115,6 +113,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {
+        //si bloque --> pas ca
         setMessageList((list) => [...list, data])
         })
         return (() => {
@@ -124,7 +123,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     //TODO faire en sorte que la userlist re render
     return (
         <div>
-                    <mark>
+        <mark>
             <h2>User list</h2>
         </mark>
         {userList?.length > 0 && (
@@ -173,8 +172,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                     {
                         ...register("message", {
                             required: "enter message",
-                            minLength: 1,
-                            maxLength: 1000 //todo regarder regle de convention
                         })
                     }
                 />

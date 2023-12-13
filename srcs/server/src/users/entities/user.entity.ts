@@ -12,7 +12,7 @@ export class User {
 	@Column({type: 'int', unique: true})
 	ftId: number
 
-	@Column({type: 'varchar', length: 20, nullable: true})
+	@Column({type: 'varchar', length: 20, nullable: true, unique: true})
 	username: string
 
 	@Column({type: 'varchar', nullable: true})
@@ -36,6 +36,10 @@ export class User {
 
 	@ManyToMany(() => Room, room => room.users)
 	room: Room[];
+
+	@ManyToMany(() => User)
+	@JoinTable({ name: 'blocked_users' })
+	blocked: User[];
 
 	//rel vers user blocked
 	@Column({type : 'int', default : 0, nullable: true})
@@ -70,7 +74,7 @@ export class User {
 
 	@Column({type : 'text', default : null, array : true, nullable : true})
 	gameSockets : string[];
-
-	@Column({type : 'text', default : null, array : true, nullable : true})
-	chatSockets : string[];
+}
+function IsUnique(arg0: { message: string; }) {
+	throw new Error('Function not implemented.');
 }

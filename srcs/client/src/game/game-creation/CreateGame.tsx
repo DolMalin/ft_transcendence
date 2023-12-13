@@ -102,7 +102,6 @@ function CreateGame(props : {sock : Socket}) {
         })
 
         sock?.on('roomName', ({roomName}) => {
-
             setGameRoom(roomName);
         })
 
@@ -135,8 +134,8 @@ function CreateGame(props : {sock : Socket}) {
                 props.sock.emit('availabilityChange', true);
                 
             }
-            catch (e) {
-                console.log('setting is Available to false returned : ', e.message);
+            catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         });
 

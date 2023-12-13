@@ -11,6 +11,9 @@ import { read } from 'fs';
 import { authenticator } from 'otplib';
 import { FileTypeValidationPipe } from '../utils/file.validator';
 import { HttpCode } from '@nestjs/common';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import { GetUser } from 'src/users/decorator/user.decorator';
+import { User } from 'src/users/entities/user.entity';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -60,11 +63,12 @@ export class AuthController {
       @UploadedFile(
         new FileTypeValidationPipe()
       ) file: Express.Multer.File,
-      @Body() body:any,
+      @Body() dto: UpdateUserDto,
       @Res() res:any,
-      @Req() req:any)
+      @GetUser() user : User
+      )
     {
-      return await this.authService.register(file, body, req, res)
+      return await this.authService.register(file, dto, res, user)
     }
 
 

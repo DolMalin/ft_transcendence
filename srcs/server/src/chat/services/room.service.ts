@@ -1,14 +1,17 @@
-import { ForbiddenException, Injectable, Req, Res } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
-import { FindOptionsOrder, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Room } from '../entities/room.entity'
 import { User } from '../../users/entities/user.entity'
 import { Message } from '../entities/message.entity'
 import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
+import { UsersService } from 'src/users/services/users.service'
+import { roomType} from '../entities/room.entity'
+import { Server } from 'socket.io'
 import { JoinRoomDto } from '../dto/join-room.dto'
 
 @Injectable()
@@ -21,7 +24,9 @@ export class RoomService {
         @InjectRepository(Message)
         private messageRepository: Repository<Message>,
         @InjectRepository(Message)
-        private userRepository: Repository<User>
+        private userRepository: Repository<User>,
+        private readonly userService : UsersService
+
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
@@ -34,20 +39,49 @@ export class RoomService {
         return await this.roomRepository.save(room);
     }
 
-    findAll() {
+    async findOneByName(name: string){
+        return await this.roomRepository.findOneBy({name})
+    }
 
-        
-        return this.roomRepository.find();
+    async createDM(user: User, user2: User, roomName: string){
+        let directMessage: Room
+        directMessage = this.roomRepository.create({
+            name: roomName,
+            type: roomType.directMessage,
+            users: [user, user2]
+        })    
+        await this.roomRepository.save(directMessage)
+        return this.getRoom(roomName)
+    }
+
+    async getRoom(roomName: string){
+    
+        return await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.name = :name', { name: roomName })
+            .orderBy('message.id', 'ASC')
+            .getOne();
+    }
+    
+    async findAll(){
+        return this.roomRepository.find()
+    }
+
+    async findAllWithoutDm() {
+        let roomList = await this.roomRepository.find()
+        roomList = roomList.filter(room => room.type !== roomType.directMessage)
+        return roomList
     }
 
     findOneById(id: number){
 
         return this.roomRepository.findOneBy({id})
     }
-
-
-
-    async findAllUsers(id: number) {
+    
+    async findAllUsersInRoom(id: number) {
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')
@@ -79,6 +113,7 @@ export class RoomService {
         const room = await this.findOneById(id)
         return this.roomRepository.remove(room)
     }
+
     
     async joinRoom(dto: JoinRoomDto, user: User){
         const room = await this.roomRepository

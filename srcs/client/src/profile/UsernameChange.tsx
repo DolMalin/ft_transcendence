@@ -12,7 +12,6 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
 
     function validateUsername(username : string) {
         
-        console.log('test')
         if (typeof username != 'string')
         {
             setFormErrorMsg('input is not a string');

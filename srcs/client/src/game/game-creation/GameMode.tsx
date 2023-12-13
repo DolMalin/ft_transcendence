@@ -19,8 +19,9 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
             const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/isAvailable');
             setPlayerAvalaible(res.data);
         }
-        catch (e) {
-            console.log('IsAvalaible returned : ', e)
+        catch (err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
         }
     }
     checkPlayerAvailability();
@@ -29,7 +30,6 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
     useEffect(() => {
 
         props.sock?.on('isAvailable', ({bool}) => {
-
             setPlayerAvalaible(bool);
         })
         return (() => {
@@ -69,8 +69,8 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             authService.patch(process.env.REACT_APP_SERVER_URL + '/users/updateIsAvailable', {isAvailable : false})
                             props.sock.emit('availabilityChange', false);
                         }
-                        catch (e) {
-                            console.log('setting is Available to false returned : ', e.message);
+                        catch (err) {
+                            console.error(`${err.response.data.message} (${err.response.data.error})`)
                         }
                     }}> 
                         {Constants.GAME_TYPE_ONE} 
@@ -125,8 +125,8 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             authService.patch(process.env.REACT_APP_SERVER_URL + '/users/updateIsAvailable', {isAvailable : false})
                             props.sock.emit('availabilityChange', false);
                         }
-                        catch (e) {
-                            console.log('setting is Available to false returned : ', e);
+                        catch (err) {
+                    
                         }
                     }}
                     >

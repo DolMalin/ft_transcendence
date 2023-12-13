@@ -17,7 +17,7 @@ import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 
-function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket}) {
+function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
@@ -28,6 +28,16 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         props.gameSock?.emit('gameInvite', {targetId : props.userId, gameType : gameType})
     }
     
+    function sendPrivateMessage(){
+        props.chatSocket?.emit('DM', {targetId: props.userId})
+        props.onClose()
+    }
+
+    function blockThem(){
+        props.chatSocket?.emit('block', {targetId: props.userId})
+        props.onClose()
+    }
+
     useEffect(() => {
         if (!props.userId)
             return ;
@@ -48,12 +58,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         const fetchUserProfile = async () => {
             try {
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + props.userId);
-                console.log('fetch profile')
                 setUser(res?.data);
                 return (res?.data?.id)
-    
-            } catch (error) {
-                console.error('Error fetching user data:', error);
+            } catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         }
     
@@ -146,6 +154,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         _hover={{background : 'white', textColor: 'black'}}
                         isDisabled={isYourself}
                         textAlign={'center'}
+                        onClick={() => (sendPrivateMessage())}
                         >
                             Message Them !
                         </Button>
@@ -167,7 +176,22 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         </Button>
                     </Box>
 
-                    <Box w={'448px'} h={'80px'} 
+                    <Box w={'224px'} h={'80px'} 
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (blockThem())}
+                        isDisabled={isYourself}
+                        >
+                             Block them !
+                        </Button>
+                    </Box>
+
+                    <Box w={'224px'} h={'80px'} 
                     display={'flex'}
                     justifyContent={'center'}
                     alignItems={'center'}>

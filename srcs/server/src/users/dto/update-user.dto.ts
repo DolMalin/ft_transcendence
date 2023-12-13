@@ -9,7 +9,7 @@ import { TransformFnParams } from 'class-transformer'
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@IsString()
 	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-	@MinLength(6)
+	@MinLength(3)
 	@MaxLength(20)
 	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
 	@IsOptional()
