@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useReducer} from 'react'
-import { Button, Input, FormControl, Flex, Box, Image, Heading, Text, Divider, Avatar} from '@chakra-ui/react'
+import React, { Component, useEffect, useState, useReducer} from 'react'
+import { Button, Flex, Divider} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
 import AuthService from '../auth/auth.service';
 import { stateType} from '../auth/components/reducer';
@@ -13,10 +13,6 @@ import AvatarChange from './AvatarChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
-	const [qrCode, setQrCode] = useState('')
-	const [displayActivate2FA, setDisplayActivate2FA] = useState(false)
-	const [displayDeactivate2FA, setDisplayDeactivate2FA] = useState(false)
-
 	const [state, dispatch] = useReducer(reducer, {
 		isAuthenticated: props.state.isAuthenticated,
 		isRegistered: props.state.isRegistered,
@@ -47,7 +43,8 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
-			return 500
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			return err.response.status
 		}
 	}
 
@@ -61,8 +58,10 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
+			console.error(`${err.response.data.message} (${err.response.data.error})`)
 		}
 	}
+
 
 	function LogoutComponent() {
 		return (

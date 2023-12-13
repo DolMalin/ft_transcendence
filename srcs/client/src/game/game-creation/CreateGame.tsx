@@ -124,14 +124,14 @@ function CreateGame(props : {sock : Socket}) {
     useEffect(() => {
         sock?.on('gameOver', async ({winner}) => {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/me');
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
                 console.log('res : ', res.data.id, ' winner : ', winner)
                 if (res.data.id === winner)
                     dispatch({type : 'SET_V_SCREEN', payload : true});
                 else
                     dispatch({type : 'SET_L_SCREEN', payload : true});
                 dispatch({type : 'SET_GAME', payload : false});
-                authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : true})
+                authService.patch(process.env.REACT_APP_SERVER_URL + '/users/updateIsAvailable', {isAvailable : true})
                 props.sock.emit('availabilityChange', true);
                 
             }

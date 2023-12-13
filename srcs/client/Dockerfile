@@ -2,6 +2,7 @@ FROM node:buster
 
 ARG CLIENT_PORT
 ARG SERVER_URL
+ARG SERVER_IP
 
 
 WORKDIR /usr/src/client

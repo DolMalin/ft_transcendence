@@ -30,7 +30,7 @@ async function getRoomList(){
         password: string | null; 
         privChan: string | null }[]; 
     try{
-        const res = await authService.get('http://127.0.0.1:4545/room/list')
+        const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/list')
         roomList = res.data
     }
     catch(err){
@@ -84,19 +84,19 @@ export function Chat(props: {socket: Socket}){
         {
             let data = {name: dt.room, password: dt.password, privChan: privateChan}
             try{
-                await authService.post('http://127.0.0.1:4545/room', data)
+                await authService.post(process.env.REACT_APP_SERVER_URL + '/room', data)
                 joinRoom(dt)
                 fetchRoom()
             }
             catch(err){
-                console.log('Channel', dt.room, 'already exists.')
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         }
     }
  
     const  joinRoom = async (dt: {room: string, password: string}) => {
         try{
-            const res = await authService.post('http://127.0.0.1:4545/room/joinRoom',
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
                 name: dt.room,
                 password: dt.password
@@ -107,7 +107,7 @@ export function Chat(props: {socket: Socket}){
             setShowChat(true)
         }
         catch(err){
-            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 

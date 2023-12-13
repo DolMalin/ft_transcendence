@@ -16,7 +16,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
     useEffect(() => {async function checkPlayerAvailability() {
 
         try {
-            const res = await authService.get('http://127.0.0.1:4545/users/isAvailable');
+            const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/isAvailable');
             setPlayerAvalaible(res.data);
         }
         catch (e) {
@@ -67,7 +67,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                         props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_ONE}); 
                         props.dispatch({type : 'SET_LF_GAME', payload : true});
                         try {
-                            authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            authService.patch(process.env.REACT_APP_SERVER_URL + '/users/updateIsAvailable', {isAvailable : false})
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (e) {
@@ -123,7 +123,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                         props.dispatch({type : 'SET_GAME_TYPE', payload : Constants.GAME_TYPE_TWO}); 
                         props.dispatch({type : 'SET_LF_GAME', payload : true})
                         try {
-                            authService.patch('http://127.0.0.1:4545/users/updateIsAvailable', {isAvailable : false})
+                            authService.patch(process.env.REACT_APP_SERVER_URL + '/users/updateIsAvailable', {isAvailable : false})
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (e) {

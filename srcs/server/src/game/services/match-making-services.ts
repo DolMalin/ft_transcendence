@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 // import { GameServDTO} from './game.gateway';
 import { Socket, Server } from 'socket.io';
 import {
@@ -125,7 +125,7 @@ export class MatchmakingService {
             client.emit('roomName', {roomName : roomName});
           }
         catch(e) {
-          console.log('Error in game creation : ', e)
+          Logger.error('In join game service : ', e?.message);
         }
     }
 
@@ -149,7 +149,7 @@ export class MatchmakingService {
         }
       }
       catch (e) {
-        console.log('Error in join duel : ', e);
+        Logger.error('in join duel service : ', e?.message);
       }
     }
 
@@ -161,12 +161,12 @@ export class MatchmakingService {
       
       if (data.playerId === '1' && client.id != game.clientOne.socket.id)
       {
-        console.log('socket meddling in leaveGame');
+        Logger.error('socket meddling in leaveGame');
         return ;
       }
       else if (data.playerId === '2' && client.id != game.clientTwo.socket.id)
       {
-        console.log('socket meddling in leaveGame');
+        Logger.error('socket meddling in leaveGame');
         return ;
       }
       clearInterval(game.ballRefreshInterval);
@@ -197,8 +197,12 @@ export class MatchmakingService {
         }
         server.to(data.roomName).emit('gameOver', {winner : game.winner});
       }
-
-      this.matchHistoryServices.storeGameResults(game);
+      try {
+        this.matchHistoryServices.storeGameResults(game);
+      }
+      catch(e) {
+        Logger.error('could not store game in DB', e?.message);
+      }
       gamesMap.delete(data.roomName);
       client.leave(data.roomName);
     }
@@ -208,7 +212,7 @@ export class MatchmakingService {
       const game = gamesMap.get(data.roomName);
       if (game === undefined)
       {
-        console.log('undefined game in leaveQueue', data.roomName)
+        Logger.error('undefined game in leaveQueue : ', data.roomName)
         return;
       }
 
@@ -223,12 +227,12 @@ export class MatchmakingService {
           this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
         }
         catch(e) {
-          console.log('in availability change ERROR : ', e);
+          Logger.error('in availability change : ', e?.message);
         }
       }
       else
       {
-        console.log('socket meddling in leave queue')
+        Logger.error('socket meddling in leave queue')
         return ;
       }
     }
@@ -239,7 +243,7 @@ export class MatchmakingService {
             const target : User = await this.userService.findOneById(targetId);
             if (target === undefined)
             {
-                console.log('invite target undefined')
+                Logger.error('invite target undefined')
                 return ;
             }
 
@@ -247,7 +251,7 @@ export class MatchmakingService {
             const sender : User = await this.userService.findOneById(senderId);
             if (sender === undefined)
             {
-                console.log('invite sender undefined')
+                Logger.error('invite sender undefined')
                 return ;
             }
 
@@ -261,7 +265,7 @@ export class MatchmakingService {
             {senderSocketId : senderSocketId,senderId : sender.id, senderUsername : sender.username, gameType : gameType})
         }
         catch (e) {
-            console.log('Game Invite Error : ', e.message)
+          Logger.error('Game Invite Error : ', e?.message)
         }
     }
 
@@ -270,14 +274,14 @@ export class MatchmakingService {
             const target : User = await this.userService.findOneById(targetId);
             if (target === undefined)
             {
-                console.log('invite target undefined')
+                Logger.error('invite target undefined')
                 return ;
             }
             
             const sender : User = await this.userService.findOneById(senderId);
             if (sender === undefined)
             {
-                console.log('invite sender undefined')
+                Logger.error('invite sender undefined')
                 return ;
             }
             this.userService.emitToAllSockets(server, sender.gameSockets, 'inviteDeclined', {username : target.username})
@@ -292,20 +296,20 @@ export class MatchmakingService {
             const target : User = await this.userService.findOneById(targetId);
             if (target === undefined)
             {
-                console.log('invite target undefined')
+                Logger.error('invite target undefined')
                 return ;
             }
             
             const sender : User = await this.userService.findOneById(senderId);
             if (sender === undefined)
             {
-                console.log('invite sender undefined')
+                Logger.error('invite sender undefined')
                 return ;
             }
 
             if (sender.isAvailable === false || target.isAvailable === false) 
             {
-                console.log('one of the players is unavailable');
+                Logger.error('one of the players is unavailable');
                 return ;
             }
             else
@@ -313,18 +317,12 @@ export class MatchmakingService {
               const roomName = roomNameGenerator(20, server.sockets.adapter.rooms);
 
               this.userService.update(sender.id, {isAvailable : false});
-              server.to(senderSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
-              // this.userService.emitToAllSockets(server, sender.gameSockets,
-              // 'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'})
-              
-              server.to(targetSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
-              // this.userService.update(target.id, {isAvailable : false});
-              // this.userService.emitToAllSockets(server, target.gameSockets,
-              // 'duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'})
+              server.to(senderSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '1'});
+              server.to(targetSocketId).emit('duelAccepted', {gameType : gameType, roomName : roomName, playerId : '2'});
             }
         }
         catch (e) {
-            console.log('Game Invite Declined Error : ', e.message)
+            Logger.error('Game Invite Declined Error : ', e.message)
         }
     }
 
@@ -335,7 +333,7 @@ export class MatchmakingService {
         let game : GameState = {
           clientOne : {socket : client, id : client.handshake.query?.userId as string},
           clientTwo : undefined,
-          gameIsFull : true, // true to avoid other from joining
+          gameIsFull : true,
           isPaused : true,
           hasStarted : false,
           clientOneScore : 0,

@@ -6,7 +6,6 @@ import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
-import { Room, roomType } from './entities/room.entity';
 import { RoomService } from './services/room.service';
 
 class ChatDTO {
@@ -16,7 +15,6 @@ class ChatDTO {
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
-    private jwtService: JwtService,
     private readonly userService : UsersService,
     private readonly authService : AuthService,
     private readonly roomService : RoomService
@@ -35,6 +33,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
 
     try {
+      if (client.handshake.query?.userId as string === undefined)
+      {
+        client.disconnect();
+        return ;
+      }
       const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
       if (client.handshake.query.type !== 'chat')
         return ;

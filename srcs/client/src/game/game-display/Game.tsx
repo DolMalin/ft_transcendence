@@ -186,12 +186,8 @@ function Game(props : GameProps) {
         }
 
         function leaveGameOnRefresh() {
-            try {
-                sock.emit('leaveGame', gameInfo);
-                sock.emit('availabilityChange', true)
-            } catch (e) {
-                alert(e.message);
-            }
+            sock.emit('leaveGame', gameInfo);
+            sock.emit('availabilityChange', true)
         }
 
         document.addEventListener("keydown", handleKeydown);
@@ -300,7 +296,7 @@ function Game(props : GameProps) {
                     height={'100%'}
                     width={'100%'}
                     name={userTwo?.username}
-                    src={userTwo?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userTwo?.id : ''}
+                    src={userTwo?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + userTwo?.id : ''}
                     />{' '}
                 </WrapItem>
                 <Text
@@ -322,7 +318,7 @@ function Game(props : GameProps) {
                     height={'100%'}
                     width={'100%'}
                     name={userOne?.username}
-                    src={userOne?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + userOne?.id : ""}
+                    src={userOne?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + userOne?.id : ""}
                     />{' '}
                 </WrapItem>
                 <Text> {userOne?.username} </Text>

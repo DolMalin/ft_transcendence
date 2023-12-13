@@ -1,31 +1,42 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
 import { CreateGameDto } from "./create.game.dto";
 import { PartialType } from '@nestjs/mapped-types'
-
+import { IsNumber, IsString, IsUUID, MaxLength, MinLength, Matches, IsPositive, IsOptional} from "class-validator";
+import { Transform, Type } from 'class-transformer'
+import * as sanitizeHtml from 'sanitize-html'
+import { TransformFnParams } from 'class-transformer'
 export class UpdateGameDto extends PartialType(CreateGameDto){
 	
-    @IsString()
+    @IsUUID()
     @IsOptional()
     winnerId : string;
 
+    @IsUUID()
+    @IsOptional()
+    looserId : string;
     @IsString()
+
+	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
+	@MinLength(6)
+	@MaxLength(20)
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
     @IsOptional()
     winnerUsername : string;
 
-    @IsNumber()
-    @IsOptional()
-    winnerScore : number;
-    
     @IsString()
-    @IsOptional()
-    looserId : string;
-
-    @IsString()
+    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
+    @MinLength(6)
+    @MaxLength(20)
+    @Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
     @IsOptional()
     looserUsername : string;
 
-
     @IsNumber()
+    @IsPositive()
+    @IsOptional()
+    winnerScore : number;
+    
+    @IsNumber()
+    @IsPositive()
     @IsOptional()
     looserScore : number;
 }

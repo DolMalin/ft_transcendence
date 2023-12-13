@@ -230,7 +230,6 @@ function App() {
   useEffect(() => {
 
       gameSock?.on('logout', () => {
-
         dispatch({type : 'SET_IS_AUTHENTICATED', payload : false});
       });
 
@@ -241,16 +240,8 @@ function App() {
   
   useEffect(() => {
     async function handleUnload() {
-      if (!gameSock)
-        return
 
-      try {
-        // await authService.patch(`${process.env.REACT_APP_SERVER_URL}/users/removeGameSocket`, [gameSock?.id]);
-        gameSock.emit('availabilityChange', true);
-      }
-      catch (e) {
-        console.log(e.message);
-      }
+      gameSock?.emit('availabilityChange', true);
     }
 
     window.addEventListener('beforeunload', handleUnload);

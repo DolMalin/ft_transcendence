@@ -9,10 +9,10 @@ import { Message } from '../entities/message.entity'
 import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
-import { RoomDto } from '../dto/room.dto'
 import { UsersService } from 'src/users/services/users.service'
 import { roomType} from '../entities/room.entity'
 import { Server } from 'socket.io'
+import { JoinRoomDto } from '../dto/join-room.dto'
 
 @Injectable()
 export class RoomService {
@@ -66,38 +66,6 @@ export class RoomService {
             .getOne();
     }
     
-
-    async joinRoom(dto: RoomDto, user: User){
-        
-        //recuperer tableau id blocked
-        //faire une query de zinzin
-        // const idsBlocked = user.blocked_user.map(user => user.id);
-
-        console.log('-----user----', user)
-        const room = await this.roomRepository
-            .createQueryBuilder('room')
-            .leftJoinAndSelect('room.message', 'message'/* , `message.author.id NOT IN ${idsBlocked}` */)
-            .leftJoinAndSelect('message.author', 'author')
-            .leftJoinAndSelect('room.users', 'user')
-            .where('room.name = :name', { name: dto.name })
-
-            .orderBy('message.id', 'ASC')
-            .getOne();
-        if (!room)
-            throw new ForbiddenException('room does not exist')
-        if (room.privChan === true)
-            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
-        if (room.password?.length > 0){
-            if (! await argon2.verify(room.password, dto.password))
-                throw new ForbiddenException('Password invalid')
-        }
-        if (room.users === undefined)
-            room.users = []
-        room.users.push(user)
-        this.roomRepository.save(room)
-        return room;
-    }
-
     async findAll(){
         return this.roomRepository.find()
     }
@@ -148,6 +116,29 @@ export class RoomService {
     }
 
     
+    async joinRoom(dto: JoinRoomDto, user: User){
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.name = :name', { name: dto.name })
+            .orderBy('message.id', 'ASC')
+            .getOne();
+        if (!room)
+            throw new ForbiddenException('room does not exist')
+        if (room.privChan === true)
+            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
+        if (room.password?.length > 0){
+            if (! await argon2.verify(room.password, dto.password))
+                throw new ForbiddenException('Password invalid')
+        }
+        if (room.users === undefined)
+            room.users = []
+        room.users.push(user)
+        this.roomRepository.save(room)
+        return room;
+    }
 
     async postMessage(sender: User, dto: CreateMessageDto){
         

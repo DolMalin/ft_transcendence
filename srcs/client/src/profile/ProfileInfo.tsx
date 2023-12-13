@@ -13,9 +13,9 @@ function ProfileInfo() {
     useLayoutEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const me = await authService.get('http://127.0.0.1:4545/users/me');
+                const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
                 // console.log(user);
-                const user = await authService.get('http://127.0.0.1:4545/users/profile/' + me?.data?.id);
+                const user = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + me?.data?.id);
                 // console.log(user);
                 setUser(user.data)
     
@@ -84,7 +84,7 @@ function ProfileInfo() {
                 {!secretImage && <Image
                 boxSize={'160px'}
                 borderRadius={'full'}
-                src={user?.id != undefined ? 'http://127.0.0.1:4545/users/avatar/' + user?.id : ""}
+                src={user?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + user?.id : ""}
                 onClick={() => setSecretImage(true)}
                 ></Image>}
                 {secretImage && <Image

@@ -44,7 +44,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             return ;
         const checkIfYourself = async (userId : string) => {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/me')
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
                 if (userId == res?.data?.id)
                 {
                     setIsYoursellf(true);
@@ -58,7 +58,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         }
         const fetchUserProfile = async () => {
             try {
-                const res = await authService.get('http://127.0.0.1:4545/users/profile/' + props.userId);
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + props.userId);
                 console.log('fetch profile')
                 setUser(res?.data);
                 return (res?.data?.id)
@@ -110,7 +110,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         <Avatar
                         size='2xl'
                         name={'avatar'}
-                        src={'http://127.0.0.1:4545/users/avatar/' + props.userId}
+                        src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + props.userId}
                         marginRight={'10px'}
                         >
                         </Avatar>

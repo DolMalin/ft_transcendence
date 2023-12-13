@@ -7,7 +7,7 @@ import { AuthService } from 'src/auth/services/auth.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { GetUser } from 'src/users/decorator/user.decorator';
 import { User } from 'src/users/entities/user.entity';
-import { RoomDto } from '../dto/room.dto';
+import { JoinRoomDto } from '../dto/join-room.dto';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 
 
@@ -23,6 +23,7 @@ export class RoomController {
     async createRoom(@GetUser() user: User, @Body() createRoomDto: CreateRoomDto){
         if (createRoomDto.password?.length > 0)
             createRoomDto.password = await this.authService.hash(createRoomDto.password)
+        
         return await this.roomService.create(createRoomDto, user)
     }
 
@@ -46,7 +47,7 @@ export class RoomController {
 
     @UseGuards(AccessToken2FAGuard)
     @Post('joinRoom')
-    async joinRoom(@GetUser() user: User, @Body() dto: RoomDto){
+    async joinRoom(@GetUser() user: User, @Body() dto: JoinRoomDto){
         return await this.roomService.joinRoom(dto, user);
     }
 

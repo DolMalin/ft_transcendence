@@ -9,6 +9,8 @@ import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
+import { isUUID } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
@@ -34,14 +36,12 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {
-
     return (this.usersService.returnScoreList());
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Get('history/:id')
   history(@Param('id') userId: string) {
-
       return (this.matchHistoryService.returnHistory(userId));
   }
 
@@ -55,7 +55,6 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('isAvailable')
   isAvailable(@GetUser() user : User) {
-    
     return (user.isAvailable);
   }
 
@@ -64,7 +63,6 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Patch('updateIsAvailable')
   updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
-    
     return (this.usersService.update(user.id, updateDto));
   }
 
@@ -84,20 +82,7 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('avatar/:id')
   async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
-    try {
-      const avatar = await this.usersService.getAvatar(id)
-      const stream = Readable.from(avatar?.data)
-      
-      res.set({
-        'Content-Disposition':`inline; filename="${avatar?.filename}"`,
-        'Content-Type' :'image'
-      })
-  
-      return new StreamableFile(stream)
-    }
-    catch (e) {
-      throw e
-    }
+    return this.usersService.getUserAvatar(res, id)
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -111,16 +96,13 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Patch('removeGameSocket')
-  removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
-
-    this.usersService.removeSocketId(gameSocketId, user.gameSockets, user);
+  async removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
+    return await this.usersService.removeSocketId(gameSocketId, user.gameSockets, user);
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
-
     return this.usersService.remove(id);
   }
 }
-

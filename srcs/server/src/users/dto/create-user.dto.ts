@@ -1,7 +1,6 @@
-import { Field } from "@nestjs/graphql";
-
+import { IsNumber } from "class-validator"
 export class CreateUserDto {
-	@Field(() => String)
+	@IsNumber()
 	ftId: number
 
 }

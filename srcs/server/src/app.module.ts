@@ -24,7 +24,6 @@ import { Avatar } from './users/entities/avatar.entity';
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
       entities: [User, Room, Message, Avatar, Game],
-      // entities: [User, Avatar, Game],
       synchronize: true,
       //dropSchema: true,/*  wipe la db a chaque refresh */
     }),
