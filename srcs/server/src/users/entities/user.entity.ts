@@ -74,6 +74,3 @@ export class User {
 	@Column({type : 'text', default : null, array : true, nullable : true})
 	gameSockets : string[];
 }
-function IsUnique(arg0: { message: string; }) {
-	throw new Error('Function not implemented.');
-}

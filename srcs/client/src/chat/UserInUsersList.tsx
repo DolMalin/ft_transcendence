@@ -11,7 +11,6 @@ function UserInUsersList(props : {username : string, userId : string,
     const { isOpen, onOpen, onClose } = Chakra.useDisclosure();
     const toast = Chakra.useToast();
 
-
     async function makeThemOp(targetId : string, roomName : string) {
           try {
               await authService.post(process.env.REACT_APP_SERVER_URL + '/room/giveAdminPrivileges', 
@@ -38,7 +37,6 @@ function UserInUsersList(props : {username : string, userId : string,
             const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
             {targetId : props?.userId, roomName : props?.roomName});
 
-            console.log(' AHHHHHHHHHHHHHHHHHHHH ' + props.username + ' is ' + privi.data)
             if(privi.data === 'isOwner')
                 setPriviColor('blue')
             else if(privi.data === 'isAdmin')

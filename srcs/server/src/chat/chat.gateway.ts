@@ -29,7 +29,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
     // for (const id of userBlocked){
         // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
-        
     Logger.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);
     try 
@@ -43,6 +42,10 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         }
         const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
         client.join(`user-${payload.id}`)
+        // const userBlocked = await this.userService.findAllBlockedUser(payload.id)
+        // for (const id of userBlocked){
+        //     client.join(`blocked-${id.id}`)
+        // }
         Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(err) {
@@ -64,8 +67,18 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   }
   
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket): void {
-    client.to(`room-${data.room.id}`).emit("receiveMessage", data)
+  async sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket) {
+    const room = await this.roomService.findOneByIdWithRelations(data.room.id)
+    const sender = await this.userService.findOneById(client.handshake.query?.userId as string)
+    room.users.forEach((user) => {
+      const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === sender.id);
+      console.log(`User ${user.id} is blocked: ${isBlocked}`);
+      if (!isBlocked) {
+        client.to(`user-${user.id}`).emit("receiveMessage", data);
+      }
+    });
+    
+    // client.to(`room-${data.room.id}`).emit("receiveMessage", data)
     // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
   }
 
@@ -98,19 +111,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   generateDMRoomName(user1Id: string, user2Id: string): string {
       return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
-  }
-  
-  @SubscribeMessage('block')
-  async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
-    try {
-      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      const user2 = await this.userService.findOneById(data.targetId)
-      this.userService.blockTarget(user, user2)
-    } 
-    catch (err) {
-      throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
-    }
-    
   }
 
 }

@@ -104,6 +104,12 @@ export class RoomService {
         return usersInRoom;
     }
 
+    async findOneByIdWithRelations(roomId: number){
+        return await this.roomRepository.findOne({
+            where : {id : roomId}, 
+            relations : ['owner', 'administrator', 'users', 'users.blocked', 'message']})
+    }
+
     async update(id: number, updateRoomDto: UpdateRoomDto) {
 
         await this.roomRepository.update(id, updateRoomDto)

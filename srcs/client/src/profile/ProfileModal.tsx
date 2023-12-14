@@ -10,6 +10,7 @@ import {
     ModalFooter,
     Text,
     Flex,
+    useToast
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
@@ -21,6 +22,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
+    const toast = useToast();
 
     function sendDuelInvite(gameType : string) {
 
@@ -33,10 +35,27 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         props.onClose()
     }
 
-    function blockThem(){
-        props.chatSocket?.emit('block', {targetId: props.userId})
+    async function blockThem(targetId: string){
+        try{
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block', {targetId})
+        }
+        catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'error',
+                    description:  err.response.data.error,
+                    colorScheme: 'red',
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
         props.onClose()
     }
+    
 
     useEffect(() => {
         if (!props.userId)
@@ -184,7 +203,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         fontWeight={'normal'}
                         borderRadius={'none'}
                         _hover={{background : 'white', textColor: 'black'}}
-                        onClick={() => (blockThem())}
+                        onClick={() => (blockThem(props.userId))}
                         isDisabled={isYourself}
                         >
                              Block them !

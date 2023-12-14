@@ -96,6 +96,12 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
+  @Post('block')
+  async blockTarget(@GetUser() user: User, @Body() dto: {targetId: string}){
+    return await this.usersService.blockTarget(user, dto.targetId)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
   remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);
