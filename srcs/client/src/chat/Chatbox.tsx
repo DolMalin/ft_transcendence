@@ -46,11 +46,14 @@ async function getUserList(id: number, me : {username: string, id: string}){
     return userlist
 }
 
+
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
     
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [rerender, setRerender] = useState(false)
     const [id, setId] = useState("")
     const [isOp, setIsOp] = useState(false)
+    const toast = Chakra.useToast();
     const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState<
     {
@@ -81,6 +84,16 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setMessageList((list) => [...list, message])
         }
         catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'You have no rights !',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
@@ -103,10 +116,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 fetchUserList(res.data)
 
                 // TO DO : get roo type so it doesnt trigger in dm room
-                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : res.data.id, roomName : props.room.name})
                 if (privi.data === 'isAdmin' || privi.data === 'isOwner')
                   setIsOp(true);
+                else
+                  setIsOp(false);
             }
             catch(err){
                 console.error(`${err.response.data.message} (${err.response.data.error})`)} 
@@ -114,6 +129,42 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         setMessageList(props.room.message? props.room.message: [])
         asyncWrapper()
     }, [])
+
+    useEffect(() => {
+      const asyncWrapper = async () => {
+        try{
+            // TO DO : get roo type so it doesnt trigger in dm room
+            if (me?.id)
+            {
+              const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+              {targetId : me?.id, roomName : props.room.name})
+              if (privi.data === 'isAdmin' || privi.data === 'isOwner')
+                setIsOp(true);
+              else
+                setIsOp(false);
+            }
+        }
+        catch(err){
+            console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+      }
+
+      asyncWrapper();
+    }, [rerender])
+
+    useEffect(function sockEvents() {
+
+      props.socket?.on('channelUpdate', () => {
+
+        if (rerender === true)
+          setRerender(false)
+        else if (rerender === false)
+          setRerender(true);
+      });
+
+      return (() => {
+        props.socket?.off('channelUpdate');
+      })
+    }, [rerender])
 
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {
@@ -125,6 +176,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
+
     return (
         <div>
           <mark>
@@ -137,11 +189,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   <div>
                     <ul>
                       <li>
-                        <UserInUsersList username={user.username} userId={user.id} roomName={props.room?.name} userIsOp={isOp}/>
+                        <UserInUsersList username={user.username} userId={user.id} room={props.room} userIsOp={isOp} chatSock={props.socket}/>
                       </li>
                     </ul>
                   </div>
                 </div>
+                <Chakra.Button onClick={() => setRerender(rerender ? false : true)}> rerender </Chakra.Button>
               </Chakra.Flex>
             ))
           )}

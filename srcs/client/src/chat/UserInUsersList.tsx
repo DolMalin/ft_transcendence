@@ -3,19 +3,24 @@ import * as Chakra from '@chakra-ui/react'
 import authService from "../auth/auth.service"
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
+import { Room } from "./Chat";
 
 function UserInUsersList(props : {username : string, userId : string, 
-    roomName : string, userIsOp : boolean, gameSock? : Socket, chatSock?: Socket}) {
+    room : Room, userIsOp : boolean, gameSock? : Socket, chatSock?: Socket}) {
 
     const [priviColor, setPriviColor] = useState('grey');
+    const [targetIsOp, setTargetIsOp] = useState<"isAdmin" | "isOwner" | "no">("no");
+    const [targetIsMuted, setTargetIsMuted] = useState(false);
     const { isOpen, onOpen, onClose } = Chakra.useDisclosure();
     const toast = Chakra.useToast();
 
 
-    async function makeThemOp(targetId : string, roomName : string) {
+    async function makeThemOp(targetId : string, roomName : string, roomId : number) {
           try {
               await authService.post(process.env.REACT_APP_SERVER_URL + '/room/giveAdminPrivileges', 
               {targetId : targetId, roomName : roomName});
+              setTargetIsOp('isAdmin')
+              props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
           }
           catch (err) {
             if (err.response.status === 409)
@@ -31,20 +36,103 @@ function UserInUsersList(props : {username : string, userId : string,
             else
               console.error(`${err.response.data.message} (${err.response.data.error})`)
           }
-      };
+    };
+
+    async function fuckThemOp(targetId : string, roomName : string, roomId : number) {
+        try {
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removeAdminPrivileges', 
+            {targetId : targetId, roomName : roomName});
+            setTargetIsOp('no');
+            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+        }
+        catch (err) {
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'You have no rights !',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            else
+              console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function muteThem(targetId : string, roomId : number, timeInMinutes : number) {
+        try {
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/muteUser', 
+            {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
+            setTargetIsMuted(true);
+            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+        }
+        catch (err) {
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'You have no rights !',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            else
+              console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function unmuteThem(targetId : string, roomId : number) {
+        try {
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/unmuteUser', 
+            {targetId : targetId, roomId : roomId});
+            setTargetIsMuted(false);
+            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+        }
+        catch (err) {
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'You have no rights !',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            else
+              console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
     useEffect(() => {
     async function asyncWrapper() {
         try {
-            const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
-            {targetId : props?.userId, roomName : props?.roomName});
+            const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+            {targetId : props?.userId, roomName : props.room?.name});
 
-            console.log(' AHHHHHHHHHHHHHHHHHHHH ' + props.username + ' is ' + privi.data)
             if(privi.data === 'isOwner')
+            {
                 setPriviColor('blue')
+                setTargetIsOp('isOwner')
+            }
             else if(privi.data === 'isAdmin')
+            {
                 setPriviColor('green')
+                setTargetIsOp('isAdmin')
+            }
+            else if (privi.data === 'isMuted')
+            {
+                setPriviColor('yellow')
+                setTargetIsMuted(true);
+            }
             else
+            {
                 setPriviColor('grey')
+                setTargetIsOp('no')
+            }
         }
         catch (err) {
             console.error(`${err.response.data.message} (${err.response.data.error})`)
@@ -52,7 +140,44 @@ function UserInUsersList(props : {username : string, userId : string,
     }
 
     asyncWrapper();
-    }, [props?.userId, props?.roomName, props.userIsOp])
+    })
+
+
+    function MuteBanSlider(props : {targetId : string, roomId : number, action : Function}) {
+        const [sliderValue, setSliderValue] = React.useState(5)
+        const [showTooltip, setShowTooltip] = React.useState(false)
+        return (<>
+            <Chakra.Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
+                mute
+            </Chakra.Button>        
+            <Chakra.Slider
+            id='slider'
+            defaultValue={0}
+            min={0}
+            max={120}
+            colorScheme='teal'
+            onChange={(v) => setSliderValue(v)}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            >
+                <Chakra.SliderTrack>
+                    <Chakra.SliderFilledTrack />
+                </Chakra.SliderTrack>
+                
+                <Chakra.Tooltip
+                    hasArrow
+                    bg='teal.500'
+                    color='white'
+                    placement='top'
+                    isOpen={showTooltip}
+                    label={`${sliderValue}min`}
+                >
+                    <Chakra.SliderThumb />
+                </Chakra.Tooltip>
+            </Chakra.Slider>
+            <Chakra.Text>Zero minute mute will result in an infinite duration being applied</Chakra.Text>
+        </>)
+    }
 
     if (props.userIsOp)
     {
@@ -65,18 +190,27 @@ function UserInUsersList(props : {username : string, userId : string,
             <Chakra.Portal>
                 <Chakra.PopoverContent>
                 <Chakra.PopoverBody>
-                    <Chakra.Button onClick={() => makeThemOp(props?.userId, props?.roomName)}>
-                    admin
-                    </Chakra.Button>
+                    {targetIsOp === 'no'  && <Chakra.Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                        give them privileges
+                    </Chakra.Button>}
+
+                    {targetIsOp === 'isAdmin' && <Chakra.Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                        Remove their privileges
+                    </Chakra.Button>}
+
                     <Chakra.Button onClick={() => ({})}>
-                    ban
+                        ban
                     </Chakra.Button>
+
+                    <Chakra.Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
+                        unmute
+                    </Chakra.Button>
+                    {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} action={muteThem}/>}
+
                     <Chakra.Button onClick={() => ({})}>
-                    mute
+                        kick
                     </Chakra.Button>
-                    <Chakra.Button onClick={() => ({})}>
-                    kick
-                    </Chakra.Button>
+
                     <Chakra.Button onClick={onOpen}>
                     profile
                     </Chakra.Button>

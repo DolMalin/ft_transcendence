@@ -135,7 +135,6 @@ export function Chat(props: {socket: Socket}){
 
     const fetchUserList = async (me : {username: string, id: string}) => {
         try {
-            console.log("me in fetchuser", me)
             const tab = await getUserList(me)
             setUserList(tab)
         }

@@ -45,7 +45,11 @@ export class RoomService {
     }
     
     async findOneByNameWithRelations(name: string){
-        return await this.roomRepository.findOne({where : {name : name}, relations : ['owner', 'administrator', 'users', 'message']})
+        return await this.roomRepository.findOne({where : {name : name}, relations : ['owner', 'administrator', 'users', 'message', 'muted', 'banned']})
+    }
+
+    async findOneByIdWithRelations(roomId: number){
+        return await this.roomRepository.findOne({where : {id : roomId}, relations : ['owner', 'administrator', 'users', 'message', 'muted', 'banned']})
     }
 
     async createDM(user: User, user2: User, roomName: string){
@@ -146,6 +150,15 @@ export class RoomService {
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
+        const room = await this.findOneByIdWithRelations(dto.roomId);
+        if (!room)
+            throw new NotFoundException("Room not found",
+            {cause: new Error(), description: "cannot find any users in database"});
+        if (this.isMuted(room, sender))
+            throw new ConflictException('Muted user', 
+            {cause: new Error(), description: 'you are muted in channel ' + room.name} )
+        
+
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
             content: dto.content,
@@ -183,7 +196,27 @@ export class RoomService {
         return await this.save(room);
     }
 
-    async hasAdminPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
+    async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        if (!room)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
+        if (!target)
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
+
+        if (requestMaker.id !== room.owner.id)
+            throw new ConflictException('Is not room owner', 
+            {cause: new Error(), description: 'tried to perform action above your paycheck'} )
+
+        if (this.isAdmin(room, target) === 'no')
+            throw new ConflictException('Is not admin',  
+            {cause: new Error(), description: "Target user allready has no privileges"} )
+
+        room.administrator = room.administrator.filter((user) => user.id != target.id);
+        return await this.save(room);
+    }
+
+    async userPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
 
         const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
         if (!room)
@@ -192,17 +225,98 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
         
+        if (this.isMuted(room, target))
+            return ('isMuted');
         return (this.isAdmin(room, target));
+    }
+
+    isMuted(room : Room, user : User)
+    {
+        if (room.muted?.find((userToFind : User) => userToFind?.id === user?.id))
+            return (true);
+        return (false);
     }
 
     isAdmin(room : Room, user : User) {
         
-        console.log(room.owner.username)
         if (room.administrator?.find((userToFind : User) => userToFind?.id === user?.id))
             return ('isAdmin');
         else if (user.id === room.owner?.id)
             return ('isOwner');
         return ('no');
+    }
+
+    isBanned(room : Room, user : User) {
+        if (room.banned?.find((userToFind : User) => userToFind?.id === user?.id))
+            return ()
+    }
+
+    async muteUser(requestMaker : User,updatePrivilegesDto : UpdatePrivilegesDto, timeInMinutes : number) {
+
+        
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        if (!room)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        if (!this.isAdmin(room, requestMaker))
+            throw new ConflictException('Not an admin', 
+            {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
+
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        if (!target)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        if (this.isAdmin(room, target) !== 'no')
+            throw new ConflictException('Target is admin', 
+            {cause: new Error(), description: 'You cannot mute an admin'} )
+
+        console.debug('tim in sec : ', timeInMinutes);
+
+        if (timeInMinutes != 0)
+        {
+            console.debug('getting in timeout if');
+            setTimeout(() => {
+                console.debug('getting in timeout');
+            if (!room.muted)
+                room.muted = [];
+            room.muted = room.muted.filter((user) => user.id != target.id)
+            this.save(room);
+            console.log(room);
+            }, timeInMinutes * 60 * 10000);
+    }
+        if (!room.muted)
+            room.muted = [];
+        room.muted.push(target);
+        return (await this.save(room));
+    }
+
+    async unmuteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        if (!room)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+        if (!this.isAdmin(room, requestMaker))
+            throw new ConflictException('Not an admin', 
+            {cause: new Error(), description: 'tried to perform actions above your paycheck'} );
+
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        if (!target)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+    
+        if (!this.isMuted(room, target)) {
+            throw new ConflictException('Is not muted', 
+            {cause: new Error(), description: 'This user is not muted'} );
+        }
+        if (!room.muted)
+            room.muted = [];
+        room.muted = room.muted.filter((user) => user.id != target.id)
+        return (await this.save(room));
+    }
+
+    async banUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+
+    }
+
+    async unbanUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+
     }
 
     async save(room: Room) {

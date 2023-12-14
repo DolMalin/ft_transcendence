@@ -64,16 +64,49 @@ export class RoomController {
     @Post('giveAdminPrivileges')
     async giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
         
-        console.log('test')
         return (await this.roomService.giveAdminPrivileges(user, updatePrivilegesDto));
 
     }
 
     @UseGuards(AccessToken2FAGuard)
-    @Post('hasAdminPrivileges')
+    @Post('removeAdminPrivileges')
+    async removeAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
+        
+        return (await this.roomService.removeAdminPrivileges(user, updatePrivilegesDto));
+
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('userPrivileges')
     async hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
     
-        return (await this.roomService.hasAdminPrivileges(updatePrivilegesDto));
+        return (await this.roomService.userPrivileges(updatePrivilegesDto));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('muteUser')
+    async muteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+
+        return (await this.roomService.muteUser(user, updatePrivilegesDto, updatePrivilegesDto.timeInMinutes));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('banUser')
+    async banUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+
+    }
+    @UseGuards(AccessToken2FAGuard)
+    @Post('unbanUser')
+    async unbanUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+
+        return (await this.roomService.banUser(user, updatePrivilegesDto));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('unmuteUser')
+    async unmuteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+
+        return (await this.roomService.unbanUser(user, updatePrivilegesDto));
     }
 
     @UseGuards(AccessToken2FAGuard)
