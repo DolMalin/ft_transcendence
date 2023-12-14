@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException, Req, Res } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -11,8 +11,8 @@ import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { UsersService } from 'src/users/services/users.service'
 import { roomType} from '../entities/room.entity'
-import { Server } from 'socket.io'
 import { JoinRoomDto } from '../dto/join-room.dto'
+import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
 
 @Injectable()
 export class RoomService {
@@ -42,6 +42,10 @@ export class RoomService {
 
     async findOneByName(name: string){
         return await this.roomRepository.findOneBy({name})
+    }
+    
+    async findOneByNameWithRelations(name: string){
+        return await this.roomRepository.findOne({where : {name : name}, relations : ['owner', 'administrator', 'users', 'message']})
     }
 
     async createDM(user: User, user2: User, roomName: string){
@@ -156,4 +160,56 @@ export class RoomService {
         msgList.reverse()
         return msgList
     }
+
+    async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        if (!room)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
+        if (!target)
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
+
+        if (requestMaker.id !== room.owner.id || this.isAdmin(room, requestMaker) === 'no')
+            throw new ConflictException('Privileges conflict', 
+            {cause: new Error(), description: 'tried to perform action above your paycheck'} )
+
+        if (this.isAdmin(room, target) !== 'no')
+            throw new ConflictException('Privileges conflict',  
+            {cause: new Error(), description: "Target user allready has privileges"} )
+
+        if (!room.administrator)
+            room.administrator = [];
+        room.administrator.push(target);
+        return await this.save(room);
+    }
+
+    async hasAdminPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
+
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        if (!room)
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
+        if (!target)
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
+        
+        return (this.isAdmin(room, target));
+    }
+
+    isAdmin(room : Room, user : User) {
+        
+        console.log(room.owner.username)
+        if (room.administrator?.find((userToFind : User) => userToFind?.id === user?.id))
+            return ('isAdmin');
+        else if (user.id === room.owner?.id)
+            return ('isOwner');
+        return ('no');
+    }
+
+    async save(room: Room) {
+        const newRoom = await this.roomRepository.save(room);
+        if (!newRoom)
+          throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}); 
+        return newRoom;
+    
+      }
 }

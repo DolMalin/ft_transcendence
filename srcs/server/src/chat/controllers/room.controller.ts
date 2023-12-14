@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode, HttpException, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
 import { Room } from '../entities/room.entity';
@@ -9,13 +9,16 @@ import { GetUser } from 'src/users/decorator/user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { JoinRoomDto } from '../dto/join-room.dto';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
+import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
+import { UsersService } from 'src/users/services/users.service';
 
 
 @Controller('room')
 export class RoomController {
     constructor(
         private readonly roomService: RoomService,
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly userService: UsersService
     ){}
 
     @UseGuards(AccessToken2FAGuard)
@@ -55,6 +58,22 @@ export class RoomController {
     @Post('message')
     async postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
         return await this.roomService.postMessage(user, dto)
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('giveAdminPrivileges')
+    async giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
+        
+        console.log('test')
+        return (await this.roomService.giveAdminPrivileges(user, updatePrivilegesDto));
+
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Post('hasAdminPrivileges')
+    async hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
+    
+        return (await this.roomService.hasAdminPrivileges(updatePrivilegesDto));
     }
 
     @UseGuards(AccessToken2FAGuard)

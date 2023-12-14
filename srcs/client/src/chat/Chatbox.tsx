@@ -7,6 +7,7 @@ import { Socket } from "socket.io-client"
 import { useForm } from "react-hook-form"
 import { useDisclosure } from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
+import UserInUsersList from "./UserInUsersList"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -49,6 +50,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")
+    const [isOp, setIsOp] = useState(false)
     const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState<
     {
@@ -75,7 +77,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         try {
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
             const message = res.data;
-            props.socket.emit("sendMessage", message);
+            props.socket.emit("sendMessage", message)
             setMessageList((list) => [...list, message])
         }
         catch(err){
@@ -99,6 +101,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
                 fetchUserList(res.data)
+
+                // TO DO : get roo type so it doesnt trigger in dm room
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
+                {targetId : res.data.id, roomName : props.room.name})
+                if (privi.data === 'isAdmin' || privi.data === 'isOwner')
+                  setIsOp(true);
             }
             catch(err){
                 console.error(`${err.response.data.message} (${err.response.data.error})`)} 
@@ -129,31 +137,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   <div>
                     <ul>
                       <li>
-                        <Chakra.Link>
-                          <Chakra.Popover>
-                            <Chakra.PopoverTrigger>
-                              <Chakra.Button>{user.username}</Chakra.Button>
-                            </Chakra.PopoverTrigger>
-                            <Chakra.Portal>
-                              <Chakra.PopoverContent>
-                                <Chakra.PopoverBody>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    admin
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    ban
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    mute
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    kick
-                                  </Chakra.Button>
-                                </Chakra.PopoverBody>
-                              </Chakra.PopoverContent>
-                            </Chakra.Portal>
-                          </Chakra.Popover>
-                        </Chakra.Link>
+                        <UserInUsersList username={user.username} userId={user.id} roomName={props.room?.name} userIsOp={isOp}/>
                       </li>
                     </ul>
                   </div>
