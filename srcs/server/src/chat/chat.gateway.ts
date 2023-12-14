@@ -45,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         client.join(`user-${payload.id}`)
         Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
-        catch(err) {
+    catch(err) {
         client.disconnect();
         Logger.error(`${err.response.data.message} (${err.response.data.error})`)
     }
