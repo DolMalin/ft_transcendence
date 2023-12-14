@@ -7,6 +7,7 @@ import { Socket } from "socket.io-client"
 import { useForm } from "react-hook-form"
 import { useDisclosure } from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
+import UserInUsersList from "./UserInUsersList"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -29,16 +30,6 @@ function timeOfDay(timestampz: string | Date){
     return (date)
 }
 
-async function makeThemOp(targetId : string, roomName : string) {
-    try {
-        await this.authService.post(process.env.REACT_APP_SERVER_URL + '/room/giveAdminPrivileges', 
-        {targetId : targetId, roomName : roomName});
-    }
-    catch (err) {
-        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-    }
-};
-
 async function getUserList(id: number, me : {username: string, id: string}){
     let userlist : {
         id : string,
@@ -46,11 +37,11 @@ async function getUserList(id: number, me : {username: string, id: string}){
     }[]
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
-        console.log('---me in getuserlistchatbox----', me)
-        console.log('res data', res.data)
+        // console.log('---me in getuserlistchatbox----', me)
+        // console.log('res data', res.data)
         userlist = res.data
         userlist = userlist.filter(user => user.id !== me?.id)
-        console.log('userlist after filter', userlist)
+        // console.log('userlist after filter', userlist)
     }
     catch(err){
         console.error(`${err.response.data.message} (${err.response.data.error})`)
@@ -62,7 +53,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")
-    const [privileges, setPrivileges] = useState('no')
+    const [isOp, setIsOp] = useState(false)
     const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState<
     {
@@ -114,9 +105,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
                 fetchUserList(res.data)
+
+                // TO DO : get roo type so it doesnt trigger in dm room
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
                 {targetId : res.data.id, roomName : props.room.name})
-                setPrivileges(privi);
+                if (privi.data === 'isAdmin' || privi.data === 'isOwner')
+                  setIsOp(true);
             }
             catch(err){
                 console.error(`${err.response.data.message} (${err.response.data.error})`)} 
@@ -135,7 +129,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
-    console.log(privileges)
     return (
         <div>
           <mark>
@@ -148,7 +141,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   <div>
                     <ul>
                       <li>
-                        <Chakra.Link>
+                        {/* <Chakra.Link>
                           <Chakra.Popover>
                             <Chakra.PopoverTrigger>
                               <Chakra.Button>{user.username}</Chakra.Button>
@@ -172,7 +165,8 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                               </Chakra.PopoverContent>
                             </Chakra.Portal>
                           </Chakra.Popover>
-                        </Chakra.Link>
+                        </Chakra.Link> */}
+                        <UserInUsersList username={user.username} userId={user.id} roomName={props.room?.name} userIsOp={isOp}/>
                       </li>
                     </ul>
                   </div>

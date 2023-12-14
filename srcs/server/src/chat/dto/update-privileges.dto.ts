@@ -3,7 +3,7 @@ import { TransformFnParams } from 'class-transformer'
 import { Transform} from 'class-transformer'
 import * as sanitizeHtml from 'sanitize-html'
 
-export class updatePrivilegesDto {
+export class UpdatePrivilegesDto {
 
     @IsUUID()
     targetId?: string

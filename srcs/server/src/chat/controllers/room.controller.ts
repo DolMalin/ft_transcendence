@@ -9,7 +9,7 @@ import { GetUser } from 'src/users/decorator/user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { JoinRoomDto } from '../dto/join-room.dto';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
-import { updatePrivilegesDto } from '../dto/update-privileges.dto';
+import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
 
 
@@ -62,36 +62,18 @@ export class RoomController {
 
     @UseGuards(AccessToken2FAGuard)
     @Post('giveAdminPrivileges')
-    async giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : updatePrivilegesDto){
+    async giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
         
-        const room = await this.roomService.findOneByNameWithRelations(updatePrivilegesDto.roomName);
-        if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
-        if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
+        console.log('test')
+        return (await this.roomService.giveAdminPrivileges(user, updatePrivilegesDto));
 
-        if (user.id !== room.owner.id || !this.roomService.isAdmin(room, user))
-            Logger.error('non-admin user tried to perform a priviledged action');
-        
-        if (!room.administrator)
-            room.administrator = [];
-        room.administrator.push(target);
-        return await this.roomService.save(room);
     }
 
     @UseGuards(AccessToken2FAGuard)
     @Post('hasAdminPrivileges')
-    async hasAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : updatePrivilegesDto){
+    async hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
     
-        const room = await this.roomService.findOneByNameWithRelations(updatePrivilegesDto.roomName);
-        if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
-        if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
-        
-        return (this.roomService.isAdmin(room, target));
+        return (await this.roomService.hasAdminPrivileges(updatePrivilegesDto));
     }
 
     @UseGuards(AccessToken2FAGuard)
