@@ -37,11 +37,8 @@ async function getUserList(id: number, me : {username: string, id: string}){
     }[]
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
-        // console.log('---me in getuserlistchatbox----', me)
-        // console.log('res data', res.data)
         userlist = res.data
         userlist = userlist.filter(user => user.id !== me?.id)
-        // console.log('userlist after filter', userlist)
     }
     catch(err){
         console.error(`${err.response.data.message} (${err.response.data.error})`)
@@ -85,7 +82,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
         catch(err){
             console.error(`${err.response.data.message} (${err.response.data.error})`)
-
         }
     }
 
@@ -141,31 +137,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   <div>
                     <ul>
                       <li>
-                        {/* <Chakra.Link>
-                          <Chakra.Popover>
-                            <Chakra.PopoverTrigger>
-                              <Chakra.Button>{user.username}</Chakra.Button>
-                            </Chakra.PopoverTrigger>
-                            <Chakra.Portal>
-                              <Chakra.PopoverContent>
-                                <Chakra.PopoverBody>
-                                  <Chakra.Button onClick={() => makeThemOp(user.id, props.room.name)}>
-                                    admin
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    ban
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    mute
-                                  </Chakra.Button>
-                                  <Chakra.Button onClick={() => ({})}>
-                                    kick
-                                  </Chakra.Button>
-                                </Chakra.PopoverBody>
-                              </Chakra.PopoverContent>
-                            </Chakra.Portal>
-                          </Chakra.Popover>
-                        </Chakra.Link> */}
                         <UserInUsersList username={user.username} userId={user.id} roomName={props.room?.name} userIsOp={isOp}/>
                       </li>
                     </ul>
