@@ -121,7 +121,7 @@ export class UsersService {
     //TODO
     //check if already block
     // user.blocked.push(user2)
-    // console.log('----user in block-----', user)
+    // this.userRepository.save
   }
   async getUserAvatar( res: any, id: string) {
 
