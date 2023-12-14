@@ -36,8 +36,11 @@ export class UsersService {
   }
 
 
-  findAll() {
-    return this.userRepository.find({relations :{playedGames: true}});
+  async findAll() {
+    const users = await this.userRepository.find({relations :{playedGames: true}})
+    if (!users)
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    return users
   }
   
   async findAllUsers() {
@@ -118,7 +121,7 @@ export class UsersService {
     //TODO
     //check if already block
     // user.blocked.push(user2)
-    // console.log('----user in block-----', user)
+    // this.userRepository.save
   }
   async getUserAvatar( res: any, id: string) {
 

@@ -39,22 +39,29 @@ async function getRoomList(){
     return roomList
 }
 
-async function getUserList(){
-    let userList: {
-        id: string,
-        username: string }[]
+async function getUserList(me : {username: string, id: string}){
+    let userlist : {
+        id : string,
+        username: string
+    }[]
     try{
-        const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/list`)
-        userList = res.data
+        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
+        userlist = res.data
+        userlist = userlist.filter(user => user.id !== me?.id)
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        throw err
     }
-    return userList
+    return userlist
 }
 
 export function Chat(props: {socket: Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [me, setMe] = useState<
+    {
+        id: string, 
+        username: string
+    } | undefined>(undefined)
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -126,9 +133,16 @@ export function Chat(props: {socket: Socket}){
         setRoomList(rooms)
     }
 
-    const fetchUserList = async () => {
-        const userList = await getUserList()
-        setUserList(userList)
+    const fetchUserList = async (me : {username: string, id: string}) => {
+        try {
+            console.log("me in fetchuser", me)
+            const tab = await getUserList(me)
+            setUserList(tab)
+        }
+        catch(err){
+            console.log(err)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
     }
 
     useEffect(() => {
@@ -142,11 +156,20 @@ export function Chat(props: {socket: Socket}){
         })
     })
 
-    useEffect(() => {
-        fetchUserList()
-        fetchRoom()
+    useEffect(() => {        
+        const asyncWrapper = async () => {
+            try{
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
+                setMe(res.data)
+                fetchUserList(res.data) 
+                fetchRoom()
+            }
+            catch(err){
+                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+        }
+        asyncWrapper()
     }, [])
-    
+
     return (
         <div>
         <mark>
@@ -168,7 +191,7 @@ export function Chat(props: {socket: Socket}){
         </mark>
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
-            <Chakra.Flex flexDir="row" key={index}>
+            <Chakra.Flex flexDir="row" key={index} >
                    <div className="userList">
                 <div>
                     <ul>

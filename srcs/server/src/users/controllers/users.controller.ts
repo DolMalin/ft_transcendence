@@ -57,21 +57,17 @@ export class UsersController {
     return (user.isAvailable);
   }
 
- 
-  
   @UseGuards(AccessToken2FAGuard)
   @Patch('updateIsAvailable')
   updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
     return (this.usersService.update(user.id, updateDto));
   }
 
-
   @UseGuards(AccessToken2FAGuard)
   @Get('me')
   getUserInfo(@GetUser() user: User){
     return {username: user?.username, id: user?.id}
   }
-
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
