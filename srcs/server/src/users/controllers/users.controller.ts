@@ -104,4 +104,20 @@ export class UsersController {
   remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id);
   }
+
+
+  // ==================================================================== //
+  // ======================== FRIENDS REQUEST ===========================
+  // ==================================================================== //
+
+  @UseGuards(AccessToken2FAGuard)
+  @Post('friendRequest/send/:receiverId')
+  async sendFriendRequest(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+    return this.usersService.sendFriendRequest(receiverId, user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friendRequest/status/:receiverId')
+  async getFriendRequestStatus(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+  }
 }

@@ -57,7 +57,7 @@ export class AuthService {
           config
         ).then((res) => {
           resolve(res.data.access_token as string)
-        }, () => {
+        }, (err) => {
           resolve(null)
         })
     })

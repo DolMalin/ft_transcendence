@@ -14,8 +14,9 @@ import { UsersService } from "src/users/services/users.service";
 import { User } from "src/users/entities/user.entity";
 import { Avatar } from "src/users/entities/avatar.entity";
 import { AvatarService } from "src/users/services/avatar.service";
+import { FriendRequest } from "src/users/entities/friendRequest.entity";
 @Module({
-    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule, TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar])] ,
+    imports: [TypeOrmModule.forFeature([Room]), TypeOrmModule.forFeature([Message]), AuthModule, JwtModule, TypeOrmModule.forFeature([User, FriendRequest]), TypeOrmModule.forFeature([Avatar])] ,
     controllers: [RoomController, MessageController],
     providers: [ChatGateway, RoomService, MessageService, JwtService, UsersService, AuthService, AvatarService],
     exports: [RoomService, MessageService, ChatGateway]

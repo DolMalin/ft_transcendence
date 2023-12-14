@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException, StreamableFile, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -11,6 +11,7 @@ import { Readable } from 'stream';
 
 import { Server} from 'socket.io';
 import { GameGateway } from 'src/game/gateway/game.gateway';
+import { FriendRequest } from '../entities/friendRequest.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,9 @@ export class UsersService {
   constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
+
+    @InjectRepository(FriendRequest)
+    private friendRequestRepository: Repository<FriendRequest>,   
 
     private readonly avatarService: AvatarService,
 	) { }
@@ -37,15 +41,19 @@ export class UsersService {
 
 
   findAll() {
-    return this.userRepository.find({relations :{playedGames: true}});
+    return this.userRepository.find({relations :{
+      playedGames: true,
+      friends: true,
+      sentFriendRequests: true,
+      receivedFriendRequests: true
+    }});
   }
   
   async findAllUsers() {
     
     let res = await this.userRepository.find()
-    if (!res || res === undefined){
+    if (!res || res === undefined)
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-    }
     const userList = res.map(user => ({
       id: user.id,
       username: user.username
@@ -217,6 +225,7 @@ export class UsersService {
       return (scoreList);
     }));
   }
+  
 
   async returnProfile(userId : string) {
     try {
@@ -229,4 +238,57 @@ export class UsersService {
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
     }
   }
+
+  // ==================================================================== //
+  // ======================== FRIENDS REQUEST ===========================
+  // ==================================================================== //
+
+  async hasRequestBeenSentOrReceived(creator: User, receiver: User) {
+    const requestHasBeenSent = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: creator.id})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: receiver.id})
+      .getOne()
+    
+    const requestHasBeenReceived = await this.friendRequestRepository
+    .createQueryBuilder('friendRequest')
+    .leftJoinAndSelect('friendRequest.creator', 'creator')
+    .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+    .where('friendRequest.creator = :creator', {creator: receiver.id})
+    .andWhere('friendRequest.receiver = :receiver', {receiver: creator.id})
+    .getOne()
+    
+    if (requestHasBeenSent)
+      return true
+    return false
+
+  }
+
+  async sendFriendRequest(receiverId: string, creator: User, res:any) {
+    if (receiverId === creator.id)
+      throw new ConflictException("Conflicts between creater and receiver", {cause: new Error(), description: "creator cannot be receiver"})
+    
+    const receiver = await this.findOneById(receiverId)
+    if (!receiver)
+      throw new BadRequestException("User not found", {cause: new Error(), description: "cannot find receiver in database"})
+
+    const hasRequestBeenSentOrReceived = await this.hasRequestBeenSentOrReceived(creator, receiver)
+    if (hasRequestBeenSentOrReceived)
+      throw new UnauthorizedException("Cannot send friend frequest", {cause: new Error(), description: "A friend request has already been sent or received to your account"})
+
+    const friendRequest = await this.friendRequestRepository.save({creator, receiver, status:'pending'})
+    if (!friendRequest)
+      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot create friend request'})
+
+    return res.status(200).send(friendRequest)
+  }
+
+  // async getFriendRequestStatus(receiverId: string, creator: User, res: any) {
+
+  // }
+
+
+
 }
