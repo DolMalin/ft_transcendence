@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { useDisclosure } from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
 import UserInUsersList from "./UserInUsersList"
+import BanList from "./BanList"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -54,6 +55,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
     const [id, setId] = useState("")
     const [isOp, setIsOp] = useState(false)
     const toast = Chakra.useToast();
+    const toastId = 'toast';
     const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState<
     {
@@ -61,6 +63,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         username: string
     } | undefined>(undefined)
     const [userList, setUserList] = useState
+    <{
+        id: string, 
+        username: string
+    }[]>([])
+    const [banList, setBanList] = useState
     <{
         id: string, 
         username: string
@@ -108,12 +115,23 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
     }
 
+    const fetchBanList = async (roomId : number) => {
+      try {
+        const bannedUsersArray = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/bannedList/' + 200.2)
+        setBanList(bannedUsersArray.data);
+      }
+      catch(err) {
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+      }
+    }
+
     useEffect(() => {        
         const asyncWrapper = async () => {
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
                 fetchUserList(res.data)
+                fetchBanList(props.room?.id);
 
                 // TO DO : get roo type so it doesnt trigger in dm room
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
@@ -128,7 +146,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
         setMessageList(props.room.message? props.room.message: [])
         asyncWrapper()
-    }, [])
+    }, [rerender])
 
     useEffect(() => {
       const asyncWrapper = async () => {
@@ -153,16 +171,34 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
     useEffect(function sockEvents() {
 
-      props.socket?.on('channelUpdate', () => {
-
+      function forceRender() {
         if (rerender === true)
           setRerender(false)
         else if (rerender === false)
           setRerender(true);
+      };
+      props.socket?.on('channelUpdate', forceRender);
+
+      props.socket.on('userJoined', forceRender);
+
+      props.socket.on('youGotBanned', () => {
+
+        props.showChat(false);
+        if(!toast.isActive(id)) {
+          toast({
+            id,
+            title: 'You have no rights !',
+            description: 'you got banned from ' + props.room.name,
+            status: 'warning',
+            isClosable: true,
+            colorScheme : 'red'
+          })
+        }
       });
 
       return (() => {
         props.socket?.off('channelUpdate');
+        props.socket?.off('userJoined');
       })
     }, [rerender])
 
@@ -198,6 +234,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
               </Chakra.Flex>
             ))
           )}
+          {isOp && <BanList banList={banList} room={props.room} chatSock={props.socket}/>}
           <div>
             <Chakra.Button onClick={() => props.showChat(false)}>
               back

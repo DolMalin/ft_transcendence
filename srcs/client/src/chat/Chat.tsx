@@ -62,6 +62,7 @@ export function Chat(props: {socket: Socket}){
         id: string, 
         username: string
     } | undefined>(undefined)
+    const toast = Chakra.useToast();
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -114,7 +115,19 @@ export function Chat(props: {socket: Socket}){
             setShowChat(true)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'You are banned',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    isClosable: true,
+                    colorScheme : 'red'
+                })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 

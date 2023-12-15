@@ -60,6 +60,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     client.join(`room-${roomId}`)
+    this.server.to(`room-${roomId}`).emit('userJoined');
     Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   
   }
@@ -115,10 +116,13 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   @SubscribeMessage('channelRightsUpdate')
   channelRightsUpdate(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
-    client.rooms.forEach((value) => Logger.debug('room : ' + value))
 
-
-      console.log(data.roomId)
       this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+  }
+
+  @SubscribeMessage('userGotBanned')
+  userGotBanned(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
+
+      this.server.to(`user-${data.targetId}`).emit('youGotBanned');
   }
 }

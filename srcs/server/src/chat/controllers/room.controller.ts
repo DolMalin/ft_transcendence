@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode, HttpException, Logger, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode, HttpException, Logger, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
 import { Room } from '../entities/room.entity';
@@ -11,6 +11,7 @@ import { JoinRoomDto } from '../dto/join-room.dto';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
+import { IsInt } from 'class-validator';
 
 
 @Controller('room')
@@ -45,7 +46,19 @@ export class RoomController {
     @UseGuards(AccessToken2FAGuard)
     @Get('userlist/:id')
     async getUserList(@Param("id") id: number){
+        if (typeof id !== 'bigint')
+            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
+        
         return await this.roomService.findAllUsersInRoom(id)
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Get('bannedList/:id')
+    async getBanList(@Param("id") roomId: number) {
+        if (typeof roomId !== 'bigint')
+            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
+
+        return (await this.roomService.getBanList(roomId));
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -94,19 +107,20 @@ export class RoomController {
     @Post('banUser')
     async banUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
 
+        return (await this.roomService.banUser(user, updatePrivilegesDto))
     }
     @UseGuards(AccessToken2FAGuard)
     @Post('unbanUser')
     async unbanUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        return (await this.roomService.banUser(user, updatePrivilegesDto));
+        return (await this.roomService.unbanUser(user, updatePrivilegesDto));
     }
 
     @UseGuards(AccessToken2FAGuard)
     @Post('unmuteUser')
     async unmuteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        return (await this.roomService.unbanUser(user, updatePrivilegesDto));
+        return (await this.roomService.unmuteUser(user, updatePrivilegesDto));
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -118,6 +132,10 @@ export class RoomController {
     @UseGuards(AccessToken2FAGuard)
     @Delete(':id')
     async removeRoom(@Param("id") id: number){
+        
+        if (typeof id != 'bigint')
+            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
+
         return await this.roomService.remove(id)
     }
 }

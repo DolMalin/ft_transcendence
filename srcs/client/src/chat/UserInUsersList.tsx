@@ -95,6 +95,30 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
+                    title: 'Got unmuted !',
+                    description:  err.response.data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            else
+              console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function banThem(targetId : string, roomId : number, timeInMinutes : number) {
+        try {
+
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/banUser', 
+            {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
+            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+            props.chatSock?.emit('userGotBanned', {targetId : targetId});
+        }
+        catch (err) {
+            if (err.response.status === 409)
+            {
+                toast({
                     title: 'You have no rights !',
                     description:  err.response.data.error,
                     status: 'info',
@@ -143,12 +167,12 @@ function UserInUsersList(props : {username : string, userId : string,
     })
 
 
-    function MuteBanSlider(props : {targetId : string, roomId : number, action : Function}) {
+    function MuteBanSlider(props : {targetId : string, roomId : number, actionName : string ,action : Function}) {
         const [sliderValue, setSliderValue] = React.useState(5)
         const [showTooltip, setShowTooltip] = React.useState(false)
         return (<>
             <Chakra.Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
-                mute
+                {props.actionName}
             </Chakra.Button>        
             <Chakra.Slider
             id='slider'
@@ -175,7 +199,7 @@ function UserInUsersList(props : {username : string, userId : string,
                     <Chakra.SliderThumb />
                 </Chakra.Tooltip>
             </Chakra.Slider>
-            <Chakra.Text>Zero minute mute will result in an infinite duration being applied</Chakra.Text>
+            <Chakra.Text>zero minutes will set timer to an undefined amounth of time</Chakra.Text>
         </>)
     }
 
@@ -189,32 +213,26 @@ function UserInUsersList(props : {username : string, userId : string,
             </Chakra.PopoverTrigger>
             <Chakra.Portal>
                 <Chakra.PopoverContent>
-                <Chakra.PopoverBody>
-                    {targetIsOp === 'no'  && <Chakra.Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
-                        give them privileges
-                    </Chakra.Button>}
+                    <Chakra.PopoverBody>
+                        {targetIsOp === 'no'  && <Chakra.Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                            Promote
+                        </Chakra.Button>}
 
-                    {targetIsOp === 'isAdmin' && <Chakra.Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
-                        Remove their privileges
-                    </Chakra.Button>}
+                        {targetIsOp === 'isAdmin' && <Chakra.Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                            Demote
+                        </Chakra.Button>}
 
-                    <Chakra.Button onClick={() => ({})}>
-                        ban
-                    </Chakra.Button>
+                        <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
 
-                    <Chakra.Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
-                        unmute
-                    </Chakra.Button>
-                    {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} action={muteThem}/>}
+                        {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
+                        <Chakra.Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
+                            unmute
+                        </Chakra.Button>
 
-                    <Chakra.Button onClick={() => ({})}>
-                        kick
-                    </Chakra.Button>
-
-                    <Chakra.Button onClick={onOpen}>
-                    profile
-                    </Chakra.Button>
-                </Chakra.PopoverBody>
+                        <Chakra.Button onClick={onOpen}>
+                            profile
+                        </Chakra.Button>
+                    </Chakra.PopoverBody>
                 </Chakra.PopoverContent>
             </Chakra.Portal>
             </Chakra.Popover>
