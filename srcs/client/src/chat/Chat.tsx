@@ -9,6 +9,7 @@ import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { EmailIcon } from "@chakra-ui/icons";
 
+
 export interface MessageData {
     id: number;
     author: {id: string, username: string};
@@ -108,7 +109,8 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            
+            console.log('--room--', res.data)
+            // res.data.users.filter((user: User) => user.id !== "bonjour")
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
@@ -135,7 +137,6 @@ export function Chat(props: {socket: Socket}){
 
     const fetchUserList = async (me : {username: string, id: string}) => {
         try {
-            console.log("me in fetchuser", me)
             const tab = await getUserList(me)
             setUserList(tab)
         }

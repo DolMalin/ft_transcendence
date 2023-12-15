@@ -146,7 +146,6 @@ export class UsersService {
     const user2 = await this.findOneById(targetId)
     if (!user2)
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
-    console.log('user out if', user)
     if (this.isAlreadyBlocked(user, user2) === false){
       user.blocked.push(user2)
       return await this.save(user)
@@ -156,6 +155,7 @@ export class UsersService {
   }
 
   isAlreadyBlocked(user: User, user2: User): boolean {
+    console.log('user', user, 'user2', user2)
     const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
     return isBlocked || false;
   }

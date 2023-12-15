@@ -176,9 +176,6 @@ export class GamePlayService {
   async gameLoop(game : GameState, data: GameInfo, client : Socket, server : Server) {
     
     let ballEvents : string = 'start';
-
-    // console.log('rooms at game loop start : ', server.sockets.adapter.rooms.get(data.roomName))
-
     try {
 
       const userOneInfos = await this.getUserBasicInfos(game.clientOne.id);

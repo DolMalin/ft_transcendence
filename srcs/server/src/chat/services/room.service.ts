@@ -132,9 +132,13 @@ export class RoomService {
             .leftJoinAndSelect('room.message', 'message')
             .leftJoinAndSelect('message.author', 'author')
             .leftJoinAndSelect('room.users', 'user')
+            .leftJoinAndSelect('user.blocked', 'blocked')
             .where('room.name = :name', { name: dto.name })
             .orderBy('message.id', 'ASC')
             .getOne();
+
+        const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
+        console.log(userRelation)
         if (!room)
             throw new ForbiddenException('room does not exist')
         if (room.privChan === true)
@@ -143,12 +147,18 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        if (room.users === undefined)
+        if (!room.users)
             room.users = []
         room.users.push(user)
-        this.roomRepository.save(room)
+        await this.roomRepository.save(room)
+        if (userRelation.blocked && room.message) {
+            console.log('allo')
+            room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id));
+        }    
         return room;
     }
+
+    // roomList = roomList.filter(room => room.type !== roomType.directMessage)
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
@@ -194,6 +204,9 @@ export class RoomService {
         const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        if (room.type === roomType.directMessage){
+            return "no"
+        }
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
@@ -203,7 +216,6 @@ export class RoomService {
 
     isAdmin(room : Room, user : User) {
         
-        console.log(room.owner.username)
         if (room.administrator?.find((userToFind : User) => userToFind?.id === user?.id))
             return ('isAdmin');
         else if (user.id === room.owner?.id)

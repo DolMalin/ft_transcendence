@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -25,10 +25,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   server : Server;
 
   async handleConnection (client: Socket) {
-    //TODO maybe find another way
-    // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
-    // for (const id of userBlocked){
-        // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
     Logger.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);
     try 
@@ -42,10 +38,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         }
         const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
         client.join(`user-${payload.id}`)
-        // const userBlocked = await this.userService.findAllBlockedUser(payload.id)
-        // for (const id of userBlocked){
-        //     client.join(`blocked-${id.id}`)
-        // }
         Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(err) {
@@ -72,14 +64,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     const sender = await this.userService.findOneById(client.handshake.query?.userId as string)
     room.users.forEach((user) => {
       const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === sender.id);
-      console.log(`User ${user.id} is blocked: ${isBlocked}`);
+      Logger.log(`User ${user.id} is blocked: ${isBlocked}`);
       if (!isBlocked) {
         client.to(`user-${user.id}`).emit("receiveMessage", data);
       }
     });
-    
-    // client.to(`room-${data.room.id}`).emit("receiveMessage", data)
-    // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
   }
 
   @SubscribeMessage('DM')
@@ -90,8 +79,10 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       }
 
       try {
-          const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-          const user2 = await this.userService.findOneById(data.targetId)
+          const user = await this.userService.findOneByIdWithBlockRelation(client.handshake.query?.userId as string);
+          const user2 = await this.userService.findOneByIdWithBlockRelation(data.targetId)
+          // console.log('user', user)
+          // console.log('user2', user2)
           await this.createOrJoinDMRoom(user, user2, this.server);
 
       } catch (err) {
@@ -103,8 +94,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async createOrJoinDMRoom(user: User, user2: User, server: Server) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
     let room = await this.roomService.getRoom(roomName)
+    if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
+      throw new ConflictException("User blocked", {cause: new Error(), description: 'You have been blocked or blocked this user.'})
+    }
+    console.log('---------here-------------')
     if (!room) {
-       room = await this.roomService.createDM(user, user2, roomName)
+      room = await this.roomService.createDM(user, user2, roomName)
     }
     server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
 }
