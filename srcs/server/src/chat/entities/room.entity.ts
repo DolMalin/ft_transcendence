@@ -32,6 +32,14 @@ export class Room {
     @JoinTable()
     administrator: User[]
 
+    @ManyToMany(() => User, user => user.id)
+    @JoinTable()
+    muted: User[]
+
+    @ManyToMany(() => User, user => user.id)
+    @JoinTable()
+    banned: User[]
+
     @ManyToMany(() => User, user => user.room)
     @JoinTable()
     users: User[]

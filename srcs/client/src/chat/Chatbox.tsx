@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form"
 import { useDisclosure } from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
 import UserInUsersList from "./UserInUsersList"
+import BanList from "./BanList"
+import BasicToast from "../toast/BasicToast"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -30,13 +32,13 @@ function timeOfDay(timestampz: string | Date){
     return (date)
 }
 
-async function getUserList(id: number, me : {username: string, id: string}){
+async function getUserList(roomId: number, me : {username: string, id: string}){
     let userlist : {
         id : string,
         username: string
     }[]
     try{
-        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
+        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + roomId)
         userlist = res.data
         userlist = userlist.filter(user => user.id !== me?.id)
     }
@@ -46,11 +48,15 @@ async function getUserList(id: number, me : {username: string, id: string}){
     return userlist
 }
 
+
 export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
     
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [rerender, setRerender] = useState(false)
     const [id, setId] = useState("")
     const [isOp, setIsOp] = useState(false)
+    const toast = Chakra.useToast();
+    const toastId = 'toast';
     const [messageList, setMessageList] = useState<MessageData[]>([])
     const [me, setMe] = useState<
     {
@@ -58,6 +64,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         username: string
     } | undefined>(undefined)
     const [userList, setUserList] = useState
+    <{
+        id: string, 
+        username: string
+    }[]>([])
+    const [banList, setBanList] = useState
     <{
         id: string, 
         username: string
@@ -87,6 +98,15 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setMessageList((list) => [...list, message])
         }
         catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                      <BasicToast text={err.response.data.error}/>
+                  </>)
+                  })
+            }
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
@@ -101,25 +121,95 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
     }
 
+    const fetchBanList = async (roomId : number) => {
+      try {
+        const bannedUsersArray = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/bannedList/' + roomId)
+        setBanList(bannedUsersArray.data);
+      }
+      catch(err) {
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+      }
+    }
+
     useEffect(() => {        
         const asyncWrapper = async () => {
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
                 fetchUserList(res.data)
+                fetchBanList(props.room?.id);
 
                 // TO DO : get roo type so it doesnt trigger in dm room
-                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/hasAdminPrivileges',
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : res.data.id, roomName : props.room.name})
                 if (privi.data === 'isAdmin' || privi.data === 'isOwner')
                   setIsOp(true);
+                else
+                  setIsOp(false);
             }
             catch(err){
                 console.error(`${err.response.data.message} (${err.response.data.error})`)} 
         }
         setMessageList(props.room.message? props.room.message: [])
         asyncWrapper()
-    }, [])
+    }, [rerender])
+
+    useEffect(() => {
+      const asyncWrapper = async () => {
+        try{
+            // TO DO : get roo type so it doesnt trigger in dm room
+            if (me?.id)
+            {
+              const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+              {targetId : me?.id, roomName : props.room.name})
+              if (privi.data === 'isAdmin' || privi.data === 'isOwner')
+                setIsOp(true);
+              else
+                setIsOp(false);
+            }
+        }
+        catch(err){
+            console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+      }
+
+      asyncWrapper();
+    }, [rerender])
+
+    useEffect(function sockEvents() {
+
+      function forceRender() {
+        if (rerender === true)
+          setRerender(false)
+        else if (rerender === false)
+          setRerender(true);
+      };
+      props.socket?.on('channelUpdate', forceRender);
+
+      props.socket.on('userJoined', forceRender);
+
+      props.socket.on('youGotBanned', () => {
+
+        const id = 'test-toast';
+        props.showChat(false);
+        if(!toast.isActive(id)) {
+          console.log(toast.isActive(id));
+          console.log('TEST')
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <> 
+              <BasicToast text={'you got banned from ' + props.room.name}/>
+          </>)
+          })
+        }
+      });
+
+      return (() => {
+        props.socket?.off('channelUpdate');
+        props.socket?.off('userJoined');
+      })
+    }, [rerender])
 
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {
@@ -145,14 +235,16 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   <div>
                     <ul>
                       <li>
-                        <UserInUsersList username={user.username} userId={user.id} roomName={props.room?.name} userIsOp={isOp}/>
+                        <UserInUsersList username={user.username} userId={user.id} room={props.room} userIsOp={isOp} chatSock={props.socket}/>
                       </li>
                     </ul>
                   </div>
                 </div>
+                {/* <Chakra.Button onClick={() => setRerender(rerender ? false : true)}> rerender </Chakra.Button> */}
               </Chakra.Flex>
             ))
           )}
+          {isOp && <BanList banList={banList} room={props.room} chatSock={props.socket}/>}
           <div>
             <Chakra.Button onClick={() => props.showChat(false)}>
               back
