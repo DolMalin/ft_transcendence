@@ -1,12 +1,8 @@
-import React, {useState, useEffect, useRef} from "react"
-import ScrollToBottom from 'react-scroll-to-bottom'
+import React from "react"
 import authService from "../auth/auth.service"
-import { MessageData, Room } from "./Chat"
+import { Room } from "./Chat"
 import { Socket } from "socket.io-client"
-import { useForm } from "react-hook-form"
-import { Box, ListItem, UnorderedList, Text, Flex, Button, useToast, Slider, SliderFilledTrack, SliderTrack} from "@chakra-ui/react"
-import ProfileModal from "../profile/ProfileModal"
-import UserInUsersList from "./UserInUsersList"
+import {ListItem, UnorderedList, Text, Flex, Button, useToast} from "@chakra-ui/react"
 import BasicToast from "../toast/BasicToast"
 
 function BanList(props : {banList :  {username : string, id : string}[], room : Room, chatSock : Socket}) {
