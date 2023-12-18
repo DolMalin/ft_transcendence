@@ -30,8 +30,8 @@ export class UsersController {
   //TODO changer nom route
   @UseGuards(AccessToken2FAGuard)
   @Get('list')
-  findAllUsers(){
-    return this.usersService.findAllUsers()
+  findAllUsers(@GetUser() user: User){
+    return this.usersService.findAllUsers(user)
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -157,7 +157,7 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('friend/isFriend/:userId')
   async isFriend(@Param('userId') targetUserId: string, @GetUser() originalUser: User, @Res() res:any) {
-    return await this.usersService.isFriend(targetUserId, originalUser, res)
+    return await this.usersService.isFriend(targetUserId, originalUser)
   }
 
 

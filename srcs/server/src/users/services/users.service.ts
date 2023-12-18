@@ -52,15 +52,18 @@ export class UsersService {
 
 
   
-  async findAllUsers() {
+  async findAllUsers(originalUser: User) {
     
     let res = await this.userRepository.find()
     if (!res || res === undefined)
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-    const userList = res.map(user => ({
+    const userList = await Promise.all(res.map(async (user) => ({
       id: user.id,
-      username: user.username
-    }))
+      username: user.username,
+      isFriend: (await this.isFriend(user.id, originalUser)).isFriend
+    })))
+
+
     return userList
   }
   
@@ -446,9 +449,11 @@ export class UsersService {
   }
 
 
-  async isFriend(targetUserId: string, originalUser:User, res: any) {
-    if (targetUserId === originalUser.id)
-      throw new ConflictException("Conflicts between target user and original user", {cause: new Error(), description: "a user cannot be his own friend"})
+
+
+  async isFriend(targetUserId: string, originalUser:User) {
+    // if (targetUserId === originalUser.id)
+    //   throw new ConflictException("Conflicts between target user and original user", {cause: new Error(), description: "a user cannot be his own friend"})
 
     const targetUser = await this.findOneById(targetUserId)
     if (!targetUser)
@@ -470,7 +475,7 @@ export class UsersService {
       .andWhere('friendRequest.receiver = :receiver', {receiver: targetUser.id})
       .getOne()
     
-    return res.status(200).send({isFriend: sendRequest?.status === 'accepted' || receivedRequest?.status === 'accepted'})
+    return {isFriend: sendRequest?.status === 'accepted' || receivedRequest?.status === 'accepted'}
 
   }
 

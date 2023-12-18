@@ -42,7 +42,8 @@ async function getRoomList(){
 async function getUserList(){
     let userList: {
         id: string,
-        username: string }[]
+        username: string,
+        isFriend: boolean}[]
     try{
         const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/list`)
         userList = res.data
@@ -67,7 +68,8 @@ export function Chat(props: {socket: Socket}){
         privChan: string | null }[]>([])
     const [userList, setUserList] = useState
     <{  id: string
-        username: string }[]>([])
+        username: string,
+    isFriend: boolean}[]>([])
     const { 
         register: registerJoin, 
         handleSubmit: handleSubmitJoin, 
@@ -146,6 +148,29 @@ export function Chat(props: {socket: Socket}){
         fetchUserList()
         fetchRoom()
     }, [])
+
+    useEffect(function socketEvent() {
+        console.log("useEffect chat")
+        props.socket?.on('friendRequestSendedChat', () => {
+            fetchUserList()
+        })
+
+        props.socket?.on('friendRequestAcceptedChat', () => {
+            fetchUserList()
+        })
+ 
+        props.socket?.on('friendRemovedChat', () => {
+            console.log('friend removed chat')
+            fetchUserList()
+        })
+
+        return (() => {
+            props.socket?.off('friendRequestSendedChat');
+            props.socket?.off('friendRequestAcceptedChat');
+            props.socket?.off('friendRemovedChat');
+        })
+        
+    }, [props.socket])
     
     return (
         <div>
@@ -166,13 +191,14 @@ export function Chat(props: {socket: Socket}){
          <mark>
             <h1>------User list------</h1>
         </mark>
+
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
             <Chakra.Flex flexDir="row" key={index}>
                    <div className="userList">
                 <div>
                     <ul>
-                        <li><Chakra.Link onClick={() => {onOpen() ; setId(user.id)}}>{user.username}</Chakra.Link></li>
+                        <li><Chakra.Link onClick={() => {onOpen() ; setId(user.id)}}>{user.username} {user.isFriend ? "👥" :""}</Chakra.Link></li>
                         <Chakra.IconButton
                             variant='outline'
                             colorScheme='teal'

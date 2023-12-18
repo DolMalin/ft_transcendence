@@ -60,6 +60,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         try {
             const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/response/${friendRequestId}`, {status:'accepted'});
             props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.creator.id})
+            props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
         } catch(err) {
@@ -146,18 +147,18 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.onClose();
         })
 
-        props.chatSocket?.on('friendRequestSended', () => {
+        props.chatSocket?.on('friendRequestSendedModal', () => {
             setFriendRequestStatus('pending')
             setIsFriendRequestCreator(false)
         })
 
-        props.chatSocket?.on('friendRequestAccepted', () => {
+        props.chatSocket?.on('friendRequestAcceptedModal', () => {
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
 
         })
  
-        props.chatSocket?.on('friendRemoved', () => {
+        props.chatSocket?.on('friendRemovedModal', () => {
             setFriendRequestStatus('undefined')
             setIsFriendRequestCreator(false)
 
@@ -165,6 +166,9 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
         return (() => {
             props.gameSock?.off('closeModal');
+            props.chatSocket?.off('friendRequestSendedModal');
+            props.chatSocket?.off('friendRequestAcceptedModal');
+            props.chatSocket?.off('friendRemovedModal');
         })
     }, [friendRequestStatus, isFriendRequestCreator])
     if (!props.userId)
