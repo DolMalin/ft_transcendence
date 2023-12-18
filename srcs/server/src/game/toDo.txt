@@ -7,3 +7,5 @@ CHECK IF A USER HAS BLOCKED ANOTHER IN INVITE PROCESS
 PARAM DECORATOR : check if type are fine 
 
 check type sent in sockets
+
+Correct mute/unmute bug where the message list is reseted

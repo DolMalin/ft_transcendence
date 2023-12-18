@@ -331,7 +331,7 @@ export class RoomService {
 
         if (this.isBanned(room, target))
             throw new ConflictException('Banned already', 
-            {cause: new Error(), description: target.username + 'is allready banned from ' + room.name});
+            {cause: new Error(), description: target.username + ' is allready banned from ' + room.name});
         if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Is Admin', 
             {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'});
@@ -368,7 +368,7 @@ export class RoomService {
 
         if (!this.isBanned(room, target))
             throw new ConflictException('Not banned', 
-            {cause: new Error(), description: target.username + 'is not banned from ' + room.name});
+            {cause: new Error(), description: target.username + ' is not banned from ' + room.name});
     
         if (!room.banned)    
             room.banned = [];

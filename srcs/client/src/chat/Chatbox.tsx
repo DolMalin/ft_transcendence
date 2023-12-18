@@ -183,9 +183,13 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
       props.socket.on('youGotBanned', () => {
 
+        const id = 'test-toast';
         props.showChat(false);
         if(!toast.isActive(id)) {
+          console.log(toast.isActive(id));
+          console.log('TEST')
           toast({
+            id,
             isClosable: true,
             duration : 5000,
             render : () => ( <> 
