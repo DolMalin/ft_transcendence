@@ -25,7 +25,7 @@ export class UsersService {
     private friendRequestRepository: Repository<FriendRequest>,   
 
     private readonly avatarService: AvatarService,
-	) { }
+	) {}
 
   async create(createUserDto: CreateUserDto) {
     

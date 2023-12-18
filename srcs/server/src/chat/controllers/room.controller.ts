@@ -118,6 +118,24 @@ export class RoomController {
 
         return (await this.roomService.unmuteUser(user, updatePrivilegesDto));
     }
+    
+    @UseGuards(AccessToken2FAGuard)
+    @Post('setPassword')
+    async setPassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return await this.roomService.setPassword(user, updateRoomDto)
+    }
+    
+    @UseGuards(AccessToken2FAGuard)
+    @Post('changePassword')
+    async changePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return await this.roomService.changePassword(user, updateRoomDto)
+    }
+    
+    @UseGuards(AccessToken2FAGuard)
+    @Post('removePassword')
+    async removePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return await this.roomService.removePassword(user, updateRoomDto)
+    }
 
     @UseGuards(AccessToken2FAGuard)
     @Get('message')
