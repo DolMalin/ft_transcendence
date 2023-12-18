@@ -113,4 +113,28 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     
   }
 
+  @SubscribeMessage('friendRequestSended')
+  async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    this.server.to('user-' + data.creatorId).emit('friendRequestSended', data)
+  }
+
+  @SubscribeMessage('friendRequestAccepted')
+  async friendRequestAccepted(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    
+    this.server.to('user-' + data.creatorId).emit('friendRequestAccepted', data)
+  }
+
+  @SubscribeMessage('friendRemoved')
+  async friendRemoved(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    
+    this.server.to('user-' + data.creatorId).emit('friendRemoved', data)
+  }
+
+
 }

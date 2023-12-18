@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { Server} from 'socket.io';
 import { GameGateway } from 'src/game/gateway/game.gateway';
 import { FriendRequest } from '../entities/friendRequest.entity';
+import { FriendRequestStatus } from '../entities/friendRequestStatus.type';
 
 @Injectable()
 export class UsersService {
@@ -48,6 +49,8 @@ export class UsersService {
       receivedFriendRequests: true
     }});
   }
+
+
   
   async findAllUsers() {
     
@@ -240,11 +243,11 @@ export class UsersService {
   }
 
   // ==================================================================== //
-  // ======================== FRIENDS REQUEST ===========================
+  // ============================== FRIENDS =============================
   // ==================================================================== //
 
-  async hasRequestBeenSentOrReceived(creator: User, receiver: User) {
-    const requestHasBeenSent = await this.friendRequestRepository
+  async getRequestSentOrReceived(creator: User, receiver: User) {
+    const requestSent = await this.friendRequestRepository
       .createQueryBuilder('friendRequest')
       .leftJoinAndSelect('friendRequest.creator', 'creator')
       .leftJoinAndSelect('friendRequest.receiver', 'receiver')
@@ -252,18 +255,18 @@ export class UsersService {
       .andWhere('friendRequest.receiver = :receiver', {receiver: receiver.id})
       .getOne()
     
-    const requestHasBeenReceived = await this.friendRequestRepository
+    const requestReceived = await this.friendRequestRepository
     .createQueryBuilder('friendRequest')
     .leftJoinAndSelect('friendRequest.creator', 'creator')
     .leftJoinAndSelect('friendRequest.receiver', 'receiver')
     .where('friendRequest.creator = :creator', {creator: receiver.id})
     .andWhere('friendRequest.receiver = :receiver', {receiver: creator.id})
     .getOne()
-    
-    if (requestHasBeenSent)
-      return true
-    return false
 
+    if (!requestSent && !requestReceived)
+      return undefined
+    
+    return (requestSent ? requestSent : requestReceived)
   }
 
   async sendFriendRequest(receiverId: string, creator: User, res:any) {
@@ -274,21 +277,201 @@ export class UsersService {
     if (!receiver)
       throw new BadRequestException("User not found", {cause: new Error(), description: "cannot find receiver in database"})
 
-    const hasRequestBeenSentOrReceived = await this.hasRequestBeenSentOrReceived(creator, receiver)
-    if (hasRequestBeenSentOrReceived)
-      throw new UnauthorizedException("Cannot send friend frequest", {cause: new Error(), description: "A friend request has already been sent or received to your account"})
+    const originalRequest = await this.getRequestSentOrReceived(creator, receiver)
+    if (originalRequest?.status === 'accepted' || originalRequest?.status === 'pending')
+      throw new ConflictException("Cannot send friend frequest", {cause: new Error(), description: "A friend request has already been sent or received to your account"})
 
     const friendRequest = await this.friendRequestRepository.save({creator, receiver, status:'pending'})
     if (!friendRequest)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot create friend request'})
 
+    return res.status(200).send({
+      status: friendRequest.status,
+      id: friendRequest.id,
+      creator:{id:friendRequest.creator.id},
+      receiver:{id:friendRequest.receiver.id},
+    })
+  }
+
+  async getFriendRequestStatus(receiverId: string, creator: User, res: any) {
+    if (receiverId === creator.id)
+      throw new ConflictException("Conflicts between creater and receiver", {cause: new Error(), description: "creator cannot be receiver"})
+    
+    const receiver = await this.findOneById(receiverId)
+    if (!receiver)
+      throw new BadRequestException("User not found", {cause: new Error(), description: "cannot find receiver in database"})
+
+    const friendRequestSent = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: creator.id})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: receiverId})
+      .getOne()
+
+    const friendRequestReceived = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: receiverId})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: creator.id})
+      .getOne()
+
+    if (!friendRequestSent && !friendRequestReceived)
+      return res.status(200).send({status: 'undefined'})
+
+    return res.status(200).send({status: friendRequestSent? friendRequestSent.status : friendRequestReceived.status})
+  }
+
+
+  async getFriendRequest(receiverId: string, creator: User, res: any) {
+    if (receiverId === creator.id)
+      throw new ConflictException("Conflicts between creater and receiver", {cause: new Error(), description: "creator cannot be receiver"})
+    
+    const receiver = await this.findOneById(receiverId)
+    if (!receiver)
+      throw new BadRequestException("User not found", {cause: new Error(), description: "cannot find receiver in database"})
+
+    const friendRequestSent = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: creator.id})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: receiverId})
+      .getOne()
+
+    const friendRequestReceived = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: receiverId})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: creator.id})
+      .getOne()
+    
+
+    if (!friendRequestSent && !friendRequestReceived)
+      return res.status(200).send({status: 'undefined'})
+    
+
+    return res.status(200).send(
+      {
+        status: friendRequestSent?.status? friendRequestSent.status : friendRequestReceived.status,
+        isCreator: friendRequestSent?.status ? true : false,
+        id: friendRequestSent?.id? friendRequestSent.id : friendRequestReceived.id,
+      })
+  }
+
+  async getFriendRequestById(friendRequestId: number) {
+    return await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.id = :id', {id: friendRequestId})
+      .getOne()
+  }
+
+  async respondToFriendRequest(friendRequestId: number, status: FriendRequestStatus, res: any) {
+    const friendRequest = await this.getFriendRequestById(friendRequestId)
+    if (!friendRequest)
+      throw new BadRequestException('Database error', {cause: new Error(), description: 'cannot find friend request'})
+
+    if (friendRequest.status !== "pending")
+      throw new ConflictException('Friend request status', {cause: new Error(), description: 'friend request has already been responded'})
+
+    if (!["accepted", "pending"].includes(status))
+      throw new BadRequestException('Invalid status', {cause: new Error(), description: 'status should be "accepted", "pending"'})
+
+
+    const newFriendRequest = await this.friendRequestRepository.save({...friendRequest, status: status})
+    if (!newFriendRequest)
+      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update friend request'})
+    
+      return res.status(200).send(newFriendRequest)
+  }
+
+  async removeFriend(friendRequestId: number, res: any) {
+    const friendRequest = await this.getFriendRequestById(friendRequestId)
+    if (!friendRequest)
+      throw new BadRequestException('Database error', {cause: new Error(), description: 'cannot find friend request'})
+
+    await this.friendRequestRepository.remove(friendRequest)
     return res.status(200).send(friendRequest)
   }
 
-  // async getFriendRequestStatus(receiverId: string, creator: User, res: any) {
+  async getFriendRequestFromRecipients(user: User, res:any) {
+    const friendRequests = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.receiver = :receiver', {receiver: user.id})
+      .getMany()
 
-  // }
+    if (!friendRequests)
+      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
+    
+    return res.status(200).send(friendRequests)
+  }
+
+  async getFriendRequestFromSender(user: User, res:any) {
+    const friendRequests = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: user.id})
+      .getMany()
+
+    if (!friendRequests)
+      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
+    
+    return res.status(200).send(friendRequests)
+  }
 
 
+  async getFriends(user: User, res:any) {
+    const friends = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where(subQuery => {
+        subQuery.where('friendRequest.creator = :creator', {creator: user.id})
+        subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
+      })
+      .where('friendRequest.status = :status', {status: 'accepted'})
+      .getMany()
+    
+    if (!friends)
+      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
+    
+    return res.status(200).send(friends)
+  }
+
+
+  async isFriend(targetUserId: string, originalUser:User, res: any) {
+    if (targetUserId === originalUser.id)
+      throw new ConflictException("Conflicts between target user and original user", {cause: new Error(), description: "a user cannot be his own friend"})
+
+    const targetUser = await this.findOneById(targetUserId)
+    if (!targetUser)
+      throw new BadRequestException("User not found", {cause: new Error(), description: "cannot find target user in database"})
+
+    const sendRequest = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: targetUser.id})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: originalUser.id})
+      .getOne()
+    
+    const receivedRequest = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where('friendRequest.creator = :creator', {creator: originalUser.id})
+      .andWhere('friendRequest.receiver = :receiver', {receiver: targetUser.id})
+      .getOne()
+    
+    return res.status(200).send({isFriend: sendRequest?.status === 'accepted' || receivedRequest?.status === 'accepted'})
+
+  }
 
 }

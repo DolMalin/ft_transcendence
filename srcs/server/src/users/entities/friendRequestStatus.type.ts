@@ -1,1 +1,1 @@
-export type FriendRequestStatus = 'pending' | 'accepted' | 'declined'
+export type FriendRequestStatus = 'pending' | 'accepted' | 'undefined'
