@@ -68,6 +68,7 @@ export function Chat(props: {socket: Socket}){
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
     const [id, setId] = useState("")
+    const toast = Chakra.useToast();
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
@@ -109,7 +110,6 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            console.log('--room--', res.data)
             // res.data.users.filter((user: User) => user.id !== "bonjour")
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
@@ -141,18 +141,28 @@ export function Chat(props: {socket: Socket}){
             setUserList(tab)
         }
         catch(err){
-            console.log(err)
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
     useEffect(() => {
+        props.socket?.on('userBlocked', (err) => {
+            toast({
+                title: err.title,
+                description:  err.desc,
+                colorScheme: 'red',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+              })
+        })
         props.socket?.on('dmRoom', (dm) => {
             props.socket?.emit("joinRoom", dm.id)
             setRoom(dm)
             setShowChat(true)
         })
         return (() => {
+            props.socket?.off('userBlocked')
             props.socket?.off('dmRoom')
         })
     })

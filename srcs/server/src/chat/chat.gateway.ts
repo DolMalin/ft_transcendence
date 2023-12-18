@@ -71,33 +71,45 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     });
   }
 
+  @SubscribeMessage('unblock')
+  async unblock(@MessageBody() data: {targetId: string}, @ConnectedSocket() client: Socket){
+    if (!data || typeof data.targetId !== "string"){
+      Logger.error("Wrong type for parameter")
+      return 
+    }
+    const res = await this.userService.unblockTarget(client.handshake.query?.userId as string, data.targetId)
+    this.server.to(`user-${res.user.id}`).emit("unblocked", {username: res.user.username, username2: res.user2.username})
+    this.server.to(`user-${res.user2.id}`).emit("unblocked2", {username: res.user.username, username2: res.user2.username})
+  }
+
   @SubscribeMessage('DM')
   async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
       if (!data || typeof data.targetId !== "string") {
-          Logger.error("Wrong type for parameter");
+          Logger.error("Wrong type for parameter")
           return;
       }
 
       try {
-          const user = await this.userService.findOneByIdWithBlockRelation(client.handshake.query?.userId as string);
+          const user = await this.userService.findOneByIdWithBlockRelation(client.handshake.query?.userId as string)
           const user2 = await this.userService.findOneByIdWithBlockRelation(data.targetId)
-          // console.log('user', user)
-          // console.log('user2', user2)
-          await this.createOrJoinDMRoom(user, user2, this.server);
-
+          await this.createOrJoinDMRoom(user, user2, this.server, client)
       } catch (err) {
         throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
       }
   }
 
 
-  async createOrJoinDMRoom(user: User, user2: User, server: Server) {
+  async createOrJoinDMRoom(user: User, user2: User, server: Server, client: Socket) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
     let room = await this.roomService.getRoom(roomName)
     if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
-      throw new ConflictException("User blocked", {cause: new Error(), description: 'You have been blocked or blocked this user.'})
+      server.to(`user-${user.id}`).emit("userBlocked", 
+      {
+        title: 'You cannot direct message this user',
+        desc: 'You cannot send or receive direct message from someone you have blocked or have been blocked by'
+      })
+      return
     }
-    console.log('---------here-------------')
     if (!room) {
       room = await this.roomService.createDM(user, user2, roomName)
     }

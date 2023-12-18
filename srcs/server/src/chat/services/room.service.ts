@@ -138,7 +138,6 @@ export class RoomService {
             .getOne();
 
         const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
-        console.log(userRelation)
         if (!room)
             throw new ForbiddenException('room does not exist')
         if (room.privChan === true)
@@ -152,7 +151,6 @@ export class RoomService {
         room.users.push(user)
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
-            console.log('allo')
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id));
         }    
         return room;

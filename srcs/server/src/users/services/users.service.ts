@@ -148,14 +148,30 @@ export class UsersService {
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
     if (this.isAlreadyBlocked(user, user2) === false){
       user.blocked.push(user2)
-      return await this.save(user)
+      await this.save(user)
+      return user2.username
     }
     else
       throw new ConflictException('User already blocked', {cause: new Error(), description: 'user is already blocked'})
   }
+  
+  async unblockTarget(blocker: string, blockedUser: string){
+    try{
+      let user = await this.findOneByIdWithBlockRelation(blocker)
+      const user2 = await this.findOneById(blockedUser)
+      if (this.isAlreadyBlocked(user, user2)){
+        user.blocked = user.blocked.filter((blockedUser) => blockedUser.id !== user2.id)
+        this.userRepository.save(user)
+        return {user, user2}
+      }
+    }
+    catch(err){
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+    }
+  }
 
   isAlreadyBlocked(user: User, user2: User): boolean {
-    console.log('user', user, 'user2', user2)
+    
     const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
     return isBlocked || false;
   }
@@ -226,11 +242,6 @@ export class UsersService {
     });
    }
 
-  // }
-
-  /**
- * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
- */ 
   returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {
@@ -244,8 +255,6 @@ export class UsersService {
       
       return (Math.trunc(ratio))
     }
-
-    
     // TODO
     return (this.findAll().then((res : User[]) => {
       let scoreList : leaderboardStats[] = []; 
