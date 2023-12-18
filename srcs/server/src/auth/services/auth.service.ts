@@ -253,7 +253,7 @@ export class AuthService {
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create avatar'})
     }
 
-    if (await this.usersService.findOneByUsername(dto.username))
+    if (dto.username?.length > 0 && await this.usersService.findOneByUsername(dto.username))
       throw new ConflictException('Database error', {cause: new Error(), description: 'username already exists'})
 
     const newUser = await this.usersService.update(user.id, {username: dto.username, isRegistered: true})
