@@ -19,9 +19,6 @@ import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 import BasicToast from "../toast/BasicToast";
 
-
-
-
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
     const [user, setUser] = useState<any>(null);
