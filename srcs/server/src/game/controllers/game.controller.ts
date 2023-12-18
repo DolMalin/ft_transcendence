@@ -13,14 +13,4 @@ export class GamesController {
         private readonly  userService: UsersService,
     ) {}
 
-    // @UseGuards(AccessTokenGuard)
-    // @Get(':id')
-    // async findUserHistory(@Param('id') id : string): Promise<Game[]>
-    // {
-    //     const user = await this.userService.findOneById(id)
-    //     if (!user)
-    //         throw new NotFoundException('Database error', {cause: new Error(), description: `Cannot find user`})
-
-    //     return (user.playedGames)
-    // }
 }

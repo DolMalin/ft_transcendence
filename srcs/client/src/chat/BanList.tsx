@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { Box, ListItem, UnorderedList, Text, Flex, Button, useToast, Slider, SliderFilledTrack, SliderTrack} from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
 import UserInUsersList from "./UserInUsersList"
+import BasicToast from "../toast/BasicToast"
 
 function BanList(props : {banList :  {username : string, id : string}[], room : Room, chatSock : Socket}) {
 
@@ -22,11 +23,11 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    isClosable: true,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else
@@ -36,18 +37,16 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
 
     return (<>
     <Flex bg={'red'}>
-        <UnorderedList>
             {props.banList?.map((bannedUser, index) => {
                 return (
-                    <>
-                    <ListItem tabIndex={index}>
-                        <Text> {bannedUser.username}</Text>
-                        <Button onClick={() => {unbanThem(bannedUser.id, props.room?.id)}}> Unban </Button>
-                    </ListItem>
-                    </>
+                    <UnorderedList key={index}>
+                        <ListItem>
+                            <Text> {bannedUser.username}</Text>
+                            <Button onClick={() => {unbanThem(bannedUser.id, props.room?.id)}}> Unban </Button>
+                        </ListItem>
+                    </UnorderedList>
                 )
             })}
-        </UnorderedList>
     </Flex>
     </>)
 }

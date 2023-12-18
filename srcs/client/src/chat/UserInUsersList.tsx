@@ -4,6 +4,7 @@ import authService from "../auth/auth.service"
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { Room } from "./Chat";
+import BasicToast from "../toast/BasicToast";
 
 function UserInUsersList(props : {username : string, userId : string, 
     room : Room, userIsOp : boolean, gameSock? : Socket, chatSock?: Socket}) {
@@ -26,11 +27,10 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else
@@ -49,11 +49,10 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else
@@ -72,11 +71,10 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else
@@ -95,11 +93,10 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'Got unmuted !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else
@@ -119,11 +116,10 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                   })
             }
             else

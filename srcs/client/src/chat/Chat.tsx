@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { EmailIcon } from "@chakra-ui/icons";
+import BasicToast from "../toast/BasicToast";
 
 export interface MessageData {
     id: number;
@@ -119,11 +120,11 @@ export function Chat(props: {socket: Socket}){
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You are banned',
-                    description:  err.response.data.error,
-                    status: 'info',
                     isClosable: true,
-                    colorScheme : 'red'
+                    duration : 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
                 })
             }
             else

@@ -9,6 +9,7 @@ import { useDisclosure } from "@chakra-ui/react"
 import ProfileModal from "../profile/ProfileModal"
 import UserInUsersList from "./UserInUsersList"
 import BanList from "./BanList"
+import BasicToast from "../toast/BasicToast"
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
@@ -31,13 +32,13 @@ function timeOfDay(timestampz: string | Date){
     return (date)
 }
 
-async function getUserList(id: number, me : {username: string, id: string}){
+async function getUserList(roomId: number, me : {username: string, id: string}){
     let userlist : {
         id : string,
         username: string
     }[]
     try{
-        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + id)
+        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/room/userlist/' + roomId)
         userlist = res.data
         userlist = userlist.filter(user => user.id !== me?.id)
     }
@@ -94,11 +95,10 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'You have no rights !',
-                    description:  err.response.data.error,
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
+                    render : () => ( <> 
+                      <BasicToast text={err.response.data.error}/>
+                  </>)
                   })
             }
             console.error(`${err.response.data.message} (${err.response.data.error})`)
@@ -117,7 +117,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
     const fetchBanList = async (roomId : number) => {
       try {
-        const bannedUsersArray = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/bannedList/' + 200.2)
+        const bannedUsersArray = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/bannedList/' + roomId)
         setBanList(bannedUsersArray.data);
       }
       catch(err) {
@@ -186,12 +186,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         props.showChat(false);
         if(!toast.isActive(id)) {
           toast({
-            id,
-            title: 'You have no rights !',
-            description: 'you got banned from ' + props.room.name,
-            status: 'warning',
             isClosable: true,
-            colorScheme : 'red'
+            duration : 5000,
+            render : () => ( <> 
+              <BasicToast text={'you got banned from ' + props.room.name}/>
+          </>)
           })
         }
       });
@@ -230,7 +229,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                     </ul>
                   </div>
                 </div>
-                <Chakra.Button onClick={() => setRerender(rerender ? false : true)}> rerender </Chakra.Button>
+                {/* <Chakra.Button onClick={() => setRerender(rerender ? false : true)}> rerender </Chakra.Button> */}
               </Chakra.Flex>
             ))
           )}

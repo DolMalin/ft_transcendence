@@ -12,6 +12,7 @@ import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { IsInt } from 'class-validator';
+import { INTParam } from 'src/decorator/uuid.decorator';
 
 
 @Controller('room')
@@ -45,20 +46,16 @@ export class RoomController {
 
     @UseGuards(AccessToken2FAGuard)
     @Get('userlist/:id')
-    async getUserList(@Param("id") id: number){
-        if (typeof id !== 'bigint')
-            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
+    async getUserList(@Param("id") @INTParam() id: number){
         
         return await this.roomService.findAllUsersInRoom(id)
     }
 
     @UseGuards(AccessToken2FAGuard)
     @Get('bannedList/:id')
-    async getBanList(@Param("id") roomId: number) {
-        if (typeof roomId !== 'bigint')
-            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
+    async getBanList(@Param("id") @INTParam() id: number) {
 
-        return (await this.roomService.getBanList(roomId));
+        return (await this.roomService.getBanList(id));
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -131,11 +128,8 @@ export class RoomController {
     
     @UseGuards(AccessToken2FAGuard)
     @Delete(':id')
-    async removeRoom(@Param("id") id: number){
+    async removeRoom(@Param("id") @INTParam() id: number){
         
-        if (typeof id != 'bigint')
-            throw new UnsupportedMediaTypeException("wrong type", {cause: new Error(), description: "param is not an integer"});
-
         return await this.roomService.remove(id)
     }
 }
