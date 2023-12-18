@@ -49,7 +49,21 @@ export class RoomService {
     }
 
     async findOneByIdWithRelations(roomId: number){
-        return await this.roomRepository.findOne({where : {id : roomId}, relations : ['owner', 'administrator', 'users', 'message', 'muted', 'banned']})
+        return await this.roomRepository.findOne(
+        {
+            where : 
+            {id : roomId}, 
+            relations : 
+            [
+                'owner', 
+                'administrator', 
+                'users', 
+                'users.blocked', 
+                'message', 
+                'muted', 
+                'banned'
+            ]
+        })
     }
 
     async createDM(user: User, user2: User, roomName: string){
@@ -106,12 +120,6 @@ export class RoomService {
             username: user.username,
         }))
         return usersInRoom;
-    }
-
-    async findOneByIdWithRelations(roomId: number){
-        return await this.roomRepository.findOne({
-            where : {id : roomId}, 
-            relations : ['owner', 'administrator', 'users', 'users.blocked', 'message']})
     }
 
     async update(id: number, updateRoomDto: UpdateRoomDto) {

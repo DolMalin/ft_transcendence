@@ -70,7 +70,6 @@ export function Chat(props: {socket: Socket}){
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
     const [id, setId] = useState("")
-    const toast = Chakra.useToast();
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
@@ -112,7 +111,6 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            // res.data.users.filter((user: User) => user.id !== "bonjour")
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)

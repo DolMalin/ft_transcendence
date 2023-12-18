@@ -141,8 +141,8 @@ export class UsersService {
   }
 
 
-  async blockTarget(blocker: User, targetId: string){
-    const user = await this.findOneByIdWithBlockRelation(blocker.id)
+  async blockTarget(blockerId: string, targetId: string){
+    const user = await this.findOneByIdWithBlockRelation(blockerId)
     const user2 = await this.findOneById(targetId)
     if (!user2)
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
@@ -155,10 +155,10 @@ export class UsersService {
       throw new ConflictException('User already blocked', {cause: new Error(), description: 'user is already blocked'})
   }
   
-  async unblockTarget(blocker: string, blockedUser: string){
+  async unblockTarget(blockerId: string, blockedId: string){
     try{
-      let user = await this.findOneByIdWithBlockRelation(blocker)
-      const user2 = await this.findOneById(blockedUser)
+      let user = await this.findOneByIdWithBlockRelation(blockerId)
+      const user2 = await this.findOneById(blockedId)
       if (this.isAlreadyBlocked(user, user2)){
         user.blocked = user.blocked.filter((blockedUser) => blockedUser.id !== user2.id)
         this.userRepository.save(user)

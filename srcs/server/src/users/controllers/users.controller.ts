@@ -1,4 +1,4 @@
-import { Controller, Get, Req,Res, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
+import { Controller, Get, Req,Res, Body, Patch, Param, Delete, UseGuards, Post} from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
@@ -97,7 +97,7 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Post('block')
   async blockTarget(@GetUser() user: User, @Body() dto: {targetId: string}){
-    return await this.usersService.blockTarget(user, dto.targetId)
+    return await this.usersService.blockTarget(user.id, dto.targetId)
   }
 
   @UseGuards(AccessToken2FAGuard)
