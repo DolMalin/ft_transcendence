@@ -1,4 +1,4 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -26,11 +26,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   server : Server;
 
   async handleConnection (client: Socket) {
-    //TODO maybe find another way
-    // fetch tous les userId bloques : paul, 1 // jerem: 4 // max 6
-    // for (const id of userBlocked){
-        // join(#whoBlockedid) ==> contient tous les user qui ont bloques id
-        
     Logger.log("Connection of socket ID : " + client.id);
     this.chatDTO.clientID.push(client.id);
     try 
@@ -66,34 +61,59 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   }
   
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket): void {
-    client.to(`room-${data.room.id}`).emit("receiveMessage", data)
-    // client.to(data.room.name)/*{.except(#whoBlocked senderId)}*/.emit("receiveMessage", data);
+  async sendMessage(@MessageBody() data: Message, @ConnectedSocket() client : Socket) {
+    const room = await this.roomService.findOneByIdWithRelations(data.room.id)
+    const sender = await this.userService.findOneById(client.handshake.query?.userId as string)
+    room.users.forEach((user) => {
+      const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === sender.id);
+      Logger.log(`User ${user.id} is blocked: ${isBlocked}`);
+      if (!isBlocked) {
+        client.to(`user-${user.id}`).emit("receiveMessage", data);
+      }
+    });
+  }
+
+  @SubscribeMessage('unblock')
+  async unblock(@MessageBody() data: {targetId: string}, @ConnectedSocket() client: Socket){
+    if (!data || typeof data.targetId !== "string"){
+      Logger.error("Wrong type for parameter")
+      return 
+    }
+    const res = await this.userService.unblockTarget(client.handshake.query?.userId as string, data.targetId)
+    this.server.to(`user-${res.user.id}`).emit("unblocked", {username: res.user.username, username2: res.user2.username})
+    this.server.to(`user-${res.user2.id}`).emit("unblocked2", {username: res.user.username, username2: res.user2.username})
   }
 
   @SubscribeMessage('DM')
   async directMessage(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket) {
       if (!data || typeof data.targetId !== "string") {
-          Logger.error("Wrong type for parameter");
+          Logger.error("Wrong type for parameter")
           return;
       }
 
       try {
-          const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-          const user2 = await this.userService.findOneById(data.targetId)
-          await this.createOrJoinDMRoom(user, user2, this.server);
-
+          const user = await this.userService.findOneByIdWithBlockRelation(client.handshake.query?.userId as string)
+          const user2 = await this.userService.findOneByIdWithBlockRelation(data.targetId)
+          await this.createOrJoinDMRoom(user, user2, this.server, client)
       } catch (err) {
         // throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
       }
   }
 
 
-  async createOrJoinDMRoom(user: User, user2: User, server: Server) {
+  async createOrJoinDMRoom(user: User, user2: User, server: Server, client: Socket) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
     let room = await this.roomService.getRoom(roomName)
+    if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
+      server.to(`user-${user.id}`).emit("userBlocked", 
+      {
+        title: 'You cannot direct message this user',
+        desc: 'You cannot send or receive direct message from someone you have blocked or have been blocked by'
+      })
+      return
+    }
     if (!room) {
-       room = await this.roomService.createDM(user, user2, roomName)
+      room = await this.roomService.createDM(user, user2, roomName)
     }
     server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
 }
@@ -105,9 +125,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('block')
   async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
     try {
-      const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      const user2 = await this.userService.findOneById(data.targetId)
-      this.userService.blockTarget(user, user2)
+      this.userService.blockTarget(client.handshake.query?.userId as string, data.targetId)
     } 
     catch (err) {
       // throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})

@@ -49,7 +49,21 @@ export class RoomService {
     }
 
     async findOneByIdWithRelations(roomId: number){
-        return await this.roomRepository.findOne({where : {id : roomId}, relations : ['owner', 'administrator', 'users', 'message', 'muted', 'banned']})
+        return await this.roomRepository.findOne(
+        {
+            where : 
+            {id : roomId}, 
+            relations : 
+            [
+                'owner', 
+                'administrator', 
+                'users', 
+                'users.blocked', 
+                'message', 
+                'muted', 
+                'banned'
+            ]
+        })
     }
 
     async createDM(user: User, user2: User, roomName: string){
@@ -131,9 +145,12 @@ export class RoomService {
             .leftJoinAndSelect('room.banned', 'banned')
             .leftJoinAndSelect('message.author', 'author')
             .leftJoinAndSelect('room.users', 'user')
+            .leftJoinAndSelect('user.blocked', 'blocked')
             .where('room.name = :name', { name: dto.name })
             .orderBy('message.id', 'ASC')
             .getOne();
+
+        const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
         if (!room)
             throw new ForbiddenException('room does not exist')
 
@@ -147,12 +164,17 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        if (room.users === undefined)
+        if (!room.users)
             room.users = []
         room.users.push(user)
-        this.roomRepository.save(room)
+        await this.roomRepository.save(room)
+        if (userRelation.blocked && room.message) {
+            room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id));
+        }    
         return room;
     }
+
+    // roomList = roomList.filter(room => room.type !== roomType.directMessage)
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
@@ -229,6 +251,9 @@ export class RoomService {
         const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+        if (room.type === roomType.directMessage){
+            return "no"
+        }
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})

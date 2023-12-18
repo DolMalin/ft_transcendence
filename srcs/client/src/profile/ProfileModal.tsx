@@ -10,6 +10,7 @@ import {
     ModalFooter,
     Text,
     Flex,
+    useToast
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
@@ -21,10 +22,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const toast = useToast();
 
     function sendDuelInvite(gameType : string) {
-
-        console.log(props.gameSock)
         props.gameSock?.emit('gameInvite', {targetId : props.userId, gameType : gameType})
     }
     
@@ -33,10 +34,66 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         props.onClose()
     }
 
-    function blockThem(){
-        props.chatSocket?.emit('block', {targetId: props.userId})
+    async function blockThem(targetId: string){
+        try{
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block', {targetId})
+            setIsBlocked(true)
+            const id = 'block-toast'
+            if (!toast.isActive(id)){
+                toast({
+                    id,
+                    title: 'Unblocked',
+                    description:  `you have blocked ${res.data}`,
+                    colorScheme: 'blue',
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                });
+            }
+        }
+        catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    title: 'error',
+                    description:  err.response.data.error,
+                    colorScheme: 'red',
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true
+                  })
+            }
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
         props.onClose()
     }
+    
+    const handleUnblocked = (data : {username: string, username2: string}) => {
+        setIsBlocked(false);
+        const id = 'unblock-toast'
+        if (!toast.isActive(id)){
+            toast({
+                id,
+                title: 'Unblocked',
+                description:  `you have unblocked ${data.username2}`,
+                colorScheme: 'blue',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+            });
+        }
+      };
+      
+     function unBlockThem(targetId: string){
+        props.chatSocket?.emit('unblock', { targetId })
+        props.chatSocket?.on('unblocked', (data) => {        
+            handleUnblocked(data)
+        })
+        return () => {
+          props.chatSocket?.off('unblocked', handleUnblocked)
+        };
+      }
+      
 
     useEffect(() => {
         if (!props.userId)
@@ -71,10 +128,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     }, [props.userId])
 
     useEffect(function socketEvent() {
+
         props.gameSock?.on('closeModal', () => {
             props.onClose();
         })
-
         return (() => {
             props.gameSock?.off('closeModal');
         })
@@ -176,7 +233,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         </Button>
                     </Box>
 
-                    <Box w={'224px'} h={'80px'} 
+                    {!isBlocked && <Box w={'224px'} h={'80px'} 
                     display={'flex'}
                     justifyContent={'center'}
                     alignItems={'center'}>
@@ -184,12 +241,27 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         fontWeight={'normal'}
                         borderRadius={'none'}
                         _hover={{background : 'white', textColor: 'black'}}
-                        onClick={() => (blockThem())}
+                        onClick={() => (blockThem(props.userId))}
                         isDisabled={isYourself}
                         >
                              Block them !
                         </Button>
-                    </Box>
+                    </Box>}
+
+                    {isBlocked && <Box w={'224px'} h={'80px'} 
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (unBlockThem(props.userId))}
+                        isDisabled={isYourself}
+                        >
+                             unblock them !
+                        </Button>
+                    </Box>}
 
                     <Box w={'224px'} h={'80px'} 
                     display={'flex'}

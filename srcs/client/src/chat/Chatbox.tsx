@@ -86,7 +86,13 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
     const sendMessage = async (currentMessage: string) => {
         try {
-            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', {roomId: props.room.id ,content: currentMessage, authorId: me.id, authorName: me.username})
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
+            {
+              roomId: props.room.id, 
+              content: currentMessage, 
+              authorId: me.id, 
+              authorName: me.username
+            })
             const message = res.data;
             props.socket.emit("sendMessage", message)
             setMessageList((list) => [...list, message])
@@ -215,7 +221,8 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         })
     }, [props.socket])
     //TODO faire en sorte que la userlist re render
-
+    //TODO limiter le nombre de message qu on peut recevoir
+    //TODO limiter le nombre de message que je charge
     return (
         <div>
           <mark>

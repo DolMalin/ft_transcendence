@@ -10,6 +10,7 @@ import ProfileModal from "../profile/ProfileModal";
 import { EmailIcon } from "@chakra-ui/icons";
 import BasicToast from "../toast/BasicToast";
 
+
 export interface MessageData {
     id: number;
     author: {id: string, username: string};
@@ -110,7 +111,6 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
@@ -153,18 +153,28 @@ export function Chat(props: {socket: Socket}){
             setUserList(tab)
         }
         catch(err){
-            console.log(err)
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
     useEffect(() => {
+        props.socket?.on('userBlocked', (err) => {
+            toast({
+                title: err.title,
+                description:  err.desc,
+                colorScheme: 'red',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+              })
+        })
         props.socket?.on('dmRoom', (dm) => {
             props.socket?.emit("joinRoom", dm.id)
             setRoom(dm)
             setShowChat(true)
         })
         return (() => {
+            props.socket?.off('userBlocked')
             props.socket?.off('dmRoom')
         })
     })

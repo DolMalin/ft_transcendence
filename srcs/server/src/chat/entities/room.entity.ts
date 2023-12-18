@@ -22,7 +22,6 @@ export class Room {
     @Column({type: Boolean, nullable: true})
     privChan: boolean
 
-    //surement changer en bool
     @Column({type: 'enum', enum: roomType, nullable: true})
     type: roomType
 
@@ -45,6 +44,6 @@ export class Room {
     @JoinTable()
     users: User[]
 
-    @OneToMany(() => Message, message => message.room/* , {onDelete:'CASCADE'} */)
+    @OneToMany(() => Message, message => message.room , {onDelete:'CASCADE'} )
     message: Message[]
 }
