@@ -51,6 +51,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestSended', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('pending')
             setIsFriendRequestCreator(true)
+            props.onClose();
         } catch(err) {
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
@@ -63,6 +64,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
+            props.onClose();
+
         } catch(err) {
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
@@ -77,6 +80,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
             setFriendRequestStatus('undefined')
             setIsFriendRequestCreator(false)
+            props.onClose();
+
         } catch(err) {
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
