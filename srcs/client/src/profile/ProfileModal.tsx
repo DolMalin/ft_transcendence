@@ -17,6 +17,7 @@ import authService from "../auth/auth.service";
 import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
+import BasicToast from "../toast/BasicToast";
 
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
@@ -40,30 +41,28 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             setIsBlocked(true)
             const id = 'block-toast'
             if (!toast.isActive(id)){
+                const status = `${res.data} has been blocked.`
                 toast({
                     id,
-                    title: 'Unblocked',
-                    description:  `you have blocked ${res.data}`,
-                    colorScheme: 'blue',
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
-                });
+                    render : () => ( <> 
+                        <BasicToast text = {status}/>
+                    </>)
+                    })
             }
         }
         catch(err){
             if (err.response.status === 409)
             {
                 toast({
-                    title: 'error',
-                    description:  err.response.data.error,
-                    colorScheme: 'red',
-                    status: 'info',
                     duration: 5000,
-                    isClosable: true
-                  })
+                    render : () => ( <> 
+                        <BasicToast text = {err.response.data.error}/>
+                    </>)
+                })
             }
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
         props.onClose()
     }
@@ -72,15 +71,14 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         setIsBlocked(false);
         const id = 'unblock-toast'
         if (!toast.isActive(id)){
+            const status = `${data.username2} has been unblocked.`
             toast({
                 id,
-                title: 'Unblocked',
-                description:  `you have unblocked ${data.username2}`,
-                colorScheme: 'blue',
-                status: 'info',
                 duration: 5000,
-                isClosable: true
-            });
+                render : () => ( <>
+                    <BasicToast text = {status}/>
+                </>)
+              })
         }
       };
       

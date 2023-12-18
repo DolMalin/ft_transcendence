@@ -20,7 +20,7 @@ export class UsersService {
 		private userRepository: Repository<User>,
 
     private readonly avatarService: AvatarService,
-	) { }
+	) {}
 
   async create(createUserDto: CreateUserDto) {
     

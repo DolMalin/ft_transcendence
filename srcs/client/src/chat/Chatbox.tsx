@@ -192,8 +192,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         const id = 'test-toast';
         props.showChat(false);
         if(!toast.isActive(id)) {
-          console.log(toast.isActive(id));
-          console.log('TEST')
           toast({
             id,
             isClosable: true,

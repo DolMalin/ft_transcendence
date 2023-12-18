@@ -127,6 +127,116 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
+    async function setPassword(roomId: number, password: string){
+        try{
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/setPassword', 
+            {
+                roomId: roomId, 
+                password: password
+            })
+            toast({
+                duration: 5000,
+                render : () => ( <> 
+                    <BasicToast text="Password have been successfully set."/>
+                </>)
+              })
+        }
+        catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            if (err.response.status === 404)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function changePassword(roomId: number, password: string){
+        try{
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/changePassword', 
+            {
+                roomId: roomId, 
+                password: password
+            })
+            toast({
+                duration: 5000,
+                render : () => ( <> 
+                    <BasicToast text="Password have been successfully updated."/>
+                </>)
+              })
+        }
+        catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            if (err.response.status === 404)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function removePassword(roomId: number){
+        try{
+            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
+            toast({
+                duration: 5000,
+                render : () => ( <> 
+                    <BasicToast text="Password have been successfully removed."/>
+                </>)
+              })
+        }
+        catch(err){
+            if (err.response.status === 409)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            if (err.response.status === 404)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                  })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
     useEffect(() => {
     async function asyncWrapper() {
         try {
@@ -198,7 +308,6 @@ function UserInUsersList(props : {username : string, userId : string,
             <Chakra.Text>zero minutes will set timer to an undefined amounth of time</Chakra.Text>
         </>)
     }
-
     if (props.userIsOp)
     {
     return (<>
@@ -227,6 +336,28 @@ function UserInUsersList(props : {username : string, userId : string,
 
                         <Chakra.Button onClick={onOpen}>
                             profile
+                        </Chakra.Button>
+                    </Chakra.PopoverBody>
+                </Chakra.PopoverContent>
+            </Chakra.Portal>
+            </Chakra.Popover>
+        </Chakra.Link>
+        <Chakra.Link>
+            <Chakra.Popover>
+            <Chakra.PopoverTrigger>
+                <Chakra.Button >settings</Chakra.Button>
+            </Chakra.PopoverTrigger>
+            <Chakra.Portal>
+                <Chakra.PopoverContent>
+                    <Chakra.PopoverBody>
+                        <Chakra.Button onClick={() => setPassword(props.room.id, "motdepasse")}>
+                            Set password
+                        </Chakra.Button>
+                        <Chakra.Button onClick={() => changePassword(props.room.id, "motdepassebis")}>
+                            change password
+                        </Chakra.Button>
+                        <Chakra.Button onClick={() => removePassword(props.room.id)}>
+                            remove password
                         </Chakra.Button>
                     </Chakra.PopoverBody>
                 </Chakra.PopoverContent>

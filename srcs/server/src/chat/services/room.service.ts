@@ -10,6 +10,7 @@ import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { UsersService } from 'src/users/services/users.service'
+import { AuthService } from 'src/auth/services/auth.service';
 import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
@@ -25,8 +26,8 @@ export class RoomService {
         private messageRepository: Repository<Message>,
         @InjectRepository(Message)
         private userRepository: Repository<User>,
-        private readonly userService : UsersService
-
+        private readonly userService : UsersService,
+        private readonly authService : AuthService
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
@@ -100,7 +101,6 @@ export class RoomService {
     }
 
     findOneById(id: number){
-
         return this.roomRepository.findOneBy({id})
     }
     
@@ -423,5 +423,78 @@ export class RoomService {
           throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}); 
         return newRoom;
     
+    }
+
+    async setPassword(user: User, updateRoomDto: UpdateRoomDto){
+        const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            })
+        if (room?.owner?.id !== user.id)
+            throw new NotFoundException("Not owner", 
+            {
+                cause: new Error(), 
+                description: "you cannot set a password if you are not owner of the channel."
+            })
+        if (room.password)
+            throw new ConflictException("Password already exists", 
+            {
+                cause: new Error(),
+                description: "you cannot set a password when there is already one."
+            })
+        room.password = await this.authService.hash(updateRoomDto.password)
+        this.save(room)
+    }
+
+    async changePassword(user: User, updateRoomDto: UpdateRoomDto){
+        const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            })
+        if (room?.owner.id !== user.id)
+            throw new NotFoundException("Not owner", 
+            {
+                cause: new Error(), 
+                description: "you cannot change password if you are not owner of the channel."
+            })
+        if (!room.password)
+            throw new ConflictException("Password does not exists", 
+            {
+                cause: new Error(),
+                description: "you cannot change a password when there is no password."
+            })
+        //TODO verifier si le mdp est le meme que le mdp en param
+        room.password = await this.authService.hash(updateRoomDto.password)
+        this.save(room)
+    }
+
+    async removePassword(user: User, updateRoomDto: UpdateRoomDto){
+        const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            })
+        if (room?.owner.id !== user.id)
+            throw new NotFoundException("Not owner", 
+            {
+                cause: new Error(), 
+                description: "you cannot remove password if you are not owner of the channel."
+            })
+        if (!room.password)
+            throw new ConflictException("Password does not exists", 
+            {
+                cause: new Error(),
+                description: "You cannot remove a password when there is no password."
+            })
+        room.password = null
+        this.save(room)
     }
 }
