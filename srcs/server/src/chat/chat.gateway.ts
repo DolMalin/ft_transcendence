@@ -7,6 +7,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
 import { Message } from './entities/message.entity';
 import { RoomService } from './services/room.service';
+import { UpdatePrivilegesDto } from './dto/update-privileges.dto';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -59,6 +60,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     client.join(`room-${roomId}`)
+    this.server.to(`room-${roomId}`).emit('userJoined');
     Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   
   }
@@ -82,7 +84,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
           await this.createOrJoinDMRoom(user, user2, this.server);
 
       } catch (err) {
-        throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+        // throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
       }
   }
 
@@ -108,9 +110,19 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       this.userService.blockTarget(user, user2)
     } 
     catch (err) {
-      throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
-    }
-    
+      // throw new NotFoundException("User not found", {cause: new Error(), description: "user not found"})
+    } 
   }
 
+  @SubscribeMessage('channelRightsUpdate')
+  channelRightsUpdate(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
+
+      this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+  }
+
+  @SubscribeMessage('userGotBanned')
+  userGotBanned(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
+
+      this.server.to(`user-${data.targetId}`).emit('youGotBanned');
+  }
 }

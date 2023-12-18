@@ -1,16 +1,12 @@
-import { Controller, Get, Post, Req,Res, Body, Patch, Param, Delete, UseGuards, StreamableFile, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Req,Res, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { User } from '../entities/user.entity';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
-import { AccessTokenGuard } from 'src/auth/guards/accessToken.auth.guard';
-import { Readable } from 'stream';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
-import { isUUID } from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
+import { UUIDParam } from 'src/decorator/uuid.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -19,6 +15,7 @@ export class UsersController {
     private readonly matchHistoryService: MatchHistoryService,
     ) {}
 
+    
   @UseGuards(AccessToken2FAGuard)
   @Get()
   findAll(): Promise<User[]> {
@@ -40,13 +37,15 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Get('history/:id')
-  history(@Param('id') userId: string) {
+  history(@Param('id') @UUIDParam() userId: string) {
+
       return (this.matchHistoryService.returnHistory(userId));
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Get('profile/:id')
-  profile(@Param('id') userId: string) {
+  profile(@Param('id') @UUIDParam() userId: string) {
+
 
       return (this.usersService.returnProfile(userId));
   }
@@ -70,13 +69,13 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<User> {
+  findOne(@Param('id') @UUIDParam() id: string): Promise<User> {
     return this.usersService.findOneById(id);
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Get('avatar/:id')
-  async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') id: string) {
+  async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') @UUIDParam() id: string) {
     return this.usersService.getUserAvatar(res, id)
   }
 
@@ -97,7 +96,7 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<User> {
+  remove(@Param('id') @UUIDParam() id: string): Promise<User> {
     return this.usersService.remove(id);
   }
 }

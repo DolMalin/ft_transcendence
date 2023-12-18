@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { EmailIcon } from "@chakra-ui/icons";
+import BasicToast from "../toast/BasicToast";
 
 export interface MessageData {
     id: number;
@@ -62,6 +63,7 @@ export function Chat(props: {socket: Socket}){
         id: string, 
         username: string
     } | undefined>(undefined)
+    const toast = Chakra.useToast();
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -114,7 +116,19 @@ export function Chat(props: {socket: Socket}){
             setShowChat(true)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
+            if (err.response.status === 409)
+            {
+                toast({
+                    isClosable: true,
+                    duration : 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
@@ -135,7 +149,6 @@ export function Chat(props: {socket: Socket}){
 
     const fetchUserList = async (me : {username: string, id: string}) => {
         try {
-            console.log("me in fetchuser", me)
             const tab = await getUserList(me)
             setUserList(tab)
         }
