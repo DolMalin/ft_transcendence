@@ -407,12 +407,13 @@ export class UsersService {
       .leftJoinAndSelect('friendRequest.creator', 'creator')
       .leftJoinAndSelect('friendRequest.receiver', 'receiver')
       .where('friendRequest.receiver = :receiver', {receiver: user.id})
+      .andWhere('friendRequest.status = :status', {status: 'pending'})
       .getMany()
 
     if (!friendRequests)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
     
-    return res.status(200).send(friendRequests)
+    return res.status(200).send(friendRequests.map(item => {return {creatorId:item.creator.id, creatorUsername: item.creator.username, status:item.status}}))
   }
 
   async getFriendRequestFromSender(user: User, res:any) {

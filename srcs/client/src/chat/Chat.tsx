@@ -23,7 +23,6 @@ export interface Room {
 }
 
 async function getRoomList(){
-
     let roomList: { 
         id: number; 
         name: string; 
@@ -54,6 +53,23 @@ async function getUserList(){
     return userList
 }
 
+async function getFriendRequestsReceived() {
+    let friendRequestsReceived: {
+        creatorId: string,
+        creatorUsername: string,
+        status: string
+    }[]
+
+    try {
+        const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friendRequest/me/received`)
+        friendRequestsReceived = res.data
+    } catch(err) {
+        console.error(`${err.response.data.message} (${err.response.data.error})`)
+    }
+
+    return friendRequestsReceived
+}
+
 export function Chat(props: {socket: Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [room, setRoom] = useState<Room>()
@@ -61,15 +77,26 @@ export function Chat(props: {socket: Socket}){
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
     const [id, setId] = useState("")
+
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
         password: string | null
         privChan: string | null }[]>([])
+
     const [userList, setUserList] = useState
     <{  id: string
         username: string,
     isFriend: boolean}[]>([])
+
+    const [friendRequestsReceived, setFriendRequestsReceived] = useState
+    <{
+        creatorId: string,
+        creatorUsername: string,
+        status: string
+    }[]>([])
+
+    
     const { 
         register: registerJoin, 
         handleSubmit: handleSubmitJoin, 
@@ -133,6 +160,11 @@ export function Chat(props: {socket: Socket}){
         setUserList(userList)
     }
 
+    const fetchFriendRequestReceived = async () => {
+        const friendRequestReceived = await getFriendRequestsReceived()
+        setFriendRequestsReceived(friendRequestReceived)
+    }
+
     useEffect(() => {
         props.socket?.on('dmRoom', (dm) => {
             props.socket?.emit("joinRoom", dm.id)
@@ -147,21 +179,26 @@ export function Chat(props: {socket: Socket}){
     useEffect(() => {
         fetchUserList()
         fetchRoom()
+        fetchFriendRequestReceived()
     }, [])
 
     useEffect(function socketEvent() {
-        console.log("useEffect chat")
         props.socket?.on('friendRequestSendedChat', () => {
             fetchUserList()
+            fetchFriendRequestReceived()
         })
 
         props.socket?.on('friendRequestAcceptedChat', () => {
             fetchUserList()
+            fetchFriendRequestReceived()
+
         })
  
         props.socket?.on('friendRemovedChat', () => {
             console.log('friend removed chat')
             fetchUserList()
+            fetchFriendRequestReceived()
+
         })
 
         return (() => {
@@ -210,8 +247,37 @@ export function Chat(props: {socket: Socket}){
                 </div>
             </div>
             </Chakra.Flex>
+        
         ))
+        
         )}
+
+        <mark>
+            <h1>------Friend requests------</h1>
+        </mark>
+        
+        {friendRequestsReceived?.length > 0 && (
+            friendRequestsReceived.map((friendRequest, index: number) => (
+                <Chakra.Flex flexDir="row" key={index}>
+                    <div className="userList">
+                        <div>
+                            <ul>
+                                <li><Chakra.Link onClick={() => {onOpen() ; setId(friendRequest.creatorId)}}>{friendRequest.creatorUsername}</Chakra.Link></li>
+                                <Chakra.IconButton
+                                    variant='outline'
+                                    colorScheme='teal'
+                                    aria-label='Send email'
+                                    icon={<EmailIcon />}
+                                    onClick={() => {}}
+                                    />
+                            </ul>
+                        </div>
+                    </div>
+                </Chakra.Flex>
+            ))
+        )}
+
+        
         <div className="Chat">
             {!showChat ? (
             <div className="joinChatContainer">
