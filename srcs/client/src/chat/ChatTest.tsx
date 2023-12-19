@@ -1,6 +1,9 @@
-import { Flex } from "@chakra-ui/react";
+import { Divider, Flex } from "@chakra-ui/react";
+import { constants } from "crypto";
 import React, { useEffect, useState } from "react";
 import * as Constants from '../game/globals/const'
+import ChannelCreator from "./ChannelCreator";
+import ChannelList from "./ChannelList";
 
 function ChatTest() {
 
@@ -62,19 +65,24 @@ function ChatTest() {
         h={boxHeight}
         minH={'320px'}
         flexDir={'column'}
-        bg='blue' 
+        bg={Constants.BG_COLOR}
         >
-            <Flex h={'30%'}
+            <Flex h={'5%'}
             w={'100%'}
-            bg={'cyan'}
+            bg={Constants.BG_COLOR}
+            justifyContent='center'
+            alignItems='center'
             >
-                Channel Settings
+                <ChannelCreator/>
             </Flex>
-            <Flex h={'70%'}
+            <Flex justifyContent='center'>
+                <Divider variant='dashed' width='90%' />
+            </Flex>
+            <Flex h={'95%'}
             w={'100%'}
-            bg='turquoise'
+            bg={Constants.BG_COLOR}
             >
-                Channel List
+                <ChannelList />
             </Flex>
         </Flex>
 

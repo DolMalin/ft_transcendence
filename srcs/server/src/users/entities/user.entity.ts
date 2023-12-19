@@ -69,16 +69,16 @@ export class User {
 	@JoinTable({joinColumn: {name: 'user_id'}})
 	friends: User[]
 
-	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator)
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator, {onDelete: 'CASCADE'})
 	sentFriendRequests: FriendRequest[]
 
-	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.receiver)
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.receiver, {onDelete: 'CASCADE'})
 	receivedFriendRequests: FriendRequest[]
 
 	@JoinColumn({name: 'avatarId'})
 	@OneToOne(() => Avatar, {nullable:true})
 	avatar: Avatar
-
+	
 	@Column({nullable: true})
 	avatarId?: string
 
