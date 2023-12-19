@@ -71,8 +71,10 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         setFontSize('2em');
       else if (window.innerWidth > 1000)
         setFontSize('1.5em')
-      else if (window.innerWidth < 800)
+      else if (window.innerWidth > 600)
         setFontSize('1em')
+      else if (window.innerWidth < 400)
+        setFontSize('0.5em')
     }, 100)
 
     window.addEventListener('resize', debouncedHandleResize)
@@ -95,7 +97,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     props.gameSock?.on('isBusy', ({username}) => {
 
       toast({
-        duration: 5000,
+        duration: 2000,
         isClosable: true,
         render : () => ( <>
             <BasicToast text={username + " is busy"}/>
@@ -218,7 +220,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <LeaderBoard gameSock={props.gameSock}/>
+          <LeaderBoard gameSock={props.gameSock} chatSocket={props.chatSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

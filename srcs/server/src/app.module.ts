@@ -13,6 +13,7 @@ import { ChatModule } from './chat/chat.module';
 import { Room } from './chat/entities/room.entity';
 import { Message } from './chat/entities/message.entity';
 import { Avatar } from './users/entities/avatar.entity';
+import { FriendRequest } from './users/entities/friendRequest.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { Avatar } from './users/entities/avatar.entity';
       username: process.env.DATABASE_USER,
       database: process.env.DATABASE_NAME,
       password: process.env.DATABASE_PASSWORD,
-      entities: [User, Room, Message, Avatar, Game],
+      entities: [User, Room, Message, Avatar, Game, FriendRequest],
       synchronize: true,
       //dropSchema: true,/*  wipe la db a chaque refresh */
     }),

@@ -18,15 +18,8 @@ export class UsersController {
     
   @UseGuards(AccessToken2FAGuard)
   @Get()
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
-  }
-
-  //TODO changer nom route
-  @UseGuards(AccessToken2FAGuard)
-  @Get('list')
-  findAllUsers(){
-    return this.usersService.findAllUsers()
+  async findAll(@GetUser() user: User) {
+    return await this.usersService.findAllUsers(user);
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -105,4 +98,59 @@ export class UsersController {
   remove(@Param('id') @UUIDParam() id: string): Promise<User> {
     return this.usersService.remove(id);
   }
+
+
+  // ==================================================================== //
+  // ======================== FRIENDS REQUEST ===========================
+  // ==================================================================== //
+
+  @UseGuards(AccessToken2FAGuard)
+  @Post('friendRequest/send/:receiverId')
+  async sendFriendRequest(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+    return await this.usersService.sendFriendRequest(receiverId, user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friendRequest/:receiverId')
+  async getFriendRequest(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+    return await this.usersService.getFriendRequest(receiverId, user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Patch('friendRequest/response/:friendRequestId')
+  async respondToFriendRequest(@Param('friendRequestId') friendRequestId: string, @Body() body: any, @Res() res: any) {
+    return await this.usersService.respondToFriendRequest(parseInt(friendRequestId), body.status, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Patch('friendRequest/remove/:friendRequestId')
+  async removeFriend(@Param('friendRequestId') friendRequestId: string,  @Res() res: any) {
+    return await this.usersService.removeFriend(parseInt(friendRequestId), res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friendRequest/me/received')
+  async getFriendRequestsFromRecipients(@GetUser() user: User, @Res() res:any) {
+    return await this.usersService.getFriendRequestFromRecipients(user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friendRequest/me/sent')
+  async getFriendRequestsFromSender(@GetUser() user: User, @Res() res:any) {
+    return await this.usersService.getFriendRequestFromSender(user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friend/all')
+  async getFriends(@GetUser() user: User, @Res() res:any) {
+    return await this.usersService.getFriends(user, res)
+  }
+
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friend/isFriend/:userId')
+  async isFriend(@Param('userId') targetUserId: string, @GetUser() originalUser: User, @Res() res:any) {
+    return await this.usersService.isFriend(targetUserId, originalUser)
+  }
+
+
 }

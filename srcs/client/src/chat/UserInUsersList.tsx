@@ -29,6 +29,7 @@ function UserInUsersList(props : {username : string, userId : string,
             {
                 toast({
                     duration: 5000,
+                    isClosable: true,
                     render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
@@ -51,6 +52,7 @@ function UserInUsersList(props : {username : string, userId : string,
             {
                 toast({
                     duration: 5000,
+                    isClosable: true,
                     render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
@@ -73,6 +75,7 @@ function UserInUsersList(props : {username : string, userId : string,
             {
                 toast({
                     duration: 5000,
+                    isClosable: true,
                     render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
@@ -94,7 +97,8 @@ function UserInUsersList(props : {username : string, userId : string,
             if (err.response.status === 409)
             {
                 toast({
-                    duration: 5000,
+                    duration: 2000,
+                    isClosable: true,
                     render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)

@@ -150,7 +150,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             catch(err){
                 console.error(`${err.response.data.message} (${err.response.data.error})`)} 
         }
-        setMessageList(props.room.message? props.room.message: [])
         asyncWrapper()
     }, [rerender])
 
@@ -218,6 +217,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             props.socket?.off("reveiveMessage")
         })
     }, [props.socket])
+
+    useEffect(() => {
+      
+      setMessageList(props.room.message? props.room.message: [])
+    }, [])
     //TODO faire en sorte que la userlist re render
     //TODO limiter le nombre de message qu on peut recevoir
     //TODO limiter le nombre de message que je charge
