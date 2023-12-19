@@ -56,25 +56,10 @@ async function getUserList(me : {username: string, id: string}){
     return userList
 }
 
-// async function getUserList(){
-//     let userList: {
-//         id: string,
-//         username: string,
-//         isFriend: boolean}[]
-//     try{
-//         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
-//         userList = res.data
-//         // userList = userList.filter(user => user.id !== me?.id)
-//     }
-//     catch(err){
-//         throw err
-//     }
-//     return userList
-// }
 
 async function getFriendRequestsReceived() {
     let friendRequestsReceived: {
-        requestId: number,
+        id: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -117,7 +102,7 @@ export function Chat(props: {socket: Socket}){
 
     const [friendRequestsReceived, setFriendRequestsReceived] = useState
     <{
-        requestId: number,
+        id: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -300,7 +285,6 @@ export function Chat(props: {socket: Socket}){
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                // fetchUserList() 
                 fetchFriendRequestReceived()
                 fetchRoom()
             }
@@ -374,7 +358,7 @@ export function Chat(props: {socket: Socket}){
                                     colorScheme='teal'
                                     aria-label='Accept friend request'
                                     icon={<CheckIcon />}
-                                    onClick={() => {acceptFriend(friendRequest.requestId)}}
+                                    onClick={() => {acceptFriend(friendRequest.id)}}
                                 />
 
                                 <Chakra.IconButton
@@ -382,7 +366,7 @@ export function Chat(props: {socket: Socket}){
                                     colorScheme='red'
                                     aria-label='Decline friend request'
                                     icon={<CloseIcon />}
-                                    onClick={() => {removeFriend(friendRequest.requestId)}}
+                                    onClick={() => {removeFriend(friendRequest.id)}}
                                 />
 
                             </ul>

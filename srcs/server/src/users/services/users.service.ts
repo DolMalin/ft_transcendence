@@ -37,29 +37,27 @@ export class UsersService {
     if (!user)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'})
     
-    return user
+    return this.removeProtectedProperties(user)
   }
 
 
   async findAll() {
     let res = await this.userRepository.find({relations :{
       playedGames: true,
-      friends: true,
       sentFriendRequests: true,
       receivedFriendRequests: true
     }})
 
     if (!res || res === undefined)
-    throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-
-    return res
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+  
+    return res.map( (user) => this.removeProtectedProperties(user))
   }
 
 
   async findAllUsers(originalUser: User) {
     let res = await this.userRepository.find({relations :{
       playedGames: true,
-      friends: true,
       sentFriendRequests: true,
       receivedFriendRequests: true
     }})
@@ -67,17 +65,13 @@ export class UsersService {
     if (!res || res === undefined)
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
 
+    return await Promise.all(res.map( async (user) => {
+      let newUser = this.removeProtectedProperties(user)
+      newUser.isFriend = (await this.isFriend(user.id, originalUser)).isFriend
+      console.log(newUser)
+      return newUser
+    }))
 
-    const userList = await Promise.all(res.map(async (user) => ({
-      id: user.id,
-      username: user.username,
-      isFriend: (await this.isFriend(user.id, originalUser)).isFriend,
-      playedGames: user.playedGames,
-      friends: user.friends,
-      receivedFriendRequest: user.receivedFriendRequests
-    })))
-
-    return userList
   }
 
   
@@ -92,8 +86,10 @@ export class UsersService {
       .leftJoinAndSelect('user.room', 'room.users')
       .where('user.id = :id', {id: id})
       .getOne()
-      if (!user)
+    
+    if (!user)
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+
       return user
     }
 
@@ -127,15 +123,21 @@ export class UsersService {
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'})
 
     const user = await this.findOneById(id)
-    return user
+    return this.removeProtectedProperties(user)
   }
 
   async save(user: User) {
     const newUser = await this.userRepository.save(user)
     if (!newUser)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}) 
-    return newUser
+    return this.removeProtectedProperties(newUser)
 
+  }
+
+  removeProtectedProperties(user: User) {
+    user.refreshToken = undefined
+    user.twoFactorAuthenticationSecret = undefined
+    return user
   }
 
   
@@ -226,7 +228,8 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOneById(id)
-    return this.userRepository.remove(user)
+    const removedUser = await this.userRepository.remove(user)
+    return this.removeProtectedProperties(removedUser)
   }
 
   async removeAll() {
@@ -250,12 +253,13 @@ export class UsersService {
 
   async addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
 
-      if (socketIdArray === null || socketIdArray === undefined)
-        socketIdArray = [];
-      socketIdArray?.push(socketId);
-      user.gameSockets = socketIdArray;
-      return (this.update(user.id, {gameSockets : user.gameSockets}));
-    }
+    if (socketIdArray === null || socketIdArray === undefined)
+      socketIdArray = [];
+    socketIdArray?.push(socketId);
+    user.gameSockets = socketIdArray;
+    const updatedUser = await this.update(user.id, {gameSockets : user.gameSockets});
+    return updatedUser
+  }
 
    async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
 
@@ -280,7 +284,6 @@ export class UsersService {
       
       return (Math.trunc(ratio))
     }
-    // TODO
     return (this.findAll().then((res : User[]) => {
       let scoreList : leaderboardStats[] = []; 
 
@@ -459,6 +462,8 @@ export class UsersService {
       throw new BadRequestException('Database error', {cause: new Error(), description: 'cannot find friend request'})
 
     await this.friendRequestRepository.remove(friendRequest)
+    friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
+    friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
     return res.status(200).send(friendRequest)
   }
 
@@ -474,7 +479,11 @@ export class UsersService {
     if (!friendRequests)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
     
-    return res.status(200).send(friendRequests.map(item => {return {requestId: item.id, creatorId:item.creator.id, creatorUsername: item.creator.username, status:item.status}}))
+      return res.status(200).send(friendRequests.map((friendRequest) => {
+        friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
+        friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
+        return friendRequest
+      }))
   }
 
   async getFriendRequestFromSender(user: User, res:any) {
@@ -488,7 +497,11 @@ export class UsersService {
     if (!friendRequests)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
     
-    return res.status(200).send(friendRequests)
+    return res.status(200).send(friendRequests.map((friendRequest) => {
+      friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
+      friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
+      return friendRequest
+    }))
   }
 
 
@@ -506,8 +519,14 @@ export class UsersService {
     
     if (!friends)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
+
     
-    return res.status(200).send(friends)
+    return res.status(200).send(friends.map((friendRequest) => {
+      friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
+      friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
+      return friendRequest
+    }))
+
   }
 
 

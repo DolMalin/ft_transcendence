@@ -91,7 +91,7 @@ export class AuthService {
   /**
    * @description Check the validity of a user from his given `ftId`, and then return him if it exists, or creates a new one
    */
-  async validateUser(ftId: number): Promise<User> {
+  async validateUser(ftId: number) {
 
     const user = await this.usersService.findOneByFtId(ftId)
     if (user) {
@@ -187,7 +187,6 @@ export class AuthService {
     if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Refresh token do not match`})
 
-
     const refreshToken = await this.createRefreshToken({id: user.id})
     const accessToken = await this.createAccessToken({id: user.id})
     if (!refreshToken || !accessToken)
@@ -243,7 +242,7 @@ export class AuthService {
     if (!user)
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
 
-    return res.status(200).send(user)
+    return res.status(200).send(this.usersService.removeProtectedProperties(user))
   }
 
   
