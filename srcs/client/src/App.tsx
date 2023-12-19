@@ -95,7 +95,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     props.gameSock?.on('isBusy', ({username}) => {
 
       toast({
-        duration: 5000,
+        duration: 2000,
         isClosable: true,
         render : () => ( <>
             <BasicToast text={username + " is busy"}/>
