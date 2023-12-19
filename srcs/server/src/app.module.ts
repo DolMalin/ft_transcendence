@@ -26,7 +26,7 @@ import { FriendRequest } from './users/entities/friendRequest.entity';
       password: process.env.DATABASE_PASSWORD,
       entities: [User, Room, Message, Avatar, Game, FriendRequest],
       synchronize: true,
-      // dropSchema: true, /*  wipe la db a chaque refresh */
+      //dropSchema: true,/*  wipe la db a chaque refresh */
     }),
     UsersModule,
     GameModule,

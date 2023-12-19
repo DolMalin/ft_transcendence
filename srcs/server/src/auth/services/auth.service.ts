@@ -141,6 +141,8 @@ export class AuthService {
    */
   async validateAccessJwt(token: string): Promise<any> {
       const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_ACCESS_SECRET})
+      if (!payload)
+        throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot verify JWT'})
       return payload
   }
 

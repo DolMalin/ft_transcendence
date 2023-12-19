@@ -14,7 +14,10 @@ import {
   TabPanel,
   useToast,
   Button,
-  CloseButton
+  CloseButton,
+  Flex,
+  Link,
+  useDisclosure
  } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
@@ -25,6 +28,8 @@ import Profile from './profile/Profile';
 import reducer from './auth/components/reducer'
 import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
+import ProfileModal from './profile/ProfileModal';
+import BasicToast from './toast/BasicToast';
 
 
 function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
@@ -90,37 +95,49 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     props.gameSock?.on('isBusy', ({username}) => {
 
       toast({
-        title: 'isBusy',
-        description: username + ' is busy',
-        status: 'info',
         duration: 5000,
-        isClosable: true
+        isClosable: true,
+        render : () => ( <>
+            <BasicToast text={username + " is busy"}/>
+        </>)
       })
     })
     props.gameSock?.on('inviteDeclined', ({username}) => {
 
       toast({
-        title: 'Invite Declined',
-        description: username + ' declined your invitation',
-        status: 'info',
         duration: 5000,
-        isClosable: true
+        isClosable: true,
+        render : () => ( <>
+            <BasicToast text={username + " declined your invitation" }/>
+        </>)
       })
     })
     props.gameSock?.on('gotInvited', ({senderSocketId, senderId, senderUsername, gameType}) => {
 
       toast({
-        title: 'Got Invited',
-        description: "Got invited by " + senderUsername + " to play a " + gameType + " game !",
-        status: 'info',
         duration: null,
-        render : () => (
-          <Box w={'350px'}
-          h={'60px'}
-          bgColor={'white'}>
-            <Button onClick={() => {close(senderId)}}> No thanks !</Button>
-            <Button onClick={() => {acceptInvite(senderSocketId, senderId, gameType)}}> Yes please ! </Button>
-          </Box>
+        render : () => ( <>
+          <BasicToast text={'Got invited by ' + senderUsername  + ' to play a ' + gameType + ' game !'}>
+              <Button onClick={() => {close(senderId)}}
+              bg={'none'}
+              borderRadius={'0px'}
+              fontWeight={'normal'}
+              textColor={'white'}
+              _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+              > 
+              No thanks !
+              </Button>
+              <Button onClick={() => {acceptInvite(senderSocketId, senderId, gameType)}}
+              bg={'none'}
+              borderRadius={'0px'}
+              fontWeight={'normal'}
+              textColor={'white'}
+              _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+              >
+                Yes please ! 
+              </Button>
+            </BasicToast>
+          </>
         ),
         isClosable: true,
       })
@@ -207,7 +224,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         <TabPanel margin={'0'} padding={'0'}>
           {<Profile state={props.state} dispatch={props.dispatch} gameSock={props.gameSock}/>}
         </TabPanel>
-
     </TabPanels>
   </Tabs>
   )

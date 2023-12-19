@@ -50,8 +50,6 @@ export class UsersService {
     }});
   }
 
-
-  
   async findAllUsers(originalUser: User) {
     
     let res = await this.userRepository.find()
@@ -70,11 +68,34 @@ export class UsersService {
   findOneById(id: string) {
     return this.userRepository.findOneBy({ id })
   }
+  
+  async findOneByIdWithBlockRelation(id: string) {
+    const user = await this.userRepository
+    .createQueryBuilder('user')
+      .leftJoinAndSelect('user.blocked', 'blocked')
+      .leftJoinAndSelect('user.room', 'room.users')
+      .where('user.id = :id', {id: id})
+      .getOne()
+      if (!user)
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+      return user
+    }
 
-  findOneByFtId(ftId: number) {
+    async findAllBlockedUser(id: string){
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.blocked', 'blocked')
+        .where('user.id = :id', {id: id})
+        .getOne()
+      if (!user)
+        throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+      return user.blocked
+  }
+    
+    findOneByFtId(ftId: number) {
     return this.userRepository.findOneBy({ ftId })
   }
-
+  
   findOneByUsername(username: string) {
     return this.userRepository.findOneBy({ username })
   }
@@ -128,12 +149,43 @@ export class UsersService {
     return avatar
   }
 
-  blockTarget(user: User, user2: User){
-    //TODO
-    //check if already block
-    // user.blocked.push(user2)
-    // console.log('----user in block-----', user)
+
+  async blockTarget(blockerId: string, targetId: string){
+    const user = await this.findOneByIdWithBlockRelation(blockerId)
+    const user2 = await this.findOneById(targetId)
+    if (!user2)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+    if (this.isAlreadyBlocked(user, user2) === false){
+      user.blocked.push(user2)
+      await this.save(user)
+      return user2.username
+    }
+    else
+      throw new ConflictException('User already blocked', {cause: new Error(), description: 'user is already blocked'})
   }
+  
+  async unblockTarget(blockerId: string, blockedId: string){
+    try{
+      let user = await this.findOneByIdWithBlockRelation(blockerId)
+      const user2 = await this.findOneById(blockedId)
+      if (this.isAlreadyBlocked(user, user2)){
+        user.blocked = user.blocked.filter((blockedUser) => blockedUser.id !== user2.id)
+        this.userRepository.save(user)
+        return {user, user2}
+      }
+    }
+    catch(err){
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+    }
+  }
+
+  isAlreadyBlocked(user: User, user2: User): boolean {
+    
+    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
+    return isBlocked || false;
+  }
+  
+
   async getUserAvatar( res: any, id: string) {
 
     if(id && !isUUID(id))
@@ -199,11 +251,6 @@ export class UsersService {
     });
    }
 
-  // }
-
-  /**
- * @description return an array of objects containing {username, userId,winsAmount, loosesAmount, W/L Ratio} of all users
- */ 
   returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {
@@ -217,8 +264,6 @@ export class UsersService {
       
       return (Math.trunc(ratio))
     }
-
-    
     // TODO
     return (this.findAll().then((res : User[]) => {
       let scoreList : leaderboardStats[] = []; 

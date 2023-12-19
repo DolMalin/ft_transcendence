@@ -7,7 +7,9 @@ import authService from "../auth/auth.service";
 import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
-import { EmailIcon } from "@chakra-ui/icons";
+import { CheckIcon, CloseIcon, EmailIcon } from "@chakra-ui/icons";
+import BasicToast from "../toast/BasicToast";
+
 
 export interface MessageData {
     id: number;
@@ -29,7 +31,7 @@ async function getRoomList(){
         password: string | null; 
         privChan: string | null }[]; 
     try{
-        const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/list')
+        const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/')
         roomList = res.data
     }
     catch(err){
@@ -38,23 +40,41 @@ async function getRoomList(){
     return roomList
 }
 
-async function getUserList(){
+async function getUserList(me : {username: string, id: string}){
     let userList: {
         id: string,
         username: string,
         isFriend: boolean}[]
     try{
-        const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/list`)
+        const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
+        userList = userList.filter(user => user.id !== me?.id)
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        throw err
     }
     return userList
 }
 
+// async function getUserList(){
+//     let userList: {
+//         id: string,
+//         username: string,
+//         isFriend: boolean}[]
+//     try{
+//         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
+//         userList = res.data
+//         // userList = userList.filter(user => user.id !== me?.id)
+//     }
+//     catch(err){
+//         throw err
+//     }
+//     return userList
+// }
+
 async function getFriendRequestsReceived() {
     let friendRequestsReceived: {
+        requestId: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -72,6 +92,12 @@ async function getFriendRequestsReceived() {
 
 export function Chat(props: {socket: Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const [me, setMe] = useState<
+    {
+        id: string, 
+        username: string
+    } | undefined>(undefined)
+    const toast = Chakra.useToast();
     const [room, setRoom] = useState<Room>()
     const [showChat, setShowChat] = useState(false)
     const [privateChan, setPrivate] = useState(false)
@@ -91,6 +117,7 @@ export function Chat(props: {socket: Socket}){
 
     const [friendRequestsReceived, setFriendRequestsReceived] = useState
     <{
+        requestId: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -130,13 +157,24 @@ export function Chat(props: {socket: Socket}){
                 name: dt.room,
                 password: dt.password
             })
-            
             setRoom(res.data)
             props.socket?.emit("joinRoom", res.data.id)
             setShowChat(true)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+
+            if (err.response.status === 409)
+            {
+                toast({
+                    isClosable: true,
+                    duration : 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
 
@@ -156,39 +194,86 @@ export function Chat(props: {socket: Socket}){
     }
 
     const fetchUserList = async () => {
-        const userList = await getUserList()
-        setUserList(userList)
+        try {
+            const tab = await getUserList(me)
+            console.log(tab)
+            setUserList(tab)
+        }
+        catch(err){
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
     }
+
+    // const fetchUserList = async (me : {username: string, id: string}) => {
+    //     try {
+    //         const tab = await getUserList(me)
+    //         setUserList(tab)
+    //     }
+    //     catch(err){
+    //         console.error(`${err.response.data.message} (${err.response.data.error})`)
+    //     }
+    // }
 
     const fetchFriendRequestReceived = async () => {
         const friendRequestReceived = await getFriendRequestsReceived()
         setFriendRequestsReceived(friendRequestReceived)
     }
 
+    async function acceptFriend(requestId: number) {
+        try {
+            const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/response/${requestId}`, {status:'accepted'});
+            props.socket?.emit('friendRequestAccepted', {creatorId: res.data.creator.id})
+            props.socket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
+
+        } catch(err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function removeFriend(requestId: number) {
+        try {
+            const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/remove/${requestId}`, {status:'undefined'});
+
+            props.socket?.emit('friendRemoved', {creatorId: res.data.creator.id})
+            props.socket?.emit('friendRemoved', {creatorId: res.data.receiver.id})
+
+        } catch(err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
     useEffect(() => {
+        props.socket?.on('userBlocked', (err) => {
+            toast({
+                title: err.title,
+                description:  err.desc,
+                colorScheme: 'red',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+              })
+        })
         props.socket?.on('dmRoom', (dm) => {
             props.socket?.emit("joinRoom", dm.id)
             setRoom(dm)
             setShowChat(true)
         })
         return (() => {
+            props.socket?.off('userBlocked')
             props.socket?.off('dmRoom')
         })
     })
 
-    useEffect(() => {
-        fetchUserList()
-        fetchRoom()
-        fetchFriendRequestReceived()
-    }, [])
 
     useEffect(function socketEvent() {
         props.socket?.on('friendRequestSendedChat', () => {
+            // fetchUserList(me)
             fetchUserList()
             fetchFriendRequestReceived()
         })
 
         props.socket?.on('friendRequestAcceptedChat', () => {
+            // fetchUserList(me)
             fetchUserList()
             fetchFriendRequestReceived()
 
@@ -196,6 +281,7 @@ export function Chat(props: {socket: Socket}){
  
         props.socket?.on('friendRemovedChat', () => {
             console.log('friend removed chat')
+            // fetchUserList(me)
             fetchUserList()
             fetchFriendRequestReceived()
 
@@ -209,6 +295,26 @@ export function Chat(props: {socket: Socket}){
         
     }, [props.socket])
     
+    useEffect(() => {        
+        const asyncWrapper = async () => {
+            try{
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
+                setMe(res.data)
+                // fetchUserList() 
+                fetchFriendRequestReceived()
+                fetchRoom()
+            }
+            catch(err){
+                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+        }
+        asyncWrapper()
+    }, [])
+
+    useEffect(() => { 
+        fetchUserList() 
+        fetchFriendRequestReceived()
+    }, [props.socket])
+
     return (
         <div>
         <mark>
@@ -231,7 +337,7 @@ export function Chat(props: {socket: Socket}){
 
         {userList?.length > 0 && (
         userList.map((user, index: number) => (
-            <Chakra.Flex flexDir="row" key={index}>
+            <Chakra.Flex flexDir="row" key={index} >
                    <div className="userList">
                 <div>
                     <ul>
@@ -266,10 +372,19 @@ export function Chat(props: {socket: Socket}){
                                 <Chakra.IconButton
                                     variant='outline'
                                     colorScheme='teal'
-                                    aria-label='Send email'
-                                    icon={<EmailIcon />}
-                                    onClick={() => {}}
-                                    />
+                                    aria-label='Accept friend request'
+                                    icon={<CheckIcon />}
+                                    onClick={() => {acceptFriend(friendRequest.requestId)}}
+                                />
+
+                                <Chakra.IconButton
+                                    variant='outline'
+                                    colorScheme='red'
+                                    aria-label='Decline friend request'
+                                    icon={<CloseIcon />}
+                                    onClick={() => {removeFriend(friendRequest.requestId)}}
+                                />
+
                             </ul>
                         </div>
                     </div>

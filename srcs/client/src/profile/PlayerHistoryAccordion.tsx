@@ -42,7 +42,6 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
 
     function openProfileModal(id : string) {
 
-        console.log(' ID : ', id);
         setTargetId(id);
         onOpen();
     }
