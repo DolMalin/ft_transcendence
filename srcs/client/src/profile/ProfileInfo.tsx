@@ -51,7 +51,7 @@ function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
           setFontSize('1em')
           setAccordionFontSize('0.75em')
         }
-      }, 100)
+      }, Constants.DEBOUNCE_TIME)
   
       window.addEventListener('resize', debouncedHandleResize)
   
@@ -60,6 +60,7 @@ function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
       })
     }, [fontSize]);
 
+    console.log('profile rerender')
     return (<>
         <Box display={'flex'} flexDir={'row'} flexWrap={'wrap'}
         alignItems={'center'}

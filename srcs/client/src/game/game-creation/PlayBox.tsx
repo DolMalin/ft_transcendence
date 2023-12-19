@@ -42,13 +42,15 @@ function PlayBox(props : {dispatch : Function}) {
             else if (window.innerWidth <= 360)
                 setBoxWidth('300px')
 
-        }, 100);
+        }, Constants.DEBOUNCE_TIME);
         window.addEventListener('resize', debouncedHandleResize)
 
         return (() => {
             window.removeEventListener('resize', debouncedHandleResize);
         })
     },  [flexDisplay]);
+
+    console.log('playbox rerender')
 
     return (
     <Flex flexDir={flexDisplay} wrap={'wrap'} overflow={'hidden'}>
