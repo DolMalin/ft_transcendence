@@ -79,7 +79,6 @@ export class RoomService {
     }
 
     async getRoom(roomName: string){
-    
         return await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
@@ -173,8 +172,6 @@ export class RoomService {
         }    
         return room;
     }
-
-    // roomList = roomList.filter(room => room.type !== roomType.directMessage)
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
@@ -290,17 +287,30 @@ export class RoomService {
         
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
         if (!this.isAdmin(room, requestMaker))
             throw new ConflictException('Not an admin', 
-            {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
-
+            {
+                cause: new Error(), 
+                description: 'tried to perform actions above your paycheck'
+            } )
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
         if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("User not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
         if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Target is admin', 
-            {cause: new Error(), description: 'You cannot mute an admin'} )
+            {
+                cause: new Error(), 
+                description: 'You cannot mute an admin'
+            } )
 
 
         if (timeInMinutes != 0)
@@ -385,7 +395,7 @@ export class RoomService {
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
         if (!this.isAdmin(room, requestMaker))
             throw new ConflictException('Not an admin', 
-            {cause: new Error(), description: 'tried to perform actions above your paycheck'} );
+            {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
 
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
         if (!target)
@@ -469,7 +479,13 @@ export class RoomService {
                 cause: new Error(),
                 description: "you cannot change a password when there is no password."
             })
-        //TODO verifier si le mdp est le meme que le mdp en param
+        if (await argon2.verify(room.password, updateRoomDto.password)){
+            throw new ConflictException("Password is the same", 
+            {
+                cause: new Error(),
+                description: "you cannot change password for the same password."
+            })
+        }
         room.password = await this.authService.hash(updateRoomDto.password)
         this.save(room)
     }
