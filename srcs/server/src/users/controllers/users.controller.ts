@@ -18,15 +18,8 @@ export class UsersController {
     
   @UseGuards(AccessToken2FAGuard)
   @Get()
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
-  }
-
-  //TODO changer nom route
-  @UseGuards(AccessToken2FAGuard)
-  @Get('list')
-  findAllUsers(@GetUser() user: User){
-    return this.usersService.findAllUsers(user)
+  async findAll(@GetUser() user: User) {
+    return await this.usersService.findAllUsers(user);
   }
 
   @UseGuards(AccessToken2FAGuard)

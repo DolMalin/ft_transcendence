@@ -285,7 +285,7 @@ export class RoomService {
         return (false);
     }
 
-    async muteUser(requestMaker : User,updatePrivilegesDto : UpdatePrivilegesDto, timeInMinutes : number) {
+    async muteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto, timeInMinutes : number) {
 
         
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);

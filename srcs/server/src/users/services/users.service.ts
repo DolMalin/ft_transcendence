@@ -41,29 +41,45 @@ export class UsersService {
   }
 
 
-  findAll() {
-    return this.userRepository.find({relations :{
+  async findAll() {
+    let res = await this.userRepository.find({relations :{
       playedGames: true,
       friends: true,
       sentFriendRequests: true,
       receivedFriendRequests: true
-    }});
+    }})
+
+    if (!res || res === undefined)
+    throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+
+    return res
   }
 
+
   async findAllUsers(originalUser: User) {
-    
-    let res = await this.userRepository.find()
+    let res = await this.userRepository.find({relations :{
+      playedGames: true,
+      friends: true,
+      sentFriendRequests: true,
+      receivedFriendRequests: true
+    }})
+
     if (!res || res === undefined)
       throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+
+
     const userList = await Promise.all(res.map(async (user) => ({
       id: user.id,
       username: user.username,
-      isFriend: (await this.isFriend(user.id, originalUser)).isFriend
+      isFriend: (await this.isFriend(user.id, originalUser)).isFriend,
+      playedGames: user.playedGames,
+      friends: user.friends,
+      receivedFriendRequest: user.receivedFriendRequests
     })))
-
 
     return userList
   }
+
   
   findOneById(id: string) {
     return this.userRepository.findOneBy({ id })
@@ -458,7 +474,7 @@ export class UsersService {
     if (!friendRequests)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
     
-    return res.status(200).send(friendRequests.map(item => {return {creatorId:item.creator.id, creatorUsername: item.creator.username, status:item.status}}))
+    return res.status(200).send(friendRequests.map(item => {return {requestId: item.id, creatorId:item.creator.id, creatorUsername: item.creator.username, status:item.status}}))
   }
 
   async getFriendRequestFromSender(user: User, res:any) {

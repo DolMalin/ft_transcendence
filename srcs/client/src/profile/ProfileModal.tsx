@@ -114,7 +114,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         }
     }
 
-    async function acceptFriend(userId: string) {
+    async function acceptFriend() {
         try {
             const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/response/${friendRequestId}`, {status:'accepted'});
             props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.creator.id})
@@ -128,7 +128,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         }
     }
 
-    async function removeFriend(userId: string) {
+    async function removeFriend() {
         try {
             const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/remove/${friendRequestId}`, {status:'undefined'});
 
@@ -386,7 +386,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         fontWeight={'normal'}
                         borderRadius={'none'}
                         _hover={{background : 'white', textColor: 'black'}}
-                        onClick={() => (removeFriend(user.id))}
+                        onClick={() => (removeFriend())}
                         isDisabled={isYourself}
                         >
                             Remove friend !
@@ -416,7 +416,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                                 fontWeight={'normal'}
                                 borderRadius={'none'}
                                 _hover={{background : 'white', textColor: 'black'}}
-                                onClick={() => (acceptFriend(user.id))}
+                                onClick={() => (acceptFriend())}
                                 isDisabled={isYourself}
                                 >
                                     Accept friend request !
@@ -428,7 +428,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                                 fontWeight={'normal'}
                                 borderRadius={'none'}
                                 _hover={{background : 'white', textColor: 'black'}}
-                                onClick={() => (removeFriend(user.id))}
+                                onClick={() => (removeFriend())}
                                 isDisabled={isYourself}
                                 >
                                     Decline friend request !
