@@ -20,8 +20,6 @@ export class FtAuthGuard implements CanActivate {
 		const ftId = await this.authService.getFtId(token)
 		if (!ftId)
 			throw new UnauthorizedException()
-
-			console.log("TRUC")
 	
 		req.user = await this.authService.validateUser(ftId)
 		if (!req.user)
