@@ -359,7 +359,7 @@ function UserInUsersList(props : {username : string, userId : string,
                         <Chakra.Button onClick={() => setPassword(props.room.id, "motdepasse")}>
                             Set password
                         </Chakra.Button>
-                        <Chakra.Button onClick={() => changePassword(props.room.id, "motdepassebis")}>
+                        <Chakra.Button onClick={() => changePassword(props.room.id, "motdepassebise")}>
                             change password
                         </Chakra.Button>
                         <Chakra.Button onClick={() => removePassword(props.room.id)}>
