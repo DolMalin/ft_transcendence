@@ -55,4 +55,4 @@ export const TABS_BORDER = '1px solid white';
 export const BOX_GRADIANT = 'linear(to-br, grey, lightgrey)';
 
 export const TOP_BAR_HEIGHT = '4vh';
-export const BODY_HEIGHT = '96vh';
+export const BODY_HEIGHT = 'calc(100vh - 60px)';
