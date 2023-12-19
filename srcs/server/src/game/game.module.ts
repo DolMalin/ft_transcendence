@@ -12,11 +12,12 @@ import { Avatar } from 'src/users/entities/avatar.entity'
 import { AvatarService } from 'src/users/services/avatar.service'
 import { AuthService } from 'src/auth/services/auth.service'
 import { JwtService } from '@nestjs/jwt'
+import { FriendRequest } from 'src/users/entities/friendRequest.entity'
 
 
 @Module({
   
-    imports: [TypeOrmModule.forFeature([Game]), TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar])],
+    imports: [TypeOrmModule.forFeature([Game]), TypeOrmModule.forFeature([User, FriendRequest]), TypeOrmModule.forFeature([Avatar])],
     controllers: [GamesController],
     providers: [JwtService,GameGateway, MatchmakingService, GamePlayService, MatchHistoryService, UsersService, AvatarService, AuthService],
     exports: [MatchHistoryService]

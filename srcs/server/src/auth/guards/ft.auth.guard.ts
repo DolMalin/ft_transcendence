@@ -9,9 +9,10 @@ export class FtAuthGuard implements CanActivate {
 	async canActivate(context: ExecutionContext  ): Promise<any>{
 		const req = context.switchToHttp().getRequest()
 		const code = req.query.code
-
+		
 		if (!code?.length)
 			return false
+		
 		const token = await this.authService.getFtToken(code)
 		if (!token)
 			throw new UnauthorizedException()
@@ -20,6 +21,8 @@ export class FtAuthGuard implements CanActivate {
 		if (!ftId)
 			throw new UnauthorizedException()
 
+			console.log("TRUC")
+	
 		req.user = await this.authService.validateUser(ftId)
 		if (!req.user)
 			throw new InternalServerErrorException()

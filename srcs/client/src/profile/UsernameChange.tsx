@@ -10,39 +10,15 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
     const [formError, setFormError] = useState(false)
     const [formErrorMsg, setFormErrorMsg] = useState('')
 
-    function validateUsername(username : string) {
-        
-        if (typeof username != 'string')
-        {
-            setFormErrorMsg('input is not a string');
-            setFormError(true);
-            return(false);
-        }
-        else if(username?.length < 3)
-        {
-            setFormErrorMsg('username is too short !');
-            setFormError(true);
-            return(false);
-        }
-        else if(username?.length > 20)
-        {
-            setFormErrorMsg('username is too long !');
-            setFormError(true);
-            return(false);
-        }
-        setFormError(false);
-        return (true)
-    }
 
     async function onChangeUsername(data : {newUsername : string}) {
 
-        if (data === undefined || !data  || data?.newUsername === undefined)
-            return ;
-        
-        if (!validateUsername(data.newUsername))
-            return ;
         try {
-            const res = await authService.patch(process.env.REACT_APP_SERVER_URL + '/users/', {username : data.newUsername})
+            const formData = new FormData()
+            if (data.newUsername)
+                formData.append("username", data.newUsername)
+            
+            await authService.register(formData)
             props.setFormVisible(false);
         }
         catch(err) {

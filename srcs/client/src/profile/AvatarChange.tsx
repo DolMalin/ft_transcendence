@@ -14,9 +14,8 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 		try {
 			const formData = new FormData()
 			if (data.avatar)
-            {
 				formData.append("file", data.avatar[0]);
-            }
+                
 			await authService.register(formData);
             props.setFormVisible(false);
 		} catch(err) {

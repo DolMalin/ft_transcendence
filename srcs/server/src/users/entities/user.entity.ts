@@ -1,8 +1,9 @@
 import { Field } from '@nestjs/graphql';
 import { Room } from 'src/chat/entities/room.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, OneToOne} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, OneToOne, OneToMany} from 'typeorm';
 import { Game } from 'src/game/entities/game-entity';
 import { Avatar } from './avatar.entity';
+import { FriendRequest } from './friendRequest.entity';
 
 @Entity()
 export class User {
@@ -63,6 +64,16 @@ export class User {
 		}
 	})
 	playedGames?: Game[];
+
+	@ManyToMany(() => User)
+	@JoinTable({joinColumn: {name: 'user_id'}})
+	friends: User[]
+
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator)
+	sentFriendRequests: FriendRequest[]
+
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.receiver)
+	receivedFriendRequests: FriendRequest[]
 
 	@JoinColumn({name: 'avatarId'})
 	@OneToOne(() => Avatar, {nullable:true})

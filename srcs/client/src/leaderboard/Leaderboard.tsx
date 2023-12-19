@@ -19,7 +19,7 @@ import authService from "../auth/auth.service";
 import ProfileModal from "../profile/ProfileModal";
 import { Socket } from "socket.io-client";
 
-function LeaderBoard(props : {gameSock : Socket}) {
+function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
 
     const [scoreList, setScoreList] = useState<leaderboardStats[]>([]);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -140,7 +140,7 @@ function LeaderBoard(props : {gameSock : Socket}) {
                     })}
                 </Tbody>
             </Table>
-            <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} gameSock={props.gameSock}/>
+            <ProfileModal userId={userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} gameSock={props.gameSock} chatSocket={props.chatSocket}/>
         </Box>
     </>)
   }

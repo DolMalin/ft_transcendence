@@ -18,10 +18,16 @@ import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 
+
+
+
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
+    const [friendRequestStatus, setFriendRequestStatus] = useState('undefined')
+    const [isFriendRequestCreator, setIsFriendRequestCreator] = useState(false)
+    const [friendRequestId, setFriendRequestId] = useState(0)
     const [isBlocked, setIsBlocked] = useState(false);
     const toast = useToast();
 
@@ -95,7 +101,52 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
       }
       
 
+    async function addFriend(userId: string) {
+        try {
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/send/${userId}`, {});
+            
+            props.chatSocket?.emit('friendRequestSended', {creatorId: res.data.receiver.id})
+            setFriendRequestStatus('pending')
+            setIsFriendRequestCreator(true)
+            props.onClose();
+        } catch(err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function acceptFriend() {
+        try {
+            const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/response/${friendRequestId}`, {status:'accepted'});
+            props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.creator.id})
+            props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
+            setFriendRequestStatus('accepted')
+            setIsFriendRequestCreator(false)
+            props.onClose();
+
+        } catch(err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+    async function removeFriend() {
+        try {
+            const res = await authService.patch(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/remove/${friendRequestId}`, {status:'undefined'});
+
+            props.chatSocket?.emit('friendRemoved', {creatorId: res.data.creator.id})
+            props.chatSocket?.emit('friendRemoved', {creatorId: res.data.receiver.id})
+
+            setFriendRequestStatus('undefined')
+            setIsFriendRequestCreator(false)
+            props.onClose();
+
+        } catch(err) {
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
+
+
     useEffect(() => {
+        
         if (!props.userId)
             return ;
         const checkIfYourself = async (userId : string) => {
@@ -121,24 +172,71 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 console.error(`${err.response.data.message} (${err.response.data.error})`)
             }
         }
+
     
         fetchUserProfile().then((userId) => {
             checkIfYourself(userId);
+            
         });
+
+
     }, [props.userId])
 
+    useEffect(() => {
+        
+        const fetchFriendStatus = async (userId: string) => {
+            if (isYourself || !props.userId)
+                return
+
+            try {
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/${userId}`);
+                setFriendRequestStatus(res.data?.status)
+                setIsFriendRequestCreator(res.data?.isCreator)
+                setFriendRequestId(res.data?.id)
+            } catch (err) {
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+            }
+        }
+        async function asyncWrapper( ) {
+            await fetchFriendStatus(props.userId)
+        }
+        asyncWrapper()
+    }, [props.userId, friendRequestStatus, isFriendRequestCreator])
+
+    
     useEffect(function socketEvent() {
 
         props.gameSock?.on('closeModal', () => {
             props.onClose();
         })
+
+        props.chatSocket?.on('friendRequestSendedModal', () => {
+            setFriendRequestStatus('pending')
+            setIsFriendRequestCreator(false)
+        })
+
+        props.chatSocket?.on('friendRequestAcceptedModal', () => {
+            setFriendRequestStatus('accepted')
+            setIsFriendRequestCreator(false)
+
+        })
+ 
+        props.chatSocket?.on('friendRemovedModal', () => {
+            setFriendRequestStatus('undefined')
+            setIsFriendRequestCreator(false)
+
+        })
+
         return (() => {
             props.gameSock?.off('closeModal');
+            props.chatSocket?.off('friendRequestSendedModal');
+            props.chatSocket?.off('friendRequestAcceptedModal');
+            props.chatSocket?.off('friendRemovedModal');
         })
-    }, [])
-
+    }, [friendRequestStatus, isFriendRequestCreator])
     if (!props.userId)
         return ;
+
     return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
         <ModalOverlay
@@ -277,6 +375,72 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                             {Constants.GAME_TYPE_TWO} Duel !
                         </Button>
                     </Box>
+
+                    <Box w={'224px'} h={'80px'} 
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}>
+
+                    {!isYourself && friendRequestStatus === 'accepted' && 
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (removeFriend())}
+                        isDisabled={isYourself}
+                        >
+                            Remove friend !
+                        </Button>
+                    }
+
+                    { !isYourself && (friendRequestStatus === 'undefined') &&
+                        <Button colorScheme='none'
+                        fontWeight={'normal'}
+                        borderRadius={'none'}
+                        _hover={{background : 'white', textColor: 'black'}}
+                        onClick={() => (addFriend(user.id))}
+                        isDisabled={isYourself}
+                        >
+                            Add friend !
+                        </Button>
+                    }
+                    {!isYourself && friendRequestStatus === 'pending' && isFriendRequestCreator &&
+                        <div>
+                            Friend request pending...
+                        </div>
+                    }
+                    {!isYourself && friendRequestStatus === 'pending' && !isFriendRequestCreator &&
+                        <>
+                            <Box>
+                                <Button colorScheme='none'
+                                fontWeight={'normal'}
+                                borderRadius={'none'}
+                                _hover={{background : 'white', textColor: 'black'}}
+                                onClick={() => (acceptFriend())}
+                                isDisabled={isYourself}
+                                >
+                                    Accept friend request !
+                                </Button>
+                            </Box>
+
+                            <Box>
+                                <Button colorScheme='none'
+                                fontWeight={'normal'}
+                                borderRadius={'none'}
+                                _hover={{background : 'white', textColor: 'black'}}
+                                onClick={() => (removeFriend())}
+                                isDisabled={isYourself}
+                                >
+                                    Decline friend request !
+                                </Button>
+                            </Box>
+                        </>
+
+                        
+                }
+                    </Box>
+
+
                 </Flex>
                 <PlayerHistoryAccordion userId={user?.id}/>
 

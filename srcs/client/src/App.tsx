@@ -218,7 +218,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          <LeaderBoard gameSock={props.gameSock}/>
+          <LeaderBoard gameSock={props.gameSock} chatSocket={props.chatSock}/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

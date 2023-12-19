@@ -10,8 +10,9 @@ import { Avatar
  } from './entities/avatar.entity';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
 import { Game } from 'src/game/entities/game-entity';
+import { FriendRequest } from './entities/friendRequest.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), TypeOrmModule.forFeature([Avatar]), TypeOrmModule.forFeature([Game])],
+  imports: [TypeOrmModule.forFeature([User, FriendRequest]), TypeOrmModule.forFeature([Avatar]), TypeOrmModule.forFeature([Game])],
   controllers: [UsersController],
   providers: [UsersService, AuthService, JwtService, AvatarService, MatchHistoryService],
   exports: [UsersService]

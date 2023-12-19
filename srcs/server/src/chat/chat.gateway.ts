@@ -132,6 +132,35 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     } 
   }
 
+  @SubscribeMessage('friendRequestSended')
+  async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRequestSendedChat')
+
+  }
+
+
+  @SubscribeMessage('friendRequestAccepted')
+  async friendRequestAccepted(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    
+    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
+  }
+
+  @SubscribeMessage('friendRemoved')
+  async friendRemoved(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+    if (!data || typeof data.creatorId !== 'string')
+      return
+    
+    
+    this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
+  }
+  
   @SubscribeMessage('channelRightsUpdate')
   channelRightsUpdate(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
 
@@ -143,4 +172,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
       this.server.to(`user-${data.targetId}`).emit('youGotBanned');
   }
+
+
 }
