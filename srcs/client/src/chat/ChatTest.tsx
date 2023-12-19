@@ -43,7 +43,7 @@ function ChatTest() {
             // if (window.innerHeight <= 960 && window.innerWidth <= 960)
             //     setBoxHeight('33%')
 
-        }, 50)
+        }, Constants.DEBOUNCE_TIME)
     
         window.addEventListener('resize', debouncedHandleResize)
     
@@ -52,6 +52,7 @@ function ChatTest() {
         })
       }, [])
 
+    console.log('chat test rerender')
     return (<>
     <Flex
     w={'100%'}

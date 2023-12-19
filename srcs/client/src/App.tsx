@@ -76,9 +76,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         setFontSize('1em')
       else if (window.innerWidth < 400)
         setFontSize('0.5em')
-
-      // if (window.innerHeight > )
-    }, 50)
+    }, Constants.DEBOUNCE_TIME)
 
     window.addEventListener('resize', debouncedHandleResize)
 
@@ -86,6 +84,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       window.removeEventListener('resize', debouncedHandleResize)
     })
   }, [fontSize])
+
+  console.log('App rerender')
 
   useEffect(function socketEvents() {
 
