@@ -12,6 +12,35 @@ import { Socket } from "socket.io-client";
 function GameMode(props : {dispatch : Function, sock : Socket}) {
 
     const [playerAvailable, setPlayerAvalaible] = useState(false);
+    const [boxWidth, setBoxWidth] = useState('300px');
+
+    useEffect(() => {
+        
+        function debounce(func : Function, ms : number) {
+            let timer : string | number | NodeJS.Timeout;
+        
+            return ( function(...args : any) {
+                clearTimeout(timer);
+                timer = setTimeout( () => {
+                    timer = null;
+                    func.apply(this, args)
+                }, ms);
+            });
+        };
+
+        const debouncedHandleResize = debounce(function handleResize() {
+            if (window.innerWidth > 600)
+                setBoxWidth('lg');
+            else if (window.innerWidth <= 360)
+                setBoxWidth('300px')
+
+        }, 100);
+        window.addEventListener('resize', debouncedHandleResize)
+
+        return (() => {
+            window.removeEventListener('resize', debouncedHandleResize);
+        })
+    },  [window.innerWidth]);
 
     useEffect(() => {async function checkPlayerAvailability() {
 
@@ -42,7 +71,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
             alignItems={'center'}
             justifyContent={'center'}
         >
-            <Box h={'lg'} w={'lg'}
+            <Box h={'lg'} w={boxWidth}
             display={'flex'}
             alignItems={'center'}
             justifyContent={'center'}
@@ -98,7 +127,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                 <Divider variant={'dashed'} w={'35%'}/>
             </Flex>
 
-            <Box h={'lg'} w={'lg'}
+            <Box h={'lg'} w={boxWidth}
             display={'flex'}
             alignItems={'center'}
             justifyContent={'center'}

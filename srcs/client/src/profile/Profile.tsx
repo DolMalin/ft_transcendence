@@ -82,6 +82,33 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 		asyncWrapper()
 	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
+	// useEffect(() => {
+        
+    //     function debounce(func : Function, ms : number) {
+    //         let timer : string | number | NodeJS.Timeout;
+        
+    //         return ( function(...args : any) {
+    //             clearTimeout(timer);
+    //             timer = setTimeout( () => {
+    //                 timer = null;
+    //                 func.apply(this, args)
+    //             }, ms);
+    //         });
+    //     };
+
+    //     const debouncedHandleResize = debounce(function handleResize() {
+    //         if (window.innerWidth < 1200)
+    //         else if (window.innerWidth >= 1200)
+    //         if (window.innerWidth > 600)
+    //         else if (window.innerWidth <= 360)
+
+    //     }, 100);
+    //     window.addEventListener('resize', debouncedHandleResize)
+
+    //     return (() => {
+    //         window.removeEventListener('resize', debouncedHandleResize);
+    //     })
+    // },  [flexDisplay]);
 	return (<>
 			<Flex 
 			width={'100vw'}
@@ -100,12 +127,12 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				{<LogoutComponent />}
 				</Flex>
 
-				<Flex minW={'360px'}
+				<Flex minW={'320px'}
+				w={'20%'}
 				h={'80%'}
 				minH={'1059px'}
 				bg={Constants.BG_COLOR_FADED}
 				padding={'10px'}
-				marginTop={'15px'}
 				wrap={'nowrap'}
 				justifyContent={'space-evenly'}
 				flexDir={'column'}>
@@ -118,12 +145,12 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 						<AvatarChange/>
 				</Flex>
 
-				<Flex minW={'360px'}
+				<Flex minW={'320px'}
 				minH={'1059px'}
 				height={'80%'}
-				width={'40vw'}
+				width={'60%'}
 				bg={Constants.BG_COLOR_FADED}
-				margin={'60px'}
+				margin={'5%'}
 				padding={'10px'}
 				wrap={'wrap'}
 				flexDir={'column'}
