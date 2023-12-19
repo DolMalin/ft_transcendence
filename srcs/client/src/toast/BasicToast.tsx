@@ -1,12 +1,12 @@
 import React from "react";
-import { Flex, Text } from "@chakra-ui/react";
+import { CloseButton, Flex, Text, ToastId } from "@chakra-ui/react";
 import * as Constants from '../game/globals/const'
 
-function BasicToast(props : {text : string, children? : React.ReactNode}) {
+function BasicToast(props : {text : string,children? : React.ReactNode}) {
     
     return (
         <Flex w={'320px'}
-        h={'120px'}
+        h={'130px'}
         className='goma'
         bgColor={Constants.BG_COLOR_FADED}
         justifyContent={'space-evenly'}
@@ -14,7 +14,7 @@ function BasicToast(props : {text : string, children? : React.ReactNode}) {
         flex={'row'}
         wrap={'wrap'}
         >
-          <Text textColor={'white'} textAlign={'center'}> {props.text} </Text>
+          <Text w={'100%'} textColor={'white'} textAlign={'center'}> {props.text} </Text>
           {props.children}
         </Flex>
     )
