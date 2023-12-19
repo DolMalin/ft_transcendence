@@ -101,6 +101,8 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			if (data.avatar)
 				formData.append("file", data.avatar[0])
 			formData.append("username", data.username)
+
+
 			await AuthService.register(formData)
 
 			props.dispatch({type:'SET_IS_REGISTERED', payload:true})

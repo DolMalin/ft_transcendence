@@ -49,7 +49,6 @@ export class AuthController {
       return this.authService.logout(req, res)
     }
 
-
     @UseGuards(AccessTokenGuard)
     @Get('validate')
     async validate(@Req() req: any, @Res() res: any) {
