@@ -1,4 +1,4 @@
-import React , {useState, useEffect} from "react";
+import React , {useState, useEffect, useLayoutEffect} from "react";
 import { ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
 import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
@@ -31,7 +31,7 @@ async function getRoomList(){
         password: string | null; 
         privChan: string | null }[]; 
     try{
-        const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/')
+        const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/list')
         roomList = res.data
     }
     catch(err){
@@ -55,22 +55,6 @@ async function getUserList(me : {username: string, id: string}){
     }
     return userList
 }
-
-// async function getUserList(){
-//     let userList: {
-//         id: string,
-//         username: string,
-//         isFriend: boolean}[]
-//     try{
-//         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
-//         userList = res.data
-//         // userList = userList.filter(user => user.id !== me?.id)
-//     }
-//     catch(err){
-//         throw err
-//     }
-//     return userList
-// }
 
 async function getFriendRequestsReceived() {
     let friendRequestsReceived: {
@@ -193,26 +177,15 @@ export function Chat(props: {socket: Socket}){
         setRoomList(rooms)
     }
 
-    const fetchUserList = async () => {
+    const fetchUserList = async (me : {username: string, id: string}) => {
         try {
             const tab = await getUserList(me)
-            console.log(tab)
             setUserList(tab)
         }
         catch(err){
             console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
-
-    // const fetchUserList = async (me : {username: string, id: string}) => {
-    //     try {
-    //         const tab = await getUserList(me)
-    //         setUserList(tab)
-    //     }
-    //     catch(err){
-    //         console.error(`${err.response.data.message} (${err.response.data.error})`)
-    //     }
-    // }
 
     const fetchFriendRequestReceived = async () => {
         const friendRequestReceived = await getFriendRequestsReceived()
@@ -267,24 +240,19 @@ export function Chat(props: {socket: Socket}){
 
     useEffect(function socketEvent() {
         props.socket?.on('friendRequestSendedChat', () => {
-            // fetchUserList(me)
-            fetchUserList()
+            fetchUserList(me)
             fetchFriendRequestReceived()
         })
 
         props.socket?.on('friendRequestAcceptedChat', () => {
-            // fetchUserList(me)
-            fetchUserList()
+            fetchUserList(me)
             fetchFriendRequestReceived()
 
         })
  
         props.socket?.on('friendRemovedChat', () => {
-            console.log('friend removed chat')
-            // fetchUserList(me)
-            fetchUserList()
+            fetchUserList(me)
             fetchFriendRequestReceived()
-
         })
 
         return (() => {
@@ -300,7 +268,7 @@ export function Chat(props: {socket: Socket}){
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                // fetchUserList() 
+                fetchUserList(res.data) 
                 fetchFriendRequestReceived()
                 fetchRoom()
             }
@@ -311,7 +279,7 @@ export function Chat(props: {socket: Socket}){
     }, [])
 
     useEffect(() => { 
-        fetchUserList() 
+        fetchUserList(me) 
         fetchFriendRequestReceived()
     }, [props.socket])
 
