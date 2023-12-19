@@ -16,6 +16,7 @@ function PlayBox(props : {dispatch : Function}) {
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
     
     const [flexDisplay, setFlexDisplay] = useState<FlexDirection>(window.innerWidth > 1200 ? 'row' : 'column');
+    const [boxWidth, setBoxWidth] = useState('300px');
 
     useEffect(() => {
         
@@ -36,6 +37,11 @@ function PlayBox(props : {dispatch : Function}) {
                 setFlexDisplay('column');
             else if (window.innerWidth >= 1200)
                 setFlexDisplay('row');
+            if (window.innerWidth > 600)
+                setBoxWidth('sm');
+            else if (window.innerWidth <= 360)
+                setBoxWidth('300px')
+
         }, 100);
         window.addEventListener('resize', debouncedHandleResize)
 
@@ -48,7 +54,7 @@ function PlayBox(props : {dispatch : Function}) {
     <Flex flexDir={flexDisplay} wrap={'wrap'} overflow={'hidden'}>
 
         <Box
-        width={'sm'} 
+        width={boxWidth} 
         height={'sm'} 
         display={'flex'}
         flexDirection={'row'}
@@ -71,7 +77,7 @@ function PlayBox(props : {dispatch : Function}) {
             </Flex>
         </Box>
 
-        <Box  width={'sm'} 
+        <Box  width={boxWidth} 
         height={'sm'} 
         display={'flex'}
         flexDirection={'row'}
@@ -123,7 +129,7 @@ function PlayBox(props : {dispatch : Function}) {
         </Box>
 
         <Box
-        width={'sm'} 
+        width={boxWidth} 
         height={'sm'} 
         display={'flex'}
         flexDirection={'row'}
