@@ -30,6 +30,7 @@ import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
 import ProfileModal from './profile/ProfileModal';
 import BasicToast from './toast/BasicToast';
+import ChatTest from './chat/ChatTest';
 
 
 function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
@@ -217,8 +218,9 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
           <CreateGame sock={props.gameSock}/>
         </TabPanel>
 
-        <TabPanel margin={'0'} padding={'0'} overflow={'auto'}>
-          <Chat socket={props.chatSock}/>
+        <TabPanel margin={'0'} padding={'0'}>
+          {/* <Chat socket={props.chatSock}/> */}
+          <ChatTest/>
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
