@@ -13,6 +13,7 @@ export class UpdatePrivilegesDto {
     @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     @Matches(/^[\w-]+( [\w-]+)*$/, {message: "channel name can only have one space between group of words"})
     @MaxLength(74)
+    @IsOptional()
     roomName? : string
 
     @IsInt()

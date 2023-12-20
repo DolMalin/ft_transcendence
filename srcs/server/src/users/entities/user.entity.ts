@@ -35,6 +35,8 @@ export class User {
 	@Field(() => Boolean, {})
 	isTwoFactorAuthenticated: boolean
 
+	isFriend: boolean
+
 	@ManyToMany(() => Room, room => room.users)
 	room: Room[];
 
@@ -65,14 +67,10 @@ export class User {
 	})
 	playedGames?: Game[];
 
-	@ManyToMany(() => User)
-	@JoinTable({joinColumn: {name: 'user_id'}})
-	friends: User[]
-
-	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator)
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator, {onDelete: 'CASCADE'})
 	sentFriendRequests: FriendRequest[]
 
-	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.receiver)
+	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.receiver, {onDelete: 'CASCADE'})
 	receivedFriendRequests: FriendRequest[]
 
 	@JoinColumn({name: 'avatarId'})

@@ -81,9 +81,7 @@ export class RoomController {
     @UseGuards(AccessToken2FAGuard)
     @Post('removeAdminPrivileges')
     async removeAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
-        
         return (await this.roomService.removeAdminPrivileges(user, updatePrivilegesDto));
-
     }
 
     @UseGuards(AccessToken2FAGuard)
