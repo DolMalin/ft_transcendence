@@ -532,8 +532,6 @@ export class UsersService {
   }
 
 
-
-
   async isFriend(targetUserId: string, originalUser:User) {
     // if (targetUserId === originalUser.id)
     //   throw new ConflictException("Conflicts between target user and original user", {cause: new Error(), description: "a user cannot be his own friend"})

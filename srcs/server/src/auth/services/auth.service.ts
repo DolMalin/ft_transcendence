@@ -156,7 +156,11 @@ export class AuthService {
     if (!refreshToken || !accessToken)
       throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot create JWT'})
 
-    const user = await this.updateRefreshToken(req.user.id, refreshToken)
+    let user = await this.updateRefreshToken(req.user.id, refreshToken)
+    if (!user)
+      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+
+    user = await this.usersService.update(user.id, {isLogged: true})
     if (!user)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
     
@@ -226,7 +230,7 @@ export class AuthService {
     if (!user)
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
       
-    const updatedUser = await this.usersService.update(user.id, {isTwoFactorAuthenticated: false})
+    const updatedUser = await this.usersService.update(user.id, {isTwoFactorAuthenticated: false, isLogged: false})
     if (!updatedUser)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
     
