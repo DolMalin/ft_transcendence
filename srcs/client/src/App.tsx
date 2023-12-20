@@ -163,7 +163,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   }, [tab, tabsRef?.current?.tabIndex])
 
   return (
-    <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
+    <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef} overflow={'auto'}
     index={tab} onChange={(index) => {
 
       switchingFrom ? setTab(0) : setTab(index); 

@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
  async handleConnection(client: Socket) {
 
    try {
-     if (client.handshake.query?.userId as string === undefined)
+     if (client.handshake.query?.userId === undefined)
      {
        client.disconnect();
        return ;
@@ -82,7 +82,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
     catch(e) {
-    Logger.error('game gateway handle disconnection error: ', e?.message);
+      Logger.error('game gateway handle disconnection error: ', e?.message);
     }
   }
 
