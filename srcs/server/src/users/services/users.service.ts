@@ -93,19 +93,30 @@ export class UsersService {
       .where('user.id = :id', {id: id})
       .getOne()
       if (!user)
-      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+        throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
       return user
     }
 
-    async findAllBlockedUser(id: string){
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect('user.blocked', 'blocked')
-        .where('user.id = :id', {id: id})
-        .getOne()
+  async findOneByIdWithRoomRelation(id: string) {
+    const user = await this.userRepository
+    .createQueryBuilder('user')
+      .leftJoinAndSelect('user.room', 'room.users')
+      .where('user.id = :id', {id: id})
+      .getOne()
       if (!user)
         throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-      return user.blocked
+      return user
+    }
+
+  async findAllBlockedUser(id: string){
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.blocked', 'blocked')
+      .where('user.id = :id', {id: id})
+      .getOne()
+    if (!user)
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    return user.blocked
   }
     
     findOneByFtId(ftId: number) {

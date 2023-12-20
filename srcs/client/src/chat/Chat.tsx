@@ -279,7 +279,6 @@ export function Chat(props: {socket: Socket}){
     }, [])
 
     useEffect(() => { 
-        fetchUserList(me) 
         fetchFriendRequestReceived()
     }, [props.socket])
 

@@ -173,6 +173,80 @@ export class RoomService {
         return room;
     }
 
+    async leaveRoom(roomId: number, userId: string){
+        const room = await this.findOneByIdWithRelations(roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
+        if (room.users){
+            room.users.forEach(user => {
+                if (user.id === userId){
+                    room.users = room.users.filter(user => user.id !== userId)
+                }
+            })
+            await this.roomRepository.save(room)
+        }
+        else{
+            throw new NotFoundException("No user was found in this room", 
+            {
+                cause: new Error(), 
+                description: `cannot find any users in room ${room?.name} in database`
+            })
+        }
+    }
+
+    async kick(roomId: number, userId: string, targetId: string){
+      
+        const room = await this.findOneByIdWithRelations(roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
+        const user = await this.userService.findOneById(userId)
+        if (!user)
+        throw new NotFoundException("User not found", 
+        {
+            cause: new Error(), 
+            description: "cannot find this user in database"
+        })
+        const user2 = await this.userService.findOneById(targetId)
+        if (!user2)
+        throw new NotFoundException("User not found", 
+        {
+            cause: new Error(), 
+            description: "cannot find this user in database"
+        })
+        if (this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'isAdmin'){
+            throw new ConflictException("User are both admins", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick an admin"
+        })}
+        if (this.isAdmin(room, user) === 'no'){
+            throw new ConflictException("You are not admin", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick if you are not admin"
+        })}
+        if (this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'isOwner'){
+            throw new ConflictException("You does not have enough power", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick an owner of channel"
+        })} 
+        if ((this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'no') ||
+        (this.isAdmin(room, user) === 'isOwner' && this.isAdmin(room, user2) === 'isAdmin') || 
+        (this.isAdmin(room, user) === 'isOwner' && this.isAdmin(room, user2) === 'no'))
+        {
+            this.leaveRoom(room?.id, user2?.id)
+        }
+    }   
+
     async postMessage(sender: User, dto: CreateMessageDto){
         
         const room = await this.findOneByIdWithRelations(dto.roomId);

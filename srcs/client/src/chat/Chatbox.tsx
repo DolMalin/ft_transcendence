@@ -184,12 +184,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
       };
       props.socket?.on('channelUpdate', forceRender);
 
-      props.socket.on('userJoined', forceRender);
+      props.socket?.on('userJoined', forceRender);
 
-      props.socket.on('youGotBanned', () => {
+      props.socket?.on('youGotBanned', () => {
 
-        const id = 'test-toast';
         props.showChat(false);
+        const id = 'test-toast';
         if(!toast.isActive(id)) {
           toast({
             id,
@@ -200,6 +200,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
           </>)
           })
         }
+      
       });
 
       return (() => {
@@ -207,6 +208,56 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         props.socket?.off('userJoined');
       })
     }, [rerender])
+
+    useEffect(() => {
+
+      props.socket?.on('channelLeft', () => {
+        props.showChat(false);
+        const id = 'test-toast';
+        if(!toast.isActive(id)) {
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <> 
+              <BasicToast text={'you left room ' + props.room.name}/>
+          </>)
+          })
+        }
+      })
+
+      props.socket?.on('kicked', () => {
+        props.showChat(false);
+        const id = 'test-toast';
+        if(!toast.isActive(id)) {
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <> 
+              <BasicToast text={'you have been kicked from ' + props.room.name}/>
+          </>)
+          })
+        }
+      })
+
+      props.socket?.on('kickby', (targetId: string) => {
+        const id = 'test-toast';
+        if(!toast.isActive(id)) {
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <> 
+              <BasicToast text={`you kicked ${targetId} from ` + props.room.name}/>
+          </>)
+          })
+        }
+      })
+      return () => {
+        props.socket?.off('channelLeft')
+      }
+    })
 
     useEffect(() => {
         props.socket?.on("receiveMessage", (data: MessageData) => {

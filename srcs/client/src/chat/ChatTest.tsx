@@ -1,11 +1,13 @@
 import { Divider, Flex } from "@chakra-ui/react";
 import { constants } from "crypto";
 import React, { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
 import * as Constants from '../game/globals/const'
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
+import UserList from "./UserList";
 
-function ChatTest() {
+function ChatTest(props: {chatSocket: Socket}) {
 
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
 
@@ -52,7 +54,6 @@ function ChatTest() {
         })
       }, [])
 
-    console.log('chat test rerender')
     return (<>
     <Flex
     w={'100%'}
@@ -74,7 +75,7 @@ function ChatTest() {
             justifyContent='center'
             alignItems='center'
             >
-                <ChannelCreator/>
+                <ChannelCreator chatSocket={props.chatSocket}/>
             </Flex>
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
@@ -105,15 +106,15 @@ function ChatTest() {
         >
             <Flex h={'50%'}
             w={'100%'}
-            bg={'magenta'}
+            bg={Constants.BG_COLOR}
             >
-                User List
+                Friend List
             </Flex>
             <Flex h={'50%'}
             w={'100%'}
-            bg={'pink'}
+            bg={Constants.BG_COLOR}
             >
-                friend List
+            <UserList chatSocket={props.chatSocket}/>
             </Flex>
         </Flex>
     </Flex>

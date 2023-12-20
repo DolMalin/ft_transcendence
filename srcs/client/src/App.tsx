@@ -85,8 +85,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     })
   }, [fontSize])
 
-  console.log('App rerender')
-
   useEffect(function socketEvents() {
 
     props.gameSock?.on('gameStarted', () => {
@@ -219,8 +217,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {/* <Chat socket={props.chatSock}/> */}
-          <ChatTest/>
+        {<Chat socket={props.chatSock}/>}
+          {/*<ChatTest chatSocket={props.chatSock}/>  */}
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
