@@ -91,7 +91,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (typeof data?.gameType !== 'string')
     {
-      Logger.error('type error in joinGame')
+      Logger.error('type error in joinGame');
       return ;
     }
 
@@ -102,7 +102,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async joinDuel(@MessageBody() data : GameInfo, @ConnectedSocket() client : Socket){
     if (typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
     {
-      Logger.error('type error in joinDuel')
+      Logger.error('type error in joinDuel');
       return ;
     }
 
@@ -114,7 +114,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (data === null || data === undefined || typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
     {
-      Logger.error('type error in leaveGame')
+      Logger.error('type error in leaveGame');
       return ;
     }
      
