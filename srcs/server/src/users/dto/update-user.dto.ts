@@ -23,6 +23,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@IsOptional()
 	isRegistered?: boolean
 
+	@IsBoolean()
+	@IsOptional()
+	isLogged?: boolean
+
 	@IsOptional()
 	twoFactorAuthenticationSecret?: string
 
