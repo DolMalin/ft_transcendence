@@ -23,6 +23,10 @@ export class User {
 	@Field(() => Boolean, {})
 	isRegistered: boolean
 
+	@Column({type: 'boolean', default: false})
+	@Field(() => Boolean, {})
+	isLogged: boolean
+
 	@Column({type: 'varchar', nullable:true})
 	@Field(() => String, {})
 	twoFactorAuthenticationSecret: string
