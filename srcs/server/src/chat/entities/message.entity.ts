@@ -19,6 +19,6 @@ export class Message {
     @CreateDateColumn({ type: 'timestamptz'})
 	sendAt: string | Date;
 
-    @ManyToOne(() => Room, room => room.message)
+    @ManyToOne(() => Room, room => room.message, {onDelete:'CASCADE'})
     room: Room;
 }

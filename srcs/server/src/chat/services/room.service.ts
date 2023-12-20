@@ -66,6 +66,16 @@ export class RoomService {
         })
     }
 
+    removeProtectedProperties(room: Room) {
+        room.users?.forEach((user)=> this.userService.removeProtectedProperties(user))
+        room.message?.forEach((message) => this.userService.removeProtectedProperties(message.author))
+        room.administrator?.forEach((user)=> this.userService.removeProtectedProperties(user))
+        room.owner = this.userService.removeProtectedProperties(room.owner)
+        room.muted?.forEach((user) => this.userService.removeProtectedProperties(user))
+        room.banned?.forEach((user) => this.userService.removeProtectedProperties(user))
+        return room
+    }
+    
     async createDM(user: User, user2: User, roomName: string){
         let directMessage: Room
         directMessage = this.roomRepository.create({
@@ -102,7 +112,7 @@ export class RoomService {
     findOneById(id: number){
 
         return this.roomRepository.findOneBy({id})
-    }
+    }   
     
     async findAllUsersInRoom(id: number) {
         const room = await this.roomRepository
@@ -151,7 +161,7 @@ export class RoomService {
             .getOne();
 
         const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
-        if (!room)
+        if (!room) 
             throw new ForbiddenException('room does not exist')
 
         if (this.isBanned(room, user))
@@ -170,11 +180,13 @@ export class RoomService {
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id));
-        }    
-        return room;
+        } 
+
+        // room.users.forEach((user) => this.userService.removeProtectedProperties(user))
+        // room.message.forEach((message) => this.userService.removeProtectedProperties(message.author))
+        return room
     }
 
-    // roomList = roomList.filter(room => room.type !== roomType.directMessage)
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
@@ -223,7 +235,8 @@ export class RoomService {
         if (!room.administrator)
             room.administrator = [];
         room.administrator.push(target);
-        return await this.save(room);
+        const newRoom = await this.save(room)
+        return this.removeProtectedProperties(newRoom)
     }
 
     async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
@@ -243,7 +256,8 @@ export class RoomService {
             {cause: new Error(), description: "Target user allready has no privileges"} )
 
         room.administrator = room.administrator.filter((admin) => admin.id != target.id);
-        return await this.save(room);
+        const newRoom = await this.save(room)
+        return this.removeProtectedProperties(newRoom)
     }
 
     async userPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
@@ -286,7 +300,6 @@ export class RoomService {
     }
 
     async muteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto, timeInMinutes : number) {
-
         
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
         if (!room)
@@ -315,7 +328,9 @@ export class RoomService {
         if (!room.muted)
             room.muted = [];
         room.muted.push(target);
-        return (await this.save(room));
+
+        const newRoom = this.removeProtectedProperties(await this.save(room))
+        return (newRoom);
     }
 
     async unmuteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
@@ -338,7 +353,9 @@ export class RoomService {
         if (!room.muted)
             room.muted = [];
         room.muted = room.muted.filter((mutedUser) => mutedUser.id != target.id)
-        return (await this.save(room));
+
+        const newRoom = this.removeProtectedProperties(await this.save(room))
+        return (newRoom);
     }
 
     async banUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
@@ -375,7 +392,10 @@ export class RoomService {
             room.banned = [];
         room.banned.push(target);
         room.users = room.users.filter((user) => user.id != target.id)
-        return (await this.save(room));
+
+        const newRoom = this.removeProtectedProperties(await this.save(room))
+        console.log(newRoom)
+        return (newRoom);
     }
 
     async unbanUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
@@ -398,11 +418,13 @@ export class RoomService {
         if (!room.banned)    
             room.banned = [];
         room.banned = room.banned.filter((bannedUser) => bannedUser.id != target.id)
-        return (await this.save(room));
+
+        const newRoom = this.removeProtectedProperties(await this.save(room))
+        return (newRoom);
     }
 
     async getBanList(roomId : number)
-    {
+    { 
         const room = await this.findOneByIdWithRelations(roomId);
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
