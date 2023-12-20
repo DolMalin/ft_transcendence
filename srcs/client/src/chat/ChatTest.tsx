@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import * as Constants from '../game/globals/const'
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
+import FriendList from "./FriendList";
 
 function ChatTest() {
 
@@ -59,6 +60,7 @@ function ChatTest() {
     h={Constants.BODY_HEIGHT}
     wrap={'nowrap'}
     flexDir={flexDir}
+    textColor={'white'}
     >
 
         <Flex
@@ -100,20 +102,20 @@ function ChatTest() {
         w={boxWidth}
         h={boxHeight}
         minH={'320px'}
-        bg='red'
+        bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <Flex h={'50%'}
-            w={'100%'}
-            bg={'magenta'}
-            >
-                User List
+            <FriendList/>
+
+            <Flex justifyContent='center'>
+                <Divider variant='dashed' width='90%' />
             </Flex>
+
             <Flex h={'50%'}
             w={'100%'}
-            bg={'pink'}
+            bg={Constants.BG_COLOR}
             >
-                friend List
+                User list
             </Flex>
         </Flex>
     </Flex>
