@@ -71,8 +71,10 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         setFontSize('2em');
       else if (window.innerWidth > 1000)
         setFontSize('1.5em')
-      else if (window.innerWidth < 800)
+      else if (window.innerWidth > 600)
         setFontSize('1em')
+      else if (window.innerWidth < 400)
+        setFontSize('0.5em')
     }, 100)
 
     window.addEventListener('resize', debouncedHandleResize)

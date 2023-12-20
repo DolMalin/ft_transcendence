@@ -23,7 +23,7 @@ import * as Constants from '../globals/const'
         minH={'sm'}
         textAlign={'center'}
         >
-            <Text fontSize={'5em'}> YOU WON MICHEL </Text>
+            <Text fontSize={'5em'}> YOU WON </Text>
 
             <Button 
             fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 

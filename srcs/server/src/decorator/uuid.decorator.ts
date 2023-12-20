@@ -39,9 +39,7 @@ export const INTParam = createParamDecorator(
     const [request] = ctx.getArgs();
     const { params } = request;
 
-    console.log(params)
     const roomId = Number(params.id);
-    console.log(typeof roomId)
 
     if (!roomId) {
       throw new BadRequestException('User ID is required');

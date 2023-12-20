@@ -19,14 +19,15 @@ function LooseScreen (props : {dispatch : Function}) {
         flexDirection={'column'}
         alignItems={'center'}
         justifyContent={'center'}
+        overflow={'scroll'}
         textColor={'white'}
         minH={'sm'}
         textAlign={'center'}
         >
-            <Text fontSize={'5em'}> YOU LOST MICHEL </Text>
+            <Text fontSize={'5em'}> YOU LOST </Text>
 
             <Button fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
-            size={'3em'} bg={Constants.BG_COLOR} fontSize={'3em'}
+            size={'2em'} bg={Constants.BG_COLOR} fontSize={'3em'}
             borderRadius={'0'}
             onClick={closeVScreen}
             >
