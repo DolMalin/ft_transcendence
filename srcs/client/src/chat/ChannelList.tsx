@@ -176,4 +176,5 @@ function ChannelList(props: {chatSocket: Socket}){
     
     
 
-export default ChannelList
+export default ChannelListChannel List
+

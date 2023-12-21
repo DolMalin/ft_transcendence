@@ -265,6 +265,4 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
       this.server.to(`user-${data.targetId}`).emit('youGotBanned');
   }
-
-
 }
