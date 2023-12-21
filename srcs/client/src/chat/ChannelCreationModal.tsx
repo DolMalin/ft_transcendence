@@ -19,7 +19,8 @@ import { Room } from "./interface"
 import { Socket } from "socket.io-client"
 import BasicToast from "../toast/BasicToast"
 
-  function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}) {
+  function 
+  ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}) {
     
     const toast = useToast();
     const [checked, setChecked] = useState(false)

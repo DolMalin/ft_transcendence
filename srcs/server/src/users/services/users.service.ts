@@ -68,7 +68,6 @@ export class UsersService {
     return await Promise.all(res.map( async (user) => {
       let newUser = this.removeProtectedProperties(user)
       newUser.isFriend = (await this.isFriend(user.id, originalUser)).isFriend
-      console.log(newUser)
       return newUser
     }))
 

@@ -36,7 +36,8 @@ export class RoomService {
         const room = this.roomRepository.create({
             name: createRoomDto.name,
             password: createRoomDto?.password,
-            owner: {id: user.id}
+            owner: {id: user.id},
+            privChan: createRoomDto.privChan
         })
         return await this.roomRepository.save(room);
     }
@@ -167,8 +168,6 @@ export class RoomService {
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
 
-        if (room.privChan === true)
-            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
         if (room.password?.length > 0){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -480,7 +479,6 @@ export class RoomService {
         room.users = room.users.filter((user) => user.id != target.id)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        console.log(newRoom)
         return (newRoom);
     }
 

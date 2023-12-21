@@ -86,7 +86,7 @@ function ChatTest(props: {chatSocket: Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-                <ChannelList />
+                <ChannelList chatSocket={props.chatSocket}/>
             </Flex>
         </Flex>
 

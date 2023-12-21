@@ -85,8 +85,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     })
   }, [fontSize])
 
-  console.log('App rerender')
-
   useEffect(function socketEvents() {
 
     props.gameSock?.on('gameStarted', () => {
