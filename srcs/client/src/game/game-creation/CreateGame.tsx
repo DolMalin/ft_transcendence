@@ -146,12 +146,12 @@ function CreateGame(props : {sock : Socket}) {
     }, [state.gameVisible, state.victoryScreenVisible, state.looseScreenVisible])
     
     return (<>
-            <Box id={Constants.GAME_ZONE}
+        <Box id={Constants.GAME_ZONE}
         width={'100vw'}
         height={Constants.BODY_HEIGHT}
         display={'flex'}
         alignItems={'center'}
-        justifyContent={'center'}
+        justifyContent={'space-evenly'}
         overflow={'auto'}
         flexWrap={'wrap'}
         background={Constants.BG_COLOR}

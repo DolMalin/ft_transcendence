@@ -138,7 +138,7 @@ function Game(props : GameProps) {
                     width : gameZone.clientHeight
                 });
             }
-        }, 100);
+        }, Constants.DEBOUNCE_TIME);
 
         window.addEventListener("resize", debouncedHandleResize);
         return (
@@ -147,6 +147,9 @@ function Game(props : GameProps) {
             }
         )
     }, [dimension])
+
+    console.log('game rerender')
+
 
     useEffect (function startUp() {
 

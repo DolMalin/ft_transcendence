@@ -80,7 +80,7 @@ export class User {
 	@JoinColumn({name: 'avatarId'})
 	@OneToOne(() => Avatar, {nullable:true})
 	avatar: Avatar
-
+	
 	@Column({nullable: true})
 	avatarId?: string
 

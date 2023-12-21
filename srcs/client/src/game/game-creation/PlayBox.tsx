@@ -42,7 +42,7 @@ function PlayBox(props : {dispatch : Function}) {
             else if (window.innerWidth <= 360)
                 setBoxWidth('300px')
 
-        }, 100);
+        }, Constants.DEBOUNCE_TIME);
         window.addEventListener('resize', debouncedHandleResize)
 
         return (() => {
@@ -50,8 +50,10 @@ function PlayBox(props : {dispatch : Function}) {
         })
     },  [flexDisplay]);
 
+    console.log('playbox rerender')
+
     return (
-    <Flex flexDir={flexDisplay} wrap={'wrap'} overflow={'hidden'}>
+    <Flex w={'100%'} flexDir={flexDisplay} wrap={'wrap'} overflowX={'auto'} justifyContent={'space-evenly'} alignItems={'center'}>
 
         <Box
         width={boxWidth} 

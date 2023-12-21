@@ -101,8 +101,24 @@ export class MatchmakingService {
         gamesMap.set(roomName, game);
       }
 
-    joinGame(server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
+    async joinGame(server : Server, client : Socket, dbUserId : string,gamesMap : Map<string, GameState>, gameType : string) {
       
+      try {
+        const user = await this.userService.findOneById(client.handshake.query.userId as string);
+        if (user.isAvailable === true)
+        {
+          this.userService.update(user.id, {isAvailable : false});
+          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : false})
+        }
+        else 
+        {
+          Logger.error(user.username + 'is not available');
+        }
+      }
+      catch(err) {
+        Logger.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+      }
+
       for (const [key, value] of gamesMap) 
       {
         if (value.gameIsFull === false && value.gameType === gameType && dbUserId !== value.clientOne.id)
@@ -121,7 +137,23 @@ export class MatchmakingService {
       client.emit('roomName', {roomName : roomName});
     }
 
-    joinDuel(server : Server, client : Socket, gamesMap : Map<string, GameState>, data : GameInfo) {
+    async joinDuel(server : Server, client : Socket, gamesMap : Map<string, GameState>, data : GameInfo) {
+      
+      try {
+        const user = await this.userService.findOneById(client.handshake.query.userId as string);
+        if (user.isAvailable === true)
+        {
+          this.userService.update(user.id, {isAvailable : false});
+          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : false})
+        }
+        else 
+        {
+          Logger.error(user.username + 'is not available');
+        }
+      }
+      catch(err) {
+        Logger.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+      }
       
       if (gamesMap.get(data.roomName) === undefined)
       {
@@ -292,7 +324,7 @@ export class MatchmakingService {
                 return ;
             }
 
-            if (sender.isAvailable === false || target.isAvailable === false) 
+            if (/*sender.isAvailable === false ||*/ target.isAvailable === false) 
             {
                 Logger.error('one of the players is unavailable');
                 return ;

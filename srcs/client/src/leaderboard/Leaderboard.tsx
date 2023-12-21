@@ -83,18 +83,17 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
 
     return (<>
         <Box
-        width={'100vw - 30px'}
+        width={'100%'}
         height={Constants.BODY_HEIGHT}
         display={'flex'}
         alignItems={'center'}
-        justifyContent={'center'}
         overflow={'auto'}
         flexWrap={'wrap'}
         background={Constants.BG_COLOR}
         padding={'30px'}
         scrollBehavior={'smooth'}
         >
-            <Table w={'90%'}>
+            <Table w={'100%'}>
                 <Thead>
                     <Tr textColor={'white'}>
                         <Th textColor={'white'} >
@@ -126,7 +125,7 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
                                     size='md'
                                     name={value?.username}
                                     src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + value?.id}
-                                    marginRight={'10px'}
+                                    // marginRight={'10px'}
                                 ></Avatar>
 
                                 <Link textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value.id)} }> 

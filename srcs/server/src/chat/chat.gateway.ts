@@ -162,14 +162,24 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   }
   
   @SubscribeMessage('channelRightsUpdate')
-  channelRightsUpdate(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
+  channelRightsUpdate(@MessageBody() data : {roomId : number} , @ConnectedSocket() client : Socket) {
 
+    if (!data || typeof data.roomId !== 'number')
+    {
+      Logger.error('wrong data passd to channelRightsUpdate event');
+      return ;
+    }
       this.server.to(`room-${data.roomId}`).emit('channelUpdate');
   }
 
   @SubscribeMessage('userGotBanned')
-  userGotBanned(@MessageBody() data : UpdatePrivilegesDto , @ConnectedSocket() client : Socket) {
+  userGotBanned(@MessageBody() data : {targetId : string} , @ConnectedSocket() client : Socket) {
 
+    if (!data || typeof data.targetId !== 'string')
+    {
+      Logger.error('wrong data passd to userGotBanned event');
+      return ;
+    }
       this.server.to(`user-${data.targetId}`).emit('youGotBanned');
   }
 

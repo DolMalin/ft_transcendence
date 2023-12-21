@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
  async handleConnection(client: Socket) {
 
    try {
-     if (client.handshake.query?.userId as string === undefined)
+     if (client.handshake.query?.userId === undefined)
      {
        client.disconnect();
        return ;
@@ -82,7 +82,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
     catch(e) {
-    Logger.error('game gateway handle disconnection error: ', e?.message);
+      Logger.error('game gateway handle disconnection error: ', e?.message);
     }
   }
 
@@ -91,7 +91,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (typeof data?.gameType !== 'string')
     {
-      Logger.error('type error in joinGame')
+      Logger.error('type error in joinGame');
       return ;
     }
 
@@ -102,7 +102,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async joinDuel(@MessageBody() data : GameInfo, @ConnectedSocket() client : Socket){
     if (typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
     {
-      Logger.error('type error in joinDuel')
+      Logger.error('type error in joinDuel');
       return ;
     }
 
@@ -114,7 +114,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (data === null || data === undefined || typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
     {
-      Logger.error('type error in leaveGame')
+      Logger.error('type error in leaveGame');
       return ;
     }
      
