@@ -20,19 +20,15 @@ export class User {
 	refreshToken: string
 
 	@Column({type: 'boolean', default: false})
-	@Field(() => Boolean, {})
 	isRegistered: boolean
 
 	@Column({type: 'varchar', nullable:true})
-	@Field(() => String, {})
 	twoFactorAuthenticationSecret: string
 
 	@Column({type: 'boolean', default: false})
-	@Field(() => Boolean, {})
 	isTwoFactorAuthenticationEnabled: boolean
 
 	@Column({type: 'boolean', default: false})
-	@Field(() => Boolean, {})
 	isTwoFactorAuthenticated: boolean
 
 	@ManyToMany(() => Room, room => room.users)
