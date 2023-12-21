@@ -18,12 +18,6 @@ import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 import BasicToast from "../toast/BasicToast";
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> main
 
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
