@@ -5,7 +5,6 @@ import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
-  Box,
   Text,
   TabList,
   Tabs,
@@ -14,10 +13,6 @@ import {
   TabPanel,
   useToast,
   Button,
-  CloseButton,
-  Flex,
-  Link,
-  useDisclosure
  } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'

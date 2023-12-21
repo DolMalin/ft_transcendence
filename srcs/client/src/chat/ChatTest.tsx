@@ -106,7 +106,7 @@ function ChatTest(props: {chatSocket: Socket}) {
         bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <FriendList/>
+            <FriendList socket={props.chatSocket}/>
 
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
