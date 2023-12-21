@@ -75,6 +75,7 @@ function ChatTest() {
             bg={Constants.BG_COLOR}
             justifyContent='center'
             alignItems='center'
+            minH={'100px'}
             >
                 <ChannelCreator/>
             </Flex>
@@ -93,7 +94,7 @@ function ChatTest() {
         w={boxWidth === '100%' ? boxWidth : '70%'}
         h={boxHeight}
         minH={'320px'}
-        bg='green' 
+        bg={Constants.BG_COLOR_FADED} 
         >
             ChatBox
         </Flex>
