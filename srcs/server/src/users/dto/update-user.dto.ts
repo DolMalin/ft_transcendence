@@ -11,7 +11,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
 	@MinLength(3)
 	@MaxLength(20)
-	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
 	@IsOptional()
 	username?: string
 

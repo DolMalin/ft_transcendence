@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { Component, useEffect, useState, useReducer} from 'react'
 import AuthService from './auth.service'
-import { Button, Link, Input, FormControl, Flex, Box, Text} from '@chakra-ui/react'
+import { Button, Link, Input, FormControl, Flex, Box, Text, FormErrorMessage, FormHelperText} from '@chakra-ui/react'
 import { useForm } from "react-hook-form";
 import { Socket } from 'socket.io-client'
 import reducer, {stateType} from './components/reducer'
@@ -11,6 +11,9 @@ import { LeftBracket, RightBracket} from '../game/game-creation/Brackets';
 
 function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
 	const [authUrl, setAuthUrl] = useState('')
+    const [formErrorMsg, setFormErrorMsg] = useState('')
+    const [formError, setFormError] = useState(false)
+
 
 	const [state, dispatch] = useReducer(reducer, {
 		isAuthenticated: props.state.isAuthenticated,
@@ -56,6 +59,8 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: res.data?.isTwoFactorAuthenticated})
 
+			setFormError(false);
+
 			return 200
 		} catch (err) {
 			props.dispatch({type: 'SET_IS_AUTHENTICATED', payload: false})
@@ -64,7 +69,9 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			setFormErrorMsg(err.response.data.error);
+			setFormError(true);
 			return err.response.status
 		}
 	}
@@ -79,7 +86,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -89,8 +96,12 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
+
+			setFormError(false);
 		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			setFormErrorMsg(err.response.data.error);
+			setFormError(true);
 		}
 	}
 
@@ -107,33 +118,60 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 			props.dispatch({type:'SET_IS_REGISTERED', payload:true})
 			dispatch({type:'SET_IS_REGISTERED', payload:true})
+
+			setFormError(false);
 		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			setFormErrorMsg(err.response.data.error);
+			setFormError(true);
 		}
 	}
 
 
 	function LoginComponent() {
 		return (
-			<div className="Log">
-				<Button fontWeight={'normal'}>
-					<Link href={authUrl}>Log in with 42</Link>
-			</Button>
-			</div>
-		)
-	}
-
-	function RegisterComponent() {
-		const { register, handleSubmit, formState: { errors } } = useForm();
-		return ( 
+			<Flex background={Constants.BG_COLOR}
+			minW={'320px'}
+			h={'100vh'}
+			overflow={'auto'}
+			>
 				<Flex width={'100%'} height={'100%'}
 				alignItems={'center'}
 				justifyContent={'center'}
 				className='goma'
 				>
-					<Flex 
-					height={'320px'}
-					width={'320px'}
+					<Link href={authUrl}>
+						<Button fontWeight={'normal'}
+						borderRadius={'0px'}
+						_hover={{transform :'scale(1.2)'}}>
+						Log in with 42
+						</Button>
+					</Link>
+				</Flex>
+			
+			</Flex>
+		)
+	}
+
+	function RegisterComponent() {
+		const { register, handleSubmit, formState: { errors } } = useForm();
+		return (
+			<Flex background={Constants.BG_COLOR}
+			minW={'320px'}
+			h={'100vh'}
+			overflow={'auto'}
+			>
+				<Flex width={'100%'} height={'100%'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				className='goma'
+				>
+					<Flex
+					minH={'420px'} 
+					minW={'320px'}
+					maxW={'640px'} 
+					height={'33%'}
+					width={'33%'}
 					bg={Constants.BG_COLOR_FADED}
 					justifyContent={'space-evenly'}
 					alignItems={'center'}
@@ -144,12 +182,14 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 							width={'100%'}
 							height={'50%'}
 							display={'flex'} flexDir={'column'} 
-							alignItems={'center'}
-							justifyContent={'center'}
+							justifyContent={'space-evenly'}
 							>
-								<FormControl isRequired>
+								<FormControl isRequired isInvalid={formError}>
 									<Input
 									w={'90%'}
+									marginLeft={'5%'}
+									marginRight={'5%'}
+									marginBottom={'10px'}
 									type="text"
 									borderRadius={'0px'}
 									focusBorderColor="white"
@@ -162,13 +202,19 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 											maxLength: 20,
 										})
 										}
-										/>
+									/>
+									<FormErrorMessage> {formErrorMsg}</FormErrorMessage>
+								</FormControl>
 
+								<FormControl isRequired>
 									<Input
 									w={'90%'}
+									marginLeft={'5%'}
+									marginRight={'5%'}
+									marginBottom={'10px'}
 									borderRadius={'0px'}
-									border={'none'}
 									textColor={'white'}
+									border={'none'}
 									required={false}
 									type="file"
 									{
@@ -183,54 +229,47 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 							<Flex
 							w={'100%'}
-							h={'50%'}
 							alignItems={'center'} 
 							justifyContent={'center'}
 							>
-								<LeftBracket w={'20px'} h={'100px'} girth={'8px'} marginRight='-8px'/>
-									<Button 	
-										fontSize={'2xl'}
-										fontWeight={'normal'}
-										textColor={'white'}
-										bgColor={Constants.BG_COLOR_FADED}
-										h={'78px'}
-										borderRadius={'0px'}
-										type='submit'
-										className='goma'
-										>
-											Register
-									</Button>
-								<RightBracket w={'20px'} h={'100px'} girth={'8px'} marginLeft='-8px'/>
+									<LeftBracket w={'20px'} h={'100px'} girth={'8px'} marginRight='-8px'/>
+										<Button 	
+											fontSize={'2xl'}
+											fontWeight={'normal'}
+											textColor={'white'}
+											bgColor={Constants.BG_COLOR_FADED}
+											h={'78px'}
+											borderRadius={'0px'}
+											type='submit'
+											className='goma'
+											_hover={{bg: 'white', textColor : 'black'}}
+											>
+												Register
+										</Button>
+									<RightBracket w={'20px'} h={'100px'} girth={'8px'} marginLeft='-8px'/>
 							</Flex>
 						</form>
 					</Flex>
 				</Flex>
+
+				<Flex pos={'fixed'} bottom={'0'} right={'0'} className='goma'>
+					{<LogoutComponent />}
+				</Flex>
+			</Flex>
 		)
 	}
 
 	function LogoutComponent() {
 		return (
-			<div className="Log">
-				<Box width={'sm'} height={'sm'}
-				display={'flex'} flexDir={'row'} 
-				alignItems={'center'} justifyContent={'center'
-			}>
-					<LeftBracket w={'20px'} h={'100px'} girth={'10px'}/>
-						<Button 	
-							fontSize={'2xl'}
-							fontWeight={'normal'}
-							textColor={'white'}
-							bgColor={Constants.BG_COLOR}
-							h={'100px'}
-							borderRadius={'0px'}
-							onClick={logout}
-							className='goma'
-							>
-								Logout
-						</Button>
-					<RightBracket w={'20px'} h={'100px'} girth={'10px'}/>
-				</Box>
-			</div>
+			<>
+				<Button onClick={logout}
+				fontWeight={'normal'}
+				borderRadius={'0px'}
+				bg={'none'}
+				textColor={'white'}
+				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
+				>Logout</Button>
+			</>
 		)
 	}
 
@@ -238,54 +277,89 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (<>
-					<form onSubmit={handleSubmit(onSubmit2fa)}>
-						<FormControl isRequired>
+			<Flex background={Constants.BG_COLOR}
+			minW={'320px'}
+			h={'100vh'}
+			overflow={'auto'}
+			>
+				<Flex width={'100%'} height={'100%'}
+				alignItems={'center'}
+				justifyContent={'center'}
+				className='goma'>
+					<Flex
+					minH={'420px'} 
+					minW={'320px'}
+					maxW={'640px'} 
+					height={'33%'}
+					width={'33%'}
+					bg={Constants.BG_COLOR_FADED}
+					justifyContent={'space-evenly'}
+					alignItems={'center'}
+					flexDir={'column'}
+					>
+						<form onSubmit={handleSubmit(onSubmit2fa)} style={{height : '100%', width : '100%'}}>
+							<FormControl isRequired isInvalid={formError}
+							width={'100%'} 
+							height={'40%'}
+							marginTop={'10%'}
+							display={'flex'}
+							flexDir={'column'}
+							alignItems={'center'} 
+							justifyContent={'center'}
+							>
 
-						<Box width={'sm'} height={'sm'}
-                		display={'flex'} flexDir={'row'} 
-                		alignItems={'center'} justifyContent={'center'
-						}>
-							<LeftBracket w={'20px'} h={'100px'} girth={'10px'}/>
-								<Input
-									type="text"
-									placeholder="2fa code"
-									border="none"
-									outline="none"
-									{
-										...register("twoFactorAuthenticationCode", {
-											required: "enter 2facode",
-											minLength: 3,
-											maxLength: 80
-										})
-									}
-									/>
-							<RightBracket w={'20px'} h={'100px'} girth={'10px'}/>
-						</Box>
+									<Input
+										placeholder="2fa code"
+										w={'80%'}
+										marginLeft={'10%'}
+										marginRight={'10%'}
+										marginBottom={'10px'}
+										type="text"
+										borderRadius={'0px'}
+										focusBorderColor="white"
+										textColor={'white'}
+										{
+											...register("twoFactorAuthenticationCode", {
+												required: "enter 2facode",
+												minLength: 3,
+												maxLength: 80
+											})
+										}
+										/>
+									<FormErrorMessage> {formErrorMsg} test</FormErrorMessage>
 
-						</FormControl>
+							</FormControl>
 
-						<Box width={'sm'} height={'sm'}
-                		display={'flex'} flexDir={'row'} 
-                		alignItems={'center'} justifyContent={'center'
-					}>
-							<LeftBracket w={'20px'} h={'100px'} girth={'10px'}/>
-								<Button
-									fontSize={'2xl'}
-									fontWeight={'normal'}
-									bgColor={Constants.BG_COLOR}
-									h={'100px'}
-									borderRadius={'0px'}
-									type='submit'
-									textColor={'white'}
-									className='goma'
-									>
-									Forward !
-								</Button>
-							<RightBracket w={'20px'} h={'100px'} girth={'10px'}/>
-						</Box>
-					</form>
-					<LogoutComponent/>
+							<Flex
+							w={'100%'}
+							h={'40%'}
+							alignItems={'center'} 
+							justifyContent={'center'}
+							>
+									<LeftBracket w={'20px'} h={'80px'} girth={'8px'} marginRight='-8px'/>
+										<Button 	
+											fontSize={'2xl'}
+											fontWeight={'normal'}
+											textColor={'white'}
+											bgColor={Constants.BG_COLOR_FADED}
+											h={'58px'}
+											borderRadius={'0px'}
+											type='submit'
+											className='goma'
+											_hover={{bg: 'white', textColor : 'black'}}
+											>
+												Log In
+										</Button>
+									<RightBracket w={'20px'} h={'80px'} girth={'8px'} marginLeft='-8px'/>
+							</Flex>
+						</form>
+					</Flex>
+				</Flex>
 
+				<Flex pos={'fixed'} bottom={'0'} right={'0'} className='goma'>
+					{<LogoutComponent />}
+				</Flex>
+			</Flex>
 		</>
 		)
 	}
@@ -307,15 +381,10 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
     }, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated])
 
 	return (<>
-		{/* <Flex background={Constants.BG_COLOR}
-		minW={'320px'}
-		h={'100vh'}
-		overflow={'auto'}
-		> */}
+
 			{state.isAuthenticated && (!state.isTwoFactorAuthenticated && state.isTwoFactorAuthenticationEnabled) && <TwoFactorAuthenticationComponent />}
 			{ state.isAuthenticated && !state.isRegistered && <RegisterComponent/>}
 			{!state.isAuthenticated && <LoginComponent />}
-		{/* </Flex> */}
 	</>)
 }
 

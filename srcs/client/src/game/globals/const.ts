@@ -57,4 +57,4 @@ export const BOX_GRADIANT = 'linear(to-br, grey, lightgrey)';
 export const TOP_BAR_HEIGHT = '4vh';
 export const BODY_HEIGHT = 'calc(100vh - 60px)';
 
-export const DEBOUNCE_TIME = 200;
+export const DEBOUNCE_TIME = 500;

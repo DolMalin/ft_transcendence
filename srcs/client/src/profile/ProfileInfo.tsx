@@ -20,7 +20,7 @@ function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
                 setUser(user.data)
     
             } catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
     

@@ -65,7 +65,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
         props.onClose()
     }
@@ -105,7 +105,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             setIsFriendRequestCreator(true)
             props.onClose();
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -119,7 +119,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.onClose();
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -135,7 +135,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.onClose();
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -164,7 +164,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 setUser(res?.data);
                 return (res?.data?.id)
             } catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
@@ -189,7 +189,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 setIsFriendRequestCreator(res.data?.isCreator)
                 setFriendRequestId(res.data?.id)
             } catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
         async function asyncWrapper( ) {
@@ -236,7 +236,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
         <ModalOverlay
           bg='blackAlpha.300'
-          backdropFilter='blur(10px) hue-rotate(90deg)'
+          backdropFilter='blur(10px)'
         />
         <ModalOverlay />
             <ModalContent borderRadius={'0px'} bg={Constants.BG_COLOR_FADED} textColor={'white'} className="goma"

@@ -18,7 +18,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 			await authService.register(formData);
             props.setFormVisible(false);
 		} catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 

@@ -135,7 +135,7 @@ function CreateGame(props : {sock : Socket}) {
                 
             }
             catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         });
 
