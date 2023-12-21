@@ -278,10 +278,9 @@ export function Chat(props: {socket: Socket}){
         asyncWrapper()
     }, [])
 
-    // useEffect(() => { 
-        // fetchUserList(me) 
-        // fetchFriendRequestReceived()
-    // }, [props.socket])
+    useEffect(() => { 
+        fetchFriendRequestReceived()
+    }, [props.socket])
 
     return (
         <div>

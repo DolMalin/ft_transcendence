@@ -1,13 +1,14 @@
 import { Divider, Flex } from "@chakra-ui/react";
 import { constants } from "crypto";
 import React, { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
 import * as Constants from '../game/globals/const'
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
+import UserList from "./UserList";
 import FriendList from "./FriendList";
-import { Socket } from "socket.io-client";
 
-function ChatTest(props: {socket: Socket}) {
+function ChatTest(props: {chatSocket: Socket}) {
 
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
 
@@ -54,7 +55,6 @@ function ChatTest(props: {socket: Socket}) {
         })
       }, [])
 
-    console.log('chat test rerender')
     return (<>
     <Flex
     w={'100%'}
@@ -76,9 +76,8 @@ function ChatTest(props: {socket: Socket}) {
             bg={Constants.BG_COLOR}
             justifyContent='center'
             alignItems='center'
-            minH={'100px'}
             >
-                <ChannelCreator/>
+                <ChannelCreator chatSocket={props.chatSocket}/>
             </Flex>
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
@@ -87,7 +86,7 @@ function ChatTest(props: {socket: Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-                <ChannelList />
+                <ChannelList chatSocket={props.chatSocket}/>
             </Flex>
         </Flex>
 
@@ -107,7 +106,7 @@ function ChatTest(props: {socket: Socket}) {
         bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <FriendList socket={props.socket}/>
+            <FriendList socket={props.chatSocket}/>
 
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
@@ -117,7 +116,7 @@ function ChatTest(props: {socket: Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-                User list
+            <UserList chatSocket={props.chatSocket}/>
             </Flex>
         </Flex>
     </Flex>

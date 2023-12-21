@@ -8,24 +8,76 @@ import {
     ModalBody,
     ModalCloseButton,
     Flex,
+    useToast,
   } from '@chakra-ui/react'
 
 import { Button, Checkbox, FormControl, Input, Stack } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import * as Const from '../game/globals/const'
+import authService from "../auth/auth.service"
+import { Room } from "./interface"
+import { Socket } from "socket.io-client"
+import BasicToast from "../toast/BasicToast"
 
-  function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void}) {
-
+  function 
+  ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}) {
+    
+    const toast = useToast();
     const [checked, setChecked] = useState(false)
+    const [room, setRoom] = useState<Room>()
     const [privateChan, setPrivate] = useState(false)
-    const { 
-        register: registerCreate, 
-        handleSubmit: handleSubmitCreate, 
-        reset: resetCreate, 
-        formState: { errors: errorCreate }} = useForm()
+    const [showChat, setShowChat] = useState(false)
+    const { register: registerCreate, 
+            handleSubmit: handleSubmitCreate, 
+            reset: resetCreate, 
+            formState: { errors: errorCreate }
+    } = useForm()
+
+    const createRoom = async (dt: {room: string, password: string}) => {
+        if (dt.room !== "")
+        {
+            let data = {name: dt.room, password: dt.password, privChan: privateChan}
+            try{
+                await authService.post(process.env.REACT_APP_SERVER_URL + '/room', data)
+                joinRoom(dt)
+            }
+            catch(err){
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+            }
+        }
+    }
+
+
+    const  joinRoom = async (dt: {room: string, password: string}) => {
+        try{
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
+            {
+                name: dt.room,
+                password: dt.password
+            })
+            setRoom(res.data)
+            props.chatSocket?.emit("joinRoom", res.data.id)
+            setShowChat(true)
+        }
+        catch(err){
+
+            if (err.response.status === 409)
+            {
+                toast({
+                    isClosable: true,
+                    duration : 5000,
+                    render : () => ( <> 
+                        <BasicToast text={err.response.data.error}/>
+                    </>)
+                })
+            }
+            else
+                console.error(`${err.response.data.message} (${err.response.data.error})`)
+        }
+    }
 
     const onSubmitCreate = (data: {room: string, password: string}) => {
-        // createRoom(data)
+        createRoom(data)
         resetCreate()
     }
 

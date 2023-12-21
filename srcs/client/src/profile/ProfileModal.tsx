@@ -90,16 +90,15 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         }
       };
       
-     function unBlockThem(targetId: string){
+    function unBlockThem(targetId: string){
         props.chatSocket?.emit('unblock', { targetId })
         props.chatSocket?.on('unblocked', (data) => {        
             handleUnblocked(data)
         })
         return () => {
-          props.chatSocket?.off('unblocked', handleUnblocked)
+            props.chatSocket?.off('unblocked', handleUnblocked)
         };
-      }
-      
+    }
 
     async function addFriend(userId: string) {
         try {
@@ -241,7 +240,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
         <ModalOverlay
           bg='blackAlpha.300'
-          backdropFilter='blur(10px) hue-rotate(90deg)'
+          backdropFilter='blur(10px)'
         />
         <ModalOverlay />
             <ModalContent borderRadius={'0px'} bg={Constants.BG_COLOR_FADED} textColor={'white'} className="goma"
