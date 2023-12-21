@@ -19,6 +19,9 @@ import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
 import BasicToast from "../toast/BasicToast";
 
+
+
+
 function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
 
     const [user, setUser] = useState<any>(null);
@@ -37,6 +40,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         props.chatSocket?.emit('DM', {targetId: props.userId})
         props.onClose()
     }
+
+
 
     async function blockThem(targetId: string){
         try{
@@ -162,6 +167,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             try {
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + props.userId);
                 setUser(res?.data);
+
                 return (res?.data?.id)
             } catch (err) {
                 console.error(`${err.response.data.message} (${err.response.data.error})`)
@@ -213,13 +219,11 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         props.chatSocket?.on('friendRequestAcceptedModal', () => {
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
-
         })
  
         props.chatSocket?.on('friendRemovedModal', () => {
             setFriendRequestStatus('undefined')
             setIsFriendRequestCreator(false)
-
         })
 
         return (() => {
@@ -228,7 +232,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.off('friendRequestAcceptedModal');
             props.chatSocket?.off('friendRemovedModal');
         })
-    }, [friendRequestStatus, isFriendRequestCreator])
+    }, [props.chatSocket, friendRequestStatus, isFriendRequestCreator])
+
     if (!props.userId)
         return ;
 

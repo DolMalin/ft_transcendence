@@ -136,7 +136,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal')
     this.server.to('user-' + data.creatorId).emit('friendRequestSendedChat')
 
   }
@@ -147,7 +147,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     if (!data || typeof data.creatorId !== 'string')
       return
     
-    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal')
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
   }
 
@@ -156,8 +156,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     if (!data || typeof data.creatorId !== 'string')
       return
     
-    
-    this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
+    this.server.to('user-' + data.creatorId).emit('friendRemovedModal')
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
   }
   
