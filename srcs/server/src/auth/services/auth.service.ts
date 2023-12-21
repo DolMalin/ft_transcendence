@@ -91,7 +91,7 @@ export class AuthService {
   /**
    * @description Check the validity of a user from his given `ftId`, and then return him if it exists, or creates a new one
    */
-  async validateUser(ftId: number): Promise<User> {
+  async validateUser(ftId: number) {
 
     const user = await this.usersService.findOneByFtId(ftId)
     if (user) {
@@ -156,7 +156,11 @@ export class AuthService {
     if (!refreshToken || !accessToken)
       throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot create JWT'})
 
-    const user = await this.updateRefreshToken(req.user.id, refreshToken)
+    let user = await this.updateRefreshToken(req.user.id, refreshToken)
+    if (!user)
+      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+
+    user = await this.usersService.update(user.id, {isLogged: true})
     if (!user)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
     
@@ -186,7 +190,6 @@ export class AuthService {
     
     if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Refresh token do not match`})
-
 
     const refreshToken = await this.createRefreshToken({id: user.id})
     const accessToken = await this.createAccessToken({id: user.id})
@@ -227,7 +230,7 @@ export class AuthService {
     if (!user)
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
       
-    const updatedUser = await this.usersService.update(user.id, {isTwoFactorAuthenticated: false})
+    const updatedUser = await this.usersService.update(user.id, {isTwoFactorAuthenticated: false, isLogged: false})
     if (!updatedUser)
       throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
     
@@ -243,7 +246,7 @@ export class AuthService {
     if (!user)
       throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
 
-    return res.status(200).send(user)
+    return res.status(200).send(this.usersService.removeProtectedProperties(user))
   }
 
   

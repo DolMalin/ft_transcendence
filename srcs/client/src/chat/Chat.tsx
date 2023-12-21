@@ -58,7 +58,7 @@ async function getUserList(me : {username: string, id: string}){
 
 async function getFriendRequestsReceived() {
     let friendRequestsReceived: {
-        requestId: number,
+        id: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -101,7 +101,7 @@ export function Chat(props: {socket: Socket}){
 
     const [friendRequestsReceived, setFriendRequestsReceived] = useState
     <{
-        requestId: number,
+        id: number,
         creatorId: string,
         creatorUsername: string,
         status: string
@@ -341,7 +341,7 @@ export function Chat(props: {socket: Socket}){
                                     colorScheme='teal'
                                     aria-label='Accept friend request'
                                     icon={<CheckIcon />}
-                                    onClick={() => {acceptFriend(friendRequest.requestId)}}
+                                    onClick={() => {acceptFriend(friendRequest.id)}}
                                 />
 
                                 <Chakra.IconButton
@@ -349,7 +349,7 @@ export function Chat(props: {socket: Socket}){
                                     colorScheme='red'
                                     aria-label='Decline friend request'
                                     icon={<CloseIcon />}
-                                    onClick={() => {removeFriend(friendRequest.requestId)}}
+                                    onClick={() => {removeFriend(friendRequest.id)}}
                                 />
 
                             </ul>

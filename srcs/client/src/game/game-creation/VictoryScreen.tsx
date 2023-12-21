@@ -20,6 +20,7 @@ import * as Constants from '../globals/const'
         alignItems={'center'}
         justifyContent={'center'}
         textColor={'white'}
+        overflow={'auto'}
         minH={'sm'}
         textAlign={'center'}
         >
@@ -27,8 +28,9 @@ import * as Constants from '../globals/const'
 
             <Button 
             fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
-            size={'3em'} bg={Constants.BG_COLOR} fontSize={'3em'}
+            size={'2em'} bg={Constants.BG_COLOR} fontSize={'2em'}
             borderRadius={'0'}
+            display={'flex'}
             _hover={{background : 'white', textColor: 'black'}}
             onClick={closeVScreen}
             >

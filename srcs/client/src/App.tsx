@@ -38,7 +38,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   const tabsRef = useRef(null)
   const [tab, setTab] = useState(0);
   const [switchingFrom, setSwitchingFrom] = useState(false)
-  const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1.75em');
+  const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1em');
   const toast = useToast();
 
   function acceptInvite(senderSocketId : string,senderId : string, gameType : string) {
@@ -84,6 +84,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       window.removeEventListener('resize', debouncedHandleResize)
     })
   }, [fontSize])
+
+  console.log('App rerender')
 
   useEffect(function socketEvents() {
 
@@ -161,7 +163,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
   }, [tab, tabsRef?.current?.tabIndex])
 
   return (
-    <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef}
+    <Tabs isFitted variant='enclosed' className='goma' ref={tabsRef} overflow={'auto'}
     index={tab} onChange={(index) => {
 
       switchingFrom ? setTab(0) : setTab(index); 
@@ -171,7 +173,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     >
 
       <TabList border='none' mb='2em' 
-      margin={'0'} padding={'0'} height={Constants.TOP_BAR_HEIGHT} 
+      margin={'0'} padding={'0'}
       minH={'60px'} 
       textColor={'white'} className='goma'
       overflowX={'auto'} overflowY={'clip'}

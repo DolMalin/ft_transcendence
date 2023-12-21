@@ -6,6 +6,7 @@ import * as Constants from '../game/globals/const'
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
 import UserList from "./UserList";
+import FriendList from "./FriendList";
 
 function ChatTest(props: {chatSocket: Socket}) {
 
@@ -60,6 +61,7 @@ function ChatTest(props: {chatSocket: Socket}) {
     h={Constants.BODY_HEIGHT}
     wrap={'nowrap'}
     flexDir={flexDir}
+    textColor={'white'}
     >
 
         <Flex
@@ -92,7 +94,7 @@ function ChatTest(props: {chatSocket: Socket}) {
         w={boxWidth === '100%' ? boxWidth : '70%'}
         h={boxHeight}
         minH={'320px'}
-        bg='green' 
+        bg={Constants.BG_COLOR_FADED} 
         >
             ChatBox
         </Flex>
@@ -101,15 +103,15 @@ function ChatTest(props: {chatSocket: Socket}) {
         w={boxWidth}
         h={boxHeight}
         minH={'320px'}
-        bg='red'
+        bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <Flex h={'50%'}
-            w={'100%'}
-            bg={Constants.BG_COLOR}
-            >
-                Friend List
+            <FriendList/>
+
+            <Flex justifyContent='center'>
+                <Divider variant='dashed' width='90%' />
             </Flex>
+
             <Flex h={'50%'}
             w={'100%'}
             bg={Constants.BG_COLOR}

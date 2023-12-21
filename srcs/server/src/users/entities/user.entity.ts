@@ -22,6 +22,10 @@ export class User {
 	@Column({type: 'boolean', default: false})
 	isRegistered: boolean
 
+	@Column({type: 'boolean', default: false})
+	@Field(() => Boolean, {})
+	isLogged: boolean
+
 	@Column({type: 'varchar', nullable:true})
 	twoFactorAuthenticationSecret: string
 
@@ -30,6 +34,8 @@ export class User {
 
 	@Column({type: 'boolean', default: false})
 	isTwoFactorAuthenticated: boolean
+
+	isFriend: boolean
 
 	@ManyToMany(() => Room, room => room.users)
 	room: Room[];
@@ -60,10 +66,6 @@ export class User {
 		}
 	})
 	playedGames?: Game[];
-
-	@ManyToMany(() => User)
-	@JoinTable({joinColumn: {name: 'user_id'}})
-	friends: User[]
 
 	@OneToMany(() => FriendRequest, (friendRequest: FriendRequest) => friendRequest.creator, {onDelete: 'CASCADE'})
 	sentFriendRequests: FriendRequest[]

@@ -50,8 +50,10 @@ function PlayBox(props : {dispatch : Function}) {
         })
     },  [flexDisplay]);
 
+    console.log('playbox rerender')
+
     return (
-    <Flex flexDir={flexDisplay} wrap={'wrap'} overflow={'hidden'}>
+    <Flex w={'100%'} flexDir={flexDisplay} wrap={'wrap'} overflowX={'auto'} justifyContent={'space-evenly'} alignItems={'center'}>
 
         <Box
         width={boxWidth} 

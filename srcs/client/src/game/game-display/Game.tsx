@@ -148,6 +148,9 @@ function Game(props : GameProps) {
         )
     }, [dimension])
 
+    console.log('game rerender')
+
+
     useEffect (function startUp() {
 
         function handleKeydown(event : globalThis.KeyboardEvent) {

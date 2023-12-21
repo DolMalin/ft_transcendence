@@ -13,6 +13,11 @@ import AvatarChange from './AvatarChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
+
+	type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
+    
+    const [flexDisplay, setFlexDisplay] = useState<FlexDirection>(window.innerWidth <= 1130 ? 'column' : 'column');
+	const [boxWidth, setBoxWidth] = useState(window.innerWidth <  592.59 ? '320px' : '54%');
 	const [state, dispatch] = useReducer(reducer, {
 		isAuthenticated: props.state.isAuthenticated,
 		isRegistered: props.state.isRegistered,
@@ -82,12 +87,41 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 		asyncWrapper()
 	}, [state.isAuthenticated, state.isRegistered, state.isTwoFactorAuthenticated, state.isTwoFactorAuthenticationEnabled, props.state.isAuthenticated])
 
+	useEffect(() => {
+        
+        function debounce(func : Function, ms : number) {
+            let timer : string | number | NodeJS.Timeout;
+        
+            return ( function(...args : any) {
+                clearTimeout(timer);
+                timer = setTimeout( () => {
+                    timer = null;
+                    func.apply(this, args)
+                }, ms);
+            });
+        };
+
+        const debouncedHandleResize = debounce(function handleResize() {
+            if (window.innerWidth <  592.59)
+			{
+				setBoxWidth('320px');
+			}
+			else
+			{
+				setBoxWidth('54%');
+			}
+        }, Constants.DEBOUNCE_TIME);
+        window.addEventListener('resize', debouncedHandleResize)
+
+        return (() => {
+            window.removeEventListener('resize', debouncedHandleResize);
+        })
+    },  []);
 	return (<>
 			<Flex 
-			width={'100vw'}
+			width={'100%'}
 			height={Constants.BODY_HEIGHT}
 			background={Constants.BG_COLOR}
-			padding={'30px'}
 			scrollBehavior={'smooth'}
 			alignItems={'center'}
 			justifyContent={'center'}
@@ -100,15 +134,16 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				{<LogoutComponent />}
 				</Flex>
 
-				<Flex minW={'360px'}
+				<Flex minW={'320px'}
+				w={'20%'}
 				h={'80%'}
 				minH={'1059px'}
 				bg={Constants.BG_COLOR_FADED}
 				padding={'10px'}
-				marginTop={'15px'}
 				wrap={'nowrap'}
 				justifyContent={'space-evenly'}
-				flexDir={'column'}>
+				flexDir={'column'}
+				>
 						<TwoFASettings state={props.state} dispatch={props.dispatch}/>
 						
 						<Divider/>
@@ -118,12 +153,12 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 						<AvatarChange/>
 				</Flex>
 
-				<Flex minW={'360px'}
+				<Flex minW={'320px'}
 				minH={'1059px'}
 				height={'80%'}
-				width={'40vw'}
+				margin={'3%'}
+				width={boxWidth}
 				bg={Constants.BG_COLOR_FADED}
-				margin={'60px'}
 				padding={'10px'}
 				wrap={'wrap'}
 				flexDir={'column'}

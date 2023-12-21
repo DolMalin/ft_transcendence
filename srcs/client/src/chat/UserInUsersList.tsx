@@ -65,6 +65,7 @@ function UserInUsersList(props : {username : string, userId : string,
 
     async function muteThem(targetId : string, roomId : number, timeInMinutes : number) {
         try {
+            
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/muteUser', 
             {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
             setTargetIsMuted(true);

@@ -60,6 +60,7 @@ function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
       })
     }, [fontSize]);
 
+    console.log('profile rerender')
     return (<>
         <Box display={'flex'} flexDir={'row'} flexWrap={'wrap'}
         alignItems={'center'}

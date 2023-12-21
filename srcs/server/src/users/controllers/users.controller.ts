@@ -31,16 +31,13 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Get('history/:id')
   history(@Param('id') @UUIDParam() userId: string) {
-
-      return (this.matchHistoryService.returnHistory(userId));
+    return (this.matchHistoryService.returnHistory(userId));
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Get('profile/:id')
   profile(@Param('id') @UUIDParam() userId: string) {
-
-
-      return (this.usersService.returnProfile(userId));
+    return (this.usersService.returnProfile(userId));
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -62,8 +59,9 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') @UUIDParam() id: string): Promise<User> {
-    return this.usersService.findOneById(id);
+  async findOne(@Param('id') @UUIDParam() id: string) {
+    const user = await this.usersService.findOneById(id)
+    return this.usersService.removeProtectedProperties(user)
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -76,8 +74,7 @@ export class UsersController {
   @Patch()
   update(
     @Req() req:any,
-    @Body() updateUserDto: UpdateUserDto)
-    : Promise<User> {
+    @Body() updateUserDto: UpdateUserDto){
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
@@ -95,13 +92,12 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
-  remove(@Param('id') @UUIDParam() id: string): Promise<User> {
-    return this.usersService.remove(id);
+  async remove(@Param('id') @UUIDParam() id: string) {
+    return await this.usersService.remove(id);
   }
 
-
   // ==================================================================== //
-  // ======================== FRIENDS REQUEST ===========================
+  // ======================== FRIENDS REQUEST =========================== //
   // ==================================================================== //
 
   @UseGuards(AccessToken2FAGuard)
