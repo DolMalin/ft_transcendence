@@ -5,8 +5,9 @@ import * as Constants from '../game/globals/const'
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
 import FriendList from "./FriendList";
+import { Socket } from "socket.io-client";
 
-function ChatTest() {
+function ChatTest(props: {socket: Socket}) {
 
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
 
@@ -106,7 +107,7 @@ function ChatTest() {
         bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <FriendList/>
+            <FriendList socket={props.socket}/>
 
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
