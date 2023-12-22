@@ -37,8 +37,14 @@ export class AuthController {
       return this.authService.refresh(user, res)
     }
 
+    @UseGuards(AccessToken2FAGuard)
+    @Get('logout-2fa')
+    logout2fa(@GetUser() user: User, @Res() res: any) {
+      return this.authService.logout(user, res)
+    }
+
     @UseGuards(AccessTokenGuard)
-    @Post('logout')
+    @Get('logout')
     logout(@GetUser() user: User, @Res() res: any) {
       return this.authService.logout(user, res)
     }
@@ -74,12 +80,6 @@ export class AuthController {
     @Post('2fa/login')
     async twoFactorAuthenticationLogin(@GetUser() user: User, @Res() res:any, @Body() body:any) {
       return await this.authService.twoFactorAuthenticationLogin(user, res, body)
-    }
-
-    @UseGuards(AccessToken2FAGuard)
-    @Post('2fa/logout')
-    logout2fa(@GetUser() user: User, @Res() res: any) {
-      return this.authService.logout(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
