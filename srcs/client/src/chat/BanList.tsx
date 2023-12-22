@@ -27,7 +27,7 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

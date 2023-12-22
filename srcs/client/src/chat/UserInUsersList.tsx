@@ -36,7 +36,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
           }
     };
 
@@ -59,7 +59,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -83,7 +83,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -106,7 +106,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -129,7 +129,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response.data.message} (${err.response.data.error})`)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -167,7 +167,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -205,7 +205,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -239,7 +239,7 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -279,7 +279,7 @@ function UserInUsersList(props : {username : string, userId : string,
             }
         }
         catch (err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

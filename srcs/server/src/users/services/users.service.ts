@@ -207,9 +207,11 @@ export class UsersService {
     }
   }
 
-  isAlreadyBlocked(user: User, user2: User): boolean {
+  isAlreadyBlocked(user: User, userToVerify: User): boolean {
     
-    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
+    console.log(user.blocked)
+    console.log(userToVerify.blocked)
+    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === userToVerify.id);
     return isBlocked || false;
   }
   

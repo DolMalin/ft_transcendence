@@ -59,7 +59,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 			setDisplayActivate2FA(false)
 		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -73,7 +73,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 			setDisplayDeactivate2FA(false)
 		} catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -88,7 +88,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 				}
 			}
 			catch(err) {
-				console.error(`${err.response.data.message} (${err.response.data.error})`)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 			}
 		}
 		else
@@ -198,8 +198,8 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		const { register, handleSubmit, formState: { errors } } = useForm();
 
 		return (
-			<form onSubmit={handleSubmit(onDeactivate2fa)}>
-				<FormControl isRequired>
+			<form onSubmit={handleSubmit(onDeactivate2fa)}  style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
+				<FormControl isRequired margin={'10px'}>
 					<Input
 						type="text"
 						placeholder="2fa code"

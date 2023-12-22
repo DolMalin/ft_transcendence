@@ -43,7 +43,7 @@ async function getUserList(roomId: number, me : {username: string, id: string}){
         userlist = userlist.filter(user => user.id !== me?.id)
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
     return userlist
 }
@@ -107,7 +107,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   </>)
                   })
             }
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -117,7 +117,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setUserList(tab)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -127,7 +127,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         setBanList(bannedUsersArray.data);
       }
       catch(err) {
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
       }
     }
 
@@ -148,7 +148,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                   setIsOp(false);
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
         }
         asyncWrapper()
     }, [rerender])
@@ -168,7 +168,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             }
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
       }
 
       asyncWrapper();

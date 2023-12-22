@@ -90,6 +90,18 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       window.dispatchEvent(new Event('resize'));
     });
 
+    props.gameSock?.on('blockedYou', ({username}) => {
+
+      console.log("TEST TEST")
+      toast({
+        duration: 2000,
+        isClosable: true,
+        render : () => ( <>
+            <BasicToast text={username + " blocked you"}/>
+        </>)
+      })
+    });
+
     props.gameSock?.on('isBusy', ({username}) => {
 
       toast({
@@ -99,7 +111,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
             <BasicToast text={username + " is busy"}/>
         </>)
       })
-    })
+    });
+
     props.gameSock?.on('inviteDeclined', ({username}) => {
 
       toast({
@@ -109,7 +122,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
             <BasicToast text={username + " declined your invitation" }/>
         </>)
       })
-    })
+    });
+
     props.gameSock?.on('gotInvited', ({senderSocketId, senderId, senderUsername, gameType}) => {
 
       toast({
@@ -261,7 +275,7 @@ function App() {
       setUserId(res.data.id)
     }
     catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
   }
 

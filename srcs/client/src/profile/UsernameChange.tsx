@@ -20,9 +20,12 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
             
             await authService.register(formData)
             props.setFormVisible(false);
+            setFormError(false);
         }
         catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data?.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            setFormError(true);
+            setFormErrorMsg(err.response?.data?.message);
         }
     }
 
@@ -41,7 +44,7 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
                     }
                     />
                     {!formError && <FormHelperText>Enter your new username !</FormHelperText>}
-                    <FormErrorMessage> {formErrorMsg} </FormErrorMessage>
+                    <FormErrorMessage> {formErrorMsg}</FormErrorMessage>
             </FormControl>
 
             <Button
