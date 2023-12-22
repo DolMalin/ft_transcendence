@@ -53,11 +53,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
     catch(err) {
         client.disconnect();
-<<<<<<< HEAD
         Logger.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-=======
-        Logger.error(`${err.response?.data.message} (${err.response?.data.error})`)
->>>>>>> main
     }
   }
 

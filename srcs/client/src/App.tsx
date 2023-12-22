@@ -92,7 +92,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
 
     props.gameSock?.on('blockedYou', ({username}) => {
 
-      console.log("TEST TEST")
       toast({
         duration: 2000,
         isClosable: true,
@@ -226,8 +225,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-        {/*{<Chat socket={props.chatSock}/>}*/}
-          <ChatTest chatSocket={props.chatSock}/>  
+        {/* {<Chat socket={props.chatSock}/>} */}
+          <ChatTest chatSocket={props.chatSock} gameSocket={props.gameSock}/>  
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
