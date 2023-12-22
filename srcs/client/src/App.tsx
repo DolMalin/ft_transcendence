@@ -5,7 +5,6 @@ import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
-  Box,
   Text,
   TabList,
   Tabs,
@@ -14,10 +13,6 @@ import {
   TabPanel,
   useToast,
   Button,
-  CloseButton,
-  Flex,
-  Link,
-  useDisclosure
  } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
@@ -84,8 +79,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       window.removeEventListener('resize', debouncedHandleResize)
     })
   }, [fontSize])
-
-  console.log('App rerender')
 
   useEffect(function socketEvents() {
 
@@ -233,8 +226,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {/* <Chat socket={props.chatSock}/> */}
-          <ChatTest/>
+        {/*{<Chat socket={props.chatSock}/>}*/}
+          <ChatTest chatSocket={props.chatSock}/>  
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

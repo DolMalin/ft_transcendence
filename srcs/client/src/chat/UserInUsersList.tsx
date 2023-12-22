@@ -243,6 +243,14 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
+    function leaveChan(roomId: number){
+        props.chatSock?.emit('leaveRoom', roomId)
+    }
+
+    function kick(roomId: number, targetId: string){
+        props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
+    }
+
     useEffect(() => {
     async function asyncWrapper() {
         try {
@@ -339,7 +347,9 @@ function UserInUsersList(props : {username : string, userId : string,
                         <Chakra.Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
                             unmute
                         </Chakra.Button>
-
+                        <Chakra.Button onClick={() => kick(props?.room.id, props?.userId)}>
+                            kick
+                        </Chakra.Button>
                         <Chakra.Button onClick={onOpen}>
                             profile
                         </Chakra.Button>
@@ -364,6 +374,9 @@ function UserInUsersList(props : {username : string, userId : string,
                         </Chakra.Button>
                         <Chakra.Button onClick={() => removePassword(props.room.id)}>
                             remove password
+                        </Chakra.Button>
+                        <Chakra.Button onClick={() => leaveChan(props.room.id)}>
+                            leave
                         </Chakra.Button>
                     </Chakra.PopoverBody>
                 </Chakra.PopoverContent>

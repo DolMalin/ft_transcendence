@@ -3,12 +3,12 @@ import * as Const from "../game/globals/const"
 
 import { 
     Button,
-    useDisclosure,
-
+    useDisclosure
 } from "@chakra-ui/react"
 import ChannelCreationModal from "./ChannelCreationModal"
+import { Socket } from "socket.io-client"
  
-function ChannelCreator (){
+function ChannelCreator (props: {chatSocket: Socket}){
     const {isOpen, onOpen, onClose} = useDisclosure()
 
     return (
@@ -24,7 +24,7 @@ function ChannelCreator (){
             >
                 Create channel
             </Button>
-            <ChannelCreationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose}/>
+            <ChannelCreationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
         </>
     )
 }

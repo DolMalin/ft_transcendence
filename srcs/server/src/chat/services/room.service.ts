@@ -36,7 +36,8 @@ export class RoomService {
         const room = this.roomRepository.create({
             name: createRoomDto.name,
             password: createRoomDto?.password,
-            owner: {id: user.id}
+            owner: {id: user.id},
+            privChan: createRoomDto.privChan
         })
         return await this.roomRepository.save(room);
     }
@@ -167,8 +168,6 @@ export class RoomService {
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
 
-        if (room.privChan === true)
-            throw new ForbiddenException(`room ${room.name} is private, you have to be invited first.`)
         if (room.password?.length > 0){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -185,6 +184,81 @@ export class RoomService {
         // room.message.forEach((message) => this.userService.removeProtectedProperties(message.author))
         return room
     }
+
+    async leaveRoom(roomId: number, userId: string){
+        const room = await this.findOneByIdWithRelations(roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
+        if (room.users){
+            room.users.forEach(user => {
+                if (user.id === userId){
+                    room.users = room.users.filter(user => user.id !== userId)
+                }
+            })
+            await this.roomRepository.save(room)
+        }
+        else{
+            throw new NotFoundException("No user was found in this room", 
+            {
+                cause: new Error(), 
+                description: `cannot find any users in room ${room?.name} in database`
+            })
+        }
+    }
+
+    async kick(roomId: number, userId: string, targetId: string){
+      
+        const room = await this.findOneByIdWithRelations(roomId)
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find any users in database"
+            })
+        const user = await this.userService.findOneById(userId)
+        if (!user)
+        throw new NotFoundException("User not found", 
+        {
+            cause: new Error(), 
+            description: "cannot find this user in database"
+        })
+        const user2 = await this.userService.findOneById(targetId)
+        if (!user2)
+        throw new NotFoundException("User not found", 
+        {
+            cause: new Error(), 
+            description: "cannot find this user in database"
+        })
+        if (this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'isAdmin'){
+            throw new ConflictException("User are both admins", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick an admin"
+        })}
+        if (this.isAdmin(room, user) === 'no'){
+            throw new ConflictException("You are not admin", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick if you are not admin"
+        })}
+        if (this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'isOwner'){
+            throw new ConflictException("You does not have enough power", 
+        {
+            cause: new Error(), 
+            description: "you cannot kick an owner of channel"
+        })} 
+        if ((this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'no') ||
+        (this.isAdmin(room, user) === 'isOwner' && this.isAdmin(room, user2) === 'isAdmin') || 
+        (this.isAdmin(room, user) === 'isOwner' && this.isAdmin(room, user2) === 'no'))
+        {
+            this.leaveRoom(room?.id, user2?.id)
+            return [user?.username, user2?.username]
+        }
+    }   
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
@@ -405,7 +479,6 @@ export class RoomService {
         room.users = room.users.filter((user) => user.id != target.id)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        console.log(newRoom)
         return (newRoom);
     }
 
