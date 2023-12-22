@@ -7,6 +7,7 @@ import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
 import { UUIDParam } from 'src/decorator/uuid.decorator';
+import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -66,16 +67,16 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Get('avatar/:id')
-  async getUserAvatar(@Res({passthrough: true}) res: any, @Param('id') @UUIDParam() id: string) {
+  async getUserAvatar(@Res({passthrough: true}) res: Request, @Param('id') @UUIDParam() id: string) {
     return this.usersService.getUserAvatar(res, id)
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Patch()
   update(
-    @Req() req:any,
+    @GetUser() user: User,
     @Body() updateUserDto: UpdateUserDto){
-    return this.usersService.update(req.user.id, updateUserDto);
+    return this.usersService.update(user.id, updateUserDto);
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -98,7 +99,7 @@ export class UsersController {
 
   // ==================================================================== //
   // ======================== FRIENDS REQUEST =========================== //
-  // ==================================================================== //
+  // ==================================================================== /
 
   @UseGuards(AccessToken2FAGuard)
   @Post('friendRequest/send/:receiverId')
@@ -114,13 +115,13 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Patch('friendRequest/response/:friendRequestId')
-  async respondToFriendRequest(@Param('friendRequestId') friendRequestId: string, @Body() body: any, @Res() res: any) {
+  async respondToFriendRequest(@Param('friendRequestId') friendRequestId: string, @Body() body: any, @Res() res: Request) {
     return await this.usersService.respondToFriendRequest(parseInt(friendRequestId), body.status, res)
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Patch('friendRequest/remove/:friendRequestId')
-  async removeFriend(@Param('friendRequestId') friendRequestId: string,  @Res() res: any) {
+  async removeFriend(@Param('friendRequestId') friendRequestId: string,  @Res() res: Request) {
     return await this.usersService.removeFriend(parseInt(friendRequestId), res)
   }
 
