@@ -25,4 +25,6 @@ export class AvatarService {
 			throw new NotFoundException()
 		return avatar
 	}
+
+	// delete avatar if needed
 }
