@@ -1,4 +1,4 @@
-import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -43,7 +43,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
     catch(err) {
         client.disconnect();
-        Logger.error(`${err.response.data.message} (${err.response.data.error})`)
+        Logger.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
   }
 
@@ -52,6 +52,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
   }
   
+  // @UseGuards('')
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     client.join(`room-${roomId}`)
@@ -136,7 +137,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal')
+    this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestSendedChat')
 
   }
@@ -147,7 +148,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     if (!data || typeof data.creatorId !== 'string')
       return
     
-    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal')
+    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
   }
 
@@ -156,7 +157,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     if (!data || typeof data.creatorId !== 'string')
       return
     
-    this.server.to('user-' + data.creatorId).emit('friendRemovedModal')
+    
+    this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
   }
   
