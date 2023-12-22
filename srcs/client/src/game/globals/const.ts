@@ -1,7 +1,7 @@
 export const GAME_TYPE_ONE = "Standard";
 export const GAME_TYPE_TWO = "Randomode";
 export const GAME_TYPE_THREE = "3";
-export const FPS = 60;
+export const FPS = 36;
 export const FRAME_RATE = 1000 / FPS;
 export const DOWN = 's';
 export const UP = 'w';
@@ -9,6 +9,7 @@ export const LEFT = 'a';
 export const RIGHT = 'd';
 export const BALL_SPEED = 0.6 / FPS;
 export const PADDLE_SPEED = 1 / FPS; // crossing board in 1 sec
+export const BALL_SPEED_INCREMENT = BALL_SPEED / 10;
 export const PADDLE_WIDTH = 0.2;
 export const PADDLE_HEIGHT = 0.02;
 export const SCORE_TO_REACH = 10;

@@ -1,7 +1,7 @@
 export const GAME_TYPE_ONE = "Standard";
 export const GAME_TYPE_TWO = "Randomode";
 export const GAME_TYPE_THREE = "3";
-export const FPS = 60;
+export const FPS = 36;
 export const FRAME_RATE = 1000 / FPS;
 export const DOWN = 's';
 export const UP = 'w';

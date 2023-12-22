@@ -70,7 +70,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response.data.error);
+			setFormErrorMsg(err.response?.data?.error);
 			setFormError(true);
 			return err.response.status
 		}
@@ -100,7 +100,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			setFormError(false);
 		} catch(err) {
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response.data.error);
+			setFormErrorMsg(err.response?.data?.error);
 			setFormError(true);
 		}
 	}
@@ -122,7 +122,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			setFormError(false);
 		} catch(err) {
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response.data.error);
+			setFormErrorMsg(err.response?.data?.error);
 			setFormError(true);
 		}
 	}
