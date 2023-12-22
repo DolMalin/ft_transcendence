@@ -1,4 +1,4 @@
-import { Box, Flex, Link, ListItem, Text, UnorderedList, useDisclosure } from "@chakra-ui/react";
+import { Box, Flex, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import authService from "../auth/auth.service";
 import * as Constants from '../game/globals/const'

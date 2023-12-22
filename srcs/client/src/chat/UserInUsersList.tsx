@@ -133,6 +133,7 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
+    
     async function setPassword(roomId: number, password: string){
         try{
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/setPassword', 
@@ -165,7 +166,7 @@ function UserInUsersList(props : {username : string, userId : string,
                         <BasicToast text={err.response.data.error}/>
                     </>)
                   })
-            }
+                }
             else
                 console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
@@ -184,17 +185,17 @@ function UserInUsersList(props : {username : string, userId : string,
                     <BasicToast text="Password have been successfully updated."/>
                 </>)
               })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
+            }
+            catch(err){
+                if (err.response.status === 409)
+                {
+                    toast({
                     duration: 5000,
                     render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
                   })
-            }
+                }
             if (err.response.status === 404)
             {
                 toast({
@@ -203,12 +204,12 @@ function UserInUsersList(props : {username : string, userId : string,
                         <BasicToast text={err.response.data.error}/>
                     </>)
                   })
-            }
+                }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response.data.message} (${err.response.data.error})`)
         }
     }
-
+    
     async function removePassword(roomId: number){
         try{
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
@@ -218,50 +219,54 @@ function UserInUsersList(props : {username : string, userId : string,
                     <BasicToast text="Password have been successfully removed."/>
                 </>)
               })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
+            }
+            catch(err){
+                if (err.response.status === 409)
+                {
+                    toast({
+                        duration: 5000,
+                        render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
                   })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
+                }
+                if (err.response.status === 404)
+                {
+                    toast({
+                        duration: 5000,
+                        render : () => ( <> 
                         <BasicToast text={err.response.data.error}/>
                     </>)
                   })
-            }
-            else
+                }
+                else
                 console.error(`${err.response.data.message} (${err.response.data.error})`)
-        }
-    }
-
-    function leaveChan(roomId: number){
-        props.chatSock?.emit('leaveRoom', roomId)
-    }
-
-    function kick(roomId: number, targetId: string){
-        props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
-    }
-
-    useEffect(() => {
-    async function asyncWrapper() {
-        try {
-            const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-            {targetId : props?.userId, roomName : props.room?.name});
-
-            if(privi.data === 'isOwner')
-            {
-                setPriviColor('blue')
-                setTargetIsOp('isOwner')
             }
+        }
+
+        function inviteThemPrivChan(roomId: number, targetId: string){
+            props.chatSock?.emit('invitePrivateChannel', {roomId: roomId, targetId: targetId})
+        }
+
+        function leaveChan(roomId: number){
+            props.chatSock?.emit('leaveRoom', roomId)
+        }
+
+        function kick(roomId: number, targetId: string){
+            props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
+        }
+        
+        useEffect(() => {
+            async function asyncWrapper() {
+                try {
+                    const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+                    {targetId : props?.userId, roomName : props.room?.name});
+                    
+                    if(privi.data === 'isOwner')
+                    {
+                        setPriviColor('blue')
+                        setTargetIsOp('isOwner')
+                    }
             else if(privi.data === 'isAdmin')
             {
                 setPriviColor('green')
@@ -352,6 +357,9 @@ function UserInUsersList(props : {username : string, userId : string,
                         </Chakra.Button>
                         <Chakra.Button onClick={onOpen}>
                             profile
+                        </Chakra.Button>
+                        <Chakra.Button onClick={() => inviteThemPrivChan(props?.room.id, props?.userId)}>
+                            invite
                         </Chakra.Button>
                     </Chakra.PopoverBody>
                 </Chakra.PopoverContent>

@@ -10,10 +10,11 @@ import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
 import { CreateMessageDto } from '../dto/create-message.dto'
 import { UsersService } from 'src/users/services/users.service'
-import { AuthService } from 'src/auth/services/auth.service';
+import { AuthService } from 'src/auth/services/auth.service'
 import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
+import e from 'express'
 
 @Injectable()
 export class RoomService {
@@ -39,7 +40,7 @@ export class RoomService {
             owner: {id: user.id},
             privChan: createRoomDto.privChan
         })
-        return await this.roomRepository.save(room);
+        return await this.roomRepository.save(room)
     }
 
     async findOneByName(name: string){
@@ -97,7 +98,7 @@ export class RoomService {
             .leftJoinAndSelect('room.users', 'user')
             .where('room.name = :name', { name: roomName })
             .orderBy('message.id', 'ASC')
-            .getOne();
+            .getOne()
     }
     
     async findAll(){
@@ -119,7 +120,7 @@ export class RoomService {
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.users', 'user')
             .where('room.id = :id', {id})
-            .getOne();
+            .getOne()
     
         if (!room){
             throw new ForbiddenException('room does not exist')
@@ -129,7 +130,7 @@ export class RoomService {
             id: user.id,
             username: user.username,
         }))
-        return usersInRoom;
+        return usersInRoom
     }
 
     async update(id: number, updateRoomDto: UpdateRoomDto) {
@@ -153,12 +154,13 @@ export class RoomService {
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
             .leftJoinAndSelect('room.banned', 'banned')
+            .leftJoinAndSelect('room.owner','owner')
             .leftJoinAndSelect('message.author', 'author')
             .leftJoinAndSelect('room.users', 'user')
             .leftJoinAndSelect('user.blocked', 'blocked')
             .where('room.name = :name', { name: dto.name })
             .orderBy('message.id', 'ASC')
-            .getOne();
+            .getOne()
 
         const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
         if (!room) 
@@ -168,6 +170,14 @@ export class RoomService {
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
 
+        if (room.privChan === true && room.owner.id !== user.id){
+            if (!room?.whitelist?.includes(user.id)){
+                throw new NotFoundException("Private channel", {
+                    cause: new Error(),
+                    description: "You have to be whitelisted to join this channel",
+            })}
+            
+        }
         if (room.password?.length > 0){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -177,12 +187,60 @@ export class RoomService {
         room.users.push(user)
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
-            room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id));
+            room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
         } 
-
         // room.users.forEach((user) => this.userService.removeProtectedProperties(user))
         // room.message.forEach((message) => this.userService.removeProtectedProperties(message.author))
         return room
+    }
+
+    async addTargetInWhiteList(roomId: number, invitedUser: string) {
+        const room = await this.findOneById(roomId)
+    
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        const target = await this.userService.findOneByName(invitedUser)
+        if (!target) {
+            throw new NotFoundException("User not found", {
+                cause: new Error(),
+                description: "Cannot find this user in the database",
+        })}
+        if (!room.whitelist)
+            room.whitelist = []
+        if (room.whitelist.includes(target.id)) {
+            throw new ConflictException('User found in whitelist', {
+            cause: new Error(),
+            description: `${target?.username} is already whitelisted.`,
+            })
+        } 
+        else{
+            room.whitelist.push(target?.id)
+            await this.save(room)
+        }
+        return {room: room, targetId: target.id}
+    }
+     
+    async removeUserFromWhiteList(roomName: string, targetId: string){
+        const room = await this.findOneByName(roomName)
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        const target = await this.userService.findOneById(targetId)
+        if (!target) {
+            throw new NotFoundException("User not found", {
+                cause: new Error(),
+                description: "Cannot find this user in the database",
+        })}
+        if (room?.whitelist?.includes(targetId)) {
+            room.whitelist.splice(room.whitelist.indexOf(targetId), 1)
+            await this.save(room)
+        }
+        return target?.username
     }
 
     async leaveRoom(roomId: number, userId: string){
@@ -191,7 +249,7 @@ export class RoomService {
             throw new NotFoundException("Room not found", 
             {
                 cause: new Error(), 
-                description: "cannot find any users in database"
+                description: "cannot find this room in database"
             })
         if (room.users){
             room.users.forEach(user => {
@@ -262,10 +320,10 @@ export class RoomService {
 
     async postMessage(sender: User, dto: CreateMessageDto){
         
-        const room = await this.findOneByIdWithRelations(dto.roomId);
+        const room = await this.findOneByIdWithRelations(dto.roomId)
         if (!room)
             throw new NotFoundException("Room not found",
-            {cause: new Error(), description: "cannot find any users in database"});
+            {cause: new Error(), description: "cannot find any users in database"})
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name} )
@@ -289,7 +347,7 @@ export class RoomService {
     }
 
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
@@ -305,14 +363,14 @@ export class RoomService {
             {cause: new Error(), description: "Target user allready has privileges"} )
 
         if (!room.administrator)
-            room.administrator = [];
-        room.administrator.push(target);
+            room.administrator = []
+        room.administrator.push(target)
         const newRoom = await this.save(room)
         return this.removeProtectedProperties(newRoom)
     }
 
     async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
@@ -327,14 +385,14 @@ export class RoomService {
             throw new ConflictException('Is not admin',  
             {cause: new Error(), description: "Target user allready has no privileges"} )
 
-        room.administrator = room.administrator.filter((admin) => admin.id != target.id);
+        room.administrator = room.administrator.filter((admin) => admin.id != target.id)
         const newRoom = await this.save(room)
         return this.removeProtectedProperties(newRoom)
     }
 
     async userPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName);
+        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         if (room.type === roomType.directMessage){
@@ -345,35 +403,35 @@ export class RoomService {
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
         
         if (this.isMuted(room, target))
-            return ('isMuted');
-        return (this.isAdmin(room, target));
+            return ('isMuted')
+        return (this.isAdmin(room, target))
     }
 
     isMuted(room : Room, user : User)
     {
         if (room.muted?.find((userToFind : User) => userToFind?.id === user?.id))
-            return (true);
-        return (false);
+            return (true)
+        return (false)
     }
 
     isAdmin(room : Room, user : User) {
         
         if (room.administrator?.find((userToFind : User) => userToFind?.id === user?.id))
-            return ('isAdmin');
+            return ('isAdmin')
         else if (user.id === room.owner?.id)
-            return ('isOwner');
-        return ('no');
+            return ('isOwner')
+        return ('no')
     }
 
     isBanned(room : Room, user : User) {
         if (room.banned?.find((userToFind : User) => userToFind?.id === user?.id))
-            return (true);
-        return (false);
+            return (true)
+        return (false)
     }
 
     async muteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto, timeInMinutes : number) {
         
-        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", 
             {
@@ -386,7 +444,7 @@ export class RoomService {
                 cause: new Error(), 
                 description: 'tried to perform actions above your paycheck'
             } )
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", 
             {
@@ -405,129 +463,129 @@ export class RoomService {
         {
             setTimeout(() => {
             if (!room.muted)
-                room.muted = [];
+                room.muted = []
             room.muted = room.muted.filter((mutedUser) => mutedUser.id != target.id)
-            this.save(room);
-            }, timeInMinutes * 60 * 1000);
+            this.save(room)
+            }, timeInMinutes * 60 * 1000)
         }
         if (!room.muted)
-            room.muted = [];
-        room.muted.push(target);
+            room.muted = []
+        room.muted.push(target)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        return (newRoom);
+        return (newRoom)
     }
 
     async unmuteUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         if (!this.isAdmin(room, requestMaker))
             throw new ConflictException('Not an admin', 
-            {cause: new Error(), description: 'tried to perform actions above your paycheck'} );
+            {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
 
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
     
         if (!this.isMuted(room, target)) {
             throw new ConflictException('Is not muted', 
-            {cause: new Error(), description: 'This user is not muted'} );
+            {cause: new Error(), description: 'This user is not muted'} )
         }
         if (!room.muted)
-            room.muted = [];
+            room.muted = []
         room.muted = room.muted.filter((mutedUser) => mutedUser.id != target.id)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        return (newRoom);
+        return (newRoom)
     }
 
     async banUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         if (!this.isAdmin(room, requestMaker))
             throw new ConflictException('Not an admin', 
-            {cause: new Error(), description: 'tried to perform actions above your paycheck'} );
+            {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
 
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
         if (this.isBanned(room, target))
             throw new ConflictException('Banned already', 
-            {cause: new Error(), description: target.username + ' is allready banned from ' + room.name});
+            {cause: new Error(), description: target.username + ' is allready banned from ' + room.name})
         if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Is Admin', 
-            {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'});
+            {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'})
 
         
         if (updatePrivilegesDto.timeInMinutes != 0)
         {
             setTimeout(() => {
             if (!room.banned)
-                room.banned = [];
+                room.banned = []
             room.banned = room.banned.filter((bannedUser) => bannedUser.id != target.id)
-            this.save(room);
-            }, updatePrivilegesDto.timeInMinutes * 60 * 1000);
+            this.save(room)
+            }, updatePrivilegesDto.timeInMinutes * 60 * 1000)
         }
         if(!room.banned)
-            room.banned = [];
-        room.banned.push(target);
+            room.banned = []
+        room.banned.push(target)
         room.users = room.users.filter((user) => user.id != target.id)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        return (newRoom);
+        return (newRoom)
     }
 
     async unbanUser(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId);
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         if (!this.isAdmin(room, requestMaker))
             throw new ConflictException('Not an admin', 
             {cause: new Error(), description: 'tried to perform actions above your paycheck'} )
 
-        const target = await this.userService.findOneById(updatePrivilegesDto.targetId);
+        const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
-            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
         if (!this.isBanned(room, target))
             throw new ConflictException('Not banned', 
-            {cause: new Error(), description: target.username + ' is not banned from ' + room.name});
+            {cause: new Error(), description: target.username + ' is not banned from ' + room.name})
     
         if (!room.banned)    
-            room.banned = [];
+            room.banned = []
         room.banned = room.banned.filter((bannedUser) => bannedUser.id != target.id)
 
         const newRoom = this.removeProtectedProperties(await this.save(room))
-        return (newRoom);
+        return (newRoom)
     }
 
     async getBanList(roomId : number)
     { 
-        const room = await this.findOneByIdWithRelations(roomId);
+        const room = await this.findOneByIdWithRelations(roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"});
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
 
-        let banList : {username : string, id : string}[] = []; 
+        let banList : {username : string, id : string}[] = [] 
         if (!room.banned)
-            room.banned = [];
+            room.banned = []
         room.banned.forEach((bannedUser) => {
-            banList.push({username : bannedUser.username, id : bannedUser.id});
-        }); 
-        return (banList);
+            banList.push({username : bannedUser.username, id : bannedUser.id})
+        }) 
+        return (banList)
     }
 
 
     async save(room: Room) {
-        const newRoom = await this.roomRepository.save(room);
+        const newRoom = await this.roomRepository.save(room)
         if (!newRoom)
-          throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}); 
-        return newRoom;
+          throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'}) 
+        return newRoom
     
     }
 

@@ -141,6 +141,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       })
     })
 
+
+
     props.gameSock?.on('duelAccepted', ({gameType, roomName, playerId}) => {
       
       props.gameSock?.emit('joinDuel', {gameType : gameType, roomName : roomName, playerId : playerId})
@@ -212,8 +214,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-        {/*{<Chat socket={props.chatSock}/>}*/}
-          <ChatTest chatSocket={props.chatSock}/>  
+        {<Chat socket={props.chatSock}/>}
+          {/*<ChatTest chatSocket={props.chatSock}/> */} 
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

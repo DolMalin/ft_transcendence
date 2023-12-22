@@ -78,6 +78,10 @@ export class UsersService {
     return this.userRepository.findOneBy({ id })
   }
   
+  async findOneByName(username: string){
+    return await this.userRepository.findOneBy({username})
+}
+
   async findOneByIdWithBlockRelation(id: string) {
     const user = await this.userRepository
     .createQueryBuilder('user')
@@ -143,7 +147,7 @@ export class UsersService {
   }
 
   removeProtectedProperties(user: User) {
-    if (user.refreshToken)
+    if (user?.refreshToken)
       user.refreshToken = undefined
     if (user.twoFactorAuthenticationSecret)
       user.twoFactorAuthenticationSecret = undefined
