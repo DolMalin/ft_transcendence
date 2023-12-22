@@ -5,7 +5,6 @@ import * as Constants from '../game/globals/const'
 import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
-
 function FriendList(props: {socket: Socket}) {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")

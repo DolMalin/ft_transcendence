@@ -68,7 +68,6 @@ export class UsersService {
     return await Promise.all(res.map( async (user) => {
       let newUser = this.removeProtectedProperties(user)
       newUser.isFriend = (await this.isFriend(user.id, originalUser)).isFriend
-      console.log(newUser)
       return newUser
     }))
 
@@ -86,22 +85,31 @@ export class UsersService {
       .leftJoinAndSelect('user.room', 'room.users')
       .where('user.id = :id', {id: id})
       .getOne()
-    
-    if (!user)
-      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-
+      if (!user)
+        throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
       return user
     }
 
-    async findAllBlockedUser(id: string){
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .leftJoinAndSelect('user.blocked', 'blocked')
-        .where('user.id = :id', {id: id})
-        .getOne()
+  async findOneByIdWithRoomRelation(id: string) {
+    const user = await this.userRepository
+    .createQueryBuilder('user')
+      .leftJoinAndSelect('user.room', 'room.users')
+      .where('user.id = :id', {id: id})
+      .getOne()
       if (!user)
         throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
-      return user.blocked
+      return user
+    }
+
+  async findAllBlockedUser(id: string){
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.blocked', 'blocked')
+      .where('user.id = :id', {id: id})
+      .getOne()
+    if (!user)
+      throw new NotFoundException("Users not found", {cause: new Error(), description: "cannot find any users in database"})
+    return user.blocked
   }
     
     findOneByFtId(ftId: number) {
@@ -199,9 +207,11 @@ export class UsersService {
     }
   }
 
-  isAlreadyBlocked(user: User, user2: User): boolean {
+  isAlreadyBlocked(user: User, userToVerify: User): boolean {
     
-    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
+    console.log(user.blocked)
+    console.log(userToVerify.blocked)
+    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === userToVerify.id);
     return isBlocked || false;
   }
   

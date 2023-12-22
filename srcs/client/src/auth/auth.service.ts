@@ -107,7 +107,7 @@ class AuthService {
 		try {
 			
 			const res:any = await this.get(url)
-			gameSock.emit('logout');
+			gameSock?.emit('logout');
 			cookies.remove("accessToken")
 			cookies.remove("refreshToken")
 			return res.status

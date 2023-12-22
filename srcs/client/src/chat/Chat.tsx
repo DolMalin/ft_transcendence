@@ -35,7 +35,7 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
     return roomList
 }
@@ -68,7 +68,7 @@ async function getFriendRequestsReceived() {
         const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friendRequest/me/received`)
         friendRequestsReceived = res.data
     } catch(err) {
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
 
     return friendRequestsReceived
@@ -129,7 +129,7 @@ export function Chat(props: {socket: Socket}){
                 fetchRoom()
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
     }
@@ -158,7 +158,7 @@ export function Chat(props: {socket: Socket}){
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -183,7 +183,7 @@ export function Chat(props: {socket: Socket}){
             setUserList(tab)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -199,7 +199,7 @@ export function Chat(props: {socket: Socket}){
             props.socket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -211,7 +211,7 @@ export function Chat(props: {socket: Socket}){
             props.socket?.emit('friendRemoved', {creatorId: res.data.receiver.id})
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -273,15 +273,14 @@ export function Chat(props: {socket: Socket}){
                 fetchRoom()
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
         }
         asyncWrapper()
     }, [])
 
-    // useEffect(() => { 
-        // fetchUserList(me) 
-        // fetchFriendRequestReceived()
-    // }, [props.socket])
+    useEffect(() => { 
+        fetchFriendRequestReceived()
+    }, [props.socket])
 
     return (
         <div>

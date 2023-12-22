@@ -5,7 +5,6 @@ import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
-  Box,
   Text,
   TabList,
   Tabs,
@@ -14,10 +13,6 @@ import {
   TabPanel,
   useToast,
   Button,
-  CloseButton,
-  Flex,
-  Link,
-  useDisclosure
  } from '@chakra-ui/react'
 import { Socket, io } from 'socket.io-client'
 import * as Constants from './game/globals/const'
@@ -85,8 +80,6 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     })
   }, [fontSize])
 
-  console.log('App rerender')
-
   useEffect(function socketEvents() {
 
     props.gameSock?.on('gameStarted', () => {
@@ -95,6 +88,18 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       setSwitchingFrom(true);
       setTab(0)
       window.dispatchEvent(new Event('resize'));
+    });
+
+    props.gameSock?.on('blockedYou', ({username}) => {
+
+      console.log("TEST TEST")
+      toast({
+        duration: 2000,
+        isClosable: true,
+        render : () => ( <>
+            <BasicToast text={username + " blocked you"}/>
+        </>)
+      })
     });
 
     props.gameSock?.on('isBusy', ({username}) => {
@@ -106,7 +111,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
             <BasicToast text={username + " is busy"}/>
         </>)
       })
-    })
+    });
+
     props.gameSock?.on('inviteDeclined', ({username}) => {
 
       toast({
@@ -116,7 +122,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
             <BasicToast text={username + " declined your invitation" }/>
         </>)
       })
-    })
+    });
+
     props.gameSock?.on('gotInvited', ({senderSocketId, senderId, senderUsername, gameType}) => {
 
       toast({
@@ -219,8 +226,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {/* <Chat socket={props.chatSock}/> */}
-          <ChatTest socket={props.chatSock}/>
+        {/*{<Chat socket={props.chatSock}/>}*/}
+          <ChatTest chatSocket={props.chatSock}/>  
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
@@ -268,7 +275,7 @@ function App() {
       setUserId(res.data.id)
     }
     catch(err) {
-			console.error(`${err.response.data.message} (${err.response.data.error})`)
+			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
   }
 
