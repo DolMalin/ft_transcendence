@@ -27,7 +27,6 @@ export class RefreshToken2FAStrategy extends PassportStrategy(Strategy, 'jwt-ref
 
 	async validate(@Req() req: any, payload: any) {
 		const user = await this.userService.findOneById(payload.id)
-			
 		if (!user?.isTwoFactorAuthenticationEnabled)
 			return user
 		

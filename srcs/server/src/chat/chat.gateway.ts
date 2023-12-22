@@ -1,4 +1,4 @@
-import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -62,6 +62,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
   }
   
+  // @UseGuards('')
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     if (typeof roomId !== "number"){
@@ -220,10 +221,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   @SubscribeMessage('friendRequestSended')
   async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
-    if (!data || typeof data.creatorId !== "string"){
-      Logger.error("Wrong type for parameter")
-      return 
-    }
+    if (!data || typeof data.creatorId !== 'string')
+      return
     this.server.to('user-' + data.creatorId).emit('friendRequestSendedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestSendedChat')
 
@@ -234,7 +233,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRequestAccepted(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal')
+    
+    this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
   }
 
@@ -242,7 +242,9 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRemoved(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    this.server.to('user-' + data.creatorId).emit('friendRemovedModal')
+    
+    
+    this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
   }
   
