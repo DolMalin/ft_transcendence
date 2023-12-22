@@ -22,8 +22,6 @@ export class RefreshToken2FAGuard extends AuthGuard('jwt-refresh-2fa') {
 			await this.jwtService.verifyAsync(refreshToken, {secret: process.env.JWT_REFRESH_SECRET})
 		} catch(err) {
 			const payload = await this.jwtService.decode(refreshToken)
-			if (!payload)
-				return false
 			const user = await this.userService.findOneById(payload['id'])
 			if (!user)
 				return false
