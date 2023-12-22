@@ -47,7 +47,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
        client.disconnect();
        return ;
      }
-     Logger.debug('TOKEN' + client.handshake.query?.token)
      const payload = await this.authService.validateAccessJwt(client.handshake.query?.token as string);
       if (client.handshake.query.type !== 'game')
         return;
@@ -82,7 +81,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.userService.update(user.id, {isAvailable : true});
         }
       });
-      Logger.debug(user.username + 'socket was disconnected')
     }
     catch(e) {
       Logger.error('game gateway handle disconnection error: ', e?.message);
