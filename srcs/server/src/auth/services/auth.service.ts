@@ -111,7 +111,7 @@ export class AuthService {
   async createAccessToken(payload: { id: string }): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: '10m'
+      expiresIn: '10s'
     })
   }
 
@@ -119,7 +119,7 @@ export class AuthService {
   async createRefreshToken(payload: { id: string }): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '1h'
+      expiresIn: '5s'
     })
   }
 
@@ -150,18 +150,18 @@ export class AuthService {
   /**
    * @description Login user by creating a jwt and store it in user's cookies
    */
-  async login(user: User, res: any) {
-    const refreshToken = await this.createRefreshToken({ id: user.id })
-    const accessToken = await this.createAccessToken({ id: user.id })
+  async login(req: any, res: any) {
+    const refreshToken = await this.createRefreshToken({ id: req.user.id })
+    const accessToken = await this.createAccessToken({ id: req.user.id })
     if (!refreshToken || !accessToken)
       throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
 
-    let fetchUser = await this.updateRefreshToken(user.id, refreshToken)
-    if (!fetchUser)
-      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot updatefetchUuser' })
+    let user = await this.updateRefreshToken(req.user.id, refreshToken)
+    if (!user)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
-    fetchUser = await this.usersService.update(fetchUser.id, { isLogged: true })
-    if (!fetchUser)
+    user = await this.usersService.update(user.id, { isLogged: true })
+    if (!user)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     res.cookie('refreshToken', refreshToken, {
@@ -184,10 +184,10 @@ export class AuthService {
   }
 
 
-  async refresh(user: User, res: any) {
-    const fetchUser = await this.usersService.findOneById(user?.id)
+  async refresh(req: any, res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
 
-    if (!fetchUser)
+    if (!user)
       throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     const refreshToken = await this.createRefreshToken({ id: user.id })
@@ -228,7 +228,7 @@ export class AuthService {
   async logout(user: User, @Res() res: any) {
     const fetchUser = await this.usersService.findOneById(user?.id)
 
-    if (!fetchUser)
+    if (!user)
       throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     const updatedUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: false, isLogged: false })
@@ -240,9 +240,11 @@ export class AuthService {
 
   }
 
-  async validate(user: User, @Res() res: any) {
-    const fetchUser = await this.usersService.findOneById(user?.id)
-    if (!fetchUser)
+
+  // @TODO: CHECK VALUES IS SEND BACK IN USER
+  async validate(@Req() req: any, @Res() res: any) {
+    const user = await this.usersService.findOneById(req.user?.id)
+    if (!user)
       throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     return res.status(200).send(this.usersService.removeProtectedProperties(user))
@@ -277,8 +279,8 @@ export class AuthService {
     return { secret, otpAuthUrl }
   }
 
-  async generateTwoFactorAuthenticationQRCode(user: User) {
-    let secret = await this.generateTwoFactorAuthenticationSecret(user)
+  async generateTwoFactorAuthenticationQRCode(req: any) {
+    let secret = await this.generateTwoFactorAuthenticationSecret(req.user)
     if (!secret)
       throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa secret' })
 
@@ -289,13 +291,13 @@ export class AuthService {
     return qrCodeDataURL
   }
 
-  async twoFactorAuthenticationLogin(user: User, res: any, body: any) {
+  async twoFactorAuthenticationLogin(req: any, res: any, body: any) {
 
-    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+    if (!authenticator.verify({ secret: req.user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: true })
-    if (!fetchUser)
+    const user = await this.usersService.update(req.user.id, { isTwoFactorAuthenticated: true })
+    if (!user)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
@@ -312,26 +314,26 @@ export class AuthService {
     })
   }
 
-  async turnOnTwoFactorAuthentication(user: User, res: any, body: any) {
+  async turnOnTwoFactorAuthentication(req: any, res: any, body: any) {
 
-    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+    if (!authenticator.verify({ secret: req.user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
-    if (!fetchUser)
+    const user = await this.usersService.update(req.user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
+    if (!user)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
   }
 
 
-  async turnOffTwoFactorAuthentication(user: User, res: any, body: any) {
+  async turnOffTwoFactorAuthentication(req: any, res: any, body: any) {
 
-    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+    if (!authenticator.verify({ secret: req.user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: false })
-    if (!fetchUser)
+    const user = await this.usersService.update(req.user.id, { isTwoFactorAuthenticationEnabled: false })
+    if (!user)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
