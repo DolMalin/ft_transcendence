@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { Room } from "./Chat";
 import BasicToast from "../toast/BasicToast";
-import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast, Box } from "@chakra-ui/react";
 import * as Constants from '../game/globals/const';
 
 function UserInUsersList(props : {username : string, userId : string, 
@@ -134,6 +134,7 @@ function UserInUsersList(props : {username : string, userId : string,
     }
 
     function kick(roomId: number, targetId: string){
+        console.log('room kicked from : ', roomId)
         props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
     }
 
@@ -177,15 +178,22 @@ function UserInUsersList(props : {username : string, userId : string,
         const [sliderValue, setSliderValue] = React.useState(5)
         const [showTooltip, setShowTooltip] = React.useState(false)
         return (<>
-            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
-                {props.actionName}
+            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}
+            borderRadius={'0px'}
+            margin={'10px'}
+            bg={Constants.BG_COLOR}
+            fontWeight={'normal'}
+            textColor={'white'}
+            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+            >
+                {props.actionName} for
             </Button>        
             <Slider
             id='slider'
             defaultValue={0}
             min={0}
             max={120}
-            colorScheme='teal'
+            colorScheme='black'
             onChange={(v) => setSliderValue(v)}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -202,7 +210,7 @@ function UserInUsersList(props : {username : string, userId : string,
                     isOpen={showTooltip}
                     label={`${sliderValue}min`}
                 >
-                    <SliderThumb />
+                <SliderThumb boxSize={4} bg={'black'}/>
                 </Tooltip>
             </Slider>
             <Text>zero minutes will set timer to an undefined amounth of time</Text>
@@ -232,26 +240,73 @@ function UserInUsersList(props : {username : string, userId : string,
                 </PopoverTrigger>
 
                 <Portal>
-                    <PopoverContent>
-                        <PopoverBody>
-                            {targetIsOp === 'no'  && <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                    <PopoverContent
+                    bg={'white'}
+                    border={'none'}
+                    >
+                        <PopoverBody display={'flex'}
+                        flexDir={'column'}
+                        className="goma"
+                        >
+                            {targetIsOp === 'no'  && 
+                            <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 Promote
                             </Button>}
 
-                            {targetIsOp === 'isAdmin' && <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                            {targetIsOp === 'isAdmin' && 
+                            <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 Demote
                             </Button>}
 
                             <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
 
                             {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
-                            <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
+                            
+                            { targetIsMuted &&
+                            <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 unmute
-                            </Button>
-                            <Button onClick={() => kick(props?.room.id, props?.userId)}>
+                            </Button>}
+
+                            <Button onClick={() => kick(props?.room.id, props?.userId)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 kick
                             </Button>
-                            <Button onClick={onOpen}>
+
+                            <Button onClick={onOpen}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 profile
                             </Button>
                         </PopoverBody>
