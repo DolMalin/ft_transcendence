@@ -72,7 +72,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 			setFormErrorMsg(err.response?.data?.error);
 			setFormError(true);
-			return err.response.status
+			return err.response?.status
 		}
 	}
 

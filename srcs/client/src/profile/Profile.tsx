@@ -49,7 +49,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			return err.response.status
+			return err.response?.status
 		}
 	}
 

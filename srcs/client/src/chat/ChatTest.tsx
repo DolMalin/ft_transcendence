@@ -58,9 +58,26 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         })
       }, [])
 
-    
     useEffect(function sockEvent() {
     
+        props.chatSocket?.on('userBlocked', (err) => {
+            toast({
+                title: err.title,
+                description:  err.desc,
+                colorScheme: 'red',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+              })
+        });
+
+        props.chatSocket?.on('dmRoom', (dm : Room) => {
+            console.log('getting in dm sock on')
+
+            props.chatSocket?.emit("joinRoom", dm.id)
+            setTargetRoom(dm)
+        });
+
         props.chatSocket?.on('kickBy', (kickByUsername: string, roomName : string) => {
 
         if (targetRoom && roomName === targetRoom?.name)
@@ -82,7 +99,9 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         })
     
         return (() => {
-            props.chatSocket?.off('kickBy');
+            props.chatSocket?.off('kickBy');            
+            props.chatSocket?.off('userBlocked')
+            props.chatSocket?.off('dmRoom')
         })
     })
 console.log('rerender in ChatText.tsx')

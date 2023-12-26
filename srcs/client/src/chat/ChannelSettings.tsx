@@ -26,21 +26,21 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
               })
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
-            if (err.response.status === 404)
+            if (err.response?.status === 404)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -60,21 +60,21 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
               })
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
-            if (err.response.status === 404)
+            if (err.response?.status === 404)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -98,21 +98,21 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
               })
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
-            if (err.response.status === 404)
+            if (err.response?.status === 404)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
