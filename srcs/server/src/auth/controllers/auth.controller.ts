@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { UsersService } from 'src/users/services/users.service';
 import { FtAuthGuard } from '../guards/ft.auth.guard';
@@ -27,32 +27,32 @@ export class AuthController {
 
     @UseGuards(FtAuthGuard)
     @Get('login')
-    async login(@Req() req: any, @Res() res: any) {
-      return await this.authService.login(req, res)
+    async login(@GetUser() user: User, @Res() res: any) {
+      return await this.authService.login(user, res)
     }
 
     @UseGuards(RefreshToken2FAGuard)
     @Get('refresh')
-    refresh(@Req() req: any, @Res() res: any) {
-      return this.authService.refresh(req, res)
+    refresh(@GetUser() user: User, @Res() res: any) {
+      return this.authService.refresh(user, res)
     }
 
     @UseGuards(AccessToken2FAGuard)
     @Get('logout-2fa')
-    logout2fa(@Req() req: any, @Res() res: any) {
-      return this.authService.logout(req, res)
+    logout2fa(@GetUser() user: User, @Res() res: any) {
+      return this.authService.logout(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
     @Get('logout')
-    logout(@Req() req: any, @Res() res: any) {
-      return this.authService.logout(req, res)
+    logout(@GetUser() user: User, @Res() res: any) {
+      return this.authService.logout(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
     @Get('validate')
-    async validate(@Req() req: any, @Res() res: any) {
-      return await this.authService.validate(req, res)
+    async validate(@GetUser() user: User, @Res() res: any) {
+      return await this.authService.validate(user, res)
     }
 
     @UseInterceptors(FileInterceptor('file'))
@@ -63,35 +63,34 @@ export class AuthController {
         new FileTypeValidationPipe()
       ) file: Express.Multer.File,
       @Body() dto: UpdateUserDto,
-      @Res() res:any,
+      @Res() res:Request,
       @GetUser() user : User
       )
     {
       return await this.authService.register(file, dto, res, user)
     }
 
-
     @UseGuards(AccessTokenGuard)
     @Get('2fa/generate')
-    async generateTwoFactorAuthenticationQRCode(@Req() req:any) {
-      return await this.authService.generateTwoFactorAuthenticationQRCode(req)
+    async generateTwoFactorAuthenticationQRCode(@GetUser() user:User) {
+      return await this.authService.generateTwoFactorAuthenticationQRCode(user)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/login')
-    async twoFactorAuthenticationLogin(@Req() req: any, @Res() res:any, @Body() body:any) {
-      return await this.authService.twoFactorAuthenticationLogin(req, res, body)
+    async twoFactorAuthenticationLogin(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return await this.authService.twoFactorAuthenticationLogin(user, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-on')
-    async turnOnTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
-      return await this.authService.turnOnTwoFactorAuthentication(req, res, body)
+    async turnOnTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return await this.authService.turnOnTwoFactorAuthentication(user, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-off')
-    async turnOffTwoFactorAuthentication(@Req() req: any, @Res() res:any, @Body() body:any) {
-      return await this.authService.turnOffTwoFactorAuthentication(req, res, body)
+    async turnOffTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return await this.authService.turnOffTwoFactorAuthentication(user, res, body)
     }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException, StreamableFile, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -147,7 +147,9 @@ export class UsersService {
   }
 
   removeProtectedProperties(user: User) {
-    if (user?.refreshToken)
+    if (!user)
+      return (user)
+    if (user.refreshToken)
       user.refreshToken = undefined
     if (user.twoFactorAuthenticationSecret)
       user.twoFactorAuthenticationSecret = undefined
@@ -211,9 +213,11 @@ export class UsersService {
     }
   }
 
-  isAlreadyBlocked(user: User, user2: User): boolean {
+  isAlreadyBlocked(user: User, userToVerify: User): boolean {
     
-    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === user2.id);
+    console.log(user.blocked)
+    console.log(userToVerify.blocked)
+    const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === userToVerify.id);
     return isBlocked || false;
   }
   

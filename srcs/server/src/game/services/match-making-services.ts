@@ -189,12 +189,12 @@ export class MatchmakingService {
       clearInterval(game.ballRefreshInterval);
 
       // WHAT PURPOSE DOES THIS SERVER, WHY DID YOU WRITE THAT YOU CUCK
-      if (game.gameIsFull === false)
-      {
-        client.leave(data.roomName);
-        gamesMap.delete(data.roomName);
-        return ;
-      }
+      // if (game.gameIsFull === false)
+      // {
+      //   client.leave(data.roomName);
+      //   gamesMap.delete(data.roomName);
+      //   return ;
+      // }
       if (data.playerId === '1')
       {
         if (game.winner === undefined)
@@ -216,6 +216,8 @@ export class MatchmakingService {
       }
       try {
         this.matchHistoryServices.storeGameResults(game);
+        this.userService.update(game.clientOne.id, {isAvailable : true});
+        this.userService.update(game.clientTwo.id, {isAvailable : true});
       }
       catch(e) {
         Logger.error('could not store game in DB', e?.message);
@@ -257,7 +259,7 @@ export class MatchmakingService {
     async gameInvite(server : Server, senderSocketId : string, senderId : string, targetId : string, gameType : string) {
 
         try {
-            const target : User = await this.userService.findOneById(targetId);
+            const target : User = await this.userService.findOneByIdWithBlockRelation(targetId);
             if (target === undefined)
             {
                 Logger.error('invite target undefined')
@@ -265,11 +267,18 @@ export class MatchmakingService {
             }
 
             
-            const sender : User = await this.userService.findOneById(senderId);
+            const sender : User = await this.userService.findOneByIdWithBlockRelation(senderId);
             if (sender === undefined)
             {
                 Logger.error('invite sender undefined')
                 return ;
+            }
+
+            console.log(this.userService.isAlreadyBlocked(target, sender));
+            if (this.userService.isAlreadyBlocked(target, sender) === true)
+            {
+              this.userService.emitToAllSockets(server, sender.gameSockets, 'blockedYou', {username : target.username})
+              return ;
             }
 
             if (target.isAvailable === false)

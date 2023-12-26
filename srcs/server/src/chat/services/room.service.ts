@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Req, Res } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, Req, Res } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -38,6 +38,7 @@ export class RoomService {
             name: createRoomDto.name,
             password: createRoomDto?.password,
             owner: {id: user.id},
+            type: roomType.groupMessage,
             privChan: createRoomDto.privChan
         })
         return await this.roomRepository.save(room)

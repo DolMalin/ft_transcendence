@@ -49,7 +49,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
             setPlayerAvalaible(res.data);
         }
         catch (err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 
         }
     }
@@ -99,7 +99,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (err) {
-                            console.error(`${err.response.data.message} (${err.response.data.error})`)
+                            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
                         }
                     }}> 
                         {Constants.GAME_TYPE_ONE} 

@@ -1,7 +1,7 @@
 export const GAME_TYPE_ONE = "Standard";
 export const GAME_TYPE_TWO = "Randomode";
 export const GAME_TYPE_THREE = "3";
-export const FPS = 60;
+export const FPS = 36;
 export const FRAME_RATE = 1000 / FPS;
 export const DOWN = 's';
 export const UP = 'w';
@@ -9,6 +9,7 @@ export const LEFT = 'a';
 export const RIGHT = 'd';
 export const BALL_SPEED = 0.6 / FPS;
 export const PADDLE_SPEED = 1 / FPS; // crossing board in 1 sec
+export const BALL_SPEED_INCREMENT = BALL_SPEED / 10;
 export const PADDLE_WIDTH = 0.2;
 export const PADDLE_HEIGHT = 0.02;
 export const SCORE_TO_REACH = 10;
@@ -45,6 +46,9 @@ export const DARK_GREEN = 'rgba(0, 130, 100, 1)';
 
 export const BG_COLOR = 'rgba(20, 20, 20, 1)';
 export const BG_COLOR_FADED = 'rgba(40, 40, 40, 0.9)';
+export const BG_COLOR_LESSER_FADE = 'rgba(30, 30, 30, 0.9)';
+
+export const WHITE_BUTTON_HOVER ='rgba(200, 200, 200, 1)';
 
 export const HIDDEN_FONT_COLOR = 'rgba(60, 60, 70, 1)';
 
@@ -57,4 +61,4 @@ export const BOX_GRADIANT = 'linear(to-br, grey, lightgrey)';
 export const TOP_BAR_HEIGHT = '4vh';
 export const BODY_HEIGHT = 'calc(100vh - 60px)';
 
-export const DEBOUNCE_TIME = 200;
+export const DEBOUNCE_TIME = 500;

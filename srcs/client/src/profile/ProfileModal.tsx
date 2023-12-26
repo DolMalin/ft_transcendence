@@ -70,7 +70,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
         props.onClose()
     }
@@ -109,7 +109,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             setIsFriendRequestCreator(true)
             props.onClose();
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -123,7 +123,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.onClose();
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -139,7 +139,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.onClose();
 
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -169,7 +169,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
                 return (res?.data?.id)
             } catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
@@ -194,7 +194,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 setIsFriendRequestCreator(res.data?.isCreator)
                 setFriendRequestId(res.data?.id)
             } catch (err) {
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
         async function asyncWrapper( ) {

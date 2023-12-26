@@ -1,4 +1,4 @@
-import { ConflictException, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
     catch(err) {
         client.disconnect();
-        Logger.error(`${err.response?.data.message} (${err.response?.data.error})`)
+        Logger.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
   }
 
@@ -62,6 +62,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
   }
   
+  // @UseGuards('')
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     if (typeof roomId !== "number"){
@@ -107,6 +108,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       const usernameArray = await this.roomService.kick(data.roomId, userId, data.targetId)
       this.server.to(`user-${data.targetId}`).emit('kickBy', usernameArray[0])
       this.server.to(`user-${userId}`).emit('kicked', usernameArray[1])//TODO send le username pas le id
+      this.server.to(`room-${data.roomId}`).emit('userLeft');
     }
     catch(err){
       this.server.to(`user-${userId}`).emit('kickedError')
@@ -261,6 +263,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   @SubscribeMessage('friendRequestSended')
   async friendRequestSended(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
+
     if (!data || typeof data.creatorId !== "string"){
       Logger.error("Wrong type for parameter")
       return 

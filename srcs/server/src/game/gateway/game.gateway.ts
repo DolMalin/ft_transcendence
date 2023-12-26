@@ -56,7 +56,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     catch(e) {
       client.disconnect();
-      Logger.error('game gateway handle connection error : ', e?.message)
+      Logger.error('game gateway handle connection error : ', e)
     }
   }
   
@@ -71,6 +71,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.gamesMap.forEach((game, key) => {
         if (game.clientOne.socket.id === client.id)
         {
+          
           this.matchmakingService.leaveGame(this.server, client, this.gamesMap, {gameType : game.gameType, playerId : '1', roomName : key});
           this.userService.update(user.id, {isAvailable : true});
         }

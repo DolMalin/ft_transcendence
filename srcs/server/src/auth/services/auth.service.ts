@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException, ConflictException} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException, ConflictException } from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { User } from 'src/users/entities/user.entity';
 
@@ -16,19 +16,19 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    
-    ) { }
-  
+
+  ) { }
+
 
   /**
    * @description Build the url that redirects to the 42 auth app
    */
   buildRedirectUrl(): object {
-    let url = new URL( '/oauth/authorize', process.env.OAUTH_URL)
+    let url = new URL('/oauth/authorize', process.env.OAUTH_URL)
     url.searchParams.set('client_id', process.env.CLIENT_ID)
     url.searchParams.set('redirect_uri', process.env.CALLBACK_URL)
     url.searchParams.set('response_type', 'code')
-    return ({url: url.toString()})
+    return ({ url: url.toString() })
   }
 
 
@@ -37,29 +37,29 @@ export class AuthService {
    */
   async getFtToken(code: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        const bodyParameters = {
-          grant_type: 'authorization_code',
-          client_id: process.env.CLIENT_ID,
-          code: code,
-          client_secret: process.env.SECRET,
-          redirect_uri: process.env.CALLBACK_URL
-        }
+      const bodyParameters = {
+        grant_type: 'authorization_code',
+        client_id: process.env.CLIENT_ID,
+        code: code,
+        client_secret: process.env.SECRET,
+        redirect_uri: process.env.CALLBACK_URL
+      }
 
-        const config = {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
+      }
 
-        axios.post(
-          "https://api.intra.42.fr/oauth/token",
-          bodyParameters,
-          config
-        ).then((res) => {
-          resolve(res.data.access_token as string)
-        }, (err) => {
-          resolve(null)
-        })
+      axios.post(
+        "https://api.intra.42.fr/oauth/token",
+        bodyParameters,
+        config
+      ).then((res) => {
+        resolve(res.data.access_token as string)
+      }, (err) => {
+        resolve(null)
+      })
     })
   }
 
@@ -98,9 +98,9 @@ export class AuthService {
       Logger.log(`User #${user.id} logged`)
       return user
     }
-    const newUser = await this.usersService.create({ftId: ftId})
+    const newUser = await this.usersService.create({ ftId: ftId })
     if (!newUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create user'})
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot create user' })
 
     Logger.log(`User ${newUser.id} created`)
 
@@ -108,18 +108,18 @@ export class AuthService {
   }
 
 
-  async createAccessToken(payload: {id: string}): Promise<string> {
+  async createAccessToken(payload: { id: string }): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn:'7d'
+      expiresIn: '10m'
     })
   }
 
 
-  async createRefreshToken(payload: {id: string}): Promise<string> {
+  async createRefreshToken(payload: { id: string }): Promise<string> {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn:'1d'
+      expiresIn: '1h'
     })
   }
 
@@ -140,65 +140,64 @@ export class AuthService {
    * @description Check the validity of a given `jwt`, and returns its `payload`
    */
   async validateAccessJwt(token: string): Promise<any> {
-      const payload = await this.jwtService.verifyAsync(token, {secret: process.env.JWT_ACCESS_SECRET})
-      if (!payload)
-        throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot verify JWT'})
-      return payload
+    const payload = await this.jwtService.verifyAsync(token, { secret: process.env.JWT_ACCESS_SECRET })
+    if (!payload)
+      throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot verify JWT' })
+    return payload
   }
 
 
   /**
    * @description Login user by creating a jwt and store it in user's cookies
    */
-  async login(req: any, res: any) {
-    const refreshToken = await this.createRefreshToken({id: req.user.id})
-    const accessToken = await this.createAccessToken({id: req.user.id})
+  async login(user: User, res: any) {
+    const refreshToken = await this.createRefreshToken({ id: user.id })
+    const accessToken = await this.createAccessToken({ id: user.id })
     if (!refreshToken || !accessToken)
-      throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot create JWT'})
+      throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
 
-    let user = await this.updateRefreshToken(req.user.id, refreshToken)
-    if (!user)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+    let fetchUser = await this.updateRefreshToken(user.id, refreshToken)
+    if (!fetchUser)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot updatefetchUuser' })
 
-    user = await this.usersService.update(user.id, {isLogged: true})
-    if (!user)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
-    
+    fetchUser = await this.usersService.update(fetchUser.id, { isLogged: true })
+    if (!fetchUser)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
       domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      maxAge: 1000 * 60 * 60 * 24, path: '/'
+    })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
       domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      maxAge: 1000 * 60 * 60 * 24, path: '/'
+    })
 
     return res.redirect(process.env.CLIENT_URL)
   }
 
 
-  async refresh(req: any, res: any) {
-    const user = await this.usersService.findOneById(req.user?.id)
-    
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user or refresh token`})
-    
-    if (! await argon2.verify(user.refreshToken, req.cookies?.refreshToken))
-      throw new ForbiddenException('Access denied', {cause: new Error(), description: `Refresh token do not match`})
+  async refresh(user: User, res: any) {
+    const fetchUser = await this.usersService.findOneById(user?.id)
 
-    const refreshToken = await this.createRefreshToken({id: user.id})
-    const accessToken = await this.createAccessToken({id: user.id})
+    if (!fetchUser)
+      throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
+
+    const refreshToken = await this.createRefreshToken({ id: user.id })
+    const accessToken = await this.createAccessToken({ id: user.id })
     if (!refreshToken || !accessToken)
-      throw new InternalServerErrorException('JWT error', {cause: new Error(), description: 'Cannot create JWT'})
+      throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
 
     const updatedUser = await this.updateRefreshToken(user.id, refreshToken)
     if (!updatedUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     Logger.log(`Tokens refreshed for user #${user.id}`)
 
@@ -207,14 +206,16 @@ export class AuthService {
       secure: true,
       domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      maxAge: 1000 * 60 * 60 * 24, path: '/'
+    })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
       domain: process.env.REACT_APP_SERVER_IP,
       sameSite: "none",
-      maxAge: 1000 * 60 * 60 * 24, path: '/'})
+      maxAge: 1000 * 60 * 60 * 24, path: '/'
+    })
 
     res.send()
   }
@@ -224,46 +225,45 @@ export class AuthService {
   /** 
    * @description Logout user by clearing its jwt in cookies
    */
-  async logout(@Req() req: any, @Res() res: any) {
-    const user = await this.usersService.findOneById(req.user?.id)
+  async logout(user: User, @Res() res: any) {
+    const fetchUser = await this.usersService.findOneById(user?.id)
 
-    if (!user)
-      throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
-      
-    const updatedUser = await this.usersService.update(user.id, {isTwoFactorAuthenticated: false, isLogged: false})
+    if (!fetchUser)
+      throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
+
+    const updatedUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: false, isLogged: false })
     if (!updatedUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
-    
-      Logger.log(`User #${user.id} logged out`)
-      res.clearCookie("refreshToken").status(200).send()
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
+
+    Logger.log(`User #${user.id} logged out`)
+    res.clearCookie("refreshToken").status(200).send()
 
   }
-  
 
   // @TODO: CHECK VALUES IS SEND BACK IN USER
-  async validate(@Req() req: any, @Res() res: any) {
-    const user = await this.usersService.findOneById(req.user?.id)
-    if (!user)
-      throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
+  async validate(user: User, @Res() res: any) {
+    const fetchUser = await this.usersService.findOneById(user?.id)
+    if (!fetchUser)
+      throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     return res.status(200).send(this.usersService.removeProtectedProperties(user))
   }
 
-  
+
   async register(file: Express.Multer.File, dto: UpdateUserDto, res: any, user: User) {
 
     if (file) {
-     const avatar = await this.usersService.addAvatar(user.id, file.buffer, file.originalname)
-     if (!avatar)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create avatar'})
+      const avatar = await this.usersService.addAvatar(user.id, file.buffer, file.originalname)
+      if (!avatar)
+        throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot create avatar' })
     }
 
     if (dto.username?.length > 0 && await this.usersService.findOneByUsername(dto.username))
-      throw new ConflictException('Database error', {cause: new Error(), description: 'username already exists'})
+      throw new ConflictException('Database error', { cause: new Error(), description: 'username already exists' })
 
-    const newUser = await this.usersService.update(user.id, {username: dto.username, isRegistered: true})
+    const newUser = await this.usersService.update(user.id, { username: dto.username, isRegistered: true })
     if (!newUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send(dto)
   }
@@ -271,70 +271,69 @@ export class AuthService {
   async generateTwoFactorAuthenticationSecret(user: User) {
     const secret = authenticator.generateSecret()
     const otpAuthUrl = authenticator.keyuri(user.id, process.env.APP_NAME, secret)
-    const newUser = await this.usersService.update(user.id, {twoFactorAuthenticationSecret:secret})
+    const newUser = await this.usersService.update(user.id, { twoFactorAuthenticationSecret: secret })
     if (!newUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
-    return {secret, otpAuthUrl}
+    return { secret, otpAuthUrl }
   }
 
-  async generateTwoFactorAuthenticationQRCode(req:any)
-  {
-    let secret = await this.generateTwoFactorAuthenticationSecret(req.user)
+  async generateTwoFactorAuthenticationQRCode(user: User) {
+    let secret = await this.generateTwoFactorAuthenticationSecret(user)
     if (!secret)
-      throw new InternalServerErrorException('2fa error', {cause: new Error(), description: 'Cannot generate 2fa secret'})
+      throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa secret' })
 
     let qrCodeDataURL = await this.generateQrCodeDataURL(secret.otpAuthUrl)
     if (!qrCodeDataURL)
-      throw new InternalServerErrorException('2fa error', {cause: new Error(), description: 'Cannot generate 2fa qrcode'})
+      throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa qrcode' })
 
     return qrCodeDataURL
   }
 
-  async twoFactorAuthenticationLogin( req: any,  res:any, body:any) {
+  async twoFactorAuthenticationLogin(user: User, res: any, body: any) {
 
-    if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-      throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
+    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const user = await this.usersService.update(req.user.id, {isTwoFactorAuthenticated: true})
-    if (!user)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: true })
+    if (!fetchUser)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
   }
-  
+
   async generateQrCodeDataURL(otpAuthUrl: string) {
     return toDataURL(otpAuthUrl)
   }
 
-  isTwoFactorAuthenticationValid(twoFactorAuthenticationCode: string, user:User) {
+  isTwoFactorAuthenticationValid(twoFactorAuthenticationCode: string, user: User) {
     return authenticator.verify({
-      token:twoFactorAuthenticationCode,
-      secret:user?.twoFactorAuthenticationSecret
+      token: twoFactorAuthenticationCode,
+      secret: user?.twoFactorAuthenticationSecret
     })
   }
 
-  async turnOnTwoFactorAuthentication( req: any,  res:any, body:any) {
+  async turnOnTwoFactorAuthentication(user: User, res: any, body: any) {
 
-    if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-      throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
+    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const user = await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true})
-    if (!user)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
+    if (!fetchUser)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
   }
 
 
-  async turnOffTwoFactorAuthentication(req: any, res:any, body:any) {
+  async turnOffTwoFactorAuthentication(user: User, res: any, body: any) {
 
-    if (!authenticator.verify({secret:req.user.twoFactorAuthenticationSecret, token:body.twoFactorAuthenticationCode}))
-      throw new UnauthorizedException('Wrong authentication code', {cause: new Error(), description: 'The 2fa code do not match'})
+    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const user =  await this.usersService.update(req.user.id, {isTwoFactorAuthenticationEnabled: false})
-    if (!user)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot update user'})
+    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: false })
+    if (!fetchUser)
+      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
   }
