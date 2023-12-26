@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, Req, Res } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, Req, Res, UnauthorizedException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
@@ -192,6 +192,9 @@ export class RoomService {
         } 
         // room.users.forEach((user) => this.userService.removeProtectedProperties(user))
         // room.message.forEach((message) => this.userService.removeProtectedProperties(message.author))
+        if (room?.password){
+            room.password = undefined
+        }
         return room
     }
 
@@ -325,13 +328,32 @@ export class RoomService {
         if (!room)
             throw new NotFoundException("Room not found",
             {cause: new Error(), description: "cannot find any users in database"})
+        
+            // console.log('room users', room.users)
+            if (room?.users) {
+                const userFound = room.users.some((user) => user.id === sender.id)
+                console.log('sender', sender)
+                console.log(room.users)
+                console.log(userFound)
+            if (!userFound) {
+                console.log('tesssssssssssst')
+              throw new ForbiddenException(
+                "User is not in room",
+                {
+                  cause: new Error(),
+                  description: `Cannot find this user in room ${room?.name} database`,
+                }
+              )
+            }
+          }
+          
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name} )
         if (this.isBanned(room, sender))
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
-
+        //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
             content: dto.content,
@@ -665,7 +687,7 @@ export class RoomService {
                 cause: new Error(),
                 description: "You cannot remove a password when there is no password."
             })
-        room.password = null
+        room.password = undefined
         this.save(room)
     }
 }

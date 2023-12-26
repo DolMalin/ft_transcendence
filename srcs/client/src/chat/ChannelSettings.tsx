@@ -1,13 +1,16 @@
-import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useToast } from "@chakra-ui/react";
-import React from "react";
+import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useDisclosure, useToast } from "@chakra-ui/react";
+import React, { useState } from "react";
 import BasicToast from "../toast/BasicToast";
 import authService from "../auth/auth.service";
+import PasswordSettingsModal from "./PasswordSettingsModal";
 import { Socket } from "socket.io-client";
 import { Room } from "./Chat";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
 function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boolean}) {
 
+    const [action, setAction] = useState("")
+    const {isOpen, onOpen, onClose} = useDisclosure()
     const toast = useToast();
 
     async function changePassword(roomId: number, password: string){
@@ -138,10 +141,16 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 <Portal>
                     <PopoverContent>
                         <PopoverBody>
-                            <Button onClick={() => setPassword(props.room.id, "motdepasse")}>
+                            <Button onClick={() => {
+                                onOpen()
+                                setAction('setPass')
+                            }}>
                                 Set password
                             </Button>
-                            <Button onClick={() => changePassword(props.room.id, "motdepassebise")}>
+                            <Button onClick={() => {
+                                onOpen()
+                                setAction('changePass')
+                            }}>
                                 change password
                             </Button>
                             <Button onClick={() => removePassword(props.room.id)}>
@@ -155,10 +164,11 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 </Portal>
                 </Popover>
             </Link>
+        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </>
     }
     else {
-
+        
         return (<>
             <Link>
                 <Popover>
