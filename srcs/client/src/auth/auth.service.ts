@@ -13,7 +13,7 @@ class AuthService {
 			const res: any = await this.api.get(uri,{ headers: {'Authorization': 'Bearer ' + this.getAccessToken()}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 401 && retry) {
+			if (err.response?.status == 401 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -36,7 +36,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 401 && retry) {
+			if (err.response?.status == 401 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -61,7 +61,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 401 && retry) {
+			if (err.response?.status == 401 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -85,7 +85,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 401 && retry) {
+			if (err.response?.status == 401 && retry) {
 				retry = false
 				try {
 					await this.refresh()

@@ -52,7 +52,7 @@ function UserList(props: {chatSocket: Socket}){
             setUserList(tab)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -63,7 +63,7 @@ function UserList(props: {chatSocket: Socket}){
                 fetchUserList(res.data) 
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)} 
         }
         asyncWrapper()
     }, [])

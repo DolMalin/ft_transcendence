@@ -98,12 +98,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setMessageList((list) => [...list, message])
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                      <BasicToast text={err.response.data.error}/>
+                      <BasicToast text={err.response?.data?.error}/>
                   </>)
                   })
             }

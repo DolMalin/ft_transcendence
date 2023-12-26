@@ -30,7 +30,7 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response.data.message} (${err.response?.data?.error})`)
     }
     return roomList
 }
@@ -62,17 +62,17 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         }
         catch(err){
 
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     isClosable: true,
                     duration : 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                 })
             }
-            else if (err.response.status === 403){
+            else if (err.response?.status === 403){
                 toast({
                     isClosable: true,
                     duration : 5000,
@@ -82,7 +82,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
     }
 
