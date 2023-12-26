@@ -103,7 +103,7 @@ class AuthService {
 
 	async logout(isTwoFactorAuthenticated: boolean, gameSock : Socket) {
 		const cookies = new Cookies()
-		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/logout-2fa` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
+		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/2fa/logout` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
 		try {
 			
 			const res:any = await this.get(url)
