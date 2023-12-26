@@ -165,6 +165,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
             )}
           </Flex>
           <ChannelPasswordModal
+            setTargetRoom={props.setTargetRoom}
             roomName={roomName}
             isOpen={isOpen}
             onClose={onClose}

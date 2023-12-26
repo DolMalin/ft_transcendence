@@ -85,7 +85,6 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket}
     useEffect(() => {
         props.chatSocket?.on("receiveMessage", (data: MessageData) => {
 
-        //si bloque --> pas ca
         if (data.room.id === props.room.id)
         {
             setMessageList((list) => [...list, data])
