@@ -7,14 +7,17 @@ import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
 import UserList from "./UserList";
 import FriendList from "./FriendList";
+import ChatBoxTest from "./ChatBoxTest";
+import { Room } from "./interface";
 
-function ChatTest(props: {chatSocket: Socket}) {
+function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
 
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
 
     const [boxWidth, setBoxWidth] = useState(window.innerWidth <= 960 ? '100%' : '15%');
     const [boxHeight, setBoxHeight] = useState(window.innerWidth <= 960 ? 'calc(100% / 3)' : '100%');
     const [flexDir, setFlexDir] = useState<FlexDirection>(window.innerWidth <= 960 ? 'column' : 'row');
+    const [targetRoom, setTargetRoom] = useState<Room>(undefined);
 
     useEffect(function DOMEvents() {
 
@@ -71,7 +74,7 @@ function ChatTest(props: {chatSocket: Socket}) {
         flexDir={'column'}
         bg={Constants.BG_COLOR}
         >
-            <Flex h={'5%'}
+            <Flex h={'100px'}
             w={'100%'}
             bg={Constants.BG_COLOR}
             justifyContent='center'
@@ -86,7 +89,7 @@ function ChatTest(props: {chatSocket: Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-                <ChannelList chatSocket={props.chatSocket}/>
+                <ChannelList chatSocket={props.chatSocket} setTargetRoom={setTargetRoom}/>
             </Flex>
         </Flex>
 
@@ -96,7 +99,12 @@ function ChatTest(props: {chatSocket: Socket}) {
         minH={'320px'}
         bg={Constants.BG_COLOR_FADED} 
         >
-            ChatBox
+            {targetRoom != undefined && 
+            <ChatBoxTest isDm={targetRoom.type === 'dm' ? true : false}
+            room={targetRoom}
+            gameSocket={props.gameSocket}
+            chatSocket={props.chatSocket}
+            />}
         </Flex>
 
         <Flex

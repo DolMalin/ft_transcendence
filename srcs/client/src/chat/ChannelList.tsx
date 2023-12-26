@@ -35,7 +35,7 @@ async function getRoomList(){
     return roomList
 }
 
-function ChannelList(props: {chatSocket: Socket}){
+function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const toast = useToast()
     const [roomName, setRoomName] = useState<string>()
@@ -57,6 +57,7 @@ function ChannelList(props: {chatSocket: Socket}){
                 password: dt.password
             })
             setRoom(res.data)
+            props.setTargetRoom(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             // setShowChat(true)
         }

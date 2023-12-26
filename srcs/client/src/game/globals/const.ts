@@ -46,6 +46,9 @@ export const DARK_GREEN = 'rgba(0, 130, 100, 1)';
 
 export const BG_COLOR = 'rgba(20, 20, 20, 1)';
 export const BG_COLOR_FADED = 'rgba(40, 40, 40, 0.9)';
+export const BG_COLOR_LESSER_FADE = 'rgba(30, 30, 30, 0.9)';
+
+export const WHITE_BUTTON_HOVER ='rgba(200, 200, 200, 1)';
 
 export const HIDDEN_FONT_COLOR = 'rgba(60, 60, 70, 1)';
 

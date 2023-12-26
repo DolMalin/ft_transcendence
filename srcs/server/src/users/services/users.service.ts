@@ -143,6 +143,8 @@ export class UsersService {
   }
 
   removeProtectedProperties(user: User) {
+    if (!user)
+      return (user)
     if (user.refreshToken)
       user.refreshToken = undefined
     if (user.twoFactorAuthenticationSecret)
