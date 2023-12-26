@@ -107,6 +107,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       const usernameArray = await this.roomService.kick(data.roomId, userId, data.targetId)
       this.server.to(`user-${data.targetId}`).emit('kickBy', usernameArray[0])
       this.server.to(`user-${userId}`).emit('kicked', usernameArray[1])//TODO send le username pas le id
+      this.server.to(`room-${data.roomId}`).emit('userLeft');
     }
     catch(err){
       this.server.to(`user-${userId}`).emit('kickedError')

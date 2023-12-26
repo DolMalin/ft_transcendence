@@ -4,6 +4,7 @@ import { Room } from "./Chat"
 import { Socket } from "socket.io-client"
 import {ListItem, UnorderedList, Text, Flex, Button, useToast} from "@chakra-ui/react"
 import BasicToast from "../toast/BasicToast"
+import * as Constants from '../game/globals/const'
 
 function BanList(props : {banList :  {username : string, id : string}[], room : Room, chatSock : Socket}) {
 
@@ -32,18 +33,23 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
     }
 
     return (<>
-    <Flex bg={'red'}>
             {props.banList?.map((bannedUser, index) => {
                 return (
-                    <UnorderedList key={index}>
-                        <ListItem>
-                            <Text> {bannedUser.username}</Text>
-                            <Button onClick={() => {unbanThem(bannedUser.id, props.room?.id)}}> Unban </Button>
-                        </ListItem>
-                    </UnorderedList>
+                    <Flex  key={index}
+                    flexDir={'column'}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                    margin={'10px'}
+                    >
+                                <Text> {bannedUser.username}</Text>
+                                <Button onClick={() => {unbanThem(bannedUser.id, props.room?.id)}}
+                                borderRadius={'0px'}
+                                fontWeight={'normal'}
+                                _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
+                                > Unban </Button>
+                    </Flex>
                 )
             })}
-    </Flex>
     </>)
 }
 

@@ -73,7 +73,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket}
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                      <BasicToast text={err}/>
+                      <BasicToast text={err.response?.data?.error}/>
                   </>)
                   })
             }
@@ -222,6 +222,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket}
                             borderRadius={'0px'}
                             type='text'
                             placeholder="type your message..."
+                            autoComplete="off"
                             {...register("message", {
                                 required: "enter message",
                             })}

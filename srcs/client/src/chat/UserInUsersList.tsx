@@ -1,11 +1,11 @@
 import React, {useState, useEffect, useRef} from "react"
-import * as Chakra from '@chakra-ui/react'
 import authService from "../auth/auth.service"
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { Room } from "./Chat";
 import BasicToast from "../toast/BasicToast";
-import PswForm from "./PswForm";
+import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import * as Constants from '../game/globals/const';
 
 function UserInUsersList(props : {username : string, userId : string, 
     room : Room, userIsOp : boolean, gameSock? : Socket, chatSock?: Socket}) {
@@ -13,8 +13,8 @@ function UserInUsersList(props : {username : string, userId : string,
     const [priviColor, setPriviColor] = useState('grey');
     const [targetIsOp, setTargetIsOp] = useState<"isAdmin" | "isOwner" | "no">("no");
     const [targetIsMuted, setTargetIsMuted] = useState(false);
-    const { isOpen, onOpen, onClose } = Chakra.useDisclosure();
-    const toast = Chakra.useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const toast = useToast();
 
 
     async function makeThemOp(targetId : string, roomName : string, roomId : number) {
@@ -133,120 +133,6 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
-    async function setPassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/setPassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully set."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    async function changePassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/changePassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully updated."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    async function removePassword(roomId: number){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully removed."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    function leaveChan(roomId: number){
-        props.chatSock?.emit('leaveRoom', roomId)
-    }
-
     function kick(roomId: number, targetId: string){
         props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
     }
@@ -291,10 +177,10 @@ function UserInUsersList(props : {username : string, userId : string,
         const [sliderValue, setSliderValue] = React.useState(5)
         const [showTooltip, setShowTooltip] = React.useState(false)
         return (<>
-            <Chakra.Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
+            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
                 {props.actionName}
-            </Chakra.Button>        
-            <Chakra.Slider
+            </Button>        
+            <Slider
             id='slider'
             defaultValue={0}
             min={0}
@@ -304,91 +190,95 @@ function UserInUsersList(props : {username : string, userId : string,
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             >
-                <Chakra.SliderTrack>
-                    <Chakra.SliderFilledTrack />
-                </Chakra.SliderTrack>
+                <SliderTrack>
+                    <SliderFilledTrack />
+                </SliderTrack>
                 
-                <Chakra.Tooltip
+                <Tooltip
                     hasArrow
-                    bg='teal.500'
+                    bg='black'
                     color='white'
                     placement='top'
                     isOpen={showTooltip}
                     label={`${sliderValue}min`}
                 >
-                    <Chakra.SliderThumb />
-                </Chakra.Tooltip>
-            </Chakra.Slider>
-            <Chakra.Text>zero minutes will set timer to an undefined amounth of time</Chakra.Text>
+                    <SliderThumb />
+                </Tooltip>
+            </Slider>
+            <Text>zero minutes will set timer to an undefined amounth of time</Text>
         </>)
     }
     if (props.userIsOp)
     {
     return (<>
-        <Chakra.Link>
-            <Chakra.Popover>
-            <Chakra.PopoverTrigger>
-                <Chakra.Button bgColor={priviColor}>{props?.username}</Chakra.Button>
-            </Chakra.PopoverTrigger>
-            <Chakra.Portal>
-                <Chakra.PopoverContent>
-                    <Chakra.PopoverBody>
-                        {targetIsOp === 'no'  && <Chakra.Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
-                            Promote
-                        </Chakra.Button>}
+        <Link>
+            <Popover>
+                <PopoverTrigger>
+                    <Button 
+                    borderRadius={'0px'}
+                    fontWeight={'normal'}
+                    textColor={'black'}
+                    paddingLeft={'12px'}
+                    paddingRight={'12px'}
+                    bg={'white'}
+                    _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
+                    >
+                        {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                        {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
+                        {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
+                        
+                        {props?.username}
+                    </Button>
+                </PopoverTrigger>
 
-                        {targetIsOp === 'isAdmin' && <Chakra.Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
-                            Demote
-                        </Chakra.Button>}
+                <Portal>
+                    <PopoverContent>
+                        <PopoverBody>
+                            {targetIsOp === 'no'  && <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                                Promote
+                            </Button>}
 
-                        <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
+                            {targetIsOp === 'isAdmin' && <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                                Demote
+                            </Button>}
 
-                        {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
-                        <Chakra.Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
-                            unmute
-                        </Chakra.Button>
-                        <Chakra.Button onClick={() => kick(props?.room.id, props?.userId)}>
-                            kick
-                        </Chakra.Button>
-                        <Chakra.Button onClick={onOpen}>
-                            profile
-                        </Chakra.Button>
-                    </Chakra.PopoverBody>
-                </Chakra.PopoverContent>
-            </Chakra.Portal>
-            </Chakra.Popover>
-        </Chakra.Link>
-        <Chakra.Link>
-            <Chakra.Popover>
-            <Chakra.PopoverTrigger>
-                <Chakra.Button >settings</Chakra.Button>
-            </Chakra.PopoverTrigger>
-            <Chakra.Portal>
-                <Chakra.PopoverContent>
-                    <Chakra.PopoverBody>
-                        <Chakra.Button onClick={() => setPassword(props.room.id, "motdepasse")}>
-                            Set password
-                        </Chakra.Button>
-                        <Chakra.Button onClick={() => changePassword(props.room.id, "motdepassebise")}>
-                            change password
-                        </Chakra.Button>
-                        <Chakra.Button onClick={() => removePassword(props.room.id)}>
-                            remove password
-                        </Chakra.Button>
-                        <Chakra.Button onClick={() => leaveChan(props.room.id)}>
-                            leave
-                        </Chakra.Button>
-                    </Chakra.PopoverBody>
-                </Chakra.PopoverContent>
-            </Chakra.Portal>
-            </Chakra.Popover>
-        </Chakra.Link>
+                            <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
+
+                            {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
+                            <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
+                                unmute
+                            </Button>
+                            <Button onClick={() => kick(props?.room.id, props?.userId)}>
+                                kick
+                            </Button>
+                            <Button onClick={onOpen}>
+                                profile
+                            </Button>
+                        </PopoverBody>
+                    </PopoverContent>
+                </Portal>
+            </Popover>
+        </Link>
+
         <ProfileModal userId={props.userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSock} gameSock={props.gameSock}/>
     </>)
     }
     else {
         return (<>
-            <Chakra.Button onClick={onOpen} bgColor={priviColor}>{props?.username}</Chakra.Button>
+            <Button onClick={onOpen}
+            borderRadius={'0px'}
+            fontWeight={'normal'}
+            textColor={'black'}
+            paddingLeft={'12px'}
+            paddingRight={'12px'}
+            bg={'white'}
+            _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
+            >
+                {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
+                {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
+                {props?.username}
+            </Button>
             <ProfileModal userId={props.userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSock} gameSock={props.gameSock}/>
         </>)
     }
