@@ -257,7 +257,7 @@ export class RoomService {
         (this.isAdmin(room, user) === 'isOwner' && this.isAdmin(room, user2) === 'no'))
         {
             this.leaveRoom(room?.id, user2?.id)
-            return [user?.username, user2?.username]
+            return [user?.username, user2?.username, room?.name]
         }
     }   
 

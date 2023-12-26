@@ -105,9 +105,10 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
     const userId = client.handshake.query?.userId as string
     try{
-      const usernameArray = await this.roomService.kick(data.roomId, userId, data.targetId)
-      this.server.to(`user-${data.targetId}`).emit('kickBy', usernameArray[0])
-      this.server.to(`user-${userId}`).emit('kicked', usernameArray[1])//TODO send le username pas le id
+      const array = await this.roomService.kick(data.roomId, userId, data.targetId)
+      console.log('emit in back');
+      this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
+      this.server.to(`user-${userId}`).emit('kicked', array[1])//TODO send le username pas le id
       this.server.to(`room-${data.roomId}`).emit('userLeft');
     }
     catch(err){

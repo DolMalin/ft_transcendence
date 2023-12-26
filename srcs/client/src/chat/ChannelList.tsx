@@ -35,11 +35,10 @@ async function getRoomList(){
     return roomList
 }
 
-function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
+function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targetRoom : Room}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const toast = useToast()
     const [roomName, setRoomName] = useState<string>()
-    const [isHovered, setIsHovered] = useState(false)
     const [hoveredRoom, setHoveredRoom] = useState<string | null>(null)
     const [room, setRoom] = useState<Room>()
     const { colorMode } = useColorMode()
@@ -56,9 +55,9 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
                 name: dt.room,
                 password: dt.password
             })
-            setRoom(res.data)
-            props.setTargetRoom(res.data)
-            props.chatSocket?.emit("joinRoom", res.data.id)
+            setRoom(res.data);
+            props.setTargetRoom(res.data);
+            props.chatSocket?.emit("joinRoom", res.data.id);
             // setShowChat(true)
         }
         catch(err){
@@ -94,6 +93,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
     useEffect(() => {
         fetchRoom()
     }, [])
+
     return (
         <>
           <Flex
@@ -119,10 +119,12 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
                 return (
                   <Flex
                     key={room.id}
+                    border={room.name === props.targetRoom?.name ? '1px solid white' : 'none'}
                     width={'100%'}
                     minH={'45px'}
                     maxWidth={'300px'}
                     marginBottom={'10px'}
+                    padding={'4px'}
                     flexDir={'column'}
                     alignItems={'center'}
                     _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
