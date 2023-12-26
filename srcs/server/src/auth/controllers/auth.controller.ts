@@ -38,7 +38,7 @@ export class AuthController {
     }
 
     @UseGuards(AccessTokenGuard)
-    @Get('logout')
+    @Post('logout')
     logout(@GetUser() user: User, @Res() res: any) {
       return this.authService.logout(user, res)
     }
@@ -77,7 +77,7 @@ export class AuthController {
     }
 
     @UseGuards(AccessToken2FAGuard)
-    @Get('2fa/logout')
+    @Post('2fa/logout')
     logout2fa(@GetUser() user: User, @Res() res: any) {
       return this.authService.logout(user, res)
     }
