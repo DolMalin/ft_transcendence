@@ -183,9 +183,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   async createOrJoinDMRoom(user: User, user2: User, server: Server, client: Socket) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
-    let room = await this.roomService.getRoom(roomName)
-    if (!room)
-      throw (`room ${roomName} was not found in database`)
+    let room = await this.roomService.getRoom(roomName);
     if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
       server.to(`user-${user.id}`).emit("userBlocked", 
       {

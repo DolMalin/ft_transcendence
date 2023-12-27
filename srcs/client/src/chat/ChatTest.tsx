@@ -75,6 +75,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             console.log('getting in dm sock on')
 
             props.chatSocket?.emit("joinRoom", dm.id)
+            console.log('FEUR FEUR')
             setTargetRoom(dm)
         });
 
