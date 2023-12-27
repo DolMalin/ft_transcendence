@@ -188,7 +188,7 @@ export class AuthService {
     const fetchUser = await this.usersService.findOneById(user?.id)
 
     if (!fetchUser)
-      throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
+      throw new UnauthorizedException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     const refreshToken = await this.createRefreshToken({ id: user.id })
     const accessToken = await this.createAccessToken({ id: user.id })
@@ -243,7 +243,7 @@ export class AuthService {
   async validate(user: User, @Res() res: any) {
     const fetchUser = await this.usersService.findOneById(user?.id)
     if (!fetchUser)
-      throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
+      throw new UnauthorizedException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
     return res.status(200).send(this.usersService.removeProtectedProperties(user))
   }

@@ -1,4 +1,4 @@
-import { ExecutionContext, ForbiddenException, Injectable,} from '@nestjs/common'
+import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException,} from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { AuthService } from '../services/auth.service';
@@ -23,23 +23,24 @@ export class RefreshToken2FAGuard extends AuthGuard('jwt-refresh-2fa') {
 		} catch(err) {
 			const payload = await this.jwtService.decode(refreshToken)
 			if (!payload)
-				return false
+				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
 			const user = await this.userService.findOneById(payload['id'])
 			if (!user)
-				return false
+				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
+
 			await this.userService.update(user.id, {isLogged: false})
-			return false
+			
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
 		}
 		const parentCanActivate = (await super.canActivate(context)) as boolean; 
 		return parentCanActivate
 
 	  }
-	handleRequest(err: any, user: any, info: any, context: any, status: any) {
 
+	handleRequest(err: any, user: any, info: any, context: any, status: any) {
 		if (err || !user) {
-			throw new ForbiddenException('Access denied', {cause: new Error(), description: `Invalid token`})
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
 		}
-	
 		return super.handleRequest(err, user, info, context, status);
 	  }	
 }
