@@ -1,12 +1,9 @@
 import { 
     Flex, 
-    ListItem, 
-    UnorderedList,
     Text,
     Link,
     useDisclosure,
     useToast,
-    Box,
     useColorMode
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
@@ -16,7 +13,7 @@ import BasicToast from "../toast/BasicToast"
 import ChannelPasswordModal from "./ChannelPasswordModal"
 import { Room } from "./interface"
 import * as Constants from '../game/globals/const'
-import { CheckCircleIcon, EmailIcon, LockIcon } from "@chakra-ui/icons"
+import { LockIcon } from "@chakra-ui/icons"
 
 
 async function getRoomList(){
@@ -30,16 +27,15 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response.data.error})`)
+        console.error(`${err.response.data.message} (${err.response?.data?.error})`)
     }
     return roomList
 }
 
-function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
+function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targetRoom : Room}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const toast = useToast()
     const [roomName, setRoomName] = useState<string>()
-    const [isHovered, setIsHovered] = useState(false)
     const [hoveredRoom, setHoveredRoom] = useState<string | null>(null)
     const [room, setRoom] = useState<Room>()
     const { colorMode } = useColorMode()
@@ -56,24 +52,24 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
                 name: dt.room,
                 password: dt.password
             })
-            setRoom(res.data)
-            props.setTargetRoom(res.data)
-            props.chatSocket?.emit("joinRoom", res.data.id)
+            setRoom(res.data);
+            props.setTargetRoom(res.data);
+            props.chatSocket?.emit("joinRoom", res.data.id);
             // setShowChat(true)
         }
         catch(err){
 
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     isClosable: true,
                     duration : 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                 })
             }
-            else if (err.response.status === 403){
+            else if (err.response?.status === 403){
                 toast({
                     isClosable: true,
                     duration : 5000,
@@ -83,7 +79,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -94,10 +90,10 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
     useEffect(() => {
         fetchRoom()
     }, [])
+
     return (
         <>
           <Flex
-            h={'50%'}
             w={'100%'}
             bg={Constants.BG_COLOR}
             padding={'10px'}
@@ -119,10 +115,12 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function}){
                 return (
                   <Flex
                     key={room.id}
+                    border={room.name === props.targetRoom?.name ? '1px solid white' : 'none'}
                     width={'100%'}
                     minH={'45px'}
                     maxWidth={'300px'}
                     marginBottom={'10px'}
+                    padding={'4px'}
                     flexDir={'column'}
                     alignItems={'center'}
                     _hover={{ background: 'white', textColor: Constants.BG_COLOR }}

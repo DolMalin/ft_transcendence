@@ -40,7 +40,7 @@ import BasicToast from "../toast/BasicToast"
                 joinRoom(dt)
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
             }
         }
     }
@@ -59,18 +59,18 @@ import BasicToast from "../toast/BasicToast"
         }
         catch(err){
 
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     isClosable: true,
                     duration : 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
     }
 

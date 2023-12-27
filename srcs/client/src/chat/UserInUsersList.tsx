@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { Room } from "./Chat";
 import BasicToast from "../toast/BasicToast";
-import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast, Box } from "@chakra-ui/react";
 import * as Constants from '../game/globals/const';
 
 function UserInUsersList(props : {username : string, userId : string, 
@@ -25,13 +25,13 @@ function UserInUsersList(props : {username : string, userId : string,
               props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
           }
           catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     isClosable: true,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -48,13 +48,13 @@ function UserInUsersList(props : {username : string, userId : string,
             props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
         }
         catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     isClosable: true,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -72,13 +72,13 @@ function UserInUsersList(props : {username : string, userId : string,
             props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
         }
         catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     isClosable: true,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -95,13 +95,13 @@ function UserInUsersList(props : {username : string, userId : string,
             props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
         }
         catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 2000,
                     isClosable: true,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -119,12 +119,12 @@ function UserInUsersList(props : {username : string, userId : string,
             props.chatSock?.emit('userGotBanned', {targetId : targetId});
         }
         catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -133,140 +133,21 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
-    
-    async function setPassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/setPassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully set."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-                }
-            else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
-        }
-    }
-
-    async function changePassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/changePassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully updated."/>
-                </>)
-              })
-            }
-            catch(err){
-                if (err.response.status === 409)
-                {
-                    toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-                }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-                }
-            else
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
-        }
+    function kick(roomId: number, targetId: string){
+        props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
     }
     
-    async function removePassword(roomId: number){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully removed."/>
-                </>)
-              })
-            }
-            catch(err){
-                if (err.response.status === 409)
+    useEffect(() => {
+        async function asyncWrapper() {
+            try {
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+                {targetId : props?.userId, roomName : props.room?.name});
+                
+                if(privi.data === 'isOwner')
                 {
-                    toast({
-                        duration: 5000,
-                        render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
+                    setPriviColor('blue')
+                    setTargetIsOp('isOwner')
                 }
-                if (err.response.status === 404)
-                {
-                    toast({
-                        duration: 5000,
-                        render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-                }
-                else
-                console.error(`${err.response.data.message} (${err.response.data.error})`)
-            }
-        }
-
-        function inviteThemPrivChan(roomId: number, targetId: string){
-            props.chatSock?.emit('invitePrivateChannel', {roomId: roomId, targetId: targetId})
-        }
-        
-        function leaveChan(roomId: number){
-            props.chatSock?.emit('leaveRoom', roomId)
-        }
-
-        function kick(roomId: number, targetId: string){
-            props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
-        }
-        
-        useEffect(() => {
-            async function asyncWrapper() {
-                try {
-                    const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-                    {targetId : props?.userId, roomName : props.room?.name});
-                    
-                    if(privi.data === 'isOwner')
-                    {
-                        setPriviColor('blue')
-                        setTargetIsOp('isOwner')
-                    }
             else if(privi.data === 'isAdmin')
             {
                 setPriviColor('green')
@@ -282,13 +163,12 @@ function UserInUsersList(props : {username : string, userId : string,
                 setPriviColor('grey')
                 setTargetIsOp('no')
             }
+            }
+            catch (err) {
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
         }
-        catch (err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    asyncWrapper();
+        asyncWrapper();
     })
 
 
@@ -296,15 +176,22 @@ function UserInUsersList(props : {username : string, userId : string,
         const [sliderValue, setSliderValue] = React.useState(5)
         const [showTooltip, setShowTooltip] = React.useState(false)
         return (<>
-            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}>
-                {props.actionName}
+            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}
+            borderRadius={'0px'}
+            margin={'10px'}
+            bg={Constants.BG_COLOR}
+            fontWeight={'normal'}
+            textColor={'white'}
+            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+            >
+                {props.actionName} for
             </Button>        
             <Slider
             id='slider'
             defaultValue={0}
             min={0}
             max={120}
-            colorScheme='teal'
+            colorScheme='black'
             onChange={(v) => setSliderValue(v)}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -321,7 +208,7 @@ function UserInUsersList(props : {username : string, userId : string,
                     isOpen={showTooltip}
                     label={`${sliderValue}min`}
                 >
-                    <SliderThumb />
+                <SliderThumb boxSize={4} bg={'black'}/>
                 </Tooltip>
             </Slider>
             <Text>zero minutes will set timer to an undefined amounth of time</Text>
@@ -351,26 +238,73 @@ function UserInUsersList(props : {username : string, userId : string,
                 </PopoverTrigger>
 
                 <Portal>
-                    <PopoverContent>
-                        <PopoverBody>
-                            {targetIsOp === 'no'  && <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                    <PopoverContent
+                    bg={'white'}
+                    border={'none'}
+                    >
+                        <PopoverBody display={'flex'}
+                        flexDir={'column'}
+                        className="goma"
+                        >
+                            {targetIsOp === 'no'  && 
+                            <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 Promote
                             </Button>}
 
-                            {targetIsOp === 'isAdmin' && <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}>
+                            {targetIsOp === 'isAdmin' && 
+                            <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 Demote
                             </Button>}
 
                             <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
 
                             {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
-                            <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}>
+                            
+                            { targetIsMuted &&
+                            <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 unmute
-                            </Button>
-                            <Button onClick={() => kick(props?.room.id, props?.userId)}>
+                            </Button>}
+
+                            <Button onClick={() => kick(props?.room.id, props?.userId)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 kick
                             </Button>
-                            <Button onClick={onOpen}>
+
+                            <Button onClick={onOpen}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 profile
                             </Button>
                         </PopoverBody>

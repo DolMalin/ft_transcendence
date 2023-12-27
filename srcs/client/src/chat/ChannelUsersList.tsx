@@ -9,7 +9,7 @@ import ChannelSettings from "./ChannelSettings";
 import * as Constants from '../game/globals/const';
 import BanList from "./BanList";
 
-function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket : Socket}) {
+function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket : Socket, setTargetChannel : Function}) {
 
     const [isOp, setIsOp] = useState(false)
     const toast = useToast();
@@ -118,7 +118,6 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             </>)
             })
           }
-        
         });
         
         return (() => {
@@ -150,7 +149,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               fontWeight={'normal'}
               border={listToDisplay === 'users' ? '1px solid white' : 'none'}
               _hover={{bg: 'white', textColor : 'black', transform : 'scale(1)'}}
-              > Userlist
+              > 
+                Users
               </Button>
 
               <Button onClick={() => {setListToDisplay('bans')}}
@@ -162,7 +162,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               fontWeight={'normal'}
               border={listToDisplay === 'bans' ? '1px solid white' : 'none'}
               _hover={{bg: 'white', textColor : 'black', transform : 'scale(1)'}}
-              > Banlist
+              >
+                Bans
               </Button>
             </Flex>
             <Flex h={'100%'} w={'80%'} minW={'224px'}
@@ -195,7 +196,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               minW={'32px'}
               justifyContent={'right'}
             >
-              <ChannelSettings chatSocket={props.chatSocket} room={props.room} isOp={isOp}/>
+              <ChannelSettings chatSocket={props.chatSocket} room={props.room} isOp={isOp} setTargetChannel={props.setTargetChannel}/>
             </Flex>
           </>
           }
@@ -233,7 +234,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             minW={'32px'}
             justifyContent={'right'}
             >
-              <ChannelSettings chatSocket={props.chatSocket} room={props.room} isOp={isOp}/>
+              <ChannelSettings chatSocket={props.chatSocket} room={props.room} isOp={isOp} setTargetChannel={props.setTargetChannel}/>
             </Flex>
             </>
             }

@@ -17,13 +17,13 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
             props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
         }
         catch (err) {
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     isClosable: true,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }

@@ -32,7 +32,7 @@ function timeOfDay(timestampz: string | Date){
     return (date)
 }
 
-function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket}) {
+function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket, setTargetChannel : Function}) {
     const [messageList, setMessageList] = useState<MessageData[]>([]);
     const scrollToBottomRef = useRef<HTMLDivElement>(null);
     const [id, setId] = useState("");
@@ -132,7 +132,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket}
             alignItems={'center'}
             bg={Constants.BG_COLOR_LESSER_FADE}
             >
-                <ChannelUsersList room={props.room} gameSocket={props.gameSocket} chatSocket={props.chatSocket}/>
+                <ChannelUsersList room={props.room} gameSocket={props.gameSocket} chatSocket={props.chatSocket} setTargetChannel={props.setTargetChannel}/>
             </Flex>
 
             {/* TEXT AREA */}

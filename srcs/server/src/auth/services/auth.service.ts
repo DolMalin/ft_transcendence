@@ -240,7 +240,6 @@ export class AuthService {
 
   }
 
-  // @TODO: CHECK VALUES IS SEND BACK IN USER
   async validate(user: User, @Res() res: any) {
     const fetchUser = await this.usersService.findOneById(user?.id)
     if (!fetchUser)

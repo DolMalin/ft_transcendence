@@ -52,7 +52,7 @@ function UserList(props: {chatSocket: Socket}){
             setUserList(tab)
         }
         catch(err){
-            console.error(`${err.response.data.message} (${err.response.data.error})`)
+            console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -63,7 +63,7 @@ function UserList(props: {chatSocket: Socket}){
                 fetchUserList(res.data) 
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response.data.error})`)} 
+                console.error(`${err.response.data.message} (${err.response?.data?.error})`)} 
         }
         asyncWrapper()
     }, [])
@@ -88,8 +88,9 @@ function UserList(props: {chatSocket: Socket}){
             else
                 pinColor = 'red';
             return(
-                <>
-                    <Flex width={'100%'} 
+                    <Flex 
+                    key={index}
+                    width={'100%'} 
                     minH={'45px'}
                     maxWidth={'300px'}
                     marginBottom={'10px'}
@@ -112,7 +113,6 @@ function UserList(props: {chatSocket: Socket}){
                             />
                         </Flex>
                     </Flex>
-                </>
             )
         })}
         <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket}/>

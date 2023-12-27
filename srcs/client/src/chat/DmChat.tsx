@@ -1,6 +1,6 @@
-import { Avatar, Button, Flex, FormControl, Input, Link, Text, useDisclosure, useToast } from "@chakra-ui/react";
+import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisclosure, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { Room } from "./Chat";
+import { Room } from "./interface";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { MessageData } from "./interface";
 import { Socket } from "socket.io-client";
@@ -37,6 +37,11 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
     const [id, setId] = useState("");
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
+    const [them, setThem] = useState<
+    {
+        id: string, 
+        username: string
+    } | undefined>(undefined);
     const [me, setMe] = useState<
     {
         id: string, 
@@ -67,16 +72,17 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             setMessageList((list) => [...list, message])
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                      <BasicToast text={err.response.data.error}/>
+                      <BasicToast text={err.response?.data?.error}/>
                   </>)
                   })
             }
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            console.log(err);
         }
     }
 
@@ -92,8 +98,23 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
 
     useEffect(() => {
       
-    //   setMessageList(props.room.message? props.room.message: [])
-    }, [])
+        const asyncWrapper = async () => {
+            try{
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
+                setMe(res.data)
+                console.log('them : ', props.room?.name.replace(me?.id, '').replace(/^(-)+|(-)+$/g, ''));
+                console.log('me : ', me.id);
+                const themRes = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/' + props.room?.name.replace(res.data.id, '').replace(/^(-)+|(-)+$/g, ''))
+                setThem(themRes.data);
+                console.log('them : ')
+            }
+            catch(err){
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
+        }
+
+        setMessageList(props.room.message ? props.room.message : []);
+        asyncWrapper();
+    }, [props.room])
 
     return (<>
         <Flex h={'100%'}
@@ -103,12 +124,15 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             <Flex w={'100%'}
             h={'10%'}
             minH={'80px'}
-            justifyContent={'center'}
             alignItems={'center'}
             bg={Constants.BG_COLOR_LESSER_FADE}
             >
-                <Avatar margin={'10px'}> </Avatar>
-                <Text> CECI EST LE NOM DU MEC </Text>
+                <Avatar
+                boxSize={'76px'}
+                src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + them?.id}
+                margin={'10px'}
+                > </Avatar>
+                <Text margin={'10px'}> {them?.username} </Text>
             </Flex>
             
             <Flex 
@@ -121,31 +145,48 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                     {messageList.map((messageContent, index) => {
 
                     return (
-                    <Flex key={index}
-                    w={'90%'}
-                    bg='none'
-                    textColor={'white'}
-                    margin={'10px'}
-                    justifyContent={messageContent.author.id === me?.id ? "left" : "right"}>
-                            <Flex 
-                            maxWidth={'70%'}
-                            bg={Constants.BG_COLOR_FADED}
-                            flexDir={'column'}
-                            padding={'10px'}
-                            >
-                                <Text>{messageContent.content}</Text>
-
-
-                                <Flex
-                                fontSize={'0.5em'}
+                        <Flex key={index}
+                        w={'90%'}
+                        bg='none'
+                        textColor={'white'}
+                        margin={'10px'}
+                        wrap={'wrap'}
+                        justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
+                                <Flex 
+                                maxWidth={'70%'}
+                                bg={Constants.BG_COLOR_FADED}
                                 flexDir={'column'}
                                 wrap={'wrap'}
+                                padding={'10px'}
+                                >   
+                                    <Flex
+                                    flexDir={'row'}
+                                    marginBottom={'4px'}
+                                    justifyContent={'space-evenly'}
+                                    alignItems={'center'}
+                                    >
+                                        <Avatar 
+                                        size='sm'
+                                        name={messageContent.author.username}
+                                        src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + messageContent.author.id}
+                                        />
+                                        
+                                        <Text padding={'10px'} >{messageContent.content}</Text>
+                                        
+                                    </Flex>
+                                    <Link fontSize={'0.6em'}onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Link>
+                                
+                                </Flex>
+                                <WrapItem
+                                padding={'5px'}
+                                fontSize={'0.6em'}
+                                flexDir={'row'}
+                                justifyContent={messageContent.author.id === me?.id ? "right" : "left"}
+                                width={'100%'}                            
                                 >
                                     <Text>{timeOfDay(messageContent.sendAt)} </Text>
-                                    <Link fontWeight={'bold'} onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Link>
-                                </Flex>
-                            </Flex>
-                    </Flex>)
+                                </WrapItem>
+                        </Flex>)
                   })}
                 </ScrollToBottom>
             </Flex>

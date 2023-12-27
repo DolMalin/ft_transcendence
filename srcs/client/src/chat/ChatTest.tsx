@@ -1,4 +1,4 @@
-import { Divider, Flex } from "@chakra-ui/react";
+import { Divider, Flex, useToast } from "@chakra-ui/react";
 import { constants } from "crypto";
 import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
@@ -9,6 +9,7 @@ import UserList from "./UserList";
 import FriendList from "./FriendList";
 import ChatBoxTest from "./ChatBoxTest";
 import { Room } from "./interface";
+import BasicToast from "../toast/BasicToast";
 
 function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
 
@@ -18,6 +19,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
     const [boxHeight, setBoxHeight] = useState(window.innerWidth <= 960 ? 'calc(100% / 3)' : '100%');
     const [flexDir, setFlexDir] = useState<FlexDirection>(window.innerWidth <= 960 ? 'column' : 'row');
     const [targetRoom, setTargetRoom] = useState<Room>(undefined);
+    const toast = useToast();
 
     useEffect(function DOMEvents() {
 
@@ -46,8 +48,6 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
                 setBoxHeight('100%');
                 setFlexDir('row');
             }
-            // if (window.innerHeight <= 960 && window.innerWidth <= 960)
-            //     setBoxHeight('33%')
 
         }, Constants.DEBOUNCE_TIME)
     
@@ -57,6 +57,54 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
           window.removeEventListener('resize', debouncedHandleResize)
         })
       }, [])
+
+    useEffect(function sockEvent() {
+    
+        props.chatSocket?.on('userBlocked', (err) => {
+            toast({
+                title: err.title,
+                description:  err.desc,
+                colorScheme: 'red',
+                status: 'info',
+                duration: 5000,
+                isClosable: true
+              })
+        });
+
+        props.chatSocket?.on('dmRoom', (dm : Room) => {
+            console.log('getting in dm sock on')
+
+            props.chatSocket?.emit("joinRoom", dm.id)
+            setTargetRoom(dm)
+        });
+
+        props.chatSocket?.on('kickBy', (kickByUsername: string, roomName : string) => {
+
+        if (targetRoom && roomName === targetRoom?.name)
+        {
+            setTargetRoom(undefined);
+        }
+        
+        const id = 'test-toast';
+        if(!toast.isActive(id)) {
+            toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <> 
+                <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
+            </>)
+            })
+        }
+        })
+    
+        return (() => {
+            props.chatSocket?.off('kickBy');            
+            props.chatSocket?.off('userBlocked')
+            props.chatSocket?.off('dmRoom')
+        })
+    })
+console.log('rerender in ChatText.tsx')
 
     return (<>
     <Flex
@@ -89,7 +137,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-                <ChannelList chatSocket={props.chatSocket} setTargetRoom={setTargetRoom}/>
+                <ChannelList chatSocket={props.chatSocket} setTargetRoom={setTargetRoom} targetRoom={targetRoom}/>
             </Flex>
         </Flex>
 
@@ -104,6 +152,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             room={targetRoom}
             gameSocket={props.gameSocket}
             chatSocket={props.chatSocket}
+            setTargetRoom={setTargetRoom}
             />}
         </Flex>
 

@@ -13,7 +13,7 @@ class AuthService {
 			const res: any = await this.api.get(uri,{ headers: {'Authorization': 'Bearer ' + this.getAccessToken()}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 403 && retry) {
+			if (err.response?.status == 403 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -36,7 +36,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 403 && retry) {
+			if (err.response?.status == 403 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -61,7 +61,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 403 && retry) {
+			if (err.response?.status == 403 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -85,7 +85,7 @@ class AuthService {
 			}})
 			return res
 	 	} catch(err) {
-			if (err.response.status == 403 && retry) {
+			if (err.response?.status == 403 && retry) {
 				retry = false
 				try {
 					await this.refresh()
@@ -103,10 +103,10 @@ class AuthService {
 
 	async logout(isTwoFactorAuthenticated: boolean, gameSock : Socket) {
 		const cookies = new Cookies()
-		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/logout-2fa` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
+		const url = isTwoFactorAuthenticated ? `${process.env.REACT_APP_SERVER_URL}/auth/2fa/logout` : `${process.env.REACT_APP_SERVER_URL}/auth/logout`
 		try {
 			
-			const res:any = await this.get(url)
+			const res:any = await this.post(url, {})
 			gameSock?.emit('logout');
 			cookies.remove("accessToken")
 			cookies.remove("refreshToken")

@@ -103,12 +103,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             setMessageList((list) => [...list, message])
         }
         catch(err){
-            if (err.response.status === 409)
+            if (err.response?.status === 409)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                      <BasicToast text={err.response.data.error}/>
+                      <BasicToast text={err.response?.data?.error}/>
                   </>)
                   })
             }
@@ -231,7 +231,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         }
       })
 
-      props.socket?.on('kickBy', (kickByUsername: string) => {
+      props.socket?.on('kickBy', (kickByUsername: string, roomName : string) => {
         props.showChat(false);
         const id = 'test-toast';
         if(!toast.isActive(id)) {
@@ -240,7 +240,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
             isClosable: true,
             duration : 5000,
             render : () => ( <> 
-              <BasicToast text={'you have been kicked from ' + props.room.name + ` by ${kickByUsername}`}/>
+              <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
           </>)
           })
         }
