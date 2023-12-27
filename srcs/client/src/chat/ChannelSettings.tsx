@@ -122,7 +122,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            Invite someone
+                            INVITE
                         </Button>
                         <Button onClick={() => leaveChan(props.room.id)}
                         borderRadius={'0px'}
