@@ -1,12 +1,9 @@
 import { 
     Flex, 
-    ListItem, 
-    UnorderedList,
     Text,
     Link,
     useDisclosure,
     useToast,
-    Box,
     useColorMode
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
@@ -16,7 +13,7 @@ import BasicToast from "../toast/BasicToast"
 import ChannelPasswordModal from "./ChannelPasswordModal"
 import { Room } from "./interface"
 import * as Constants from '../game/globals/const'
-import { CheckCircleIcon, EmailIcon, LockIcon } from "@chakra-ui/icons"
+import { LockIcon } from "@chakra-ui/icons"
 
 
 async function getRoomList(){
@@ -97,7 +94,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     return (
         <>
           <Flex
-            h={'50%'}
             w={'100%'}
             bg={Constants.BG_COLOR}
             padding={'10px'}
