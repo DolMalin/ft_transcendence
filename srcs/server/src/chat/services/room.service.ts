@@ -171,7 +171,7 @@ export class RoomService {
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
 
-        if (room.privChan === true && room.owner.id !== user.id){
+        if (room.privChan === true && room.owner?.id !== user.id ){
             if (!room?.whitelist?.includes(user.id)){
                 throw new NotFoundException("Private channel", {
                     cause: new Error(),
@@ -198,7 +198,7 @@ export class RoomService {
         return room
     }
 
-    async addTargetInWhiteList(roomId: number, invitedUser: string) {
+    async getInfoForInvite(roomId: number, invitedUser: string) {
         const room = await this.findOneById(roomId)
     
         if (!room) {
@@ -207,6 +207,23 @@ export class RoomService {
                 description: "Cannot find this room in the database",
         })}
         const target = await this.userService.findOneByName(invitedUser)
+        if (!target) {
+            throw new NotFoundException("User not found", {
+                cause: new Error(),
+                description: "Cannot find this user in the database",
+        })}
+        return {room: room, targetId: target.id}
+    }
+
+    async addTargetInWhiteList(roomId: number, invitedUser: string) {
+        const room = await this.findOneById(roomId)
+    
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        const target = await this.userService.findOneById(invitedUser)
         if (!target) {
             throw new NotFoundException("User not found", {
                 cause: new Error(),
@@ -224,7 +241,6 @@ export class RoomService {
             room.whitelist.push(target?.id)
             await this.save(room)
         }
-        return {room: room, targetId: target.id}
     }
      
     async removeUserFromWhiteList(roomName: string, targetId: string){
@@ -244,11 +260,11 @@ export class RoomService {
             room.whitelist.splice(room.whitelist.indexOf(targetId), 1)
             await this.save(room)
         }
-        return target?.username
+        return room
     }
 
     async leaveRoom(roomId: number, userId: string){
-        const room = await this.findOneByIdWithRelations(roomId)
+        let room = await this.findOneByIdWithRelations(roomId)
         if (!room)
             throw new NotFoundException("Room not found", 
             {
@@ -256,14 +272,15 @@ export class RoomService {
                 description: "cannot find this room in database"
             })
         if (room.users){
-            room.users.forEach(user => {
+            room.users.forEach(user =>  {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
-                    if (room.owner?.id === userId){
+                    if (room.owner?.id === userId)
                         room.owner = null
-                    }
                 }
             })
+            if (room?.privChan === true)
+                room = await this.removeUserFromWhiteList(room?.name, userId)
             await this.roomRepository.save(room)
         }
         else{
@@ -332,14 +349,9 @@ export class RoomService {
             throw new NotFoundException("Room not found",
             {cause: new Error(), description: "cannot find any users in database"})
         
-            // console.log('room users', room.users)
             if (room?.users) {
                 const userFound = room.users.some((user) => user.id === sender.id)
-                console.log('sender', sender)
-                console.log(room.users)
-                console.log(userFound)
             if (!userFound) {
-                console.log('tesssssssssssst')
               throw new ForbiddenException(
                 "User is not in room",
                 {

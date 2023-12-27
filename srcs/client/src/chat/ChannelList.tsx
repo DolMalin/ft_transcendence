@@ -7,7 +7,8 @@ import {
     useColorMode,
     Input,
     InputGroup,
-    InputLeftElement
+    InputLeftElement,
+    Button
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
@@ -57,6 +58,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 password: dt.password
             })
             props.setTargetRoom(res.data);
+            console.log(res.data.id)
             props.chatSocket?.emit("joinRoom", res.data.id);
             // setShowChat(true)
         }
@@ -77,10 +79,19 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                     isClosable: true,
                     duration : 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.message}/>
+                        <BasicToast text={err.response?.data?.message}/>
                     </>)
                 })
             }
+            else if (err.response?.status === 404){
+              toast({
+                  isClosable: true,
+                  duration : 5000,
+                  render : () => ( <> 
+                      <BasicToast text={err.response?.data?.error}/>
+                  </>)
+              })
+          }
             else
                 console.error(`${err.response.data.message} (${err.response?.data?.error})`)
         }
@@ -113,6 +124,63 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     useEffect(() => {
       fetchRoom()
     }, [roomnamesNarrower])
+
+    useEffect(() => {
+
+      props.chatSocket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, roomId, targetId}) => {
+        const id = 'invite-toast'
+        if(!toast.isActive(id)) {
+        toast({
+          id,  
+          duration: null,
+          render : () => ( <>
+            <BasicToast text={'You just got invited by ' + senderUsername  + ' to join ' + roomName + ' !'}>
+                <Button onClick={() => {
+                    props.chatSocket?.emit('declinedInviteChan', {roomName, targetId, senderId})
+                    toast.closeAll()}
+                }
+                bg={'none'}
+                borderRadius={'0px'}
+                fontWeight={'normal'}
+                textColor={'white'}
+                _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+                > 
+                No thanks !
+                </Button>
+                <Button onClick={() => {
+                    props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, targetId: targetId})
+                    joinRoom({room: roomName, password: null})
+                    toast.closeAll()
+                }}
+                bg={'none'}
+                borderRadius={'0px'}
+                fontWeight={'normal'}
+                textColor={'white'}
+                _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+                >
+                  Yes please ! 
+                </Button>
+              </BasicToast>
+            </>
+          ),
+          isClosable: true,
+        })
+      }
+      })  
+      props.chatSocket?.on('declinedNotification', (username: string) => {
+          const id = 'declined-toast';
+          if(!toast.isActive(id)){
+            toast({
+              id,
+              isClosable: true,
+              duration : 5000,
+              render : () => ( <>
+                <BasicToast text={`${username} declined your invitation `}/>
+            </>)
+            })
+          }
+        })
+    })
 
     function handleChange(event : React.ChangeEvent<HTMLInputElement>) {
       setRoomnamesNarrower(event.target.value)
@@ -149,7 +217,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 if (room?.privChan) state = 'private'
                 else if (room?.password) state = 'password'
                 else state = 'default'
-                if (state === 'private') return null 
+                // if (state === 'private') return null 
                 return (
                   <Flex
                     key={room.id}

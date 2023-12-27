@@ -19,8 +19,7 @@ import { Room } from "./interface"
 import { Socket } from "socket.io-client"
 import BasicToast from "../toast/BasicToast"
 
-  function 
-  ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {
+function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {
     
     const toast = useToast();
     const [checked, setChecked] = useState(false)
@@ -154,11 +153,13 @@ import BasicToast from "../toast/BasicToast"
                     </form>    
                     <Flex alignItems="center" justifyContent="space-evenly" marginTop="20px" >
                     <Checkbox 
-                        colorScheme='green' 
+                        colorScheme='green'
+                        isChecked={checked}
                         onChange={(event) => setChecked(event.target.checked)}> password 
                     </Checkbox>
                     <Checkbox 
-                        colorScheme='green' 
+                        colorScheme='green'
+                        isChecked={privateChan}
                         onChange={(event) => setPrivate((event.target as HTMLInputElement).checked)}> private channel 
                     </Checkbox>
                     </Flex>

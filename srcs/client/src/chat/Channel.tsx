@@ -77,7 +77,6 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                   </>)
                   })
             }
-            console.log(err)
             console.error(err)
         }
     }
