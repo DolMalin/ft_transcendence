@@ -7,11 +7,13 @@ import { Socket } from "socket.io-client";
 import { Room } from "./Chat";
 import { DragHandleIcon } from "@chakra-ui/icons";
 import * as Constants from '../game/globals/const';
+import InviteModal from "./InviteModal";
 
 function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boolean, setTargetChannel : Function}) {
 
     const [action, setAction] = useState("")
     const {isOpen, onOpen, onClose} = useDisclosure()
+    const {isOpen: isOpenInvite, onOpen: onOpenInvite, onClose: onCloseInvite} = useDisclosure()
     const toast = useToast();
 
     async function removePassword(roomId: number){
@@ -110,7 +112,9 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         >
                             REMOVE PASSWORD
                         </Button>
-                        <Button onClick={() => {}}
+                        <Button onClick={() => {
+                            onOpenInvite()
+                        }}
                         borderRadius={'0px'}
                         margin={'10px'}
                         bg={Constants.BG_COLOR}
@@ -136,6 +140,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 </Popover>
             </Link>
         <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
+        <InviteModal socket={props.chatSocket} roomId={props.room.id} isOpen={isOpenInvite} onOpen={onOpenInvite} onClose={onCloseInvite} />
         </>
     }
     else {

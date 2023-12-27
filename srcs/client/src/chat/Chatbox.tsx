@@ -274,19 +274,19 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, 
         }
       })
   
-      // props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
-      //   const id = 'invite-toast';
-      //   if(!toast.isActive(id)){
-      //     toast({
-      //       id,
-      //       isClosable: true,
-      //       duration : 5000,
-      //       render : () => ( <>
-      //         <BasicToast text={`You received an invitation from ${hostUsername}`}/>
-      //     </>)
-      //     })
-      //   }
-      // })
+      props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
+        const id = 'invite-toast-chan';
+        if(!toast.isActive(id)){
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <>
+              <BasicToast text={`You received an invitation from ${hostUsername}`}/>
+          </>)
+          })
+        }
+      })
 
       return () => {
         props.socket?.off('channelLeft')

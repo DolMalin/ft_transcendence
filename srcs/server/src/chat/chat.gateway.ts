@@ -225,7 +225,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
     let hostId = client.handshake.query?.userId as string
     try{
-      const info = await this.roomService.addTargetInWhiteList(data.roomId, data.guestUsername)
+      const info = await this.roomService.getInfoForInvite(data.roomId, data.guestUsername)
+      if (hostId === info.targetId){
+        Logger.error('You cannot invite yourself')
+        return
+      }
       const host = await this.userService.findOneById(hostId)
       this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
       this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
@@ -233,8 +237,10 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         senderId: host?.id, 
         senderUsername: host?.username, 
         roomName: info?.room?.name,
+        roomId: data.roomId,
         targetId: info?.targetId
       })
+      
     }
     catch(err){
       // if (guestUsername && hostId)
@@ -243,15 +249,30 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('declinedInviteChan')
-  async declinedInviteChan(@MessageBody() data: {roomName: string, targetId: string, senderId: string }, @ConnectedSocket() client: Socket){
-     if (!data || typeof data.roomName !== "string" || typeof data.targetId !== "string"){
+  @SubscribeMessage('acceptedInviteChan')
+  async acceptedInviteChan(@MessageBody() data: {roomId: number, targetId: string}, @ConnectedSocket() client: Socket){
+    if (!data || typeof data.roomId !== "number" || typeof data.targetId !== "string"){
       Logger.error("Wrong type for parameter")
       return 
     }
     try{
-      const username = await this.roomService.removeUserFromWhiteList(data.roomName, data.targetId)
-      this.server.to(`user-${data.senderId}`).emit('declinedNotification', username)
+      console.log('from acceptedInviteChan')
+      await this.roomService.addTargetInWhiteList(data.roomId, data.targetId)
+    }
+    catch(err){
+      Logger.error(err)
+    }
+  }
+  
+  @SubscribeMessage('declinedInviteChan')
+  async declinedInviteChan(@MessageBody() data: {roomName: string, targetId: string, senderId: string }, @ConnectedSocket() client: Socket){
+    if (!data || typeof data.roomName !== "string" || typeof data.targetId !== "string"){
+      Logger.error("Wrong type for parameter")
+      return 
+    }
+    try{
+      const target = await this.userService.findOneById(data?.targetId)
+      this.server.to(`user-${data.senderId}`).emit('declinedNotification', target?.username)
     }
     catch(err){
       Logger.error(err)
