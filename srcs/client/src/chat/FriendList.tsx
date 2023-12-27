@@ -29,7 +29,7 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
             const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friends/all`)
             setFriendsList(res.data)
         } catch(err) {
-            console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+            console.error(`${err?.response?.data?.message} (${err?.response?.data?.error})`)
         }
         return friendsList
     }      

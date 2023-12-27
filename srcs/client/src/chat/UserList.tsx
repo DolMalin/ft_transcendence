@@ -58,12 +58,8 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
 
     useEffect(() => {        
         const asyncWrapper = async () => {
-            try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 fetchUserList(res.data) 
-            }
-            catch(err){
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)} 
         }
         asyncWrapper();
         const interval = setInterval(asyncWrapper, 3000);
