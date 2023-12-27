@@ -154,6 +154,8 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
       })
     })
 
+
+
     props.gameSock?.on('duelAccepted', ({gameType, roomName, playerId}) => {
       
       props.gameSock?.emit('joinDuel', {gameType : gameType, roomName : roomName, playerId : playerId})

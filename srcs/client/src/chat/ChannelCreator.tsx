@@ -8,7 +8,7 @@ import {
 import ChannelCreationModal from "./ChannelCreationModal"
 import { Socket } from "socket.io-client"
  
-function ChannelCreator (props: {chatSocket: Socket}){
+function ChannelCreator (props: {chatSocket: Socket, setTargetRoom: Function}){
     const {isOpen, onOpen, onClose} = useDisclosure()
 
     return (
@@ -24,7 +24,7 @@ function ChannelCreator (props: {chatSocket: Socket}){
             >
                 Create channel
             </Button>
-            <ChannelCreationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
+            <ChannelCreationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket} setTargetRoom={props.setTargetRoom}/>
         </>
     )
 }

@@ -1,5 +1,5 @@
 import React , {useState, useEffect, useLayoutEffect} from "react";
-import { ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
+import { Button, ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
 import * as Chakra from '@chakra-ui/react'
 import { Chatbox } from "./Chatbox";
 import './chat.css'
@@ -9,6 +9,7 @@ import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
 import { CheckIcon, CloseIcon, EmailIcon } from "@chakra-ui/icons";
 import BasicToast from "../toast/BasicToast";
+import * as Constants from '../game/globals/const'
 
 
 export interface MessageData {
@@ -87,13 +88,11 @@ export function Chat(props: {socket: Socket}){
     const [privateChan, setPrivate] = useState(false)
     const [checked, setChecked] = useState(false)
     const [id, setId] = useState("")
-
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
         password: string | null
         privChan: string | null }[]>([])
-
     const [userList, setUserList] = useState
     <{  id: string
         username: string,
@@ -231,6 +230,58 @@ export function Chat(props: {socket: Socket}){
             setRoom(dm)
             setShowChat(true)
         })
+        props.socket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, targetId}) => {
+            const id = 'test-toast';
+            if(!toast.isActive(id)) {
+            toast({
+              id,  
+              duration: null,
+              render : () => ( <>
+                <BasicToast text={'You just got invited by ' + senderUsername  + ' to join ' + roomName + ' !'}>
+                    <Button onClick={() => {
+                        props.socket?.emit('declinedInviteChan', {roomName, targetId, senderId})
+                        toast.closeAll()}}
+                    bg={'none'}
+                    borderRadius={'0px'}
+                    fontWeight={'normal'}
+                    textColor={'white'}
+                    _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+                    > 
+                    No thanks !
+                    </Button>
+                    <Button onClick={() => {
+                        joinRoom({room: roomName, password: null})
+                        toast.closeAll()
+                    }}
+                    bg={'none'}
+                    borderRadius={'0px'}
+                    fontWeight={'normal'}
+                    textColor={'white'}
+                    _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+                    >
+                      Yes please ! 
+                    </Button>
+                  </BasicToast>
+                </>
+              ),
+              isClosable: true,
+            })
+          }})
+
+        
+        props.socket?.on('declinedNotification', (username: string) => {
+        const id = 'declined-toast';
+        if(!toast.isActive(id)){
+          toast({
+            id,
+            isClosable: true,
+            duration : 5000,
+            render : () => ( <>
+              <BasicToast text={`${username} declined your invitation `}/>
+          </>)
+          })
+        }
+      })
         return (() => {
             props.socket?.off('userBlocked')
             props.socket?.off('dmRoom')
@@ -281,7 +332,7 @@ export function Chat(props: {socket: Socket}){
     useEffect(() => { 
         fetchFriendRequestReceived()
     }, [props.socket])
-
+    
     return (
         <div>
         <mark>

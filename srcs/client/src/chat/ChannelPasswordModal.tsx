@@ -7,14 +7,13 @@ import * as Const from '../game/globals/const'
 import BasicToast from "../toast/BasicToast"
 import { Room } from "./Chat"
 
-function ChannelPasswordModal(props : {roomName: string, isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}){
+function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string, isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}){
 
     const { register: registerJoin, 
         handleSubmit: handleSubmitJoin, 
         reset: resetJoin, 
         formState: { errors: errorJoin }
     } = useForm()
-    const [room, setRoom] = useState<Room>()
     const toast = useToast();
 
 
@@ -25,10 +24,10 @@ function ChannelPasswordModal(props : {roomName: string, isOpen : boolean, onOpe
                 name: dt.room,
                 password: dt.password
             })
-            setRoom(res.data)
+            console.log(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.onClose()
-            // setShowChat(true)
+            props.setTargetRoom(res.data)
         }
         catch(err){
 

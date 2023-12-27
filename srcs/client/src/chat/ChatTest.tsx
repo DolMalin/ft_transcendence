@@ -128,7 +128,7 @@ console.log('rerender in ChatText.tsx')
             justifyContent='center'
             alignItems='center'
             >
-                <ChannelCreator chatSocket={props.chatSocket}/>
+                <ChannelCreator chatSocket={props.chatSocket} setTargetRoom={setTargetRoom}/>
             </Flex>
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />

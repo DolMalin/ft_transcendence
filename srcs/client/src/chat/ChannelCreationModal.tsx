@@ -20,13 +20,11 @@ import { Socket } from "socket.io-client"
 import BasicToast from "../toast/BasicToast"
 
   function 
-  ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}) {
+  ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {
     
     const toast = useToast();
     const [checked, setChecked] = useState(false)
-    const [room, setRoom] = useState<Room>()
     const [privateChan, setPrivate] = useState(false)
-    const [showChat, setShowChat] = useState(false)
     const { register: registerCreate, 
             handleSubmit: handleSubmitCreate, 
             reset: resetCreate, 
@@ -55,10 +53,10 @@ import BasicToast from "../toast/BasicToast"
                 name: dt.room,
                 password: dt.password
             })
-            setRoom(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.chatSocket.emit('channelCreation');
-            setShowChat(true)
+            props.setTargetRoom(res.data)
+            props.onClose()
         }
         catch(err){
 

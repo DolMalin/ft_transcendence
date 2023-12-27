@@ -9,7 +9,7 @@ export class JoinRoomDto {
     
     @IsString()
     @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-    @MaxLength(20)
+    @MaxLength(74)
     name: string
 
     @IsString()
