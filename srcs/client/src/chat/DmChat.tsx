@@ -82,7 +82,6 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                   })
             }
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-            console.log(err);
         }
     }
 
@@ -106,7 +105,6 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                console.log('them : ', props.room?.name.replace(res.data.id, ''));
                 const themRes = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/' + trimDashes(props.room?.name.replace(res.data.id, '')))
                 setThem(themRes.data);
             }
@@ -131,7 +129,7 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             >
                 <Avatar
                 boxSize={'76px'}
-                src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + them?.id}
+                src={them !== undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + them?.id : ''}
                 margin={'10px'}
                 > </Avatar>
                 <Text margin={'10px'}> {them?.username} </Text>
