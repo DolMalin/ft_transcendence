@@ -14,44 +14,6 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
     const {isOpen, onOpen, onClose} = useDisclosure()
     const toast = useToast();
 
-    async function changePassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/changePassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully updated."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response?.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.error}/>
-                    </>)
-                  })
-            }
-            if (err.response?.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
     async function removePassword(roomId: number){
         try{
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
@@ -59,44 +21,6 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 duration: 5000,
                 render : () => ( <> 
                     <BasicToast text="Password have been successfully removed."/>
-                </>)
-              })
-        }
-        catch(err){
-            if (err.response?.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.error}/>
-                    </>)
-                  })
-            }
-            if (err.response?.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    async function setPassword(roomId: number, password: string){
-        try{
-            await authService.post(process.env.REACT_APP_SERVER_URL + '/room/setPassword', 
-            {
-                roomId: roomId, 
-                password: password
-            })
-            toast({
-                duration: 5000,
-                render : () => ( <> 
-                    <BasicToast text="Password have been successfully set."/>
                 </>)
               })
         }
