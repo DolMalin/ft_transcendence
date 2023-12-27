@@ -75,7 +75,7 @@ async function getFriendRequestsReceived() {
     return friendRequestsReceived
 }
 
-export function Chat(props: {socket: Socket}){
+export function Chat(props: {socket: Socket, gameSocket : Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [me, setMe] = useState<
     {
@@ -489,10 +489,10 @@ export function Chat(props: {socket: Socket}){
             </div>
             )
             : (
-            <Chatbox socket={props.socket} room={room} showChat={setShowChat}/>
+            <Chatbox socket={props.socket} gameSocket={props.gameSocket} room={room} showChat={setShowChat}/>
             )}
         </div>                
-        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket}/>
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} gameSock={props.gameSocket}/>
         </div>
     )
 }

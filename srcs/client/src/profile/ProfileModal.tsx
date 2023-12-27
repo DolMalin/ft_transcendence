@@ -22,7 +22,7 @@ import BasicToast from "../toast/BasicToast";
 
 
 
-function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock? : Socket, chatSocket?: Socket}) {
+function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () => void , onClose : () => void, gameSock : Socket, chatSocket: Socket}) {
 
     const [user, setUser] = useState<any>(null);
     const [isYourself, setIsYoursellf] = useState(false);
@@ -441,7 +441,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
 
                 </Flex>
-                <PlayerHistoryAccordion userId={user?.id}/>
+                <PlayerHistoryAccordion userId={user?.id} gameSocket={props.gameSock} chatSocket={props.chatSocket}/>
 
             </ModalContent>
     </Modal>);

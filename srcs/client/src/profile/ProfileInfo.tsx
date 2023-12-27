@@ -6,7 +6,7 @@ import { LeftBracket, RightBracket } from '../game/game-creation/Brackets'
 import PlayerHistoryAccordion from './PlayerHistoryAccordion';
 import { Socket } from 'socket.io-client';
 
-function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
+function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
     const [user, setUser] = useState(undefined);
     const [fontSize, setFontSize] = useState(window.innerWidth > 1300 ? '2em' : '1em');
     const [accordionFontSize, setAccordionFontSize] = useState(window.innerWidth > 800 ? '1em' : '0.75em');
@@ -118,7 +118,7 @@ function ProfileInfo( props : {gameSock? : Socket, chatSock? : Socket}) {
                 <Text textAlign={'center'} fontSize={fontSize}> {user?.loosesAmount} </Text>
               </Box>
               <Box width={'100%'}>
-                <PlayerHistoryAccordion userId={user?.id} isOpen={true} fontSize={accordionFontSize} gameSocket={props.gameSock}/>
+                <PlayerHistoryAccordion userId={user?.id} isOpen={true} fontSize={accordionFontSize} gameSocket={props.gameSock} chatSocket={props.chatSock}/>
               </Box>
             </Flex>
         </Box>

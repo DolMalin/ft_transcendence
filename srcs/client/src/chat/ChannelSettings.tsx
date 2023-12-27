@@ -140,9 +140,22 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                     ><DragHandleIcon color={'white'}/></Button>
                 </PopoverTrigger>
                 <Portal>
-                    <PopoverContent>
-                        <PopoverBody>
-                            <Button onClick={() => leaveChan(props.room.id)}>
+                    <PopoverContent
+                    bg={'white'}
+                    border={'none'}
+                    >
+                        <PopoverBody display={'flex'}
+                        flexDir={'column'}
+                        className="goma"
+                        >
+                            <Button onClick={() => leaveChan(props.room.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 leave
                             </Button>
                         </PopoverBody>

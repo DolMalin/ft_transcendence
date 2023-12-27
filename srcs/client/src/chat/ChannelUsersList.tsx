@@ -13,7 +13,6 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
 
     const [isOp, setIsOp] = useState(false)
     const toast = useToast();
-    const toastId = 'toast';
     const [listToDisplay, setListToDisplay] = useState('users')
     const [rerender, setRerender] = useState(false)
     const [userList, setUserList] = useState
@@ -94,19 +93,24 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
     useEffect(function sockEvents() {
 
         function forceRender() {
+
           if (rerender === true)
             setRerender(false)
           else if (rerender === false)
             setRerender(true);
+
+          
         };
         props.chatSocket?.on('channelUpdate', forceRender);
   
         props.chatSocket?.on('userJoined', forceRender);
 
         props.chatSocket?.on('userLeft', forceRender);
+
+        props.chatSocket?.on('timeoutEnd', forceRender);
   
-        props.chatSocket?.on('youGotBanned', () => {
-  
+        props.chatSocket?.on('youGotBanned', (roomId) => {
+          
           const id = 'test-toast';
           if(!toast.isActive(id)) {
             toast({
@@ -124,6 +128,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           props.chatSocket?.off('channelUpdate');
           props.chatSocket?.off('userJoined');
           props.chatSocket?.off('userleft');
+          props.chatSocket?.off('youGotBanned');
+          props.chatSocket?.off('timeoutEnd');
         })
       }, [props.chatSocket, rerender])
 
