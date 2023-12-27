@@ -27,7 +27,7 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+        console.error(`${err?.response?.data.message} (${err?.response?.data?.error})`)
     }
     return roomList
 }
