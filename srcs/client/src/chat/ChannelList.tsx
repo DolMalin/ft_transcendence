@@ -4,7 +4,10 @@ import {
     Link,
     useDisclosure,
     useToast,
-    useColorMode
+    useColorMode,
+    Input,
+    InputGroup,
+    InputLeftElement
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
@@ -13,7 +16,8 @@ import BasicToast from "../toast/BasicToast"
 import ChannelPasswordModal from "./ChannelPasswordModal"
 import { Room } from "./interface"
 import * as Constants from '../game/globals/const'
-import { LockIcon } from "@chakra-ui/icons"
+import { LockIcon, SearchIcon } from "@chakra-ui/icons"
+import { Chat } from "./Chat"
 
 
 async function getRoomList(){
@@ -37,7 +41,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     const toast = useToast()
     const [roomName, setRoomName] = useState<string>()
     const [hoveredRoom, setHoveredRoom] = useState<string | null>(null)
-    const [room, setRoom] = useState<Room>()
+    const [roomnamesNarrower, setRoomnamesNarrower] = useState('')
     const { colorMode } = useColorMode()
     const [roomList, setRoomList] = useState
     <{  id: number
@@ -52,7 +56,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 name: dt.room,
                 password: dt.password
             })
-            setRoom(res.data);
             props.setTargetRoom(res.data);
             props.chatSocket?.emit("joinRoom", res.data.id);
             // setShowChat(true)
@@ -85,11 +88,35 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
 
     const fetchRoom = async () => {
         const rooms = await getRoomList()
-        setRoomList(rooms)
+
+        if (roomnamesNarrower === '')
+          setRoomList(rooms);
+        else (setRoomList(() => {
+          return (rooms.filter((room) => room.name.toLocaleLowerCase().includes(roomnamesNarrower.toLocaleLowerCase())));
+        }))
     }
     useEffect(() => {
         fetchRoom()
     }, [])
+
+    useEffect(function socketEvents() {
+
+      props.chatSocket?.on('channelCreated', () => {
+        fetchRoom();
+      });
+
+      return (() => {
+        props.chatSocket?.off('channelCreated');
+      })
+    }, [props.chatSocket])
+
+    useEffect(() => {
+      fetchRoom()
+    }, [roomnamesNarrower])
+
+    function handleChange(event : React.ChangeEvent<HTMLInputElement>) {
+      setRoomnamesNarrower(event.target.value)
+    }
 
     return (
         <>
@@ -104,6 +131,17 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}>
               Channel List
             </Text>
+
+            <InputGroup>
+              <InputLeftElement pointerEvents='none'>
+                <SearchIcon color='gray.300' />
+              </InputLeftElement>
+              <Input value={roomnamesNarrower} onChange={handleChange}
+              marginBottom={'10px'}
+              focusBorderColor="black"
+              _focus={{bg : 'white', textColor : 'black'}}
+              />
+            </InputGroup>
     
             {roomList?.length > 0 && (
               roomList.map((room, index: number) => {
@@ -163,6 +201,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             )}
           </Flex>
           <ChannelPasswordModal
+            setTargetRoom={props.setTargetRoom}
             roomName={roomName}
             isOpen={isOpen}
             onClose={onClose}

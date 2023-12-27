@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, NotFoundException, StreamableFile, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -78,6 +78,10 @@ export class UsersService {
     return this.userRepository.findOneBy({ id })
   }
   
+  async findOneByName(username: string){
+    return await this.userRepository.findOneBy({username})
+}
+
   async findOneByIdWithBlockRelation(id: string) {
     const user = await this.userRepository
     .createQueryBuilder('user')

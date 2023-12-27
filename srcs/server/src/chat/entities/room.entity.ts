@@ -25,6 +25,9 @@ export class Room {
     @Column({type: 'enum', enum: roomType, nullable: true})
     type: roomType
 
+    @Column({type : 'text', default : null, array : true, nullable : true})
+    whitelist: string[]
+
     @ManyToOne(() => User, user => user.id)
     owner: User
 

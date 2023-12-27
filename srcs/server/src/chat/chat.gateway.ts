@@ -62,7 +62,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
   }
   
-  // @UseGuards('')
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     if (typeof roomId !== "number"){
@@ -189,7 +188,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       server.to(`user-${user.id}`).emit("userBlocked", 
       {
         title: 'You cannot direct message this user',
-        desc: 'You cannot send or receive direct message from someone you have blocked or have been blocked by'
+        desc: 'you cannot send or receive direct message from someone you have blocked or have been blocked by'
       })
       return
     }
@@ -215,6 +214,49 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     catch (err) {
       Logger.error(err)
     } 
+  }
+
+  @SubscribeMessage('invitePrivateChannel')
+  async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
+    console.log('data', data)
+    if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){
+      Logger.error("Wrong type for parameter")
+      return 
+    }
+    let hostId = client.handshake.query?.userId as string
+    try{
+      const info = await this.roomService.addTargetInWhiteList(data.roomId, data.guestUsername)
+      const host = await this.userService.findOneById(hostId)
+      this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
+      this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
+      {
+        senderId: host?.id, 
+        senderUsername: host?.username, 
+        roomName: info?.room?.name,
+        targetId: info?.targetId
+      })
+    }
+    catch(err){
+      // if (guestUsername && hostId)
+      //   this.server.to(`user-${hostId}`).emit('chanInviteError', guestUsername)
+      Logger.error(err)
+    }
+  }
+
+  @SubscribeMessage('declinedInviteChan')
+  async declinedInviteChan(@MessageBody() data: {roomName: string, targetId: string, senderId: string }, @ConnectedSocket() client: Socket){
+     if (!data || typeof data.roomName !== "string" || typeof data.targetId !== "string"){
+      Logger.error("Wrong type for parameter")
+      return 
+    }
+    try{
+      console.log('data', data)
+      const username = await this.roomService.removeUserFromWhiteList(data.roomName, data.targetId)
+      this.server.to(`user-${data.senderId}`).emit('declinedNotification', username)
+    }
+    catch(err){
+      Logger.error(err)
+    }
   }
 
   @SubscribeMessage('friendRequestSended')
@@ -244,6 +286,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     
     this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
+  }
+
+  @SubscribeMessage('channelCreation')
+  event(@ConnectedSocket() client: Socket) {
+
+    this.server.sockets.emit('channelCreated');
   }
   
   @SubscribeMessage('channelRightsUpdate')
