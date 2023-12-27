@@ -11,19 +11,19 @@ export class FtAuthGuard implements CanActivate {
 		const code = req.query.code
 		
 		if (!code?.length)
-			return false
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `no code provided`})
 		
 		const token = await this.authService.getFtToken(code)
 		if (!token)
-			throw new UnauthorizedException()
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `cannot fetch 42 token`})
 			
 		const ftId = await this.authService.getFtId(token)
 		if (!ftId)
-			throw new UnauthorizedException()
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `cannot fetch 42 id`})
 	
 		req.user = await this.authService.validateUser(ftId)
 		if (!req.user)
-			throw new InternalServerErrorException()
+			throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot create or validate user'})
 		return true
 	}
 }
