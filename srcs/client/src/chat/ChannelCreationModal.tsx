@@ -54,6 +54,7 @@ import BasicToast from "../toast/BasicToast"
                 password: dt.password
             })
             props.chatSocket?.emit("joinRoom", res.data.id)
+            props.chatSocket.emit('channelCreation');
             props.setTargetRoom(res.data)
             props.onClose()
         }

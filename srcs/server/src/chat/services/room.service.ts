@@ -259,6 +259,9 @@ export class RoomService {
             room.users.forEach(user => {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
+                    if (room.owner?.id === userId){
+                        room.owner = null
+                    }
                 }
             })
             await this.roomRepository.save(room)

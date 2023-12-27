@@ -62,7 +62,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     this.chatDTO.clientID = this.chatDTO.clientID.filter(id => id != client.id);
   }
   
-  // @UseGuards('')
   @SubscribeMessage('joinRoom')
   joinRoom(@MessageBody() roomId: number, @ConnectedSocket() client : Socket): void {
     if (typeof roomId !== "number"){
@@ -287,6 +286,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     
     this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
+  }
+
+  @SubscribeMessage('channelCreation')
+  event(@ConnectedSocket() client: Socket) {
+
+    this.server.sockets.emit('channelCreated');
   }
   
   @SubscribeMessage('channelRightsUpdate')

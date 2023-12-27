@@ -82,7 +82,6 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                   })
             }
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-            console.log(err);
         }
     }
 
@@ -96,17 +95,18 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
         })
     }, [props.chatSocket])
 
+    function trimDashes(str : string) {
+        return str.at(0) === '-' ? str.substring(1) : str.substring(0, str.length - 1)
+    }
+
     useEffect(() => {
       
         const asyncWrapper = async () => {
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                console.log('them : ', props.room?.name.replace(me?.id, '').replace(/^(-)+|(-)+$/g, ''));
-                console.log('me : ', me.id);
-                const themRes = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/' + props.room?.name.replace(res.data.id, '').replace(/^(-)+|(-)+$/g, ''))
+                const themRes = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/' + trimDashes(props.room?.name.replace(res.data.id, '')))
                 setThem(themRes.data);
-                console.log('them : ')
             }
             catch(err){
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
@@ -129,7 +129,7 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             >
                 <Avatar
                 boxSize={'76px'}
-                src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + them?.id}
+                src={them !== undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + them?.id : ''}
                 margin={'10px'}
                 > </Avatar>
                 <Text margin={'10px'}> {them?.username} </Text>
