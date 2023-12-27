@@ -77,7 +77,6 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                   </>)
                   })
             }
-            console.log(err)
             console.error(err)
         }
     }
@@ -88,14 +87,12 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
         if (data.room.id === props.room.id)
         {
             setMessageList((list) => [...list, data])
-
-            console.log('current : ', scrollToBottomRef.current)
         }
         })
         return (() => {
-            props.chatSocket?.off("reveiveMessage")
+            props.chatSocket?.off("receiveMessage")
         })
-    }, [props.chatSocket])
+    }, [props.room])
 
     useEffect(() => {
       

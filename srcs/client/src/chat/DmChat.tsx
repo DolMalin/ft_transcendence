@@ -87,13 +87,16 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
 
     useEffect(() => {
         props.chatSocket?.on("receiveMessage", (data: MessageData) => {
-        //si bloque --> pas ca
-        setMessageList((list) => [...list, data])
+
+        if (data.room.id === props.room.id)
+        {
+            setMessageList((list) => [...list, data])
+        }
         })
         return (() => {
-            props.chatSocket?.off("reveiveMessage")
+            props.chatSocket?.off("receiveMessage")
         })
-    }, [props.chatSocket])
+    }, [props.room])
 
     function trimDashes(str : string) {
         return str.at(0) === '-' ? str.substring(1) : str.substring(0, str.length - 1)
