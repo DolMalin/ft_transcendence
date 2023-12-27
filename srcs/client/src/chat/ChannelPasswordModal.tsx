@@ -24,6 +24,7 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
                 name: dt.room,
                 password: dt.password
             })
+            console.log(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.onClose()
             props.setTargetRoom(res.data)
