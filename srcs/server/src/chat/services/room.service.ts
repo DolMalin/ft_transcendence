@@ -193,11 +193,16 @@ export class RoomService {
             {
                 cause: new Error(), 
                 description: "cannot find any users in database"
-            })
+            })   
+        
+        console.log(room.owner)
         if (room.users){
             room.users.forEach(user => {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
+                    if (room.owner?.id === userId){
+                        room.owner = null
+                    }
                 }
             })
             await this.roomRepository.save(room)
