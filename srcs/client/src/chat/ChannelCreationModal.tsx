@@ -57,6 +57,7 @@ import BasicToast from "../toast/BasicToast"
             })
             setRoom(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
+            props.chatSocket.emit('channelCreation');
             setShowChat(true)
         }
         catch(err){
