@@ -1,7 +1,8 @@
-import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useToast } from "@chakra-ui/react";
-import React from "react";
+import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useDisclosure, useToast } from "@chakra-ui/react";
+import React, { useState } from "react";
 import BasicToast from "../toast/BasicToast";
 import authService from "../auth/auth.service";
+import PasswordSettingsModal from "./PasswordSettingsModal";
 import { Socket } from "socket.io-client";
 import { Room } from "./Chat";
 import { DragHandleIcon } from "@chakra-ui/icons";
@@ -9,6 +10,8 @@ import * as Constants from '../game/globals/const';
 
 function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boolean, setTargetChannel : Function}) {
 
+    const [action, setAction] = useState("")
+    const {isOpen, onOpen, onClose} = useDisclosure()
     const toast = useToast();
 
     async function changePassword(roomId: number, password: string){
@@ -143,59 +146,66 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                     bg={'white'}
                     border={'none'}
                     >
-                        <PopoverBody display={'flex'}
-                        flexDir={'column'}
-                        className="goma"
+                    <PopoverBody display={'flex'}
+                    flexDir={'column'}
+                    className="goma"
+                    >
+                        <Button onClick={() => {
+                            onOpen()
+                            setAction('setPass')
+                        }}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            <Button onClick={() => setPassword(props.room.id, "motdepasse")}
-                            borderRadius={'0px'}
-                            margin={'10px'}
-                            bg={Constants.BG_COLOR}
-                            fontWeight={'normal'}
-                            textColor={'white'}
-                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
-                            >
-                                Set password
-                            </Button >
-                            <Button onClick={() => changePassword(props.room.id, "motdepassebise")}
-                            borderRadius={'0px'}
-                            margin={'10px'}
-                            bg={Constants.BG_COLOR}
-                            fontWeight={'normal'}
-                            textColor={'white'}
-                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
-                            >
-                                change password
-                            </Button>
-                            <Button onClick={() => removePassword(props.room.id)}
-                            borderRadius={'0px'}
-                            margin={'10px'}
-                            bg={Constants.BG_COLOR}
-                            fontWeight={'normal'}
-                            textColor={'white'}
-                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
-                            >
-                                remove password
-                            </Button>
-                            <Button onClick={() => leaveChan(props.room.id)}
-                            borderRadius={'0px'}
-                            margin={'10px'}
-                            bg={Constants.BG_COLOR}
-                            fontWeight={'normal'}
-                            textColor={'white'}
-                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
-                            >
-                                leave
-                            </Button>
-                        </PopoverBody>
+                            Set password
+                        </Button >
+                        <Button onClick={() => {
+                            onOpen()
+                            setAction('changePass')
+                        }}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                        >
+                            change password
+                        </Button>
+                        <Button onClick={() => removePassword(props.room.id)}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                        >
+                            remove password
+                        </Button>
+                        <Button onClick={() => leaveChan(props.room.id)}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                        >
+                            leave
+                        </Button>
+                    </PopoverBody>
                     </PopoverContent>
                 </Portal>
                 </Popover>
             </Link>
+        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </>
     }
     else {
-
+        
         return (<>
             <Link>
                 <Popover>
@@ -221,3 +231,4 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
 }
 
 export default ChannelSettings
+

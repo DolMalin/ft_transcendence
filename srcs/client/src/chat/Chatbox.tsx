@@ -83,7 +83,12 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
         sendMessage(data.message)
         setValue('message', '')
     }
-
+    const { 
+      register: registerInvite, 
+      handleSubmit: handleSubmitInvite, 
+      reset: resetInvite, 
+      formState: { errors: errorJoin }} = useForm()
+    
     const sendMessage = async (currentMessage: string) => {
         try {
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
@@ -254,8 +259,39 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
           })
         }
       })
+
+      props.socket?.on('chanInvite', (guestUsername: string) => {
+        const id = 'invite-toast';
+        if(!toast.isActive(id)){
+          toast({
+            id,
+            isClosable: true,
+            duration : 2000,
+            render : () => ( <>
+              <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
+          </>)
+          })
+        }
+      })
+  
+      // props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
+      //   const id = 'invite-toast';
+      //   if(!toast.isActive(id)){
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <>
+      //         <BasicToast text={`You received an invitation from ${hostUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
+
       return () => {
         props.socket?.off('channelLeft')
+        props.socket?.off('kickBy')
+        props.socket?.off('kicked')
       }
     })
 
@@ -273,11 +309,46 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
       
       setMessageList(props.room.message? props.room.message: [])
     }, [])
+
+
+    const onSubmitInvite = (data: {friend: string}) => {
+      console.log('friend', data.friend)
+      props.socket?.emit('invitePrivateChannel', {roomId: props.room.id, guestUsername: data.friend})
+      resetInvite()
+  }
     //TODO faire en sorte que la userlist re render
     //TODO limiter le nombre de message qu on peut recevoir
     //TODO limiter le nombre de message que je charge
     return (
         <div>
+          <Chakra.Popover>
+            <Chakra.PopoverTrigger>
+              <Chakra.Button>
+                invite
+              </Chakra.Button>
+            </Chakra.PopoverTrigger>
+            <Chakra.PopoverContent>
+              <Chakra.PopoverArrow />
+              <Chakra.PopoverCloseButton />
+              <Chakra.PopoverBody>
+              <form onSubmit={handleSubmitInvite(onSubmitInvite)}>
+                        <Chakra.FormControl isRequired>
+                            <Chakra.Input
+                                type="text"
+                                placeholder="Invite your friend !"
+                                {
+                                    ...registerInvite("friend", {
+                                        required: "enter friend name",
+                                    })
+                                }
+                            />
+                        </Chakra.FormControl>
+                        
+                    <Chakra.Button type='submit'>invite</Chakra.Button>
+                    </form>       
+              </Chakra.PopoverBody>
+            </Chakra.PopoverContent>
+          </Chakra.Popover>
           <mark>
             <h2>User list</h2>
           </mark>

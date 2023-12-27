@@ -134,21 +134,20 @@ function UserInUsersList(props : {username : string, userId : string,
     }
 
     function kick(roomId: number, targetId: string){
-        console.log('room kicked from : ', roomId)
         props.chatSock?.emit('kick', {roomId: roomId, targetId: targetId})
     }
-
+    
     useEffect(() => {
-    async function asyncWrapper() {
-        try {
-            const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-            {targetId : props?.userId, roomName : props.room?.name});
-
-            if(privi.data === 'isOwner')
-            {
-                setPriviColor('blue')
-                setTargetIsOp('isOwner')
-            }
+        async function asyncWrapper() {
+            try {
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+                {targetId : props?.userId, roomName : props.room?.name});
+                
+                if(privi.data === 'isOwner')
+                {
+                    setPriviColor('blue')
+                    setTargetIsOp('isOwner')
+                }
             else if(privi.data === 'isAdmin')
             {
                 setPriviColor('green')
@@ -164,13 +163,12 @@ function UserInUsersList(props : {username : string, userId : string,
                 setPriviColor('grey')
                 setTargetIsOp('no')
             }
+            }
+            catch (err) {
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
         }
-        catch (err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    asyncWrapper();
+        asyncWrapper();
     })
 
 
