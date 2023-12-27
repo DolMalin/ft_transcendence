@@ -10,7 +10,6 @@ import { toDataURL } from 'qrcode'
 import { Avatar } from 'src/users/entities/avatar.entity';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,7 +17,6 @@ export class AuthService {
     private jwtService: JwtService,
 
   ) { }
-
 
   /**
    * @description Build the url that redirects to the 42 auth app
@@ -30,7 +28,6 @@ export class AuthService {
     url.searchParams.set('response_type', 'code')
     return ({ url: url.toString() })
   }
-
 
   /**
    * @description Send a post request to the 42 api with the `callback code` and fetch the 42 auth `token` 
