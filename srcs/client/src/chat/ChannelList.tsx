@@ -8,8 +8,8 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
-    Button,
-    Tooltip
+    Tooltip,
+    Button
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
@@ -60,6 +60,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 password: dt.password
             })
             props.setTargetRoom(res.data);
+            console.log(res.data.id)
             props.chatSocket?.emit("joinRoom", res.data.id);
         }
         catch(err){
@@ -134,7 +135,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     useEffect(() => {
 
       props.chatSocket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, roomId, targetId}) => {
-        console.log('AALLLLLOOOOOOOOO')
         const id = 'invite-toast'
         if(!toast.isActive(id)) {
         toast({
@@ -155,9 +155,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 No thanks !
                 </Button>
                 <Button onClick={() => {
-                  console.log('from onclick')
                     props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, roomName: roomName, targetId: targetId})
-                    // joinRoom({room: roomName, password: null})
                     toast.closeAll()
                 }}
                 bg={'none'}
