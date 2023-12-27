@@ -110,6 +110,16 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         >
                             remove password
                         </Button>
+                        <Button onClick={() => {}}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                        >
+                            Invite someone
+                        </Button>
                         <Button onClick={() => leaveChan(props.room.id)}
                         borderRadius={'0px'}
                         margin={'10px'}
