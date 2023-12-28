@@ -151,6 +151,12 @@ export class RoomService {
 
     
     async joinRoom(dto: JoinRoomDto, user: User){
+
+        if (dto?.password === null){
+            throw new NotFoundException('You need a password', 
+            {cause: new Error(), description: 'This channel is protected by a password.'})
+        }
+        
         const room = await this.roomRepository
             .createQueryBuilder('room')
             .leftJoinAndSelect('room.message', 'message')
@@ -163,10 +169,15 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
 
-        const userRelation = await this.userService.findOneByIdWithBlockRelation(user.id)
         if (!room) 
             throw new ForbiddenException('room does not exist')
 
+        const userRelation = await this.userService.findOneByIdWithBlockRelation(user?.id)
+        if (!userRelation){
+            throw new NotFoundException('User not found', 
+            {cause: new Error(), description: 'User does not exist in database'})
+        }
+       
         if (this.isBanned(room, user))
             throw new ConflictException('Banned user', 
             {cause: new Error(), description: 'you are banned in channel ' + room.name} )
@@ -178,8 +189,10 @@ export class RoomService {
                     description: "You have to be whitelisted to join this channel",
             })}
             
-        }
-        if (room.password?.length > 0){
+        } 
+        
+        if (room?.password?.length > 0 && room.password){
+            console.log('test')
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
@@ -190,8 +203,6 @@ export class RoomService {
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
         } 
-        // room.users.forEach((user) => this.userService.removeProtectedProperties(user))
-        // room.message.forEach((message) => this.userService.removeProtectedProperties(message.author))
         if (room?.password){
             room.password = undefined
         }
