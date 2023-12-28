@@ -11,18 +11,16 @@ export class CreateGameDto {
     @IsUUID()
     looserId : string;
 
-    @IsString()
-	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-	@MinLength(6)
+	@IsString()
+	@MinLength(3)
 	@MaxLength(20)
-	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
     winnerUsername : string;
 
-    @IsString()
-	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-	@MinLength(6)
+	@IsString()
+	@MinLength(3)
 	@MaxLength(20)
-	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
     looserUsername : string;
 
     @IsNumber()
