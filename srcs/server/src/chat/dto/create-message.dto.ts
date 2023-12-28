@@ -5,8 +5,8 @@ import * as sanitizeHtml from 'sanitize-html'
 
 export class CreateMessageDto {
 
+    // Escape
     @IsString()
-    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     @MinLength(1)
     @Matches(/^(?!\s*$).+/, {message: "message must not contains only spaces"})
 	@MaxLength(1000)
@@ -15,8 +15,10 @@ export class CreateMessageDto {
     @IsNumber()
     roomId : number;
 
-    @IsString()
-	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
+	@IsString()
+	@MinLength(3)
+	@MaxLength(20)
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
     authorName: string
 
     @IsUUID()

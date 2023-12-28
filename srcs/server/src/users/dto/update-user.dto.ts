@@ -8,7 +8,6 @@ import { TransformFnParams } from 'class-transformer'
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@IsString()
-	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
 	@MinLength(3)
 	@MaxLength(20)
 	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
@@ -28,6 +27,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	isLogged?: boolean
 
 	@IsOptional()
+	@IsString()
 	twoFactorAuthenticationSecret?: string
 
 	@IsBoolean()
