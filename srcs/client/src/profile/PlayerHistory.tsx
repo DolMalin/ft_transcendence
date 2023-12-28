@@ -19,8 +19,9 @@ import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
 import { DBGame } from "../game/globals/interfaces";
 import ProfileModal from "./ProfileModal";
+import { Socket } from "socket.io-client";
 
-function PlayerHistory(props : {userId : string}) {
+function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket : Socket}) {
 
     const [history, setHistory] = useState<DBGame[]>([]);
     const {isOpen, onOpen, onClose} = useDisclosure();
@@ -78,6 +79,6 @@ function PlayerHistory(props : {userId : string}) {
         })}
         </Tbody>
     </Table>
-    <ProfileModal userId={adversaryId} isOpen={isOpen} onClose={onClose} onOpen={onOpen}/>
+    <ProfileModal userId={adversaryId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
     </>)
 }

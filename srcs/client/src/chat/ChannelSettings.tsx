@@ -125,7 +125,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 </Portal>
                 </Popover>
             </Link>
-        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
         </>
     }
     else {
@@ -140,9 +140,22 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                     ><DragHandleIcon color={'white'}/></Button>
                 </PopoverTrigger>
                 <Portal>
-                    <PopoverContent>
-                        <PopoverBody>
-                            <Button onClick={() => leaveChan(props.room.id)}>
+                    <PopoverContent
+                    bg={'white'}
+                    border={'none'}
+                    >
+                        <PopoverBody display={'flex'}
+                        flexDir={'column'}
+                        className="goma"
+                        >
+                            <Button onClick={() => leaveChan(props.room.id)}
+                            borderRadius={'0px'}
+                            margin={'10px'}
+                            bg={Constants.BG_COLOR}
+                            fontWeight={'normal'}
+                            textColor={'white'}
+                            _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                            >
                                 leave
                             </Button>
                         </PopoverBody>

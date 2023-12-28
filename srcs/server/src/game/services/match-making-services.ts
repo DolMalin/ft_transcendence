@@ -274,7 +274,6 @@ export class MatchmakingService {
                 return ;
             }
 
-            console.log(this.userService.isAlreadyBlocked(target, sender));
             if (this.userService.isAlreadyBlocked(target, sender) === true)
             {
               this.userService.emitToAllSockets(server, sender.gameSockets, 'blockedYou', {username : target.username})

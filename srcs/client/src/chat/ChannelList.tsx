@@ -58,7 +58,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             })
             props.setTargetRoom(res.data);
             props.chatSocket?.emit("joinRoom", res.data.id);
-            // setShowChat(true)
         }
         catch(err){
 
@@ -88,6 +87,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
 
     const fetchRoom = async () => {
         const rooms = await getRoomList()
+        console.log(rooms)
 
         if (roomnamesNarrower === '')
           setRoomList(rooms);
@@ -105,8 +105,16 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         fetchRoom();
       });
 
+      props.chatSocket?.on('channelStatusUpdate', () => {
+
+        console.log('SOCK ON')
+
+        fetchRoom();
+      })
+
       return (() => {
         props.chatSocket?.off('channelCreated');
+        props.chatSocket?.off('channelStatusUpdate');
       })
     }, [props.chatSocket])
 

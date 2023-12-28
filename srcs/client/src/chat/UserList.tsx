@@ -35,7 +35,7 @@ async function getUserList(me : {username: string, id: string}){
     return userList
 }
 
-function UserList(props: {chatSocket: Socket}){
+function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")
     const [userList, setUserList] = useState
@@ -111,34 +111,9 @@ function UserList(props: {chatSocket: Socket}){
                     </Flex>
             )
         })}
-        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket}/>
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
 </Flex>
 </>)
 }
-
-
-//     return (
-//         <>
-//         <Flex width='100%' flexDir='column'>
-//         <Text fontSize='2xl' textColor='white' paddingBottom='10px' textAlign='center'>User list</Text>
-//         {userList?.length > 0 && (
-//         userList.map((user, index: number) => (
-//             <UnorderedList key={index} width='100%' paddingLeft='10px'>
-//                 <ListItem><Link color='white' onClick={() => {onOpen() ; setId(user.id)}}>{user.username} {user.isuser ? "👥" :""}</Link></ListItem>
-//                 {/* <IconButton
-//                     variant='outline'
-//                     colorScheme='teal'
-//                     aria-label='Send email'
-//                     icon={<EmailIcon />}
-//                     onClick={() => {}}
-//                 /> */}
-//             </UnorderedList>
-//         ))
-//         )}
-//         <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket}/>
-//         </Flex>
-//         </>
-//     )
-// }
 
 export default UserList

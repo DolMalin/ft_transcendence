@@ -49,7 +49,7 @@ async function getUserList(roomId: number, me : {username: string, id: string}){
 }
 
 
-export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
+export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, gameSocket : Socket}) {
     
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [rerender, setRerender] = useState(false)
@@ -411,7 +411,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
               </form>
             </div>
-            <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} />
+            <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} gameSock={props.gameSocket}/>
           </div>
         </div>
       );

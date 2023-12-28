@@ -9,6 +9,7 @@ import { Message } from './entities/message.entity';
 import { RoomService } from './services/room.service';
 import { UpdatePrivilegesDto } from './dto/update-privileges.dto';
 import { type } from 'os';
+import { delay, timeout } from 'rxjs';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -84,6 +85,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       const userId =  client.handshake.query?.userId as string
       await this.roomService.leaveRoom(roomId, userId)
       this.server.to(`user-${userId}`).emit('channelLeft')
+      this.server.to(`room-${roomId}`).emit('channelUpdate');
       client.leave(`room-${roomId}`)
     }
     catch(err){
@@ -105,7 +107,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     const userId = client.handshake.query?.userId as string
     try{
       const array = await this.roomService.kick(data.roomId, userId, data.targetId)
-      console.log('emit in back');
       this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
       this.server.to(`user-${userId}`).emit('kicked', array[1])//TODO send le username pas le id
       this.server.to(`room-${data.roomId}`).emit('userLeft');
@@ -218,7 +219,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
-    console.log('data', data)
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){
       Logger.error("Wrong type for parameter")
       return 
@@ -250,7 +250,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     try{
-      console.log('data', data)
       const username = await this.roomService.removeUserFromWhiteList(data.roomName, data.targetId)
       this.server.to(`user-${data.senderId}`).emit('declinedNotification', username)
     }
@@ -299,20 +298,44 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
     if (!data || typeof data.roomId !== 'number')
     {
-      Logger.error('wrong data passd to channelRightsUpdate event');
+      Logger.error('wrong data passed to channelRightsUpdate event');
       return ;
     }
       this.server.to(`room-${data.roomId}`).emit('channelUpdate');
   }
 
-  @SubscribeMessage('userGotBanned')
-  userGotBanned(@MessageBody() data : {targetId : string} , @ConnectedSocket() client : Socket) {
-
-    if (!data || typeof data.targetId !== 'string')
+  @SubscribeMessage('userGotBannedOrMuted')
+  userGotBannedOrMuted(@MessageBody() data : {roomId : number, timeInMinutes : number}) {
+    if (!data || typeof data?.roomId !== 'number' 
+    || typeof data.timeInMinutes !== 'number' || data.timeInMinutes > 120 || data.timeInMinutes <= 0)
     {
-      Logger.error('wrong data passd to userGotBanned event');
+      Logger.error('wrong data passed to userGotBannedOrMuted event');
       return ;
     }
-      this.server.to(`user-${data.targetId}`).emit('youGotBanned');
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+
+    setTimeout(() => {
+
+      this.server.to(`room-${data.roomId}`).emit('timeoutEnd');
+    }, data.timeInMinutes * 60 * 1000 + 2000)
+  }
+
+  @SubscribeMessage('userGotBanned')
+  userGotBanned(@MessageBody() data : {targetId : string, roomName : string} , @ConnectedSocket() client : Socket) {
+
+    if (!data || typeof data.targetId !== 'string' || typeof data.roomName !== 'string')
+    {
+      Logger.error('wrong data passed to userGotBanned event');
+      return ;
+    }
+    this.server.to(`user-${data.targetId}`).emit('youGotBanned', data.roomName);
+    this.server.to(`user-${data.targetId}`).emit('expeledFromChan', data.roomName);
+  }
+
+  @SubscribeMessage('channelStatusUpdate')
+  channelStatusUpdate(@ConnectedSocket() client : Socket) {
+    
+    this.server.sockets.except(client.id).emit('channelStatusUpdate');
+    client.emit('channelStatusUpdate')
   }
 }
