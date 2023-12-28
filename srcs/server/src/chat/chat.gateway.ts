@@ -312,22 +312,30 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       Logger.error('wrong data passed to userGotBannedOrMuted event');
       return ;
     }
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate');
 
     setTimeout(() => {
 
-      Logger.debug('room id : ', data.roomId)
       this.server.to(`room-${data.roomId}`).emit('timeoutEnd');
     }, data.timeInMinutes * 60 * 1000 + 2000)
   }
 
   @SubscribeMessage('userGotBanned')
-  userGotBanned(@MessageBody() data : {targetId : string, roomId : number} , @ConnectedSocket() client : Socket) {
+  userGotBanned(@MessageBody() data : {targetId : string, roomName : string} , @ConnectedSocket() client : Socket) {
 
-    if (!data || typeof data.targetId !== 'string' || typeof data.roomId !== 'number')
+    if (!data || typeof data.targetId !== 'string' || typeof data.roomName !== 'string')
     {
       Logger.error('wrong data passed to userGotBanned event');
       return ;
     }
-      this.server.to(`user-${data.targetId}`).emit('youGotBanned', {roomId : data.roomId});
+    this.server.to(`user-${data.targetId}`).emit('youGotBanned', data.roomName);
+    this.server.to(`user-${data.targetId}`).emit('expeledFromChan', data.roomName);
+  }
+
+  @SubscribeMessage('channelStatusUpdate')
+  channelStatusUpdate(@ConnectedSocket() client : Socket) {
+    
+    this.server.sockets.except(client.id).emit('channelStatusUpdate');
+    client.emit('channelStatusUpdate')
   }
 }

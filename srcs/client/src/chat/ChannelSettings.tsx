@@ -125,7 +125,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                 </Portal>
                 </Popover>
             </Link>
-        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
         </>
     }
     else {

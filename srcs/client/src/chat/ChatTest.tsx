@@ -97,9 +97,10 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         }
         })
 
-        props.chatSocket?.on('youGotBanned', (roomId) => {
+        props.chatSocket?.on('expeledFromChan', (roomName) => {
           
-            if (targetRoom && roomId === targetRoom?.id)
+            console.log('yo got banned 2 roomId : ', roomName, ' targetRoom : ', targetRoom?.id)
+            if (targetRoom && roomName === targetRoom?.name)
             {
                 setTargetRoom(undefined);
             }
@@ -109,10 +110,9 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             props.chatSocket?.off('kickBy');            
             props.chatSocket?.off('userBlocked')
             props.chatSocket?.off('dmRoom')
-            props.chatSocket.off('youGotBanned')
+            props.chatSocket?.off('expeledFromChan')
         })
     })
-console.log('rerender in ChatText.tsx')
 
     return (<>
     <Flex

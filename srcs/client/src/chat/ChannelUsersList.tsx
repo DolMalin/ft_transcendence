@@ -109,7 +109,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
 
         props.chatSocket?.on('timeoutEnd', forceRender);
   
-        props.chatSocket?.on('youGotBanned', (roomId) => {
+        props.chatSocket?.on('youGotBanned', (roomName) => {
           
           const id = 'test-toast';
           if(!toast.isActive(id)) {
@@ -118,7 +118,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               isClosable: true,
               duration : 5000,
               render : () => ( <> 
-                <BasicToast text={'you got banned from ' + props.room.name}/>
+                <BasicToast text={'you got banned from ' + roomName}/>
             </>)
             })
           }
