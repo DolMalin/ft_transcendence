@@ -116,6 +116,10 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
                         <Flex w={'100%'} justifyContent={'right'} paddingBottom={'10px'} paddingRight={'10px'}>
                             <EmailIcon boxSize={4} color={'white'} //TO DO : if pending message change color to red
                             _hover={{transform : 'scale(1.2)'}}
+                            _active={{transform : 'scale(0.9)'}}
+                            onClick={() => {
+                                props.chatSocket?.emit('DM', {targetId: user.id})
+                            }}
                             />
                         </Flex>
                     </Flex>
