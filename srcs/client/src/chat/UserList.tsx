@@ -1,11 +1,7 @@
 import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons"
 import { 
     Flex, 
-    Heading, 
-    IconButton, 
     Link, 
-    ListItem, 
-    UnorderedList, 
     useDisclosure,
     Text,
     Box
@@ -22,12 +18,16 @@ async function getUserList(me : {username: string, id: string}){
         username: string,
         isuser: boolean,
         isLogged: boolean,
-        isAvailable: boolean
+        isAvailable: boolean,
+        isRegistered: boolean
     }[]
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
-        userList = userList.filter(user => user.id !== me?.id).filter(user => user.isLogged === true)
+        userList = userList
+            .filter(user => user.id !== me?.id)
+            .filter(user => user.isLogged === true)
+            .filter(user => user.isRegistered === true);
     }
     catch(err){
         throw err

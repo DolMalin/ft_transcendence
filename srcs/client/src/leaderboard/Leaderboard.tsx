@@ -62,7 +62,7 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
     async function getScoreList() {
         try {
             const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/scoreList');
-            setScoreList(sortScoreList(res?.data))
+            setScoreList(sortScoreList(res?.data));
         }
         catch (err)
         {
