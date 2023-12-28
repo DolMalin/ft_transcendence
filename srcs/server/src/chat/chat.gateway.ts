@@ -256,7 +256,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     try{
-      console.log('from acceptedInviteChan')
       await this.roomService.addTargetInWhiteList(data.roomId, data.targetId)
     }
     catch(err){
