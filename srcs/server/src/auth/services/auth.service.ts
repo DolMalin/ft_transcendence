@@ -164,19 +164,20 @@ export class AuthService {
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      domain: process.env.REACT_APP_SERVER_IP,
-      sameSite: "none",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: true,
-      domain: process.env.REACT_APP_SERVER_IP,
-      sameSite: "none",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
@@ -204,7 +205,7 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain: process.env.REACT_APP_SERVER_IP,
+      domain: process.env.SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -212,7 +213,7 @@ export class AuthService {
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain: process.env.REACT_APP_SERVER_IP,
+      domain: process.env.SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
