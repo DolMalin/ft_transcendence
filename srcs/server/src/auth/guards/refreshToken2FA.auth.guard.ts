@@ -23,14 +23,14 @@ export class RefreshToken2FAGuard extends AuthGuard('jwt-refresh-2fa') {
 		} catch(err) {
 			const payload = await this.jwtService.decode(refreshToken)
 			if (!payload)
-				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
+				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `invalid token`})
 			const user = await this.userService.findOneById(payload['id'])
 			if (!user)
-				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
+				throw new UnauthorizedException('Access denied', {cause: new Error(), description: `cannot find user`})
 
 			await this.userService.update(user.id, {isLogged: false})
 			
-			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `Invalid token`})
+			throw new UnauthorizedException('Access denied', {cause: new Error(), description: `invalid token`})
 		}
 		const parentCanActivate = (await super.canActivate(context)) as boolean; 
 		return parentCanActivate
