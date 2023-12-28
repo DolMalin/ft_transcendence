@@ -7,7 +7,6 @@ export class CreateGameDto {
     @IsUUID()
     winnerId : string;
     
-    @IsString()
     @IsUUID()
     looserId : string;
 
