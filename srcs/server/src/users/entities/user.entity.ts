@@ -13,7 +13,7 @@ export class User {
 	@Column({type: 'int', unique: true})
 	ftId: number
 
-	@Column({type: 'varchar', length: 20, nullable: true, unique: true})
+	@Column({type: 'varchar', nullable: true, unique: true})
 	username: string
 
 	@Column({type: 'varchar', nullable: true})
