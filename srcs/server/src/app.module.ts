@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,6 +14,8 @@ import { Room } from './chat/entities/room.entity';
 import { Message } from './chat/entities/message.entity';
 import { Avatar } from './users/entities/avatar.entity';
 import { FriendRequest } from './users/entities/friendRequest.entity';
+
+import { BrowserCheckMiddleware } from './middlewares/BrowserCheck.middlware';
 
 @Module({
   imports: [
@@ -37,5 +39,9 @@ import { FriendRequest } from './users/entities/friendRequest.entity';
   providers: [AppService],
 })
 
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // consumer.apply(BrowserCheckMiddleware).forRoutes('*');
+  }
+}
 
