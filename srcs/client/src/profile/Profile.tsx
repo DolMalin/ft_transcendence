@@ -12,7 +12,7 @@ import UsernameChange from './UsernameChange';
 import AvatarChange from './AvatarChange';
 
 
-function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket}) {
+function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSocket : Socket}) {
 
 	type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
     
@@ -163,7 +163,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				wrap={'wrap'}
 				flexDir={'column'}
 				>
-					<ProfileInfo gameSock={props.gameSock}/>
+					<ProfileInfo gameSock={props.gameSock} chatSock={props.chatSocket}/>
 				</Flex>
 		</Flex>
 	</>)

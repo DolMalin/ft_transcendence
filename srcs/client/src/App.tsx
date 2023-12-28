@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState, useReducer} from 'react';
 
 import Auth from "./auth/Auth"
-import { Chat } from "./chat/Chat"
 import CreateGame from './game/game-creation/CreateGame';
 import { 
   ChakraProvider, 
@@ -23,7 +22,6 @@ import Profile from './profile/Profile';
 import reducer from './auth/components/reducer'
 import { stateType } from './auth/components/reducer'
 import authService from './auth/auth.service';
-import ProfileModal from './profile/ProfileModal';
 import BasicToast from './toast/BasicToast';
 import ChatTest from './chat/ChatTest';
 
@@ -236,7 +234,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-          {<Profile state={props.state} dispatch={props.dispatch} gameSock={props.gameSock}/>}
+          {<Profile state={props.state} dispatch={props.dispatch} gameSock={props.gameSock} chatSocket={props.chatSock}/>}
         </TabPanel>
     </TabPanels>
   </Tabs>

@@ -96,11 +96,20 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             })
         }
         })
+
+        props.chatSocket?.on('expeledFromChan', (roomName) => {
+          
+            if (targetRoom && roomName === targetRoom?.name)
+            {
+                setTargetRoom(undefined);
+            }
+        });
     
         return (() => {
             props.chatSocket?.off('kickBy');            
             props.chatSocket?.off('userBlocked')
             props.chatSocket?.off('dmRoom')
+            props.chatSocket?.off('expeledFromChan')
         })
     })
 
@@ -161,7 +170,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
-            <FriendList socket={props.chatSocket}/>
+            <FriendList chatSocket={props.chatSocket} gameSocket={props.gameSocket}/>
 
             <Flex justifyContent='center'>
                 <Divider variant='dashed' width='90%' />
@@ -171,7 +180,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             w={'100%'}
             bg={Constants.BG_COLOR}
             >
-            <UserList chatSocket={props.chatSocket}/>
+            <UserList chatSocket={props.chatSocket} gameSocket={props.gameSocket}/>
             </Flex>
         </Flex>
     </Flex>

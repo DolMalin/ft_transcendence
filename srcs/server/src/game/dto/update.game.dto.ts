@@ -13,20 +13,18 @@ export class UpdateGameDto extends PartialType(CreateGameDto){
     @IsUUID()
     @IsOptional()
     looserId : string;
-    @IsString()
 
-	@Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-	@MinLength(6)
+	@IsString()
+	@MinLength(3)
 	@MaxLength(20)
-	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
     @IsOptional()
     winnerUsername : string;
 
-    @IsString()
-    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
-    @MinLength(6)
-    @MaxLength(20)
-    @Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } / @ or :'})
+	@IsString()
+	@MinLength(3)
+	@MaxLength(20)
+	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
     @IsOptional()
     looserUsername : string;
 

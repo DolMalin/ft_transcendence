@@ -51,6 +51,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         privChan: string | null }[]>([])
 
     const  joinRoom = async (dt: {room: string, password: string}) => {
+      console.log('from join room')
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
@@ -59,7 +60,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             })
             props.setTargetRoom(res.data);
             props.chatSocket?.emit("joinRoom", res.data.id);
-            // setShowChat(true)
         }
         catch(err){
 
@@ -98,6 +98,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
 
     const fetchRoom = async () => {
         const rooms = await getRoomList()
+        console.log(rooms)
 
         if (roomnamesNarrower === '')
           setRoomList(rooms);
@@ -115,8 +116,16 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         fetchRoom();
       });
 
+      props.chatSocket?.on('channelStatusUpdate', () => {
+
+        console.log('SOCK ON')
+
+        fetchRoom();
+      })
+
       return (() => {
         props.chatSocket?.off('channelCreated');
+        props.chatSocket?.off('channelStatusUpdate');
       })
     }, [props.chatSocket])
 
@@ -127,6 +136,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     useEffect(() => {
 
       props.chatSocket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, roomId, targetId}) => {
+        console.log('AALLLLLOOOOOOOOO')
         const id = 'invite-toast'
         if(!toast.isActive(id)) {
         toast({
@@ -147,8 +157,9 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 No thanks !
                 </Button>
                 <Button onClick={() => {
-                    props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, targetId: targetId})
-                    joinRoom({room: roomName, password: null})
+                  console.log('from onclick')
+                    props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, roomName: roomName, targetId: targetId})
+                    // joinRoom({room: roomName, password: null})
                     toast.closeAll()
                 }}
                 bg={'none'}
@@ -179,6 +190,15 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             })
           }
         })
+
+      props.chatSocket?.on('signalForJoinRoom', (roomName: string) => {
+        joinRoom({room: roomName, password: null})
+      })
+      return (() => {
+        props.chatSocket?.off('declinedNotication')
+        props.chatSocket?.off('chanInvitedNotification')
+        props.chatSocket?.off('signalForJoinRoom')
+      })
     })
 
     function handleChange(event : React.ChangeEvent<HTMLInputElement>) {

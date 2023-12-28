@@ -27,7 +27,7 @@ async function getUserList(me : {username: string, id: string}){
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
-        userList = userList.filter(user => user.id !== me?.id)
+        userList = userList.filter(user => user.id !== me?.id).filter(user => user.isLogged === true)
     }
     catch(err){
         throw err
@@ -35,7 +35,7 @@ async function getUserList(me : {username: string, id: string}){
     return userList
 }
 
-function UserList(props: {chatSocket: Socket}){
+function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")
     const [userList, setUserList] = useState
@@ -61,8 +61,14 @@ function UserList(props: {chatSocket: Socket}){
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 fetchUserList(res.data) 
         }
-        asyncWrapper()
+        asyncWrapper();
+        const interval = setInterval(asyncWrapper, 3000);
+    
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
+
     return (<>
         <Flex h={'50%'}
     w={'100%'}
@@ -106,39 +112,18 @@ function UserList(props: {chatSocket: Socket}){
                         <Flex w={'100%'} justifyContent={'right'} paddingBottom={'10px'} paddingRight={'10px'}>
                             <EmailIcon boxSize={4} color={'white'} //TO DO : if pending message change color to red
                             _hover={{transform : 'scale(1.2)'}}
+                            _active={{transform : 'scale(0.9)'}}
+                            onClick={() => {
+                                props.chatSocket?.emit('DM', {targetId: user.id})
+                            }}
                             />
                         </Flex>
                     </Flex>
             )
         })}
-        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket}/>
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
 </Flex>
 </>)
 }
-
-
-//     return (
-//         <>
-//         <Flex width='100%' flexDir='column'>
-//         <Text fontSize='2xl' textColor='white' paddingBottom='10px' textAlign='center'>User list</Text>
-//         {userList?.length > 0 && (
-//         userList.map((user, index: number) => (
-//             <UnorderedList key={index} width='100%' paddingLeft='10px'>
-//                 <ListItem><Link color='white' onClick={() => {onOpen() ; setId(user.id)}}>{user.username} {user.isuser ? "👥" :""}</Link></ListItem>
-//                 {/* <IconButton
-//                     variant='outline'
-//                     colorScheme='teal'
-//                     aria-label='Send email'
-//                     icon={<EmailIcon />}
-//                     onClick={() => {}}
-//                 /> */}
-//             </UnorderedList>
-//         ))
-//         )}
-//         <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket}/>
-//         </Flex>
-//         </>
-//     )
-// }
 
 export default UserList

@@ -10,7 +10,6 @@ import * as Constants from '../game/globals/const';
 function UserInUsersList(props : {username : string, userId : string, 
     room : Room, userIsOp : boolean, gameSock? : Socket, chatSock?: Socket}) {
 
-    const [priviColor, setPriviColor] = useState('grey');
     const [targetIsOp, setTargetIsOp] = useState<"isAdmin" | "isOwner" | "no">("no");
     const [targetIsMuted, setTargetIsMuted] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -63,13 +62,14 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
-    async function muteThem(targetId : string, roomId : number, timeInMinutes : number) {
+    async function muteThem(targetId : string, roomId : number, roomName : string, timeInMinutes : number) {
         try {
             
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/muteUser', 
             {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
             setTargetIsMuted(true);
-            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+            // props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+            props.chatSock?.emit('userGotBannedOrMuted', {roomId : roomId, timeInMinutes : timeInMinutes});
         }
         catch (err) {
             if (err.response?.status === 409)
@@ -110,13 +110,14 @@ function UserInUsersList(props : {username : string, userId : string,
         }
     }
 
-    async function banThem(targetId : string, roomId : number, timeInMinutes : number) {
+    async function banThem(targetId : string, roomId : number, roomName : string,timeInMinutes : number) {
         try {
 
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/banUser', 
             {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
-            props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
-            props.chatSock?.emit('userGotBanned', {targetId : targetId});
+            // props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
+            props.chatSock?.emit('userGotBanned', {targetId : targetId, roomName : roomName});
+            props.chatSock?.emit('userGotBannedOrMuted', {roomId : roomId, timeInMinutes : timeInMinutes});
         }
         catch (err) {
             if (err.response?.status === 409)
@@ -144,25 +145,15 @@ function UserInUsersList(props : {username : string, userId : string,
                 {targetId : props?.userId, roomName : props.room?.name});
                 
                 if(privi.data === 'isOwner')
-                {
-                    setPriviColor('blue')
                     setTargetIsOp('isOwner')
-                }
-            else if(privi.data === 'isAdmin')
-            {
-                setPriviColor('green')
-                setTargetIsOp('isAdmin')
-            }
-            else if (privi.data === 'isMuted')
-            {
-                setPriviColor('yellow')
-                setTargetIsMuted(true);
-            }
-            else
-            {
-                setPriviColor('grey')
-                setTargetIsOp('no')
-            }
+                else if(privi.data === 'isAdmin')
+                    setTargetIsOp('isAdmin')
+                else if (privi.data === 'isMuted')
+                    setTargetIsMuted(true);
+                else if (privi.data !== 'isMuted')
+                    setTargetIsMuted(false);
+                else
+                    setTargetIsOp('no')
             }
             catch (err) {
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -171,12 +162,38 @@ function UserInUsersList(props : {username : string, userId : string,
         asyncWrapper();
     })
 
+    useEffect( function socketEvent() {
 
-    function MuteBanSlider(props : {targetId : string, roomId : number, actionName : string ,action : Function}) {
+        async function asyncWrapper() {
+            try {
+                const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
+                {targetId : props?.userId, roomName : props.room?.name});
+                
+                if (privi.data === 'isMuted')
+                    setTargetIsMuted(true);
+                else
+                    setTargetIsMuted(false);
+            }
+            catch (err) {
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
+        }
+        props.chatSock?.on('timeoutEnd', () => {
+
+            asyncWrapper();
+        })
+
+        return(() => {
+            props.chatSock?.off('timeoutEnd')
+        })
+    }, [props.chatSock])
+
+
+    function MuteBanSlider(props : {targetId : string, roomId : number, roomName : string, actionName : string ,action : Function}) {
         const [sliderValue, setSliderValue] = React.useState(5)
         const [showTooltip, setShowTooltip] = React.useState(false)
         return (<>
-            <Button onClick={() => props.action(props.targetId, props.roomId, sliderValue)}
+            <Button onClick={() => props.action(props.targetId, props.roomId, props.roomName, sliderValue)}
             borderRadius={'0px'}
             margin={'10px'}
             bg={Constants.BG_COLOR}
@@ -214,6 +231,7 @@ function UserInUsersList(props : {username : string, userId : string,
             <Text>zero minutes will set timer to an undefined amounth of time</Text>
         </>)
     }
+
     if (props.userIsOp)
     {
     return (<>
@@ -270,9 +288,9 @@ function UserInUsersList(props : {username : string, userId : string,
                                 Demote
                             </Button>}
 
-                            <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="ban" action={banThem}/>
+                            <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} roomName={props.room?.name} actionName="ban" action={banThem}/>
 
-                            {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} actionName="mute" action={muteThem}/>}
+                            {!targetIsMuted && <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} roomName={props.room?.name} actionName="mute" action={muteThem}/>}
                             
                             { targetIsMuted &&
                             <Button onClick={() => unmuteThem(props?.userId, props.room?.id)}

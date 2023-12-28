@@ -1,13 +1,12 @@
 import { Button, Flex, FormControl, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
-import React, { useState } from "react"
+import React from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
 import authService from "../auth/auth.service"
 import * as Const from '../game/globals/const'
 import BasicToast from "../toast/BasicToast"
-import { Room } from "./Chat"
 
-function PasswordSettingsModal(props : {action: string, roomId: number, isOpen : boolean, onOpen : () => void , onClose : () => void}){
+function PasswordSettingsModal(props : {action: string, roomId: number, chatSocket : Socket,isOpen : boolean, onOpen : () => void , onClose : () => void}){
 
     const { register: registerSetPass, 
         handleSubmit: handleSubmitSetPass, 
@@ -66,6 +65,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, isOpen :
                 roomId: roomId, 
                 password: password
             })
+            props.chatSocket?.emit('channelStatusUpdate');
             toast({
                 duration: 5000,
                 render : () => ( <> 

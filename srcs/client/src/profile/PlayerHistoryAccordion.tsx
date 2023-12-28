@@ -23,7 +23,7 @@ import ProfileModal from "./ProfileModal";
 import { Socket } from "socket.io-client";
 
 
-function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fontSize?: string, gameSocket?: Socket}) {
+function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fontSize?: string, gameSocket: Socket, chatSocket : Socket}) {
     const [history, setHistory] = useState<DBGame[]>([]);
     const [targetId, setTargetId] = useState<string>('');
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -95,7 +95,7 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
                         })}
                         </Tbody>
                     </Table>
-                    <ProfileModal userId={targetId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} gameSock={props.gameSocket}/>   
+                    <ProfileModal userId={targetId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} gameSock={props.gameSocket} chatSocket={props.chatSocket}/>   
                 </AccordionPanel>
             </AccordionItem>
         </Accordion>

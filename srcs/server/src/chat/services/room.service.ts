@@ -378,6 +378,9 @@ export class RoomService {
             throw new NotFoundException("Room not found",
             {cause: new Error(), description: "cannot find any users in database"})
         
+            if (this.isBanned(room, sender))
+                throw new ConflictException('Banned user', 
+                {cause: new Error(), description: 'you are banned in channel ' + room.name} )
             if (room?.users) {
                 const userFound = room.users.some((user) => user.id === sender.id)
             if (!userFound) {
@@ -394,9 +397,6 @@ export class RoomService {
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name} )
-        if (this.isBanned(room, sender))
-            throw new ConflictException('Banned user', 
-            {cause: new Error(), description: 'you are banned in channel ' + room.name} )
         //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},

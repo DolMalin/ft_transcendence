@@ -8,8 +8,8 @@ import * as sanitizeHtml from 'sanitize-html'
 export class CreateRoomDto {
     
     @IsString()
-    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     @Matches(/^\w+( \w+)*$/, {message: "channel name can only have one space between group of words"})
+    @Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'channel name must not contains ^ # < > [ ] | { } : @ or /'})
     @MaxLength(74)
     name: string
     
@@ -17,7 +17,6 @@ export class CreateRoomDto {
     privChan: boolean
     
     @IsString()
-    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     @MinLength(6)
     @MaxLength(20)
     @IsOptional()

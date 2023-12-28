@@ -5,7 +5,8 @@ import * as Constants from '../game/globals/const'
 import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons";
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
-function FriendList(props: {socket: Socket}) {
+
+function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [id, setId] = useState("")
 
@@ -39,36 +40,38 @@ function FriendList(props: {socket: Socket}) {
     }
 
     useEffect(function socketEvent() {
-        props.socket?.on('friendRequestSendedChat', () => {
+
+        props.chatSocket?.on('friendRequestSendedChat', () => {
             fetchFriends()
         })
 
-        props.socket?.on('friendRequestAcceptedChat', () => {
+        props.chatSocket?.on('friendRequestAcceptedChat', () => {
             fetchFriends()
-
         })
  
-        props.socket?.on('friendRemovedChat', () => {
+        props.chatSocket?.on('friendRemovedChat', () => {
             fetchFriends()
         })
 
         return (() => {
-            props.socket?.off('friendRequestSendedChat');
-            props.socket?.off('friendRequestAcceptedChat');
-            props.socket?.off('friendRemovedChat');
+            props.chatSocket?.off('friendRequestSendedChat');
+            props.chatSocket?.off('friendRequestAcceptedChat');
+            props.chatSocket?.off('friendRemovedChat');
         })
-        
-    }, [props.socket])
+    }, [props.chatSocket])
 
     useEffect(() => { 
         fetchFriends()
-    }, [props.socket])
+    }, [props.chatSocket])
 
     useEffect(() => {        
-        const asyncWrapper = async () => {
-                fetchFriends()
-            } 
-        asyncWrapper()
+
+        fetchFriends();
+        const interval = setInterval(fetchFriends, 3000);
+
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
 
 
@@ -93,8 +96,8 @@ function FriendList(props: {socket: Socket}) {
                     else
                         pinColor = 'red';
                     return(
-                        <>
-                            <Flex width={'100%'} 
+                            <Flex key={(index)}
+                            width={'100%'} 
                             minH={'45px'}
                             maxWidth={'300px'}
                             marginBottom={'10px'}
@@ -114,14 +117,17 @@ function FriendList(props: {socket: Socket}) {
                                 <Flex w={'100%'} justifyContent={'right'} paddingBottom={'10px'} paddingRight={'10px'}>
                                     <EmailIcon boxSize={4} color={'white'} //TO DO : if pending message change color to red
                                     _hover={{transform : 'scale(1.2)'}}
+                                    _active={{transform : 'scale(0.9)'}}
+                                    onClick={() => {
+                                        props.chatSocket?.emit('DM', {targetId: friend.id})
+                                    }}
                                     />
                                 </Flex>
                             </Flex>
-                        </>
                     )
                 })}
         </Flex>
-        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket}/>
+        <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
     </>)
 }
 

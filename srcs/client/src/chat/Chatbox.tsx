@@ -49,7 +49,7 @@ async function getUserList(roomId: number, me : {username: string, id: string}){
 }
 
 
-export function Chatbox(props: {socket: Socket, room: Room, showChat: Function}) {
+export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, gameSocket : Socket}) {
     
     const { isOpen, onOpen, onClose } = useDisclosure()
     const [rerender, setRerender] = useState(false)
@@ -216,83 +216,83 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
     useEffect(() => {
 
-      props.socket?.on('channelLeft', () => {
-        props.showChat(false);
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={'you left room ' + props.room.name}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('channelLeft', () => {
+      //   props.showChat(false);
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={'you left room ' + props.room.name}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('kickBy', (kickByUsername: string, roomName : string) => {
-        props.showChat(false);
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('kickBy', (kickByUsername: string, roomName : string) => {
+      //   props.showChat(false);
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('kicked', (targetId: string) => {
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={`you kicked ${targetId} from ` + props.room.name}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('kicked', (targetId: string) => {
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={`you kicked ${targetId} from ` + props.room.name}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('chanInvite', (guestUsername: string) => {
-        const id = 'invite-toast';
-        if(!toast.isActive(id)){
-          toast({
-            id,
-            isClosable: true,
-            duration : 2000,
-            render : () => ( <>
-              <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('chanInvite', (guestUsername: string) => {
+      //   const id = 'invite-toast';
+      //   if(!toast.isActive(id)){
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 2000,
+      //       render : () => ( <>
+      //         <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
   
-      props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
-        const id = 'invite-toast-chan';
-        if(!toast.isActive(id)){
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <>
-              <BasicToast text={`You received an invitation from ${hostUsername}`}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
+      //   const id = 'invite-toast-chan';
+      //   if(!toast.isActive(id)){
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <>
+      //         <BasicToast text={`You received an invitation from ${hostUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      return () => {
-        props.socket?.off('channelLeft')
-        props.socket?.off('kickBy')
-        props.socket?.off('kicked')
-      }
+      // return () => {
+      //   props.socket?.off('channelLeft')
+      //   props.socket?.off('kickBy')
+      //   props.socket?.off('kicked')
+      // }
     })
 
     useEffect(() => {
@@ -410,7 +410,7 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
                 <Chakra.Button type='submit'><>&#9658;</></Chakra.Button>
               </form>
             </div>
-            <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} />
+            <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.socket} gameSock={props.gameSocket}/>
           </div>
         </div>
       );

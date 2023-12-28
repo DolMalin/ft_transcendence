@@ -274,6 +274,12 @@ export class MatchmakingService {
                 return ;
             }
 
+            if (sender.isAvailable === false)
+            {
+              this.userService.emitToAllSockets(server, sender.gameSockets, 'isBusy', {username : 'You'})
+              return ;
+            }
+
             if (this.userService.isAlreadyBlocked(target, sender) === true)
             {
               this.userService.emitToAllSockets(server, sender.gameSockets, 'blockedYou', {username : target.username})
