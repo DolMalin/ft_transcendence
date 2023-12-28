@@ -27,7 +27,7 @@ async function getUserList(me : {username: string, id: string}){
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
-        userList = userList.filter(user => user.id !== me?.id)
+        userList = userList.filter(user => user.id !== me?.id).filter(user => user.isLogged === true)
     }
     catch(err){
         throw err
@@ -61,8 +61,14 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 fetchUserList(res.data) 
         }
-        asyncWrapper()
+        asyncWrapper();
+        const interval = setInterval(asyncWrapper, 3000);
+    
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
+
     return (<>
         <Flex h={'50%'}
     w={'100%'}
@@ -106,6 +112,10 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
                         <Flex w={'100%'} justifyContent={'right'} paddingBottom={'10px'} paddingRight={'10px'}>
                             <EmailIcon boxSize={4} color={'white'} //TO DO : if pending message change color to red
                             _hover={{transform : 'scale(1.2)'}}
+                            _active={{transform : 'scale(0.9)'}}
+                            onClick={() => {
+                                props.chatSocket?.emit('DM', {targetId: user.id})
+                            }}
                             />
                         </Flex>
                     </Flex>

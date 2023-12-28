@@ -40,13 +40,13 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     }
 
     useEffect(function socketEvent() {
+
         props.chatSocket?.on('friendRequestSendedChat', () => {
             fetchFriends()
         })
 
         props.chatSocket?.on('friendRequestAcceptedChat', () => {
             fetchFriends()
-
         })
  
         props.chatSocket?.on('friendRemovedChat', () => {
@@ -58,7 +58,6 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
             props.chatSocket?.off('friendRequestAcceptedChat');
             props.chatSocket?.off('friendRemovedChat');
         })
-        
     }, [props.chatSocket])
 
     useEffect(() => { 
@@ -66,10 +65,13 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     }, [props.chatSocket])
 
     useEffect(() => {        
-        const asyncWrapper = async () => {
-                fetchFriends()
-            } 
-        asyncWrapper()
+
+        fetchFriends();
+        const interval = setInterval(fetchFriends, 3000);
+
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
 
 
@@ -94,8 +96,8 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                     else
                         pinColor = 'red';
                     return(
-                        <>
-                            <Flex width={'100%'} 
+                            <Flex key={(index)}
+                            width={'100%'} 
                             minH={'45px'}
                             maxWidth={'300px'}
                             marginBottom={'10px'}
@@ -115,10 +117,13 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                                 <Flex w={'100%'} justifyContent={'right'} paddingBottom={'10px'} paddingRight={'10px'}>
                                     <EmailIcon boxSize={4} color={'white'} //TO DO : if pending message change color to red
                                     _hover={{transform : 'scale(1.2)'}}
+                                    _active={{transform : 'scale(0.9)'}}
+                                    onClick={() => {
+                                        props.chatSocket?.emit('DM', {targetId: friend.id})
+                                    }}
                                     />
                                 </Flex>
                             </Flex>
-                        </>
                     )
                 })}
         </Flex>

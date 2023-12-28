@@ -1,5 +1,5 @@
 import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisclosure, useToast } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Room } from "./interface";
 import ScrollToBottom from "react-scroll-to-bottom";
 import { MessageData } from "./interface";
@@ -34,6 +34,7 @@ function timeOfDay(timestampz: string | Date){
 
 function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket}) {
     const [messageList, setMessageList] = useState<MessageData[]>([]);
+    const scrollToBottomRef = useRef<HTMLDivElement>(null);
     const [id, setId] = useState("");
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
@@ -119,6 +120,14 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
         asyncWrapper();
     }, [props.room])
 
+
+    useEffect(() => {
+
+        if (scrollToBottomRef.current) {
+            scrollToBottomRef.current.scrollTop = scrollToBottomRef.current.scrollHeight;
+          }
+    }, [messageList])
+
     return (<>
         <Flex h={'100%'}
         flexDir={'column'}
@@ -143,8 +152,9 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             h={'80%'}
             flexDir={'column'}
             overflowY={'auto'}
-            overflowX={'hidden'}>
-                <ScrollToBottom mode="bottom">
+            overflowX={'hidden'}
+            ref={scrollToBottomRef}
+            >
                     {messageList.map((messageContent, index) => {
 
                     return (
@@ -191,7 +201,6 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                                 </WrapItem>
                         </Flex>)
                   })}
-                </ScrollToBottom>
             </Flex>
 
             <Flex w={'100%'}
