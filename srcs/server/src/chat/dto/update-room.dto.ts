@@ -9,7 +9,6 @@ export class UpdateRoomDto{
     roomId? : number
 
     @IsString()
-    @Transform((params: TransformFnParams) => sanitizeHtml(params.value))
     @MinLength(6)
     @MaxLength(20)
     @IsOptional()
