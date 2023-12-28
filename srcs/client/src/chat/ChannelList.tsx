@@ -60,7 +60,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 password: dt.password
             })
             props.setTargetRoom(res.data);
-            console.log(res.data.id)
             props.chatSocket?.emit("joinRoom", res.data.id);
         }
         catch(err){
