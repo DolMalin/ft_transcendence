@@ -16,7 +16,7 @@ async function bootstrap() {
       "Accept",
       "Origin",
       "X-Api-Key",
-      "content-type",
+      "Content-Type",
       "Authorization",
       "Acces-Control-Request-Methods",
       "Access-Control-Allow-Credentials",
