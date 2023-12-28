@@ -144,7 +144,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 						<Button fontWeight={'normal'}
 						borderRadius={'0px'}
 						_hover={{transform :'scale(1.2)'}}>
-						Log in with 42
+						LOG IN WITH 42
 						</Button>
 					</Link>
 				</Flex>
@@ -244,7 +244,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 											className='goma'
 											_hover={{bg: 'white', textColor : 'black'}}
 											>
-												Register
+												REGISTER
 										</Button>
 									<RightBracket w={'20px'} h={'100px'} girth={'8px'} marginLeft='-8px'/>
 							</Flex>
@@ -268,7 +268,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 				bg={'none'}
 				textColor={'white'}
 				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-				>Logout</Button>
+				>LOGOUT</Button>
 			</>
 		)
 	}
@@ -348,7 +348,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 											className='goma'
 											_hover={{bg: 'white', textColor : 'black'}}
 											>
-												Log In
+												LOG IN
 										</Button>
 									<RightBracket w={'20px'} h={'80px'} girth={'8px'} marginLeft='-8px'/>
 							</Flex>

@@ -46,7 +46,7 @@ function BanList(props : {banList :  {username : string, id : string}[], room : 
                                 borderRadius={'0px'}
                                 fontWeight={'normal'}
                                 _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
-                                > Unban </Button>
+                                > UNBAN </Button>
                     </Flex>
                 )
             })}

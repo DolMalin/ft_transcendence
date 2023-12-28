@@ -85,7 +85,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            Set password
+                            SET PASSWORD
                         </Button >
                         <Button onClick={() => {
                             onOpen()
@@ -98,7 +98,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            change password
+                            CHANGE PASSWORD
                         </Button>
                         <Button onClick={() => removePassword(props.room.id)}
                         borderRadius={'0px'}
@@ -108,7 +108,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            remove password
+                            REMOVE PASSWORD
                         </Button>
                         <Button onClick={() => leaveChan(props.room.id)}
                         borderRadius={'0px'}
@@ -118,7 +118,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            leave
+                            LEAVE
                         </Button>
                     </PopoverBody>
                     </PopoverContent>
@@ -156,7 +156,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                leave
+                                LEAVE
                             </Button>
                         </PopoverBody>
                     </PopoverContent>

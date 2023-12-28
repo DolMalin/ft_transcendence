@@ -32,7 +32,7 @@ function LooseScreen (props : {dispatch : Function}) {
             textOverflow={'clip'}
             onClick={closeVScreen}
             >
-            Fuck go back ?</Button>
+            GO BACK</Button>
         </Box>
     </>)
 }

@@ -122,13 +122,13 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
                         return (<Tr key={index}  textColor={index % 2 !== 0 ? 'rgb(220, 220, 220)' : 'rgb(150, 150, 150)'}>
                             <Td display={'flex'} alignItems={'center'} >
                                 <Avatar 
-                                    size='md'
+                                    boxSize='60px'
                                     name={value?.username}
                                     src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + value?.id}
-                                    // marginRight={'10px'}
+                                    marginRight={'10px'}
                                 ></Avatar>
 
-                                <Link textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value.id)} }> 
+                                <Link fontWeight={'bold'} textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value.id)} }> 
                                     {value?.username} 
                                 </Link>
                             </Td>

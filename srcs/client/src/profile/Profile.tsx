@@ -64,7 +64,6 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			window.location.reload()
 		} catch(err) {
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			console.log(err)
 		}
 	}
 
@@ -78,7 +77,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				bg={'none'}
 				textColor={'white'}
 				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-				>Logout</Button>
+				>LOGOUT</Button>
 			</>
 		)
 	}

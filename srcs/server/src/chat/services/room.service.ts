@@ -192,7 +192,6 @@ export class RoomService {
         } 
         
         if (room?.password?.length > 0 && room.password){
-            console.log('test')
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }

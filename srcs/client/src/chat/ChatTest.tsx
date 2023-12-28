@@ -99,7 +99,6 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
 
         props.chatSocket?.on('expeledFromChan', (roomName) => {
           
-            console.log('yo got banned 2 roomId : ', roomName, ' targetRoom : ', targetRoom?.id)
             if (targetRoom && roomName === targetRoom?.name)
             {
                 setTargetRoom(undefined);

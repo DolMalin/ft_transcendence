@@ -201,7 +201,7 @@ function UserInUsersList(props : {username : string, userId : string,
             textColor={'white'}
             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
             >
-                {props.actionName} for
+                {props.actionName.toLocaleUpperCase()} FOR
             </Button>        
             <Slider
             id='slider'
@@ -273,7 +273,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                Promote
+                                PROMOTE
                             </Button>}
 
                             {targetIsOp === 'isAdmin' && 
@@ -285,7 +285,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                Demote
+                                DEMOTE
                             </Button>}
 
                             <MuteBanSlider targetId={props?.userId} roomId={props.room?.id} roomName={props.room?.name} actionName="ban" action={banThem}/>
@@ -301,7 +301,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                unmute
+                                UNMUTE
                             </Button>}
 
                             <Button onClick={() => kick(props?.room.id, props?.userId)}
@@ -312,7 +312,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                kick
+                                KICK
                             </Button>
 
                             <Button onClick={onOpen}
@@ -323,7 +323,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                profile
+                                PROFILE
                             </Button>
                         </PopoverBody>
                     </PopoverContent>
