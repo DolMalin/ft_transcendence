@@ -72,7 +72,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             else
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
-        props.onClose()
+        // props.onClose()
     }
     
     const handleUnblocked = (data : {username: string, username2: string}) => {
@@ -107,7 +107,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestSended', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('pending')
             setIsFriendRequestCreator(true)
-            props.onClose();
+            // props.onClose();
         } catch(err) {
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
@@ -120,7 +120,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
-            props.onClose();
+            // props.onClose();
 
         } catch(err) {
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -136,7 +136,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
             setFriendRequestStatus('undefined')
             setIsFriendRequestCreator(false)
-            props.onClose();
+            // props.onClose();
 
         } catch(err) {
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -182,26 +182,23 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     }, [props.userId])
 
-    useEffect(() => {
-        
-        const fetchFriendStatus = async (userId: string) => {
-            if (isYourself || !props.userId)
-                return
+    const fetchFriendStatus = async (userId: string) => {
+        if (isYourself || !props.userId)
+            return
 
-            try {
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/${userId}`);
-                setFriendRequestStatus(res.data?.status)
-                setIsFriendRequestCreator(res.data?.isCreator)
-                setFriendRequestId(res.data?.id)
-            } catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-            }
+        try {
+            const res = await authService.get(process.env.REACT_APP_SERVER_URL + `/users/friendRequest/${userId}`);
+            setFriendRequestStatus(res.data?.status)
+            setIsFriendRequestCreator(res.data?.isCreator)
+            setFriendRequestId(res.data?.id)
+        } catch (err) {
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
-        async function asyncWrapper( ) {
-            await fetchFriendStatus(props.userId)
-        }
-        asyncWrapper()
-    }, [props.userId, friendRequestStatus, isFriendRequestCreator])
+    }
+
+    useEffect(() => {
+        fetchFriendStatus(props.userId);
+    })
 
     
     useEffect(function socketEvent() {
