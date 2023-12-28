@@ -27,7 +27,7 @@ async function getUserList(me : {username: string, id: string}){
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
-        userList = userList.filter(user => user.id !== me?.id)
+        userList = userList.filter(user => user.id !== me?.id).filter(user => user.isLogged === true)
     }
     catch(err){
         throw err
@@ -65,8 +65,14 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
             catch(err){
                 console.error(`${err.response.data.message} (${err.response?.data?.error})`)} 
         }
-        asyncWrapper()
+        asyncWrapper();
+        const interval = setInterval(asyncWrapper, 3000);
+    
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
+
     return (<>
         <Flex h={'50%'}
     w={'100%'}

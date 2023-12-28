@@ -40,13 +40,13 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     }
 
     useEffect(function socketEvent() {
+
         props.chatSocket?.on('friendRequestSendedChat', () => {
             fetchFriends()
         })
 
         props.chatSocket?.on('friendRequestAcceptedChat', () => {
             fetchFriends()
-
         })
  
         props.chatSocket?.on('friendRemovedChat', () => {
@@ -58,7 +58,6 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
             props.chatSocket?.off('friendRequestAcceptedChat');
             props.chatSocket?.off('friendRemovedChat');
         })
-        
     }, [props.chatSocket])
 
     useEffect(() => { 
@@ -66,14 +65,13 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     }, [props.chatSocket])
 
     useEffect(() => {        
-        const asyncWrapper = async () => {
-            try{
-                fetchFriends()
-            }
-            catch(err){
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)} 
-        }
-        asyncWrapper()
+
+        fetchFriends();
+        const interval = setInterval(fetchFriends, 3000);
+
+        return (() => {
+            clearInterval(interval);
+        })
     }, [])
 
 
@@ -98,8 +96,8 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                     else
                         pinColor = 'red';
                     return(
-                        <>
-                            <Flex width={'100%'} 
+                            <Flex key={(index)}
+                            width={'100%'} 
                             minH={'45px'}
                             maxWidth={'300px'}
                             marginBottom={'10px'}
@@ -122,7 +120,6 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                                     />
                                 </Flex>
                             </Flex>
-                        </>
                     )
                 })}
         </Flex>
