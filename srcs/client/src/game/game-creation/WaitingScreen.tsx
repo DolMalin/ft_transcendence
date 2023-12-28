@@ -67,7 +67,7 @@ import * as Constants from '../globals/const'
                 _hover={{background : 'white', textColor: 'black'}}
                 onClick={leaveQueue} 
                 > 
-                Leave Queue </Button>
+                LEAVE QUEUE </Button>
             </Box>
     </Flex>
     )

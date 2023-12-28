@@ -252,13 +252,13 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     <LeftBracket w={'16px'} h={'42px'} girth={'6px'} marginRight="-4px"/>
                         <Text fontWeight={'normal'} textAlign={'center'} padding={'0px'} fontSize={'2em'}
                         > 
-                        {user?.username} 
+                            {user?.username} 
                         </Text>
                     <RightBracket w={'16px'} h={'42px'} girth={'6px'} marginLeft="-4px"/>
                 </Box>
 
                 <ModalBody display={'flex'} flexDir={'row'} padding={'8px'}>
-                    <Box width={'128px'} height={'128px'}>
+                    <Box width={'128px'} height={'128px'} marginBottom={'15px'}>
                         <Avatar
                         size='2xl'
                         name={'avatar'}
@@ -273,6 +273,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     alignContent={'left'}
                     alignItems={'center'}
                     justifyContent={'center'}
+                    marginBottom={'15px'}
                     >
                         <Text textAlign={'center'} fontSize={'2em'}> WINS </Text>
                         <Text textAlign={'center'} fontSize={'2em'}> {user?.winsAmount} </Text>
@@ -282,6 +283,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     alignContent={'left'}
                     alignItems={'center'}
                     justifyContent={'center'}
+                    marginBottom={'15px'}
                     >
                         <Text textAlign={'center'} fontSize={'2em'}> LOOSES </Text>
                         <Text textAlign={'center'} fontSize={'2em'}> {user?.loosesAmount} </Text>
@@ -307,7 +309,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         textAlign={'center'}
                         onClick={() => (sendPrivateMessage())}
                         >
-                            Message Them !
+                            MESSAGE THEM
                         </Button>
                     </Box>
 
@@ -323,7 +325,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         isDisabled={isYourself}
                         textAlign={'center'}
                         >
-                            {Constants.GAME_TYPE_ONE} Duel !
+                            {Constants.GAME_TYPE_ONE.toLocaleUpperCase()} DUEL
                         </Button>
                     </Box>
 
@@ -338,7 +340,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         onClick={() => (blockThem(props.userId))}
                         isDisabled={isYourself}
                         >
-                             Block them !
+                             BLOCK THEM
                         </Button>
                     </Box>}
 
@@ -353,7 +355,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         onClick={() => (unBlockThem(props.userId))}
                         isDisabled={isYourself}
                         >
-                             unblock them !
+                             UNBLOCK THEM
                         </Button>
                     </Box>}
 
@@ -368,7 +370,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         onClick={() => (sendDuelInvite(Constants.GAME_TYPE_TWO))}
                         isDisabled={isYourself}
                         >
-                            {Constants.GAME_TYPE_TWO} Duel !
+                            {Constants.GAME_TYPE_TWO.toLocaleUpperCase()} DUEL
                         </Button>
                     </Box>
 
@@ -385,7 +387,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         onClick={() => (removeFriend())}
                         isDisabled={isYourself}
                         >
-                            Remove friend !
+                            REMOVE FRIEND
                         </Button>
                     }
 
@@ -397,7 +399,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                         onClick={() => (addFriend(user.id))}
                         isDisabled={isYourself}
                         >
-                            Add friend !
+                            ADD FRIEND
                         </Button>
                     }
                     {!isYourself && friendRequestStatus === 'pending' && isFriendRequestCreator &&
@@ -415,7 +417,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                                 onClick={() => (acceptFriend())}
                                 isDisabled={isYourself}
                                 >
-                                    Accept friend request !
+                                    ACCEPT FRIENDSHIP
                                 </Button>
                             </Box>
 
@@ -427,7 +429,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                                 onClick={() => (removeFriend())}
                                 isDisabled={isYourself}
                                 >
-                                    Decline friend request !
+                                    DENY FRIENDSHIP
                                 </Button>
                             </Box>
                         </>

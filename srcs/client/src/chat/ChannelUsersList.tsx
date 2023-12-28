@@ -156,7 +156,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               border={listToDisplay === 'users' ? '1px solid white' : 'none'}
               _hover={{bg: 'white', textColor : 'black', transform : 'scale(1)'}}
               > 
-                Users
+                USERS
               </Button>
 
               <Button onClick={() => {setListToDisplay('bans')}}
@@ -169,7 +169,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
               border={listToDisplay === 'bans' ? '1px solid white' : 'none'}
               _hover={{bg: 'white', textColor : 'black', transform : 'scale(1)'}}
               >
-                Bans
+                BANS
               </Button>
             </Flex>
             <Flex h={'100%'} w={'80%'} minW={'224px'}

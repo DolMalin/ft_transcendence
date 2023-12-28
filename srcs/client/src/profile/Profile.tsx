@@ -77,7 +77,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				bg={'none'}
 				textColor={'white'}
 				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
-				>Logout</Button>
+				>LOGOUT</Button>
 			</>
 		)
 	}

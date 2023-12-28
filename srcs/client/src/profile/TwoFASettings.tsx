@@ -117,7 +117,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 	function TwoFactorAuthenticationButton() {
 
-		const text = displayActivate2FA ? "maybe not" : "Activate 2FA"
+		const text = displayActivate2FA ? "MAYBE NOT" : "ACTIVATE 2FA"
 		if (!props.state.isTwoFactorAuthenticationEnabled) {
 			return (
 				<>
@@ -143,7 +143,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 					textColor={'white'}
 					_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 					>
-						Disable 2FA
+						DISABLE 2FA
 					</Button>
 				</>
 			)
@@ -187,7 +187,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 						_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 						type='submit'
 						>
-							Submit
+							SUBMIT
 						</Button>
 					</form>
 			</>
@@ -223,7 +223,7 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 				_hover={{background : 'white', textColor : Constants.BG_COLOR}}
 				type='submit'
 				>
-					Disable 2FA
+					DISABLE 2FA
 				</Button>
 			</form>
 		)

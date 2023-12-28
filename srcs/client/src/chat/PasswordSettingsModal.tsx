@@ -160,7 +160,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                         _hover={{background : 'white', textColor : Const.BG_COLOR}} 
                         type='submit' marginTop="15px"
                         >
-                            set your password
+                            SET PASSWORD
                             </Button>
                     </form>}
                     {props.action === 'changePass' && <form onSubmit={handleSubmitChangePass(onSubmitChangePass)}style={
@@ -193,7 +193,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                         _hover={{background : 'white', textColor : Const.BG_COLOR}} 
                         type='submit' marginTop="15px"
                         >
-                            change your password   
+                            CHANGE PASSWORD   
                             </Button>
                     </form>}
             </ModalBody>

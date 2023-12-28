@@ -101,10 +101,9 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                 width={'448px'}
                 marginBottom={'20px'}
                 >
-            <ModalCloseButton />
+            <ModalCloseButton marginBottom={'40px'}/>
             <ModalBody>
-                    <Flex alignItems="center" justifyContent="center" marginBottom='20px'>
-                        <h3>Create a channel</h3>
+                    <Flex marginBottom='25px'>
                     </Flex>
                     <form onSubmit={handleSubmitCreate(onSubmitCreate)} style={
                         {
@@ -154,7 +153,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                         _hover={{background : 'white', textColor : Const.BG_COLOR}} 
                         type='submit' marginTop="10px"
                         >
-                            Create a channel
+                            CREATE CHANNEL
                         </Button>
                     </form>    
                     <Flex alignItems="center" justifyContent="space-evenly" marginTop="20px" >

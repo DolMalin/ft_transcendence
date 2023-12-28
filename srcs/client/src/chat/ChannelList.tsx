@@ -98,7 +98,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
 
     const fetchRoom = async () => {
         const rooms = await getRoomList()
-        console.log(rooms)
 
         if (roomnamesNarrower === '')
           setRoomList(rooms);
@@ -117,8 +116,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       });
 
       props.chatSocket?.on('channelStatusUpdate', () => {
-
-        console.log('SOCK ON')
 
         fetchRoom();
       })

@@ -58,7 +58,7 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
             _hover={{background : 'white', textColor : Constants.BG_COLOR}}
             type='submit'
             >
-                Submit
+                SUBMIT
             </Button>
         </form>
     )
@@ -67,7 +67,7 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
 function UsernameChange() {
 
     const [formVisible, setFormVisible] = useState(false)
-    const text = formVisible ? "maybe not" : "Change my username"
+    const text = formVisible ? "MAYBE NOT" : "CHANGE MY USERNAME"
 
     return (<>
             <Flex minH={'353px'}

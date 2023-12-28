@@ -110,7 +110,7 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
                         _hover={{background : 'white', textColor : Const.BG_COLOR}} 
                         type='submit' marginTop="15px"
                         >
-                            join {props.roomName}
+                            JOIN
                             </Button>
                     </form>
             </ModalBody>
