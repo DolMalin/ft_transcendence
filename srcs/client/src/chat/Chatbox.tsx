@@ -312,7 +312,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function})
 
 
     const onSubmitInvite = (data: {friend: string}) => {
-      console.log('friend', data.friend)
       props.socket?.emit('invitePrivateChannel', {roomId: props.room.id, guestUsername: data.friend})
       resetInvite()
   }

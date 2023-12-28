@@ -103,7 +103,6 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             props.chatSocket?.off('dmRoom')
         })
     })
-console.log('rerender in ChatText.tsx')
 
     return (<>
     <Flex

@@ -215,8 +215,6 @@ export class UsersService {
 
   isAlreadyBlocked(user: User, userToVerify: User): boolean {
     
-    console.log(user.blocked)
-    console.log(userToVerify.blocked)
     const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === userToVerify.id);
     return isBlocked || false;
   }
@@ -389,21 +387,6 @@ export class UsersService {
     const request = await this.getRequestSentOrReceived(creator, receiver)
     if (!request)
       return res.status(200).send({status: 'undefined'})
-
-    // console.log(await this.friendRequestRepository.find({relations :{
-    //   creator: true,
-    //   receiver: true
-    // }}))
-
-    // const friendRequests = await this.friendRequestRepository
-    // .createQueryBuilder('friendRequest')
-    // .leftJoinAndSelect('friendRequest.creator', 'creator')
-    // .leftJoinAndSelect('friendRequest.receiver', 'receiver')
-    // .where('friendRequest.creator = :creator', {creator: creator.id})
-    // .orWhere('friendRequest.creator = :creator', {creator: receiverId})
-    // .getMany()
-    
-    // console.log(friendRequests)
 
     return res.status(200).send(
       {

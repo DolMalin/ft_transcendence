@@ -25,23 +25,28 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
     const [checked, setChecked] = useState(false)
     const [privateChan, setPrivate] = useState(false)
     const { register: registerCreate, 
-            handleSubmit: handleSubmitCreate, 
+            handleSubmit: handleSubmitCreate, setValue,
             reset: resetCreate, 
             formState: { errors: errorCreate }
     } = useForm()
 
-    const createRoom = async (dt: {room: string, password: string}) => {
+    const createRoom = async (dt: {room: string, password: string}) => {            
+        setValue('password', '')        
+        setChecked(false)
         if (dt.room !== "")
         {
             let data = {name: dt.room, password: dt.password, privChan: privateChan}
             try{
                 await authService.post(process.env.REACT_APP_SERVER_URL + '/room', data)
+                setPrivate(false)
                 joinRoom(dt)
             }
             catch(err){
                 console.error(`${err.response.data.message} (${err.response?.data?.error})`)
             }
-        }
+        }      
+        
+       
     }
 
 
@@ -55,6 +60,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.chatSocket.emit('channelCreation');
             props.setTargetRoom(res.data)
+
             props.onClose()
         }
         catch(err){
@@ -155,12 +161,17 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                     <Checkbox 
                         colorScheme='green'
                         isChecked={checked}
-                        onChange={(event) => setChecked(event.target.checked)}> password 
+                        onChange={(event) => {
+                            setChecked(event.target.checked)
+                            setValue('password', '')
+                        }}
+                        > password 
                     </Checkbox>
                     <Checkbox 
                         colorScheme='green'
                         isChecked={privateChan}
-                        onChange={(event) => setPrivate((event.target as HTMLInputElement).checked)}> private channel 
+                        onChange={(event) => setPrivate((event.target as HTMLInputElement).checked)
+                        }> private channel 
                     </Checkbox>
                     </Flex>
             </ModalBody>

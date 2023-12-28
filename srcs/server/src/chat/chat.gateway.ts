@@ -105,7 +105,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     const userId = client.handshake.query?.userId as string
     try{
       const array = await this.roomService.kick(data.roomId, userId, data.targetId)
-      console.log('emit in back');
       this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
       this.server.to(`user-${userId}`).emit('kicked', array[1])//TODO send le username pas le id
       this.server.to(`room-${data.roomId}`).emit('userLeft');
@@ -218,7 +217,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
 
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
-    console.log('data', data)
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){
       Logger.error("Wrong type for parameter")
       return 
@@ -256,7 +254,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     try{
-      console.log('from acceptedInviteChan')
       await this.roomService.addTargetInWhiteList(data.roomId, data.targetId)
     }
     catch(err){
