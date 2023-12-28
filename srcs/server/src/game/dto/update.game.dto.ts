@@ -13,7 +13,6 @@ export class UpdateGameDto extends PartialType(CreateGameDto){
     @IsUUID()
     @IsOptional()
     looserId : string;
-    @IsString()
 
 	@IsString()
 	@MinLength(3)
