@@ -222,7 +222,6 @@ export class AuthService {
   }
 
 
-  // @TODO: remove refresh token from db
   /** 
    * @description Logout user by clearing its jwt in cookies
    */
@@ -237,7 +236,7 @@ export class AuthService {
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     Logger.log(`User #${user.id} logged out`)
-    res.clearCookie("refreshToken").status(200).send()
+    return res.clearCookie("refreshToken").clearCookie('accessToken').status(200).send()
 
   }
 
