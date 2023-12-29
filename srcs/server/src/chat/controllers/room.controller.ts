@@ -12,7 +12,7 @@ import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { IsInt } from 'class-validator';
-import { INTParam } from 'src/decorator/uuid.decorator';
+import { INTParam } from 'src/decorator/decorator';
 
 
 @Controller('room')
