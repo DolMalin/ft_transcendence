@@ -189,7 +189,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                       {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'5px'}> # </Text>)}
                         <Tooltip label={room.name}>
                           <Text>
-                            {room.name.length < 15 ? room.name : room.name.substring(0, 12) + '...'}{' '}
+                            {room.name.length < 20 ? room.name : room.name.substring(0, 17) + '...'}{' '}
                           </Text>
                         </Tooltip>
                       </Flex>
