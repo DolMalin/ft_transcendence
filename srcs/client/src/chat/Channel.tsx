@@ -86,7 +86,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
     useEffect(() => {
         props.chatSocket?.on("receiveMessage", (data: MessageData) => {
 
-        if (data.room.id === props.room.id)
+        if (data.room?.id === props.room?.id)
         {
             setMessageList((list) => [...list, data])
         }
@@ -147,10 +147,10 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
 
                     return (
                     <Flex key={index}
-                    w={'90%'}
+                    w={'100%'}
                     bg='none'
                     textColor={'white'}
-                    margin={'10px'}
+                    padding={'10px'}
                     wrap={'wrap'}
                     justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                             <Flex 

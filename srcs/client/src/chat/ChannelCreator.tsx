@@ -22,7 +22,7 @@ function ChannelCreator (props: {chatSocket: Socket, setTargetRoom: Function}){
             _hover={{background : 'white', textColor : Const.BG_COLOR}}
             onClick={() => (onOpen())}
             >
-                Create channel
+                CREATE CHANNEL
             </Button>
             <ChannelCreationModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket} setTargetRoom={props.setTargetRoom}/>
         </>

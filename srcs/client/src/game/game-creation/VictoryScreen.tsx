@@ -34,7 +34,7 @@ import * as Constants from '../globals/const'
             _hover={{background : 'white', textColor: 'black'}}
             onClick={closeVScreen}
             >
-            Go back ?</Button>
+            GO BACK</Button>
         </Box>
     </>)
 }

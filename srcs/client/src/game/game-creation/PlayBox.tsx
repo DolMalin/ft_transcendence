@@ -99,7 +99,7 @@ function PlayBox(props : {dispatch : Function}) {
                     borderRadius={'0px'}
                     size={'lg'}
                     > 
-                    Play</Button>
+                    PLAY</Button>
                 </Box>
 
                 <Flex h="50%" w="100%">

@@ -1,63 +1,47 @@
 import { Button, Flex, FormControl, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
-import authService from "../auth/auth.service"
 import * as Const from '../game/globals/const'
 import BasicToast from "../toast/BasicToast"
-import { Room } from "./Chat"
+import * as Constants from '../game/globals/const'
 
-function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string, isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}){
+function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, onOpen : () => void , onClose : () => void}){
 
-    const { register: registerJoin, 
-        handleSubmit: handleSubmitJoin, 
-        reset: resetJoin, 
-        formState: { errors: errorJoin }
+    const { register: registerSetInvite, 
+        handleSubmit: handleSubmitInvite, 
+        reset: resetInvite, 
+        formState: { errors: errorSetPass }
     } = useForm()
+
     const toast = useToast();
 
+    const onSubmitInvite = (data: {friend: string}) => {
+        props.socket?.emit('invitePrivateChannel', {roomId: props.roomId, guestUsername: data.friend})
+        props.onClose()
+        resetInvite()
+    }
 
-    const  joinRoom = async (dt: {room: string, password: string}) => {
-        try{
-            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
-            {
-                name: dt.room,
-                password: dt.password
+    useEffect(() => {
+      props.socket?.on('chanInvite', (guestUsername: string) => {
+          const id = 'invite-toast';
+          if(!toast.isActive(id)){
+            toast({
+              id,
+              isClosable: true,
+              duration : 2000,
+              render : () => ( <>
+                <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
+            </>)
             })
-            props.chatSocket?.emit("joinRoom", res.data.id)
-            props.onClose()
-            props.setTargetRoom(res.data)
-        }
-        catch(err){
+          }
+        })
+    
+      return () => {
+        props.socket?.off('chanInvite')
+      }
+    })
 
-            if (err.response?.status === 409)
-            {
-                toast({
-                    isClosable: true,
-                    duration : 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.error}/>
-                    </>)
-                })
-            }
-            else if (err.response?.status === 403){
-                toast({
-                    isClosable: true,
-                    duration : 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.message}/>
-                    </>)
-                })
-            }
-            else
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
-        }
-    }
-
-    const onSubmitJoin = (data: {password: string}) => {
-        joinRoom({room: props.roomName, password: data.password})
-        resetJoin()
-    }
 
     return (
         <>
@@ -78,9 +62,8 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
             <ModalCloseButton />
             <ModalBody>
                     <Flex alignItems="center" justifyContent="center" marginBottom='20px'>
-                        <h3>type your password</h3>
                     </Flex>
-                    <form onSubmit={handleSubmitJoin(onSubmitJoin)}style={
+                    <form onSubmit={handleSubmitInvite(onSubmitInvite)}style={
                         {
                             alignItems: "center", 
                             display: "flex", 
@@ -92,11 +75,11 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
                         <FormControl isRequired>
                             <Input
                                 marginBottom="10px"
-                                type="password"
-                                placeholder="Please enter a password"
+                                type="text"
+                                placeholder="Please enter a username"
                                 {
-                                    ...registerJoin("password", {
-                                        required: "enter password",
+                                    ...registerSetInvite("friend", {
+                                        required: "enter username",
                                     })
                                 }
                             />
@@ -110,7 +93,7 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
                         _hover={{background : 'white', textColor : Const.BG_COLOR}} 
                         type='submit' marginTop="15px"
                         >
-                            JOIN
+                            Invite your friend
                             </Button>
                     </form>
             </ModalBody>
@@ -121,4 +104,4 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
     )
 }
 
-export default ChannelPasswordModal
+export default InviteModal

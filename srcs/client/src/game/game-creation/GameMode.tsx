@@ -102,7 +102,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
                         }
                     }}> 
-                        {Constants.GAME_TYPE_ONE} 
+                        {Constants.GAME_TYPE_ONE.toLocaleUpperCase()} 
                     </Button>
 
                     <RightBracket w={'30px'} h={'150px'} girth={'10px'}/>
@@ -114,7 +114,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                 justifyContent={'center'}
             >
                 <Divider variant={'dashed'} w={'35%'}/>
-                <Button w='20%' margin='5%'
+                <Button margin='5%'
                 borderRadius={'0'}
                 bg={Constants.BG_COLOR} 
                 textColor={'white'} 
@@ -123,7 +123,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                 onClick={() => {
                     props.dispatch({type : 'SET_GAME_MOD', payload : false});
                     props.dispatch({type : 'SET_PLAY', payload : true});
-                }}> Go back !</Button>
+                }}> GO BACK</Button>
                 <Divider variant={'dashed'} w={'35%'}/>
             </Flex>
 
@@ -159,7 +159,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                         }
                     }}
                     >
-                        {Constants.GAME_TYPE_TWO}
+                        {Constants.GAME_TYPE_TWO.toLocaleUpperCase()}
                     </Button>
 
                     <RightBracket w={'30px'} h={'150px'} girth={'10px'}/>

@@ -1,11 +1,7 @@
 import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons"
 import { 
     Flex, 
-    Heading, 
-    IconButton, 
     Link, 
-    ListItem, 
-    UnorderedList, 
     useDisclosure,
     Text,
     Box
@@ -22,12 +18,16 @@ async function getUserList(me : {username: string, id: string}){
         username: string,
         isuser: boolean,
         isLogged: boolean,
-        isAvailable: boolean
+        isAvailable: boolean,
+        isRegistered: boolean
     }[]
     try{
         const res =  await authService.get(process.env.REACT_APP_SERVER_URL + '/users/')
         userList = res.data
-        userList = userList.filter(user => user.id !== me?.id).filter(user => user.isLogged === true)
+        userList = userList
+            .filter(user => user.id !== me?.id)
+            .filter(user => user.isLogged === true)
+            .filter(user => user.isRegistered === true);
     }
     catch(err){
         throw err
@@ -70,16 +70,23 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
     }, [])
 
     return (<>
-        <Flex h={'50%'}
+    <Flex 
+    h={'50%'}
     w={'100%'}
     bg={Constants.BG_COLOR}
     padding={'10px'}
     wrap={'nowrap'}
     flexDir={'column'}
-    overflowY={'auto'}
     >
 
-    <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}> user List </Text>
+    <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}> USERS LIST </Text>
+        <Flex
+        w={'100%'}
+        bg={Constants.BG_COLOR}
+        wrap={'nowrap'}
+        flexDir={'column'}
+        overflowY={'auto'}
+        >
         {userList.map((user, index) => {
 
             let pinColor : string;
@@ -93,12 +100,12 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
                     <Flex 
                     key={index}
                     width={'100%'} 
-                    minH={'45px'}
-                    maxWidth={'300px'}
+                    minH={'66px'}
                     marginBottom={'10px'}
                     flexDir={'column'} 
                     alignItems={'center'}
                     bgColor={Constants.BG_COLOR_FADED}
+                    overflow={'hidden'}
                     >
                         <Flex w={'100%'}
                         flexDir={'row'} 
@@ -121,6 +128,7 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
                     </Flex>
             )
         })}
+        </Flex>
         <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
 </Flex>
 </>)

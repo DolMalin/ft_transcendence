@@ -62,13 +62,13 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
 
     const debouncedHandleResize = debounce (function handleResize() {
       if (window.innerWidth > 1300)
-        setFontSize('2em');
+        setFontSize('1.75em');
       else if (window.innerWidth > 1000)
-        setFontSize('1.5em')
+        setFontSize('1.25em')
       else if (window.innerWidth > 600)
         setFontSize('1em')
-      else if (window.innerWidth < 400)
-        setFontSize('0.5em')
+      else if (window.innerWidth <= 600)
+        setFontSize('0.75em')
     }, Constants.DEBOUNCE_TIME)
 
     window.addEventListener('resize', debouncedHandleResize)
@@ -76,7 +76,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     return(() => {
       window.removeEventListener('resize', debouncedHandleResize)
     })
-  }, [fontSize])
+  }, [fontSize, window.innerWidth, window.innerHeight])
 
   useEffect(function socketEvents() {
 
@@ -134,7 +134,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
               textColor={'white'}
               _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
               > 
-              No thanks !
+              NO THANKS
               </Button>
               <Button onClick={() => {acceptInvite(senderSocketId, senderId, gameType)}}
               bg={'none'}
@@ -143,7 +143,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
               textColor={'white'}
               _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
               >
-                Yes please ! 
+                YES PLEASE 
               </Button>
             </BasicToast>
           </>
@@ -188,7 +188,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         _selected={{background: Constants.TABS_COLOR}}
         >
           {tab === 0 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
-          <Text w={'80%'}>Pong</Text>
+          <Text w={'80%'}>PONG</Text>
           {tab === 0 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
         </Tab>
 
@@ -196,7 +196,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         _selected={{background: Constants.TABS_COLOR}}
         >
           {tab === 1 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
-            <Text w={'80%'}>Chat</Text>
+            <Text w={'80%'}>CHAT</Text>
           {tab === 1 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
         </Tab>
 
@@ -204,7 +204,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         _selected={{background: Constants.SELECTED_TAB_COLOR}}
         >
           {tab === 2 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
-            <Text w={'80%'}>LeaderBoard</Text>
+            <Text w={'80%'}>LEADERBOARD</Text>
           {tab === 2 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
         </Tab>
 
@@ -212,7 +212,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         _selected={{background: Constants.SELECTED_TAB_COLOR}}
         >
           {tab === 3 && <LeftBracket w={'15px'} h={'50px'} girth='5px'></LeftBracket>}
-          <Text w={'80%'}>Profile</Text>
+          <Text w={'80%'}>PROFILE</Text>
           {tab === 3 && <RightBracket w={'15px'} h={'50px'} girth='5px'></RightBracket>}
         </Tab>
 

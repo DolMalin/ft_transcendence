@@ -161,15 +161,15 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
 
                     return (
                         <Flex key={index}
-                        w={'90%'}
+                        w={'100%'}
                         bg='none'
+                        padding={'10px'}
                         textColor={'white'}
-                        margin={'10px'}
                         wrap={'wrap'}
                         justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                                 <Flex 
                                 maxWidth={'70%'}
-                                bg={Constants.BG_COLOR_FADED}
+                                bg={Constants.BG_COLOR_LESSER_FADE}
                                 flexDir={'column'}
                                 wrap={'wrap'}
                                 padding={'10px'}
@@ -232,6 +232,7 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                             focusBorderColor="none"
                             borderRadius={'0px'}
                             type='text'
+                            autoComplete="off"
                             placeholder="type your message..."
                             {...register("message", {
                                 required: "enter message",

@@ -216,66 +216,66 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, 
 
     useEffect(() => {
 
-      props.socket?.on('channelLeft', () => {
-        props.showChat(false);
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={'you left room ' + props.room.name}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('channelLeft', () => {
+      //   props.showChat(false);
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={'you left room ' + props.room.name}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('kickBy', (kickByUsername: string, roomName : string) => {
-        props.showChat(false);
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('kickBy', (kickByUsername: string, roomName : string) => {
+      //   props.showChat(false);
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={'you have been kicked from ' + roomName + ` by ${kickByUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('kicked', (targetId: string) => {
-        const id = 'test-toast';
-        if(!toast.isActive(id)) {
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <> 
-              <BasicToast text={`you kicked ${targetId} from ` + props.room.name}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('kicked', (targetId: string) => {
+      //   const id = 'test-toast';
+      //   if(!toast.isActive(id)) {
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 5000,
+      //       render : () => ( <> 
+      //         <BasicToast text={`you kicked ${targetId} from ` + props.room.name}/>
+      //     </>)
+      //     })
+      //   }
+      // })
 
-      props.socket?.on('chanInvite', (guestUsername: string) => {
-        const id = 'invite-toast';
-        if(!toast.isActive(id)){
-          toast({
-            id,
-            isClosable: true,
-            duration : 2000,
-            render : () => ( <>
-              <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
-          </>)
-          })
-        }
-      })
+      // props.socket?.on('chanInvite', (guestUsername: string) => {
+      //   const id = 'invite-toast';
+      //   if(!toast.isActive(id)){
+      //     toast({
+      //       id,
+      //       isClosable: true,
+      //       duration : 2000,
+      //       render : () => ( <>
+      //         <BasicToast text={`You sent an invitation to ${guestUsername}`}/>
+      //     </>)
+      //     })
+      //   }
+      // })
   
       // props.socket?.on('chanInvitedNotification', (hostUsername: string) => {
-      //   const id = 'invite-toast';
+      //   const id = 'invite-toast-chan';
       //   if(!toast.isActive(id)){
       //     toast({
       //       id,
@@ -288,11 +288,11 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, 
       //   }
       // })
 
-      return () => {
-        props.socket?.off('channelLeft')
-        props.socket?.off('kickBy')
-        props.socket?.off('kicked')
-      }
+      // return () => {
+      //   props.socket?.off('channelLeft')
+      //   props.socket?.off('kickBy')
+      //   props.socket?.off('kicked')
+      // }
     })
 
     useEffect(() => {
@@ -312,7 +312,6 @@ export function Chatbox(props: {socket: Socket, room: Room, showChat: Function, 
 
 
     const onSubmitInvite = (data: {friend: string}) => {
-      console.log('friend', data.friend)
       props.socket?.emit('invitePrivateChannel', {roomId: props.room.id, guestUsername: data.friend})
       resetInvite()
   }

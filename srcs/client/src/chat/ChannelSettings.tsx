@@ -7,11 +7,13 @@ import { Socket } from "socket.io-client";
 import { Room } from "./Chat";
 import { DragHandleIcon } from "@chakra-ui/icons";
 import * as Constants from '../game/globals/const';
+import InviteModal from "./InviteModal";
 
 function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boolean, setTargetChannel : Function}) {
 
     const [action, setAction] = useState("")
     const {isOpen, onOpen, onClose} = useDisclosure()
+    const {isOpen: isOpenInvite, onOpen: onOpenInvite, onClose: onCloseInvite} = useDisclosure()
     const toast = useToast();
 
     async function removePassword(roomId: number){
@@ -85,7 +87,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            Set password
+                            SET PASSWORD
                         </Button >
                         <Button onClick={() => {
                             onOpen()
@@ -98,7 +100,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            change password
+                            CHANGE PASSWORD
                         </Button>
                         <Button onClick={() => removePassword(props.room.id)}
                         borderRadius={'0px'}
@@ -108,7 +110,19 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            remove password
+                            REMOVE PASSWORD
+                        </Button>
+                        <Button onClick={() => {
+                            onOpenInvite()
+                        }}
+                        borderRadius={'0px'}
+                        margin={'10px'}
+                        bg={Constants.BG_COLOR}
+                        fontWeight={'normal'}
+                        textColor={'white'}
+                        _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
+                        >
+                            INVITE
                         </Button>
                         <Button onClick={() => leaveChan(props.room.id)}
                         borderRadius={'0px'}
@@ -118,14 +132,15 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         textColor={'white'}
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
-                            leave
+                            LEAVE
                         </Button>
                     </PopoverBody>
                     </PopoverContent>
                 </Portal>
                 </Popover>
             </Link>
-        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket}/>
+        <InviteModal socket={props.chatSocket} roomId={props.room.id} isOpen={isOpenInvite} onOpen={onOpenInvite} onClose={onCloseInvite} />
+        <PasswordSettingsModal action={action} roomId={props.room.id} isOpen={isOpen} onOpen={onOpen} onClose={onClose} chatSocket={props.chatSocket} />
         </>
     }
     else {
@@ -156,7 +171,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                             textColor={'white'}
                             _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                             >
-                                leave
+                                LEAVE
                             </Button>
                         </PopoverBody>
                     </PopoverContent>

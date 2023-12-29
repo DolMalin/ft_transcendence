@@ -46,7 +46,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
                             <label htmlFor="fileInput" 
                             style={{display: 'flex', alignItems: 'center', overflowX: 'auto', overflowY : 'hidden',textOverflow: 'ellipsis', whiteSpace: 'nowrap',scrollbarWidth:'thin'}}
                             >
-                                {inputText}
+                                {(inputText as string).toUpperCase()}
                             </label>
                         </Button>
                     
@@ -76,7 +76,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
             _hover={{background : 'white', textColor : Constants.BG_COLOR}}
             type='submit'
             >
-                Submit
+                SUBMIT
             </Button>
         </form>
     )
@@ -84,7 +84,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 
 function AvatarChange() {
     const [formVisible, setFormVisible] = useState(false)
-    const text = formVisible ? "maybe not" : "Change my Avatar"
+    const text = formVisible ? "MAYBE NOT" : "CHANGE MY AVATAR"
 
     return (<>
         <Flex minH={'353px'}

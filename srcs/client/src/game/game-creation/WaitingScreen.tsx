@@ -54,7 +54,7 @@ import * as Constants from '../globals/const'
             justifyContent={'center'}
             >
                 <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
-                    <b>Looking for game {dot} </b>
+                    LOOKING FOR GAME {dot}
                 </Text>
             </Box>
 
@@ -67,7 +67,7 @@ import * as Constants from '../globals/const'
                 _hover={{background : 'white', textColor: 'black'}}
                 onClick={leaveQueue} 
                 > 
-                Leave Queue </Button>
+                LEAVE QUEUE </Button>
             </Box>
     </Flex>
     )

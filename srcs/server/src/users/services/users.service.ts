@@ -304,9 +304,11 @@ export class UsersService {
       let scoreList : leaderboardStats[] = []; 
 
       res?.forEach(async (value) => {
-
-        scoreList.push({username : value.username, id : value.id,winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
-        WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
+        if (value.isRegistered === true)
+        {
+          scoreList.push({username : value.username, id : value.id,winsAmount : value.winsAmount, loosesAmount : value.loosesAmount,
+          WLRatio : winRatioCalculator(value.winsAmount, value.loosesAmount)});
+        }
       })
       return (scoreList);
     }));

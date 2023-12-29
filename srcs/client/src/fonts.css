@@ -5,13 +5,13 @@
 }
 
 @font-face {
-    font-family: 'Bionic';
+    font-family: 'Russo';
 
-    src: url('../public/fonts/BIONICKIDSIMPLE.ttf')
+    src: url('../public/fonts/Russo/RussoOne-Regular.ttf')
 }
 
 .goma {
-    font-family: 'Goma';
+    font-family: 'Russo';
     font-weight: 'normal';
 }
 

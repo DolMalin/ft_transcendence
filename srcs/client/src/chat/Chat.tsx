@@ -214,79 +214,79 @@ export function Chat(props: {socket: Socket, gameSocket : Socket}){
         }
     }
 
-    useEffect(() => {
-        props.socket?.on('userBlocked', (err) => {
-            toast({
-                title: err.title,
-                description:  err.desc,
-                colorScheme: 'red',
-                status: 'info',
-                duration: 5000,
-                isClosable: true
-              })
-        })
-        props.socket?.on('dmRoom', (dm) => {
-            props.socket?.emit("joinRoom", dm.id)
-            setRoom(dm)
-            setShowChat(true)
-        })
-        props.socket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, targetId}) => {
-            const id = 'test-toast';
-            if(!toast.isActive(id)) {
-            toast({
-              id,  
-              duration: null,
-              render : () => ( <>
-                <BasicToast text={'You just got invited by ' + senderUsername  + ' to join ' + roomName + ' !'}>
-                    <Button onClick={() => {
-                        props.socket?.emit('declinedInviteChan', {roomName, targetId, senderId})
-                        toast.closeAll()}}
-                    bg={'none'}
-                    borderRadius={'0px'}
-                    fontWeight={'normal'}
-                    textColor={'white'}
-                    _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
-                    > 
-                    No thanks !
-                    </Button>
-                    <Button onClick={() => {
-                        joinRoom({room: roomName, password: null})
-                        toast.closeAll()
-                    }}
-                    bg={'none'}
-                    borderRadius={'0px'}
-                    fontWeight={'normal'}
-                    textColor={'white'}
-                    _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
-                    >
-                      Yes please ! 
-                    </Button>
-                  </BasicToast>
-                </>
-              ),
-              isClosable: true,
-            })
-          }})
+    // useEffect(() => {
+    //     props.socket?.on('userBlocked', (err) => {
+    //         toast({
+    //             title: err.title,
+    //             description:  err.desc,
+    //             colorScheme: 'red',
+    //             status: 'info',
+    //             duration: 5000,
+    //             isClosable: true
+    //           })
+    //     })
+    //     props.socket?.on('dmRoom', (dm) => {
+    //         props.socket?.emit("joinRoom", dm.id)
+    //         setRoom(dm)
+    //         setShowChat(true)
+    //     })
+    //     props.socket?.on('chanInvitedNotification', ({senderId, senderUsername, roomName, targetId}) => {
+    //         const id = 'test-toast';
+    //         if(!toast.isActive(id)) {
+    //         toast({
+    //           id,  
+    //           duration: null,
+    //           render : () => ( <>
+    //             <BasicToast text={'You just got invited by ' + senderUsername  + ' to join ' + roomName + ' !'}>
+    //                 <Button onClick={() => {
+    //                     props.socket?.emit('declinedInviteChan', {roomName, targetId, senderId})
+    //                     toast.closeAll()}}
+    //                 bg={'none'}
+    //                 borderRadius={'0px'}
+    //                 fontWeight={'normal'}
+    //                 textColor={'white'}
+    //                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+    //                 > 
+    //                 No thanks !
+    //                 </Button>
+    //                 <Button onClick={() => {
+    //                     joinRoom({room: roomName, password: null})
+    //                     toast.closeAll()
+    //                 }}
+    //                 bg={'none'}
+    //                 borderRadius={'0px'}
+    //                 fontWeight={'normal'}
+    //                 textColor={'white'}
+    //                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
+    //                 >
+    //                   Yes please ! 
+    //                 </Button>
+    //               </BasicToast>
+    //             </>
+    //           ),
+    //           isClosable: true,
+    //         })
+    //       }})
 
         
-        props.socket?.on('declinedNotification', (username: string) => {
-        const id = 'declined-toast';
-        if(!toast.isActive(id)){
-          toast({
-            id,
-            isClosable: true,
-            duration : 5000,
-            render : () => ( <>
-              <BasicToast text={`${username} declined your invitation `}/>
-          </>)
-          })
-        }
-      })
-        return (() => {
-            props.socket?.off('userBlocked')
-            props.socket?.off('dmRoom')
-        })
-    })
+    //     props.socket?.on('declinedNotification', (username: string) => {
+    //     const id = 'declined-toast';
+    //     if(!toast.isActive(id)){
+    //       toast({
+    //         id,
+    //         isClosable: true,
+    //         duration : 5000,
+    //         render : () => ( <>
+    //           <BasicToast text={`${username} declined your invitation `}/>
+    //       </>)
+    //       })
+    //     }
+    //   })
+    //     return (() => {
+    //         props.socket?.off('userBlocked')
+    //         props.socket?.off('dmRoom')
+    //     })
+    // })
 
 
     useEffect(function socketEvent() {

@@ -85,7 +85,14 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
             overflowY={'auto'}
             >
 
-            <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}> Friend List </Text>
+            <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}> FRIENDS LIST </Text>
+            <Flex
+            w={'100%'}
+            bg={Constants.BG_COLOR}
+            wrap={'nowrap'}
+            flexDir={'column'}
+            overflowY={'auto'}
+            >
                 {friendsList.map((friend, index) => {
 
                     let pinColor : string;
@@ -98,8 +105,7 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                     return(
                             <Flex key={(index)}
                             width={'100%'} 
-                            minH={'45px'}
-                            maxWidth={'300px'}
+                            minH={'66px'}
                             marginBottom={'10px'}
                             flexDir={'column'} 
                             alignItems={'center'}
@@ -126,6 +132,7 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
                             </Flex>
                     )
                 })}
+            </Flex>
         </Flex>
         <ProfileModal userId={id} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
     </>)
