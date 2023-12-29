@@ -160,7 +160,7 @@ export function drawBall(context : CanvasRenderingContext2D, canvasBounding : DO
  * use draw number to display a 3 to 0 count down
 */
 export function drawMidPointCt(context : CanvasRenderingContext2D, canvasBounding : DOMRect, ctSizeModifier : number, midPointCT : number) {
-    let numberSize = canvasBounding.width / 6 * ctSizeModifier;
+    let numberSize = canvasBounding.width / 7 * ctSizeModifier;
     let x = canvasBounding.width / 2 - (numberSize * 0.25)
     let y = canvasBounding.height / 2 - (numberSize * 0.25)
     switch (midPointCT) 
@@ -169,13 +169,13 @@ export function drawMidPointCt(context : CanvasRenderingContext2D, canvasBoundin
             drawNumbers(context, 'white', x, y, numberSize, Constants.THREE);
             break ;
         case 2 :
-            drawNumbers(context, 'yellow', x, y, numberSize, Constants.TWO);
+            drawNumbers(context, 'white', x, y, numberSize, Constants.TWO);
             break ;
         case 1 :
-            drawNumbers(context, 'orange', x, y, numberSize, Constants.ONE);
+            drawNumbers(context, 'white', x, y, numberSize, Constants.ONE);
             break ;
         case 0 :
-            drawNumbers(context, 'red', x, y, numberSize, Constants.ZERO);
+            drawNumbers(context, 'white', x, y, numberSize, Constants.ZERO);
             break ;
         default :
             break ;
