@@ -145,10 +145,10 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
 
                     return (
                     <Flex key={index}
-                    w={'90%'}
+                    w={'100%'}
                     bg='none'
                     textColor={'white'}
-                    margin={'10px'}
+                    padding={'10px'}
                     wrap={'wrap'}
                     justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                             <Flex 

@@ -120,7 +120,6 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
     wrap={'nowrap'}
     flexDir={flexDir}
     textColor={'white'}
-    // justifyContent={'space-evenly'}
     bg={Constants.BG_COLOR}
     >
 
