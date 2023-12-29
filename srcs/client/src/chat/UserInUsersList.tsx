@@ -148,12 +148,12 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsOp('isOwner')
                 else if(privi.data === 'isAdmin')
                     setTargetIsOp('isAdmin')
+                else if (privi.data === 'no')
+                    setTargetIsOp('no');
                 else if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
                 else if (privi.data !== 'isMuted')
                     setTargetIsMuted(false);
-                else
-                    setTargetIsOp('no')
             }
             catch (err) {
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -234,6 +234,7 @@ function UserInUsersList(props : {username : string, userId : string,
 
     if (props.userIsOp)
     {
+
     return (<>
         <Link>
             <Popover>

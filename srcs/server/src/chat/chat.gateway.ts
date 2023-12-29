@@ -321,7 +321,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       Logger.error('wrong data passed to channelRightsUpdate event');
       return ;
     }
-      this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate');
   }
 
   @SubscribeMessage('userGotBannedOrMuted')

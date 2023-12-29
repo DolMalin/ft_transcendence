@@ -151,7 +151,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 textColor={'white'}
                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
                 > 
-                No thanks !
+                NO THANKS
                 </Button>
                 <Button onClick={() => {
                     props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, roomName: roomName, targetId: targetId})
@@ -163,7 +163,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 textColor={'white'}
                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
                 >
-                  Yes please ! 
+                  YES PLEASE 
                 </Button>
               </BasicToast>
             </>
@@ -262,9 +262,9 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                     >
                       <Flex w={'100%'} h={'60px'} flexDir={'row'} alignItems={'center'} textOverflow={'ellipsis'}>
                       {state === 'password' && (<LockIcon boxSize={4} color={hoveredRoom === room.name ? 'black' : 'white'} marginRight={'5px'}/>)}
-                      {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'5px'}> # </Text>)}
+                      {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'8px'}> # </Text>)}
                         <Tooltip label={room.name}>
-                          <Text>
+                          <Text as={'b'}>
                             {room.name.length < 20 ? room.name : room.name.substring(0, 17) + '...'}{' '}
                           </Text>
                         </Tooltip>
