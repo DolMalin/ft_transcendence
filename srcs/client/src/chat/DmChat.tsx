@@ -11,6 +11,8 @@ import BasicToast from "../toast/BasicToast";
 import { useForm } from "react-hook-form";
 import { ArrowRightIcon } from "@chakra-ui/icons";
 
+import { decode } from "html-entities";
+
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
     let hour = dateObj.getHours()
@@ -184,7 +186,7 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                                         src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + messageContent.author.id}
                                         />
                                         
-                                        <Text padding={'10px'} >{messageContent.content}</Text>
+                                        <Text padding={'10px'} >{decode(messageContent.content)}</Text>
                                         
                                     </Flex>
                                     <Link fontSize={'0.6em'}onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Link>
