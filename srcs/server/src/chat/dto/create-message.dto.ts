@@ -1,11 +1,11 @@
 import { IsNumber, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
-import { TransformFnParams } from 'class-transformer'
-import { Transform} from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
+import { Escape } from "class-sanitizer"
+import { Transform, TransformFnParams } from "class-transformer";
+import * as sanitizeHtml from 'sanitize-html';
+import * as xss from "xss"
 
 export class CreateMessageDto {
 
-    // Escape
     @IsString()
     @MinLength(1)
     @Matches(/^(?!\s*$).+/, {message: "message must not contains only spaces"})
@@ -25,3 +25,4 @@ export class CreateMessageDto {
     authorId: string
     
 }
+

@@ -34,6 +34,7 @@
     "argon2": "^0.31.1",
     "axios": "^1.4.0",
     "buffer-to-stream": "^1.0.0",
+    "class-sanitizer": "^1.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cli": "^1.0.1",
@@ -59,7 +60,8 @@
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "stream": "^0.0.2",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "xss": "^1.0.14"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
