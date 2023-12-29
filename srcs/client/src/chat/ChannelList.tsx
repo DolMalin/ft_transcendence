@@ -7,7 +7,8 @@ import {
     useColorMode,
     Input,
     InputGroup,
-    InputLeftElement
+    InputLeftElement,
+    Tooltip
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
@@ -131,10 +132,9 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
             padding={'10px'}
             wrap={'nowrap'}
             flexDir={'column'}
-            overflowY={'auto'}
           >
             <Text w={'100%'} textAlign={'center'} marginBottom={'10px'}>
-              Channel List
+              CHANNEL LIST
             </Text>
 
             <InputGroup>
@@ -147,63 +147,57 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
               _focus={{bg : 'white', textColor : 'black'}}
               />
             </InputGroup>
-    
-            {roomList?.length > 0 && (
-              roomList.map((room, index: number) => {
-                let state: string
-                if (room?.privChan) state = 'private'
-                else if (room?.password) state = 'password'
-                else state = 'default'
-                if (state === 'private') return null 
-                return (
-                  <Flex
-                    key={room.id}
-                    border={room.name === props.targetRoom?.name ? '1px solid white' : 'none'}
-                    width={'100%'}
-                    minH={'45px'}
-                    maxWidth={'300px'}
-                    marginBottom={'10px'}
-                    padding={'4px'}
-                    flexDir={'column'}
-                    alignItems={'center'}
-                    _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
-                    bgColor={Constants.BG_COLOR_FADED}
-                    onClick={() => {
-                      if (room.password) {
-                        onOpen()
-                        setRoomName(room.name)
-                      } else {
-                        joinRoom({ room: room.name, password: room?.password })
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredRoom(room.name)}
-                    onMouseLeave={() => setHoveredRoom(null)}
-                  >
-                    <Flex w={'100%'} flexDir={'row'} alignItems={'center'}>
-                      <Link
-                        overflow={'hidden'}
-                        textOverflow={'ellipsis'}
-                      >
-                        {room.name}{' '}
-                      </Link>
-                    </Flex>
-                    {state === 'password' && (
-                      <Flex
-                        w={'100%'}
-                        justifyContent={'right'}
-                        paddingBottom={'10px'}
-                        paddingRight={'10px'}
-                      >
-                        <LockIcon
-                          boxSize={4}
-                          color={hoveredRoom === room.name ? 'black' : 'white'}
-                        />
+            <Flex
+              w={'100%'}
+              padding={'10px'}
+              wrap={'nowrap'}
+              flexDir={'column'}
+              overflowY={'auto'}
+            >
+              {roomList?.length > 0 && (
+                roomList.map((room, index: number) => {
+                  let state: string
+                  if (room?.privChan) state = 'private'
+                  else if (room?.password) state = 'password'
+                  else state = 'default'
+                  if (state === 'private') return null 
+                  return (
+                    <Flex
+                      key={room.id}
+                      border={room.name === props.targetRoom?.name ? '1px solid white' : 'none'}
+                      width={'100%'}
+                      minH={'45px'}
+                      marginBottom={'10px'}
+                      padding={'4px'}
+                      flexDir={'column'}
+                      alignItems={'center'}
+                      _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
+                      bgColor={Constants.BG_COLOR_FADED}
+                      onClick={() => {
+                        if (room.password) {
+                          onOpen()
+                          setRoomName(room.name)
+                        } else {
+                          joinRoom({ room: room.name, password: room?.password })
+                        }
+                      }}
+                      onMouseEnter={() => setHoveredRoom(room.name)}
+                      onMouseLeave={() => setHoveredRoom(null)}
+                    >
+                      <Flex w={'100%'} h={'60px'} flexDir={'row'} alignItems={'center'} textOverflow={'ellipsis'}>
+                      {state === 'password' && (<LockIcon boxSize={4} color={hoveredRoom === room.name ? 'black' : 'white'} marginRight={'5px'}/>)}
+                      {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'5px'}> # </Text>)}
+                        <Tooltip label={room.name}>
+                          <Text>
+                            {room.name.length < 15 ? room.name : room.name.substring(0, 12) + '...'}{' '}
+                          </Text>
+                        </Tooltip>
                       </Flex>
-                    )}
-                  </Flex>
-                )
-              })
-            )}
+                    </Flex>
+                  )
+                })
+              )}
+            </Flex>
           </Flex>
           <ChannelPasswordModal
             setTargetRoom={props.setTargetRoom}
