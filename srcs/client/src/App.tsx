@@ -62,9 +62,9 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
 
     const debouncedHandleResize = debounce (function handleResize() {
       if (window.innerWidth > 1300)
-        setFontSize('2em');
+        setFontSize('1.75em');
       else if (window.innerWidth > 1000)
-        setFontSize('1.5em')
+        setFontSize('1.25em')
       else if (window.innerWidth > 600)
         setFontSize('1em')
       else if (window.innerWidth <= 600)
