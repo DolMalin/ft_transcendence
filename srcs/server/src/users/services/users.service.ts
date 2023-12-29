@@ -175,6 +175,9 @@ export class UsersService {
     if (!user)
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
 
+    if (!user.avatarId)
+      throw new NotFoundException('Avatar not found', {cause: new Error(), description: 'the avatar do not exist in database (probably not setup yet)'})
+      
     const avatar = await this.avatarService.getAvatarById(user.avatarId)
 
     if (!avatar)
