@@ -32,6 +32,10 @@ export class RoomService {
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
+
+        if(createRoomDto.privChan === true && createRoomDto.password)
+            throw new ConflictException("Channel is private", {cause: new Error(), description: "You cannot have a password protected private channel"})
+
         if (await this.findOneByName(createRoomDto.name))
             throw new ConflictException("Channel already exists", {cause: new Error(), description: "channel name is unique, find another one"})
         const room = this.roomRepository.create({
@@ -733,5 +737,18 @@ export class RoomService {
             })
         room.password = undefined
         this.save(room)
+    }
+
+    async isPriv(roomId : number) {
+
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            })
+        return (room.privChan);
     }
 }

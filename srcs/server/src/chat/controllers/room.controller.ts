@@ -59,6 +59,13 @@ export class RoomController {
     }
 
     @UseGuards(AccessToken2FAGuard)
+    @Get('isPriv/:id')
+    async isPriv(@Param("id") @INTParam() id: number) {
+
+        return (await this.roomService.isPriv(id));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
     @Post('joinRoom')
     async joinRoom(@GetUser() user: User, @Body() dto: JoinRoomDto){
         return await this.roomService.joinRoom(dto, user);

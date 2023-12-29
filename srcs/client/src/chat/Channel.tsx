@@ -153,7 +153,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                     justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                             <Flex 
                             maxWidth={'70%'}
-                            bg={Constants.BG_COLOR_FADED}
+                            bg={Constants.BG_COLOR_LESSER_FADE}
                             flexDir={'column'}
                             wrap={'wrap'}
                             padding={'10px'}
