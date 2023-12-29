@@ -54,7 +54,7 @@ import * as Constants from '../globals/const'
             justifyContent={'center'}
             >
                 <Text fontSize="2xl" textAlign="center" style={{display : 'flex', flexDirection: 'row'}}>
-                    <b>Looking for game {dot} </b>
+                    LOOKING FOR GAME {dot}
                 </Text>
             </Box>
 
