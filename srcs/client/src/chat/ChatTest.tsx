@@ -44,7 +44,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
             }
             else
             {
-                setBoxWidth('15%');
+                setBoxWidth('320px');
                 setBoxHeight('100%');
                 setFlexDir('row');
             }
@@ -120,12 +120,15 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
     wrap={'nowrap'}
     flexDir={flexDir}
     textColor={'white'}
+    // justifyContent={'space-evenly'}
+    bg={Constants.BG_COLOR}
     >
 
         <Flex
         w={boxWidth}
         h={boxHeight}
-        minH={'320px'}
+        maxWidth={boxWidth}
+        minH={'450px'}
         flexDir={'column'}
         bg={Constants.BG_COLOR}
         >
@@ -149,9 +152,9 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         </Flex>
 
         <Flex
-        w={boxWidth === '100%' ? boxWidth : '70%'}
+        w={boxWidth === '100%' ? boxWidth : 'calc(100% - 620px)'}
         h={boxHeight}
-        minH={'320px'}
+        minH={'450px'}
         bg={Constants.BG_COLOR_FADED} 
         >
             {targetRoom != undefined && 
@@ -166,7 +169,8 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         <Flex
         w={boxWidth}
         h={boxHeight}
-        minH={'320px'}
+        maxWidth={boxWidth}
+        minH={'450px'}
         bg={Constants.BG_COLOR}
         flexDir={'column'} 
         >
@@ -176,12 +180,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
                 <Divider variant='dashed' width='90%' />
             </Flex>
 
-            <Flex h={'50%'}
-            w={'100%'}
-            bg={Constants.BG_COLOR}
-            >
             <UserList chatSocket={props.chatSocket} gameSocket={props.gameSocket}/>
-            </Flex>
         </Flex>
     </Flex>
     </>)
