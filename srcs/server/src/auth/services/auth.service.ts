@@ -291,9 +291,12 @@ export class AuthService {
   }
 
   async twoFactorAuthenticationLogin(user: User, res: any, body: any) {
+    if (!user.isTwoFactorAuthenticationEnabled)
+      throw new BadRequestException('User error', { cause: new Error(), description: 'user is not 2fa enabled' })
+      
     if (!body.twoFactorAuthenticationCode)
       throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code give' })
-      
+
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
