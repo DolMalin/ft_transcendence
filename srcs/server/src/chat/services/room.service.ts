@@ -92,7 +92,14 @@ export class RoomService {
             users: [user, user2]
         })    
         await this.roomRepository.save(directMessage)
-        return this.getRoom(roomName)
+        const room = await this.getRoom(roomName)
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        return (room);
     }
 
     async getRoom(roomName: string){
@@ -104,6 +111,27 @@ export class RoomService {
             .where('room.name = :name', { name: roomName })
             .orderBy('message.id', 'ASC')
             .getOne()
+    }
+
+    async getRoomById(roomId: number){
+
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.id = :id', { id: roomId })
+            .orderBy('message.id', 'ASC')
+            .getOne()
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        this.removeProtectedProperties(room);
+        room.password = null;
+        return(room);
     }
     
     async findAll(){
@@ -168,8 +196,11 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
 
-        if (!room) 
-            throw new ForbiddenException('room does not exist')
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
         
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
@@ -210,7 +241,7 @@ export class RoomService {
             })
             }  
         } 
-
+        
         if (room?.password?.length > 0 && room.password){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -748,7 +779,27 @@ export class RoomService {
             {
                 cause: new Error(), 
                 description: "cannot find this room in database"
-            })
+            });
         return (room.privChan);
+    }
+
+    async isInRoom(user : User, roomId : number) {
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (!user)
+            throw new NotFoundException("User not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (room.users?.some(chanUser => chanUser.id === user.id))
+            return (true)
+        return (false);
     }
 }

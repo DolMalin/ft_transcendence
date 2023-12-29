@@ -38,10 +38,18 @@ export class RoomController {
         return await this.roomService.findAll();
     }
 
+    
     @UseGuards(AccessToken2FAGuard)
     @Get('list')
     async getRoomListWithoutDm(){
         return await this.roomService.findAllWithoutDm();
+    }
+    
+    @UseGuards(AccessToken2FAGuard)
+    @Get(':id')
+    async getRoom(@Param('id') @INTParam() id: number){
+
+        return await this.roomService.getRoomById(id);
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -63,6 +71,13 @@ export class RoomController {
     async isPriv(@Param("id") @INTParam() id: number) {
 
         return (await this.roomService.isPriv(id));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Get('isInRoom/:id')
+    async isInRoom(@GetUser() user : User ,@Param("id") @INTParam() id: number) {
+
+        return (await this.roomService.isInRoom(user ,id));
     }
 
     @UseGuards(AccessToken2FAGuard)

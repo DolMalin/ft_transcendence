@@ -93,7 +93,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
               })
           }
             else
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -200,6 +200,26 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       setRoomnamesNarrower(event.target.value)
     }
 
+    async function isUserInRoom(roomId : number, roomName : string, roomPswd : string) {
+
+      try {
+        const isHe = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
+        console.log(isHe)
+        if (isHe.data === false && roomPswd !== null) {
+          onOpen()
+          setRoomName(roomName)
+        } 
+        else {
+          const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
+          console.log(res.data)
+          props.setTargetRoom(res.data);
+        }
+      }
+      catch(err) {
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+      }
+    }
+
     return (
         <>
           <Flex
@@ -250,12 +270,13 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                       _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
                       bgColor={Constants.BG_COLOR_FADED}
                       onClick={() => {
-                        if (room.password) {
-                          onOpen()
-                          setRoomName(room.name)
-                        } else {
-                          joinRoom({ room: room.name, password: room?.password })
-                        }
+                        isUserInRoom(room.id, room.name, room.password);
+                        // if (room.password) {
+                        //   onOpen()
+                        //   setRoomName(room.name)
+                        // } else {
+                        //   joinRoom({ room: room.name, password: room?.password })
+                        // }
                       }}
                       onMouseEnter={() => setHoveredRoom(room.name)}
                       onMouseLeave={() => setHoveredRoom(null)}
