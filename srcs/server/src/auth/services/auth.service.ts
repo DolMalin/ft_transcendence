@@ -278,6 +278,9 @@ export class AuthService {
   }
 
   async generateTwoFactorAuthenticationQRCode(user: User) {
+    if (user.twoFactorAuthenticationSecret)
+      throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already activated' })
+
     let secret = await this.generateTwoFactorAuthenticationSecret(user)
     if (!secret)
       throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa secret' })
@@ -294,7 +297,7 @@ export class AuthService {
       throw new BadRequestException('User error', { cause: new Error(), description: 'user is not 2fa enabled' })
       
     if (!body.twoFactorAuthenticationCode)
-      throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code give' })
+      throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
@@ -318,6 +321,11 @@ export class AuthService {
   }
 
   async turnOnTwoFactorAuthentication(user: User, res: any, body: any) {
+    if (user.isTwoFactorAuthenticationEnabled)
+      throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already turned on' })
+
+    if (!body.twoFactorAuthenticationCode)
+      throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
@@ -331,6 +339,11 @@ export class AuthService {
 
 
   async turnOffTwoFactorAuthentication(user: User, res: any, body: any) {
+    if (!user.isTwoFactorAuthenticationEnabled)
+      throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already turned off' })
+
+    if (!body.twoFactorAuthenticationCode)
+      throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
