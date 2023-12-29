@@ -227,7 +227,7 @@ function Game(props : GameProps) {
                 setGameMetrics(pOneMetrics);
             else if(props.playerId === '2')
                 setGameMetrics(pTwoMetrics);
-            setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
+            // setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
         });
 
         sock?.on('midPointCt', (ct : number) => {
