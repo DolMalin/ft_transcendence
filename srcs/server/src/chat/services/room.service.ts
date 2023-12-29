@@ -15,6 +15,8 @@ import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
 import e from 'express'
+import * as xss from 'xss'
+
 
 @Injectable()
 export class RoomService {
@@ -400,7 +402,7 @@ export class RoomService {
         //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
-            content: dto.content,
+            content: xss.escapeHtml(dto.content),
             room: {id: dto.roomId}
         })
         return await this.messageRepository.save(msg)
