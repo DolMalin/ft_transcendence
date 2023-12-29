@@ -236,7 +236,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                   if (room?.privChan) state = 'private'
                   else if (room?.password) state = 'password'
                   else state = 'default'
-                  if (state === 'private') return null 
+                  // if (state === 'private') return null 
                   return (
                     <Flex
                       key={room.id}

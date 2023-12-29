@@ -1,4 +1,4 @@
-import { Button, Flex, FormControl, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
+import { Button, Flex, FormControl, FormErrorMessage, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
@@ -7,7 +7,9 @@ import BasicToast from "../toast/BasicToast"
 import * as Constants from '../game/globals/const'
 
 function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, onOpen : () => void , onClose : () => void}){
-
+  
+  const [errorMsg, setErrorMsg] = useState('')
+  const [formError, setFormError] = useState(false)
     const { register: registerSetInvite, 
         handleSubmit: handleSubmitInvite, 
         reset: resetInvite, 
@@ -18,12 +20,12 @@ function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, 
 
     const onSubmitInvite = (data: {friend: string}) => {
         props.socket?.emit('invitePrivateChannel', {roomId: props.roomId, guestUsername: data.friend})
-        props.onClose()
-        resetInvite()
     }
 
     useEffect(() => {
       props.socket?.on('chanInvite', (guestUsername: string) => {
+          resetInvite()
+          props.onClose()
           const id = 'invite-toast';
           if(!toast.isActive(id)){
             toast({
@@ -36,9 +38,15 @@ function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, 
             })
           }
         })
-    
+      
+      props.socket?.on('inviteError', (error: string) => {
+        setFormError(true)
+        setErrorMsg(error)
+      })
+      
       return () => {
         props.socket?.off('chanInvite')
+        props.socket?.off('inviteError')
       }
     })
 
@@ -72,7 +80,7 @@ function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, 
                             flexWrap:"wrap",
                             
                         }}>
-                        <FormControl isRequired>
+                        <FormControl isRequired isInvalid={formError}>
                             <Input
                                 marginBottom="10px"
                                 type="text"
@@ -80,9 +88,12 @@ function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, 
                                 {
                                     ...registerSetInvite("friend", {
                                         required: "enter username",
+                                        maxLength: 20,
+                                        minLength: 3
                                     })
                                 }
                             />
+                            <FormErrorMessage>{errorMsg}</FormErrorMessage>
                         </FormControl>
                         <Button
                         fontWeight={'normal'}

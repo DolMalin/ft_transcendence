@@ -77,7 +77,15 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                   </>)
                   })
             }
-            console.error(err)
+            if (err.response?.status === 413)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                      <BasicToast text='Payload is too large.'/>
+                  </>)
+                  })
+            }
         }
     }
 

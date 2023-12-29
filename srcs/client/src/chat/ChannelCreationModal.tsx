@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
     Modal,
     ModalOverlay,
@@ -9,6 +9,8 @@ import {
     ModalCloseButton,
     Flex,
     useToast,
+    FormErrorMessage,
+    Text,
   } from '@chakra-ui/react'
 
 import { Button, Checkbox, FormControl, Input, Stack } from "@chakra-ui/react"
@@ -22,6 +24,8 @@ import BasicToast from "../toast/BasicToast"
 function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {
     
     const toast = useToast();
+    const [ErrorMsg, setErrorMsg] = useState('')
+    const [formError, setFormError] = useState(false)
     const [checked, setChecked] = useState(false)
     const [privateChan, setPrivate] = useState(false)
     const { register: registerCreate, 
@@ -30,8 +34,9 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
             formState: { errors: errorCreate }
     } = useForm()
 
-    const createRoom = async (dt: {room: string, password: string}) => {            
-        setValue('password', '')        
+    const createRoom = async (dt: {room: string, password: string}) => {       
+
+        setValue('password', '')
         setChecked(false)
         if (dt.room !== "")
         {
@@ -39,13 +44,20 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
             try{
                 await authService.post(process.env.REACT_APP_SERVER_URL + '/room', data)
                 setPrivate(false)
-                joinRoom(dt)
+                setFormError(false)
+                joinRoom(dt)   
             }
             catch(err){
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+
+                setFormError(true)
+                setErrorMsg(err.response?.data?.message)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
-        }      
-        
+        }
+        else {
+            setValue('password', '')
+            setChecked(false)
+        }    
        
     }
 
@@ -61,6 +73,8 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
             props.chatSocket.emit('channelCreation');
             props.setTargetRoom(res.data)
 
+            setErrorMsg('');
+            setFormError(false);
             props.onClose()
         }
         catch(err){
@@ -85,6 +99,11 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
         resetCreate()
     }
 
+    useEffect(() => {
+        setErrorMsg('');
+        setFormError(false);
+    }, [props.isOpen])
+
     return (
       <>
         <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
@@ -105,6 +124,9 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
             <ModalBody>
                     <Flex marginBottom='25px'>
                     </Flex>
+                    <Flex w={'100%'} justifyContent={'center'} marginBottom={'10px'}>
+                        {formError && <Text textAlign={'center'} textColor={'red.500'}> {ErrorMsg} </Text>}
+                    </Flex>
                     <form onSubmit={handleSubmitCreate(onSubmitCreate)} style={
                         {
                             alignItems: "center", 
@@ -115,31 +137,27 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                             flexWrap:"wrap",
                             
                         }}>
-                            <FormControl isRequired>
+                            <FormControl isRequired isInvalid={formError}>
                                 <Input
                                     marginBottom="10px"
                                     type="text"
                                     placeholder="Please enter a channel name"
                                     {
                                         ...registerCreate("room", {
-                                            required: "enter channel name",
-                                            minLength: 2,
-                                            maxLength: 80,
+                                            required: "enter channel name"
                                         })
                                     }
                                 />
                             </FormControl>
                         {checked && (
-                        <FormControl isRequired>
+                        <FormControl isRequired  isInvalid={formError}>
                             <Input
                                 marginBottom="10px"
                                 type="password"
                                 placeholder="Please enter a password"
                                 {
                                     ...registerCreate("password", {
-                                        required: "enter password",
-                                        minLength: 2,
-                                        maxLength: 80,
+                                        required: "enter password"
                                     })
                                 }
                             />

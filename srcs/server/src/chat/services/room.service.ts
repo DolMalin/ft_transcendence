@@ -14,7 +14,6 @@ import { AuthService } from 'src/auth/services/auth.service'
 import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
-import e from 'express'
 
 @Injectable()
 export class RoomService {
@@ -167,6 +166,8 @@ export class RoomService {
         if (!room) 
             throw new ForbiddenException('room does not exist')
         
+        console.log(`in join room ${room.name}`,room?.owner)
+
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
@@ -215,7 +216,6 @@ export class RoomService {
             room.users = []
         room.users.push(user)
         await this.roomRepository.save(room)
-
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
         } 
@@ -297,17 +297,21 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             })
+            console.log('before', room?.owner)
         if (room.users){
             room.users.forEach(user =>  {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
-                    if (room.owner?.id === userId)
+                    if (room.owner?.id === userId){
+                        console.log('bizarre cette histoire')
                         room.owner = null
+                    }
                     if (this.isAdmin(room, user) === 'isAdmin'){
                         room.administrator.splice(room.administrator.indexOf(user), 1)
                     }
                 }
             })
+            console.log('after', room?.owner)
             if (room?.privChan === true)
                 room = await this.removeUserFromWhiteList(room?.name, userId)
             await this.roomRepository.save(room)
