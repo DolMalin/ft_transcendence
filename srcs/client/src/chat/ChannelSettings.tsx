@@ -1,5 +1,5 @@
 import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useDisclosure, useToast } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BasicToast from "../toast/BasicToast";
 import authService from "../auth/auth.service";
 import PasswordSettingsModal from "./PasswordSettingsModal";
@@ -12,6 +12,7 @@ import InviteModal from "./InviteModal";
 function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boolean, setTargetChannel : Function}) {
 
     const [action, setAction] = useState("")
+    const [isPrivate, setIsPrivate] = useState(false);
     const {isOpen, onOpen, onClose} = useDisclosure()
     const {isOpen: isOpenInvite, onOpen: onOpenInvite, onClose: onCloseInvite} = useDisclosure()
     const toast = useToast();
@@ -56,6 +57,24 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
         props.chatSocket?.emit('leaveRoom', roomId)
     }
 
+    useEffect(() => {
+
+        async function fetchChannelStatus() {
+            try {
+                const isPriv = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isPriv/' + props.room.id)
+
+                console.log(isPriv.data)
+                setIsPrivate(isPriv.data);
+            }
+            catch(err) {
+                setIsPrivate(false);
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
+        };
+
+        fetchChannelStatus();
+    }, [props.room])
+
     if (props.isOp) {
 
         return <>
@@ -89,6 +108,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         >
                             SET PASSWORD
                         </Button >
+
                         <Button onClick={() => {
                             onOpen()
                             setAction('changePass')
@@ -102,6 +122,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         >
                             CHANGE PASSWORD
                         </Button>
+
                         <Button onClick={() => removePassword(props.room.id)}
                         borderRadius={'0px'}
                         margin={'10px'}
@@ -112,7 +133,8 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         >
                             REMOVE PASSWORD
                         </Button>
-                        <Button onClick={() => {
+
+                        { isPrivate && <Button onClick={() => {
                             onOpenInvite()
                         }}
                         borderRadius={'0px'}
@@ -123,7 +145,8 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                         _hover={{bg : Constants.BG_COLOR, transform : 'scale(1.1)'}}
                         >
                             INVITE
-                        </Button>
+                        </Button>}
+
                         <Button onClick={() => leaveChan(props.room.id)}
                         borderRadius={'0px'}
                         margin={'10px'}

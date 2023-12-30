@@ -7,8 +7,9 @@ function BasicToast(props : {text : string,children? : React.ReactNode}) {
     return (
         <Flex w={'320px'}
         h={'130px'}
+        padding={'10px'}
         className='goma'
-        bgColor={Constants.BG_COLOR_FADED}
+        bgColor={Constants.BG_COLOR_LESSER_FADE}
         justifyContent={'space-evenly'}
         alignItems={'center'}
         flex={'row'}

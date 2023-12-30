@@ -230,6 +230,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         Logger.error('You cannot invite yourself')
         return
       }
+      if (info.room?.privChan === false)
+      {
+        Logger.error('You cannot invite in a public channel')
+        return
+      }
       const host = await this.userService.findOneById(hostId)
       this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
       this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
@@ -321,7 +326,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       Logger.error('wrong data passed to channelRightsUpdate event');
       return ;
     }
-      this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate');
   }
 
   @SubscribeMessage('userGotBannedOrMuted')

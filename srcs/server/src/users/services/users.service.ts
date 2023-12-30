@@ -216,6 +216,18 @@ export class UsersService {
     }
   }
 
+  async isBlocked(user : User, targetId : string) {
+
+    const currentUser = await this.findOneByIdWithBlockRelation(user.id)
+    if (!currentUser)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+    const target = await this.findOneByIdWithBlockRelation(targetId)
+    if (!target)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+
+    return (this.isAlreadyBlocked(currentUser, target));
+  }
+
   isAlreadyBlocked(user: User, userToVerify: User): boolean {
     
     const isBlocked = user.blocked?.some((userToFind: User) => userToFind.id === userToVerify.id);

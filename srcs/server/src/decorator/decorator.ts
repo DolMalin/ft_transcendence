@@ -14,6 +14,11 @@ class roomIdDto {
   roomId: number
 }
 
+class friendRequestIdDto {
+  @IsInt()
+  requestId: number
+}
+
 export const UUIDParam = createParamDecorator(
   async (id: string, ctx: ExecutionContext) => {
     const [request] = ctx.getArgs();
@@ -51,5 +56,48 @@ export const INTParam = createParamDecorator(
     }
 
     return roomId;
+  },
+);
+
+export const FRIDParam = createParamDecorator(
+  async (friendRequestId: number, ctx: ExecutionContext) => {
+    const [request] = ctx.getArgs();
+    const { params } = request;
+
+    const requestId = Number(params.friendRequestId);
+
+    if (!requestId) {
+      throw new BadRequestException('friend request ID is required');
+    }
+
+    console.log('type of ',requestId ,' : ', typeof requestId)
+
+    const errors = await validate(plainToClass(friendRequestIdDto, { requestId }));
+    if (errors.length > 0) {
+      throw new BadRequestException('Invalid friend request id');
+    }
+
+    return requestId;
+  },
+);
+
+export const FRuserIdParam = createParamDecorator(
+  async (receiverId: string, ctx: ExecutionContext) => {
+    const [request] = ctx.getArgs();
+    const { params } = request;
+
+    const userId = params.receiverId;
+
+
+    if (!userId) {
+      throw new BadRequestException('receiver ID is required');
+    }
+
+    const errors = await validate(plainToClass(userIdDto, { userId }));
+    if (errors.length > 0) {
+      throw new BadRequestException('Invalid user id');
+    }
+
+    return userId;
   },
 );

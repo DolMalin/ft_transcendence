@@ -6,8 +6,9 @@ import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { leaderboardStats } from 'src/game/globals/interfaces';
 import { GetUser } from '../decorator/user.decorator';
 import { MatchHistoryService } from 'src/game/services/match.history.services';
-import { UUIDParam } from 'src/decorator/uuid.decorator';
+import { FRIDParam, FRuserIdParam, UUIDParam } from 'src/decorator/decorator';
 import { Request } from 'express';
+import { INTParam } from 'src/decorator/decorator';
 
 @Controller('users')
 export class UsersController {
@@ -92,9 +93,16 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
+  @Get('isBlocked/:id')
+  async isBlocked(@GetUser() user: User, @Param('id') @UUIDParam() targetId: string){
+
+    return await this.usersService.isBlocked(user, targetId);
+  }
+
+  @UseGuards(AccessToken2FAGuard)
   @Delete(':id')
-  async remove(@Param('id') @UUIDParam() id: string) {
-    return await this.usersService.remove(id);
+  async remove(@Param('id') @UUIDParam() userId: string) {
+    return await this.usersService.remove(userId);
   }
 
   // ==================================================================== //
@@ -103,26 +111,26 @@ export class UsersController {
 
   @UseGuards(AccessToken2FAGuard)
   @Post('friendRequest/send/:receiverId')
-  async sendFriendRequest(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+  async sendFriendRequest(@Param('receiverId') @FRuserIdParam() receiverId: string, @GetUser() user: User, @Res() res:any) {
     return await this.usersService.sendFriendRequest(receiverId, user, res)
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Get('friendRequest/:receiverId')
-  async getFriendRequest(@Param('receiverId') receiverId: string, @GetUser() user: User, @Res() res:any) {
+  async getFriendRequest(@Param('receiverId') @FRuserIdParam() receiverId: string, @GetUser() user: User, @Res() res:any) {
     return await this.usersService.getFriendRequest(receiverId, user, res)
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Patch('friendRequest/response/:friendRequestId')
-  async respondToFriendRequest(@Param('friendRequestId') friendRequestId: string, @Body() body: any, @Res() res: Request) {
-    return await this.usersService.respondToFriendRequest(parseInt(friendRequestId), body.status, res)
+  async respondToFriendRequest(@Param('friendRequestId') @FRIDParam() friendRequestId: number, @Body() body: any, @Res() res: Request) {
+    return await this.usersService.respondToFriendRequest(friendRequestId, body.status, res)
   }
 
   @UseGuards(AccessToken2FAGuard)
   @Patch('friendRequest/remove/:friendRequestId')
-  async removeFriend(@Param('friendRequestId') friendRequestId: string,  @Res() res: Request) {
-    return await this.usersService.removeFriend(parseInt(friendRequestId), res)
+  async removeFriend(@Param('friendRequestId') @FRIDParam() friendRequestId: number,  @Res() res: Request) {
+    return await this.usersService.removeFriend(friendRequestId, res)
   }
 
   @UseGuards(AccessToken2FAGuard)
@@ -144,8 +152,8 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
-  @Get('friend/isFriend/:userId')
-  async isFriend(@Param('userId') targetUserId: string, @GetUser() originalUser: User, @Res() res:any) {
+  @Get('friend/isFriend/:id')
+  async isFriend(@Param('id') @UUIDParam() targetUserId: string, @GetUser() originalUser: User, @Res() res:any) {
     return await this.usersService.isFriend(targetUserId, originalUser)
   }
 
