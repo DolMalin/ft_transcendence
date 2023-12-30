@@ -17,6 +17,10 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
         isAvailable : boolean
       }[]>([]);
 
+    const [pendingRequestList, setPendingRequestList] = useState<{
+    creatorId: string,
+    creatorName: string,
+    }[]>([]);
     async function fetchFriends() {
         let friendsList: {
             username: string,
@@ -28,6 +32,9 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
         try {
             const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friends/all`)
             setFriendsList(res.data)
+
+            const requests = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friends/allRequests`)
+            setPendingRequestList(requests.data);
         } catch(err) {
             console.error(`${err?.response?.data?.message} (${err?.response?.data?.error})`)
         }
@@ -93,6 +100,32 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
             flexDir={'column'}
             overflowY={'auto'}
             >
+                {pendingRequestList && pendingRequestList?.map((request, index) => {
+                    if (!request)
+                        return
+                    return (
+                        <Flex key={(index)}
+                        width={'100%'} 
+                        minH={'66px'}
+                        marginBottom={'10px'}
+                        flexDir={'column'} 
+                        alignItems={'center'}
+                        justifyContent={'center'}
+                        bgColor={Constants.BG_COLOR_FADED}
+                        > 
+                            <Text>
+                                Friend request from
+                                <Link 
+                                overflow={'hidden'} 
+                                textOverflow={'ellipsis'} 
+                                onClick={() => {openProfileModal(request?.creatorId)}}>
+                                     {' ' + request?.creatorName}
+                                </Link>
+                            </Text>
+                        </Flex>
+                    )
+                })}
+
                 {friendsList.map((friend, index) => {
 
                     let pinColor : string;

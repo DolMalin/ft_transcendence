@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -521,19 +521,38 @@ export class UsersService {
         subQuery.where('friendRequest.creator = :creator', {creator: user.id})
         subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
       })
-      .andWhere('friendRequest.status = :status', {status: 'accepted'})
+      .getMany()
+    
+    if (!friends)
+      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
+
+    return res.status(200).send(friends.filter(friendRequest => friendRequest.status === 'accepted').map((friendRequest) => {
+      if (friendRequest.creator.id === user.id)
+        return this.removeProtectedProperties(friendRequest.receiver)
+      else
+        return this.removeProtectedProperties(friendRequest.creator)
+    }))
+  }
+
+  async getRequests(user: User, res:any) {
+    const friends = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where(subQuery => {
+        subQuery.where('friendRequest.creator = :creator', {creator: user.id})
+        subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
+      })
+      .andWhere('friendRequest.status = :status', {status: 'pending'})
       .getMany()
     
     if (!friends)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
 
     return res.status(200).send(friends.map((friendRequest) => {
-      if (friendRequest.creator.id === user.id)
-        return this.removeProtectedProperties(friendRequest.receiver)
-      else
-        return this.removeProtectedProperties(friendRequest.creator)
+      if (friendRequest.creator.id !== user.id)
+        return ({creatorId : friendRequest.creator.id, creatorName : friendRequest.creator.username})
     }))
-
   }
 
 
