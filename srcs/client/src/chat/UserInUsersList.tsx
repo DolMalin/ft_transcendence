@@ -143,6 +143,7 @@ function UserInUsersList(props : {username : string, userId : string,
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : props?.userId, roomName : props.room?.name});
+                console.log('privi in wrapper : ', privi.data)
                 
                 if(privi.data === 'isOwner')
                     setTargetIsOp('isOwner')
@@ -150,7 +151,7 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsOp('isAdmin')
                 else if (privi.data === 'no')
                     setTargetIsOp('no');
-                else if (privi.data === 'isMuted')
+                if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
                 else if (privi.data !== 'isMuted')
                     setTargetIsMuted(false);
@@ -159,6 +160,7 @@ function UserInUsersList(props : {username : string, userId : string,
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
+
         asyncWrapper();
     })
 
@@ -168,6 +170,7 @@ function UserInUsersList(props : {username : string, userId : string,
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : props?.userId, roomName : props.room?.name});
+                console.log('privi in sock ev : ', privi.data)
                 
                 if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
@@ -186,7 +189,7 @@ function UserInUsersList(props : {username : string, userId : string,
         return(() => {
             props.chatSock?.off('timeoutEnd')
         })
-    }, [props.chatSock])
+    })
 
 
     function MuteBanSlider(props : {targetId : string, roomId : number, roomName : string, actionName : string ,action : Function}) {

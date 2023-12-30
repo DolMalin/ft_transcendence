@@ -47,6 +47,10 @@ export class RoomService {
             type: roomType.groupMessage,
             privChan: createRoomDto.privChan
         })
+        if (room.privChan) {
+            room.whitelist = [];
+            room.whitelist.push(user.id);
+        }
         return await this.roomRepository.save(room)
     }
 
@@ -245,20 +249,29 @@ export class RoomService {
             }  
         }
         
-        if (!room?.whitelist && room?.privChan) 
-            room.whitelist = []
+        // if (!room?.whitelist && room?.privChan) 
+        //     room.whitelist = []
+
+        // if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
+        //     room.whitelist.push(user?.id)
         
-        if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
-            room.whitelist.push(user?.id)
-        
-        if (room.privChan === true){
-            if (!room?.whitelist?.includes(user.id)){
-                throw new NotFoundException("Private channel", {
-                    cause: new Error(),
-                    description: "You have to be whitelisted to join this channel",
+        // if (room.privChan === true)
+        // {
+        //     if (!room?.whitelist?.includes(user.id)){
+                // throw new NotFoundException("Private channel", {
+                //     cause: new Error(),
+                //     description: "You have to be whitelisted to join this channel",
+                // })
+        //     }  
+        // } 
+
+        if (room.privChan === true && !room?.whitelist?.includes(user.id))
+        {
+            throw new NotFoundException("Private channel", {
+                cause: new Error(),
+                description: "You have to be whitelisted to join this channel",
             })
-            }  
-        } 
+        }
         
         if (room?.password?.length > 0 && room.password){
             if (! await argon2.verify(room.password, dto.password))
@@ -322,8 +335,7 @@ export class RoomService {
         }
     }
      
-    async removeUserFromWhiteList(roomName: string, targetId: string){
-        const room = await this.findOneByName(roomName)
+    async removeUserFromWhiteList(room: Room, targetId: string){
         if (!room) {
             throw new NotFoundException("Room not found", {
                 cause: new Error(),
@@ -350,7 +362,9 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             })
-        if (room.users){
+
+        if (room.users)
+        {
             room.users.forEach(user =>  {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
@@ -361,9 +375,6 @@ export class RoomService {
                     }
                 }
             })
-            if (room?.privChan === true)
-                room = await this.removeUserFromWhiteList(room?.name, userId)
-            await this.roomRepository.save(room)
         }
         else{
             throw new NotFoundException("No user was found in this room", 
@@ -372,6 +383,11 @@ export class RoomService {
                 description: `cannot find any users in room ${room?.name} in database`
             })
         }
+        if (room?.privChan === true)
+        {
+            room = await this.removeUserFromWhiteList(room, userId)
+        }
+        await this.roomRepository.save(room)
     }
 
     async kick(roomId: number, userId: string, targetId: string){
@@ -523,7 +539,10 @@ export class RoomService {
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
         
         if (this.isMuted(room, target))
+        {
+            Logger.debug(target.username + 'IS MUTED in ' + room.name)
             return ('isMuted')
+        }
         return (this.isAdmin(room, target))
     }
 

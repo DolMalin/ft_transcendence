@@ -88,12 +88,16 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
         }
 
         asyncWrapper();
-    }, [rerender])
+    }, [rerender, props.room])
 
     useEffect(function sockEvents() {
 
-        function forceRender() {
-
+        function forceRender(roomId? : number) {
+          
+          console.log('roomId : ', roomId)
+          if (roomId && roomId !== props.room.id)
+            return ;
+          console.log('force rerender')
           if (rerender === true)
             setRerender(false)
           else if (rerender === false)
@@ -101,13 +105,15 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
 
           
         };
-        props.chatSocket?.on('channelUpdate', forceRender);
+
+        console.log('IN SOCK EVENTS')
+        props.chatSocket?.on('channelUpdate', (roomId) => forceRender(roomId));
   
-        props.chatSocket?.on('userJoined', forceRender);
+        props.chatSocket?.on('userJoined', (roomId) => forceRender(roomId));
 
-        props.chatSocket?.on('userLeft', forceRender);
+        props.chatSocket?.on('userLeft', (roomId) => forceRender(roomId));
 
-        props.chatSocket?.on('timeoutEnd', forceRender);
+        props.chatSocket?.on('timeoutEnd', (roomId) => forceRender(roomId));
   
         props.chatSocket?.on('youGotBanned', (roomName) => {
           
@@ -131,7 +137,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           props.chatSocket?.off('youGotBanned');
           props.chatSocket?.off('timeoutEnd');
         })
-      }, [props.chatSocket, rerender])
+      })
 
     return (<>
         <Flex 
