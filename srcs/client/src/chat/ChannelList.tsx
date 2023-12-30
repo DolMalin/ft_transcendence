@@ -200,7 +200,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       setRoomnamesNarrower(event.target.value)
     }
 
-    async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none') {
+    async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none', isPrivChan : string) {
 
       try {
         const isHe = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
@@ -209,11 +209,13 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
           onOpen()
           setRoomName(roomName)
         }
-        else if (isHe.data === false && password === 'none')
+        else if (isHe.data === false && !isPrivChan && password === 'none')
         {
           joinRoom({room : roomName, password : null});
           props.setTargetRoom(room.data);
         }
+        else if (isHe.data === false && isPrivChan)
+          joinRoom({room : roomName, password : null});
         else
           props.setTargetRoom(room.data);
       }
@@ -271,7 +273,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                       _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
                       bgColor={Constants.BG_COLOR_FADED}
                       onClick={() => {
-                        isUserInRoom(room.id, room.name, room.password);
+                        isUserInRoom(room.id, room.name, room.password, room.privChan);
                       }}
                       onMouseEnter={() => setHoveredRoom(room.name)}
                       onMouseLeave={() => setHoveredRoom(null)}
