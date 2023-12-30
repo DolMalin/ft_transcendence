@@ -268,24 +268,32 @@ export class AuthService {
   }
 
   async generateTwoFactorAuthenticationSecret(user: User) {
+    if (user.twoFactorAuthenticationSecret)
+      throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already activated' })
+
     const secret = authenticator.generateSecret()
-    const otpAuthUrl = authenticator.keyuri(user.id, process.env.APP_NAME, secret)
     const newUser = await this.usersService.update(user.id, { twoFactorAuthenticationSecret: secret })
     if (!newUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
-    return { secret, otpAuthUrl }
+    return secret
   }
 
   async generateTwoFactorAuthenticationQRCode(user: User) {
-    if (user.twoFactorAuthenticationSecret)
-      throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already activated' })
 
-    let secret = await this.generateTwoFactorAuthenticationSecret(user)
-    if (!secret)
-      throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa secret' })
+    let secret: string 
+    
+    if (!user.twoFactorAuthenticationSecret) {
+      secret = await this.generateTwoFactorAuthenticationSecret(user)
+      if (!secret)
+        throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa secret' })
+    } else {
+      secret = user.twoFactorAuthenticationSecret
+    }
 
-    let qrCodeDataURL = await this.generateQrCodeDataURL(secret.otpAuthUrl)
+   const otpAuthUrl = authenticator.keyuri(user.id, process.env.APP_NAME, secret)
+
+    let qrCodeDataURL = await this.generateQrCodeDataURL(otpAuthUrl)
     if (!qrCodeDataURL)
       throw new InternalServerErrorException('2fa error', { cause: new Error(), description: 'Cannot generate 2fa qrcode' })
 
@@ -321,18 +329,22 @@ export class AuthService {
   }
 
   async turnOnTwoFactorAuthentication(user: User, res: any, body: any) {
-    if (user.isTwoFactorAuthenticationEnabled)
+    if (user.isTwoFactorAuthenticationEnabled) {
       throw new BadRequestException('User error', { cause: new Error(), description: '2fa is already turned on' })
+    }
 
-    if (!body.twoFactorAuthenticationCode)
-      throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
+    if (user.twoFactorAuthenticationSecret) {
+      if (!body.twoFactorAuthenticationCode)
+        throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
+  
+      if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
+        throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
+  
+      const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
+      if (!fetchUser)
+        throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
+     }
 
-    if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
-      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
-
-    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
-    if (!fetchUser)
-      throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
     return res.status(200).send()
   }
