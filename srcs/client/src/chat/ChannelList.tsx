@@ -20,13 +20,14 @@ import { Room } from "./interface"
 import * as Constants from '../game/globals/const'
 import { LockIcon, SearchIcon } from "@chakra-ui/icons"
 import { Chat } from "./Chat"
+import { join } from "path"
 
 
 async function getRoomList(){
     let roomList: { 
         id: number 
         name: string 
-        password: string | null 
+        password : 'isPasswordProtected' | 'none',
         privChan: string | null }[]
     try{
         const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/list')
@@ -48,11 +49,10 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
-        password: string | null
+        password: 'isPasswordProtected' | 'none',
         privChan: string | null }[]>([])
 
     const  joinRoom = async (dt: {room: string, password: string}) => {
-      console.log('from join room')
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
@@ -200,20 +200,22 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       setRoomnamesNarrower(event.target.value)
     }
 
-    async function isUserInRoom(roomId : number, roomName : string, roomPswd : string) {
+    async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none') {
 
       try {
         const isHe = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
-        console.log(isHe)
-        if (isHe.data === false && roomPswd !== null) {
+        const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
+        if (isHe.data === false && password === 'isPasswordProtected') {
           onOpen()
           setRoomName(roomName)
-        } 
-        else {
-          const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
-          console.log(res.data)
-          props.setTargetRoom(res.data);
         }
+        else if (isHe.data === false && password === 'none')
+        {
+          joinRoom({room : roomName, password : null});
+          props.setTargetRoom(room.data);
+        }
+        else
+          props.setTargetRoom(room.data);
       }
       catch(err) {
         console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -254,9 +256,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 roomList.map((room, index: number) => {
                   let state: string
                   if (room?.privChan) state = 'private'
-                  else if (room?.password) state = 'password'
+                  else if (room?.password === 'isPasswordProtected') state = 'password'
                   else state = 'default'
-                  // if (state === 'private') return null 
                   return (
                     <Flex
                       key={room.id}
@@ -271,12 +272,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                       bgColor={Constants.BG_COLOR_FADED}
                       onClick={() => {
                         isUserInRoom(room.id, room.name, room.password);
-                        // if (room.password) {
-                        //   onOpen()
-                        //   setRoomName(room.name)
-                        // } else {
-                        //   joinRoom({ room: room.name, password: room?.password })
-                        // }
                       }}
                       onMouseEnter={() => setHoveredRoom(room.name)}
                       onMouseLeave={() => setHoveredRoom(null)}

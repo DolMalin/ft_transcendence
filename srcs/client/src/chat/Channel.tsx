@@ -56,6 +56,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
 
     const sendMessage = async (currentMessage: string) => {
         try {
+            console.log('Room in send message : ', props.room)
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
             {
               roomId: props.room.id, 
