@@ -59,8 +59,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 name: dt.room,
                 password: dt.password
             })
-            props.setTargetRoom(res.data);
             props.chatSocket?.emit("joinRoom", res.data.id);
+            props.setTargetRoom(res.data);
         }
         catch(err){
 
@@ -210,10 +210,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
           setRoomName(roomName)
         }
         else if (isHe.data === false && !isPrivChan && password === 'none')
-        {
           joinRoom({room : roomName, password : null});
-          props.setTargetRoom(room.data);
-        }
         else if (isHe.data === false && isPrivChan)
           joinRoom({room : roomName, password : null});
         else
