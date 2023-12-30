@@ -162,6 +162,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                         isChecked={checked}
                         onChange={(event) => {
                             setChecked(event.target.checked)
+                            setPrivate(event.target.checked ? false : true)
                             setValue('password', '')
                         }}
                         > password 
@@ -169,7 +170,11 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                     <Checkbox 
                         colorScheme='green'
                         isChecked={privateChan}
-                        onChange={(event) => setPrivate((event.target as HTMLInputElement).checked)
+                        onChange={(event) => { 
+                            setPrivate((event.target as HTMLInputElement).checked)
+                            setChecked(event.target.checked ? false : true)
+                            setValue('password', null)
+                        }
                         }> private channel 
                     </Checkbox>
                     </Flex>

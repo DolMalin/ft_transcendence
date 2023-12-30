@@ -73,8 +73,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                fetchUserList(res.data)
-                fetchBanList(props.room?.id);
+                await fetchUserList(res.data)
+                await fetchBanList(props.room?.id);
 
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : res.data.id, roomName : props.room.name})
@@ -172,7 +172,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
                 BANS
               </Button>
             </Flex>
-            <Flex h={'100%'} w={'80%'} minW={'224px'}
+            <Flex h={'100%'} w={'80%'} minW={'224px'} padding={'10px'}
             overflowY={'auto'} flexDir={'row'} wrap={'wrap'}>
                 {listToDisplay === 'users' && <>
                   {userList.map((user, index) => {

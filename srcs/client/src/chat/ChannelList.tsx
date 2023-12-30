@@ -20,13 +20,14 @@ import { Room } from "./interface"
 import * as Constants from '../game/globals/const'
 import { LockIcon, SearchIcon } from "@chakra-ui/icons"
 import { Chat } from "./Chat"
+import { join } from "path"
 
 
 async function getRoomList(){
     let roomList: { 
         id: number 
         name: string 
-        password: string | null 
+        password : 'isPasswordProtected' | 'none',
         privChan: string | null }[]
     try{
         const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/list')
@@ -48,11 +49,10 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
-        password: string | null
+        password: 'isPasswordProtected' | 'none',
         privChan: string | null }[]>([])
 
     const  joinRoom = async (dt: {room: string, password: string}) => {
-      console.log('from join room')
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
@@ -93,7 +93,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
               })
           }
             else
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -151,7 +151,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 textColor={'white'}
                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
                 > 
-                No thanks !
+                NO THANKS
                 </Button>
                 <Button onClick={() => {
                     props.chatSocket?.emit('acceptedInviteChan', {roomId: roomId, roomName: roomName, targetId: targetId})
@@ -163,7 +163,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 textColor={'white'}
                 _hover={{bg: 'white', textColor : Constants.BG_COLOR_FADED}}
                 >
-                  Yes please ! 
+                  YES PLEASE 
                 </Button>
               </BasicToast>
             </>
@@ -200,6 +200,30 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       setRoomnamesNarrower(event.target.value)
     }
 
+    async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none', isPrivChan : string) {
+
+      try {
+        const isHe = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
+        const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
+        if (isHe.data === false && password === 'isPasswordProtected') {
+          onOpen()
+          setRoomName(roomName)
+        }
+        else if (isHe.data === false && !isPrivChan && password === 'none')
+        {
+          joinRoom({room : roomName, password : null});
+          props.setTargetRoom(room.data);
+        }
+        else if (isHe.data === false && isPrivChan)
+          joinRoom({room : roomName, password : null});
+        else
+          props.setTargetRoom(room.data);
+      }
+      catch(err) {
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+      }
+    }
+
     return (
         <>
           <Flex
@@ -234,9 +258,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 roomList.map((room, index: number) => {
                   let state: string
                   if (room?.privChan) state = 'private'
-                  else if (room?.password) state = 'password'
+                  else if (room?.password === 'isPasswordProtected') state = 'password'
                   else state = 'default'
-                  if (state === 'private') return null 
                   return (
                     <Flex
                       key={room.id}
@@ -250,21 +273,16 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                       _hover={{ background: 'white', textColor: Constants.BG_COLOR }}
                       bgColor={Constants.BG_COLOR_FADED}
                       onClick={() => {
-                        if (room.password) {
-                          onOpen()
-                          setRoomName(room.name)
-                        } else {
-                          joinRoom({ room: room.name, password: room?.password })
-                        }
+                        isUserInRoom(room.id, room.name, room.password, room.privChan);
                       }}
                       onMouseEnter={() => setHoveredRoom(room.name)}
                       onMouseLeave={() => setHoveredRoom(null)}
                     >
                       <Flex w={'100%'} h={'60px'} flexDir={'row'} alignItems={'center'} textOverflow={'ellipsis'}>
                       {state === 'password' && (<LockIcon boxSize={4} color={hoveredRoom === room.name ? 'black' : 'white'} marginRight={'5px'}/>)}
-                      {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'5px'}> # </Text>)}
+                      {state !== 'password' && (<Text fontWeight={'bold'} marginRight={'8px'}> # </Text>)}
                         <Tooltip label={room.name}>
-                          <Text>
+                          <Text as={'b'}>
                             {room.name.length < 20 ? room.name : room.name.substring(0, 17) + '...'}{' '}
                           </Text>
                         </Tooltip>

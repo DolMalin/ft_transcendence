@@ -58,6 +58,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
 
     const sendMessage = async (currentMessage: string) => {
         try {
+            console.log('Room in send message : ', props.room)
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
             {
               roomId: props.room.id, 
@@ -155,7 +156,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                     justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                             <Flex 
                             maxWidth={'70%'}
-                            bg={Constants.BG_COLOR_FADED}
+                            bg={Constants.BG_COLOR_LESSER_FADE}
                             flexDir={'column'}
                             wrap={'wrap'}
                             padding={'10px'}

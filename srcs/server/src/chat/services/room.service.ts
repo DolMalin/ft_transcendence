@@ -34,6 +34,10 @@ export class RoomService {
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
+
+        if(createRoomDto.privChan === true && createRoomDto.password)
+            throw new ConflictException("Channel is private", {cause: new Error(), description: "You cannot have a password protected private channel"})
+
         if (await this.findOneByName(createRoomDto.name))
             throw new ConflictException("Channel already exists", {cause: new Error(), description: "channel name is unique, find another one"})
         const room = this.roomRepository.create({
@@ -90,7 +94,14 @@ export class RoomService {
             users: [user, user2]
         })    
         await this.roomRepository.save(directMessage)
-        return this.getRoom(roomName)
+        const room = await this.getRoom(roomName)
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        return (room);
     }
 
     async getRoom(roomName: string){
@@ -103,6 +114,27 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
     }
+
+    async getRoomById(roomId: number){
+
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.id = :id', { id: roomId })
+            .orderBy('message.id', 'ASC')
+            .getOne()
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        this.removeProtectedProperties(room);
+        room.password = null;
+        return(room);
+    }
     
     async findAll(){
         return this.roomRepository.find()
@@ -110,7 +142,23 @@ export class RoomService {
 
     async findAllWithoutDm() {
         let roomList = await this.roomRepository.find()
+
+        // TO DO IS this really necessary ?
+        if (!roomList) {
+            throw new NotFoundException("No rooms", {
+                cause: new Error(),
+                description: "There are no rooms in data base",
+        })}
+        // 
         roomList = roomList.filter(room => room.type !== roomType.directMessage)
+        roomList.forEach((room) => {
+            if (room.password)
+                room.password = 'isPasswordProtected'
+            else
+                room.password = 'none'
+
+            this.removeProtectedProperties(room);
+        })
         return roomList
     }
 
@@ -166,8 +214,11 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
 
-        if (!room) 
-            throw new ForbiddenException('room does not exist')
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
         
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
@@ -208,7 +259,7 @@ export class RoomService {
             })
             }  
         } 
-
+        
         if (room?.password?.length > 0 && room.password){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -735,5 +786,38 @@ export class RoomService {
             })
         room.password = undefined
         this.save(room)
+    }
+
+    async isPriv(roomId : number) {
+
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        return (room.privChan);
+    }
+
+    async isInRoom(user : User, roomId : number) {
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (!user)
+            throw new NotFoundException("User not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (room.users?.some(chanUser => chanUser.id === user.id))
+            return (true)
+        return (false);
     }
 }
