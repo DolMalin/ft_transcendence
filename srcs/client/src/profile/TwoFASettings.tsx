@@ -80,12 +80,9 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 	async function activateTwoFactorAuthentication() {
 		if (displayActivate2FA === false) {
 			try {
-
 				const res = await AuthService.get(process.env.REACT_APP_SERVER_URL + '/auth/2fa/generate')
-				if (res.status === 200) {
-					setQrCode(res.data)
-					setDisplayActivate2FA(true)
-				}
+				setQrCode(res.data)
+				setDisplayActivate2FA(true)
 			}
 			catch(err) {
 				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -112,7 +109,6 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 			<DeactivateTwoFactorAuthenticationForm/>
 		</>)
 	}
-
 
 
 	function TwoFactorAuthenticationButton() {
