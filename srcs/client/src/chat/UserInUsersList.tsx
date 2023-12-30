@@ -248,10 +248,9 @@ function UserInUsersList(props : {username : string, userId : string,
                     bg={'white'}
                     _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
                     >
-                        {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
-                        {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
-                        {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
-                        
+                        {targetIsOp === 'isOwner' && <Image boxSize={5} title="https://icons8.com/icon/12566/crown" src={'./icons/crown.png'} marginRight={'3px'}/>}
+                        {targetIsOp === 'isAdmin' && <Image boxSize={5} title="https://icons8.com/icon/5336/sword" src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                        {targetIsMuted && <Image boxSize={5} title="https://icons8.com/icon/644/mute" src={'./icons/blackMute.png'} marginRight={'3px'}/>}
                         {props?.username}
                     </Button>
                 </PopoverTrigger>
@@ -346,9 +345,9 @@ function UserInUsersList(props : {username : string, userId : string,
             bg={'white'}
             _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
             >
-                {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
-                {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
-                {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
+                {targetIsOp === 'isOwner' && <Image boxSize={5} title="https://icons8.com/icon/12566/crown" src={'./icons/crown.png'} marginRight={'3px'}/>}
+                {targetIsOp === 'isAdmin' && <Image boxSize={5} title="https://icons8.com/icon/5336/sword" src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                {targetIsMuted && <Image boxSize={5} title="https://icons8.com/icon/644/mute" src={'./icons/blackMute.png'} marginRight={'3px'}/>}
                 {props?.username}
             </Button>
             <ProfileModal userId={props.userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSock} gameSock={props.gameSock}/>
