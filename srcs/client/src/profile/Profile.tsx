@@ -130,7 +130,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			overflow={'auto'}
 			textColor={'white'}
 			>
-				<Flex pos={'fixed'} bottom={'0'} right={'0'}>
+				<Flex pos={'fixed'} bottom={'0'} right={'12px'}>
 				{<LogoutComponent />}
 				</Flex>
 
@@ -162,6 +162,7 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 				padding={'10px'}
 				wrap={'wrap'}
 				flexDir={'column'}
+				justifyContent={'space-evenly'}
 				>
 					<ProfileInfo gameSock={props.gameSock} chatSock={props.chatSocket}/>
 				</Flex>
