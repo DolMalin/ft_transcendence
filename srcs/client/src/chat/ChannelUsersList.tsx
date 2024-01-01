@@ -94,10 +94,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
 
         function forceRender(roomId? : number) {
           
-          console.log('roomId : ', roomId)
           if (roomId && roomId !== props.room.id)
             return ;
-          console.log('force rerender')
           if (rerender === true)
             setRerender(false)
           else if (rerender === false)
@@ -106,7 +104,6 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           
         };
 
-        console.log('IN SOCK EVENTS')
         props.chatSocket?.on('channelUpdate', (roomId) => forceRender(roomId));
   
         props.chatSocket?.on('userJoined', (roomId) => forceRender(roomId));
@@ -137,7 +134,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           props.chatSocket?.off('youGotBanned');
           props.chatSocket?.off('timeoutEnd');
         })
-      })
+      }, [props.chatSocket, props.room, rerender])
 
     return (<>
         <Flex 

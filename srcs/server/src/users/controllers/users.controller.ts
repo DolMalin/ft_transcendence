@@ -162,4 +162,10 @@ export class UsersController {
     return await this.usersService.getFriends(user, res)
   }
 
+  @UseGuards(AccessToken2FAGuard)
+  @Get('friends/allRequests')
+  async getAllRequests(@GetUser() user: User, @Res() res:any) {
+    
+    return await this.usersService.getRequests(user, res)
+  }
 }
