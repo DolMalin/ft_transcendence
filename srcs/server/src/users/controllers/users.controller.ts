@@ -51,8 +51,8 @@ export class UsersController {
   @UseGuards(AccessToken2FAGuard)
   @Patch('updateIsAvailable')
   updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
-    return (this.usersService.update(user.id, updateDto));
-  }
+    return this.usersService.updateIsAvailable(user, updateDto);
+  }  
 
   @UseGuards(AccessToken2FAGuard)
   @Get('me')
@@ -91,7 +91,6 @@ export class UsersController {
   async blockTarget(@GetUser() user: User, @Body() dto: {targetId: string}){
     return await this.usersService.blockTarget(user.id, dto.targetId)
   }
-
   @UseGuards(AccessToken2FAGuard)
   @Get('isBlocked/:id')
   async isBlocked(@GetUser() user: User, @Param('id') @UUIDParam() targetId: string){

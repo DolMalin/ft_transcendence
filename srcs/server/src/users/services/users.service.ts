@@ -70,10 +70,9 @@ export class UsersService {
       newUser.isFriend = (await this.isFriend(user.id, originalUser)).isFriend
       return newUser
     }))
-
   }
 
-  
+
   findOneById(id: string) {
     return this.userRepository.findOneBy({ id })
   }
@@ -186,8 +185,15 @@ export class UsersService {
     return avatar
   }
 
+  async updateIsAvailable(user:User, updateDto: UpdateUserDto) {
+    if (!updateDto?.hasOwnProperty('isAvailable'))
+      throw new BadRequestException('DTO error', {cause: new Error(), description: 'isAvailable is missing'})
+    
+    return await this.update(user.id, {isAvailable:updateDto.isAvailable})
+  }
 
   async blockTarget(blockerId: string, targetId: string){
+    console.log(targetId)
     const user = await this.findOneByIdWithBlockRelation(blockerId)
     const user2 = await this.findOneById(targetId)
     if (!user2)
