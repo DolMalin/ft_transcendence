@@ -87,9 +87,9 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
-  @Post('block')
-  async blockTarget(@GetUser() user: User, @Body() dto: {targetId: string}){
-    return await this.usersService.blockTarget(user.id, dto.targetId)
+  @Post('block/:id')
+  async blockTarget(@GetUser() user: User, @Param('id') @UUIDParam() targetId: string){
+    return await this.usersService.blockTarget(user.id, targetId)
   }
 
   @UseGuards(AccessToken2FAGuard)
