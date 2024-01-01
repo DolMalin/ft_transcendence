@@ -425,7 +425,7 @@ export class UsersService {
   async respondToFriendRequest(friendRequestId: number, status: FriendRequestStatus, res: any) {
     const friendRequest = await this.getFriendRequestById(friendRequestId)
     if (!friendRequest)
-      throw new BadRequestException('Database error', {cause: new Error(), description: 'cannot find friend request'})
+      throw new BadRequestException('Bad Request', {cause: new Error(), description: 'cannot find friend request'})
 
     if (friendRequest.status !== "pending")
       throw new ConflictException('Friend request status', {cause: new Error(), description: 'friend request has already been responded'})
