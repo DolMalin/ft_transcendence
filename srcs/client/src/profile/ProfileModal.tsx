@@ -45,7 +45,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     async function blockThem(targetId: string){
         try{
-            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block', {targetId})
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block/' + targetId, {})
             setIsBlocked(true)
             const id = 'block-toast'
             if (!toast.isActive(id)){
