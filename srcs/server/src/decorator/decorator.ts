@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { IsInt, IsOptional, IsUUID, Max, validate } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsUUID, Max, validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { BadRequestException } from '@nestjs/common';
 
@@ -10,12 +10,15 @@ class userIdDto {
 
 class roomIdDto {
   @IsInt()
+  @IsPositive()
   @Max(1000000)
   roomId: number
 }
 
 class friendRequestIdDto {
   @IsInt()
+  @IsPositive()
+  @Max(1000000)
   requestId: number
 }
 
@@ -69,8 +72,6 @@ export const FRIDParam = createParamDecorator(
     if (!requestId) {
       throw new BadRequestException('friend request ID is required');
     }
-
-    console.log('type of ',requestId ,' : ', typeof requestId)
 
     const errors = await validate(plainToClass(friendRequestIdDto, { requestId }));
     if (errors.length > 0) {
