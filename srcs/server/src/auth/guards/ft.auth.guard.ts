@@ -1,5 +1,5 @@
 
-import { Injectable, ExecutionContext, CanActivate, UnauthorizedException, InternalServerErrorException} from '@nestjs/common'
+import { CanActivate, ExecutionContext, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()

@@ -1,17 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 // import { GameServDTO} from './game.gateway';
-import { Socket, Server } from 'socket.io';
-import {
-  GameState,
-  GameInfo,
-  } from '../globals/interfaces'
-import { 
-  randomizeBallAngle,
-  } from './BallMoves';
-import * as Constants from '../globals/const'
-import { MatchHistoryService } from './match.history.services';
-import { UsersService } from 'src/users/services/users.service';
+import { Server, Socket } from 'socket.io';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/services/users.service';
+import * as Constants from '../globals/const';
+import {
+  GameInfo,
+  GameState,
+} from '../globals/interfaces';
+import {
+  randomizeBallAngle,
+} from './BallMoves';
+import { MatchHistoryService } from './match.history.services';
 
 export function roomNameGenerator(lenght : number, map : Map<string, Set<string>>) {
 

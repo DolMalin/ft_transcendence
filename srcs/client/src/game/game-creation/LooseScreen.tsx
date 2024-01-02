@@ -1,9 +1,10 @@
+import {
+    Box,
+    Button,
+    Text,
+} from "@chakra-ui/react";
 import React from "react";
-import { Box,
-Text,
-Button,
- } from "@chakra-ui/react"
-import * as Constants from '../globals/const'
+import * as Constants from '../globals/const';
 
 
 function LooseScreen (props : {dispatch : Function}) {

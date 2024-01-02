@@ -1,8 +1,4 @@
-import { Field } from "@nestjs/graphql";
-import { IsOptional, IsString, Matches, MaxLength, MinLength} from "class-validator";
-import { TransformFnParams, Type } from 'class-transformer'
-import { Transform} from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
+import { IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { IsOptionalWithEmptyStrings } from "../decorators/isOptionnalWithEmptyStrings.decorator";
 
 export class JoinRoomDto {

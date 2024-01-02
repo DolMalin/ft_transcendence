@@ -1,15 +1,13 @@
+import { ArrowRightIcon } from "@chakra-ui/icons";
 import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisclosure, useToast } from "@chakra-ui/react";
 import React, { useEffect, useRef, useState } from "react";
-import { Room } from "./interface";
-import ScrollToBottom from "react-scroll-to-bottom";
-import { MessageData } from "./interface";
-import { Socket } from "socket.io-client";
-import ProfileModal from "../profile/ProfileModal";
-import * as Constants from '../game/globals/const'
-import authService from "../auth/auth.service";
-import BasicToast from "../toast/BasicToast";
 import { useForm } from "react-hook-form";
-import { ArrowRightIcon } from "@chakra-ui/icons";
+import { Socket } from "socket.io-client";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import ProfileModal from "../../profile/modal/ProfileModal";
+import BasicToast from "../../toast/BasicToast";
+import { MessageData, Room } from "../interfaces/interface";
 
 import { decode } from "html-entities";
 

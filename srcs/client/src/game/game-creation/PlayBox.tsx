@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
 import {
-    Button,
-    Text, 
     Box,
-    Kbd,
+    Button,
     Flex,
-    Heading
+    Kbd,
+    Text
 } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import '../../fonts.css';
 import * as Constants from '../globals/const';
-import '../../fonts.css'
-import authService from '../../auth/auth.service';
 
 function PlayBox(props : {dispatch : Function}) {
 

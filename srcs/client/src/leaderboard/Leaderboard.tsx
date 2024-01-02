@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react"
+import { RepeatIcon } from '@chakra-ui/icons';
 import {
-    Table,
-    Thead,
-    Tbody,
-    Link,
-    Tr,
-    Th,
-    Td,
-    Box,
     Avatar,
-    useDisclosure,
+    Box,
     Button,
-  } from '@chakra-ui/react'
-import {RepeatIcon} from '@chakra-ui/icons'
-import * as Constants from '../game/globals/const'
-import { leaderboardStats } from "../game/globals/interfaces";
-import authService from "../auth/auth.service";
-import ProfileModal from "../profile/ProfileModal";
+    Link,
+    Table,
+    Tbody,
+    Td,
+    Th,
+    Thead,
+    Tr,
+    useDisclosure,
+} from '@chakra-ui/react';
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import authService from "../auth/auth.service";
+import * as Constants from '../game/globals/const';
+import { leaderboardStats } from "../game/globals/interfaces";
+import ProfileModal from "../profile/modal/ProfileModal";
 
 function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
 

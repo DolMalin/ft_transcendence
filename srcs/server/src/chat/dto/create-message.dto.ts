@@ -1,8 +1,4 @@
 import { IsNumber, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
-import { Escape } from "class-sanitizer"
-import { Transform, TransformFnParams } from "class-transformer";
-import * as sanitizeHtml from 'sanitize-html';
-import * as xss from "xss"
 
 export class CreateMessageDto {
 

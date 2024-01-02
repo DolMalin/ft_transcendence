@@ -1,9 +1,7 @@
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt"
-import { Injectable } from "@nestjs/common";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { UsersService } from "src/users/services/users.service";
-import { Repository } from "typeorm";
-import { ForbiddenException } from "@nestjs/common";
 
 
 @Injectable()

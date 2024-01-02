@@ -1,10 +1,6 @@
-import { Controller, Get, Post, Param, Body, UseGuards} from "@nestjs/common";
-import { MatchHistoryService } from "../services/match.history.services";
-import { Game } from "../entities/game-entity";
+import { Controller } from "@nestjs/common";
 import { UsersService } from "src/users/services/users.service";
-import { User } from "src/users/entities/user.entity";
-import { AccessTokenGuard } from "src/auth/guards/accessToken.auth.guard";
-import { NotFoundException } from "@nestjs/common";
+import { MatchHistoryService } from "../services/match.history.services";
 
 @Controller('games')
 export class GamesController {

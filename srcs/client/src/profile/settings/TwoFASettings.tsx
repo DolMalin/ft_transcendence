@@ -1,10 +1,9 @@
-import React, {useEffect, useState, useReducer} from 'react'
-import { Button, Input, FormControl, Flex, Box, Image, Heading, Text, Divider, Avatar} from '@chakra-ui/react'
+import { Button, Flex, FormControl, Image, Input } from '@chakra-ui/react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useForm } from "react-hook-form";
-import AuthService from '../auth/auth.service';
-import { stateType} from '../auth/components/reducer';
-import reducer from '../auth/components/reducer';
-import * as Constants from '../game/globals/const';
+import AuthService from '../../auth/auth.service';
+import reducer, { stateType } from '../../auth/components/reducer';
+import * as Constants from '../../game/globals/const';
 
 function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 

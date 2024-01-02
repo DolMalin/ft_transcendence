@@ -1,7 +1,4 @@
-import { IsNumber, IsString, IsUUID, MaxLength, MinLength, Matches, IsPositive} from "class-validator";
-import { Transform, Type } from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
-import { TransformFnParams } from 'class-transformer'
+import { IsNumber, IsPositive, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
 export class CreateGameDto {
 	
     @IsUUID()

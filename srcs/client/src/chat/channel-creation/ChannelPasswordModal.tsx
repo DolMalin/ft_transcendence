@@ -1,11 +1,10 @@
 import { Button, Flex, FormControl, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
-import React, { useState } from "react"
+import React from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
-import authService from "../auth/auth.service"
-import * as Const from '../game/globals/const'
-import BasicToast from "../toast/BasicToast"
-import { Room } from "./Chat"
+import authService from "../../auth/auth.service"
+import * as Const from '../../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
 
 function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string, isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket}){
 

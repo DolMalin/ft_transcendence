@@ -1,15 +1,10 @@
-import { ConflictException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { SubscribeMessage, WebSocketGateway, OnGatewayConnection, OnGatewayDisconnect, MessageBody, WebSocketServer, ConnectedSocket } from '@nestjs/websockets'
-import { Server, Socket } from 'socket.io'
+import { Logger } from '@nestjs/common';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { Message } from './entities/message.entity';
 import { RoomService } from './services/room.service';
-import { UpdatePrivilegesDto } from './dto/update-privileges.dto';
-import { type } from 'os';
-import { delay, timeout } from 'rxjs';
 
 class ChatDTO {
   clientID: string[] = [];

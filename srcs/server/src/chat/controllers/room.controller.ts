@@ -1,18 +1,16 @@
-import { Controller, Get, Post, Req, Res, Body, Patch, Param, Delete, UseGuards, HttpStatus, ForbiddenException, HttpCode, HttpException, Logger, NotFoundException, UnsupportedMediaTypeException } from '@nestjs/common';
-import { UpdateRoomDto } from '../dto/update-room.dto';
-import { RoomService } from '../services/room.service';
-import { Room } from '../entities/room.entity';
-import { CreateRoomDto } from '../dto/create-room.dto';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { AuthService } from 'src/auth/services/auth.service';
-import { CreateMessageDto } from '../dto/create-message.dto';
+import { INTParam } from 'src/decorator/decorator';
 import { GetUser } from 'src/users/decorator/user.decorator';
 import { User } from 'src/users/entities/user.entity';
-import { JoinRoomDto } from '../dto/join-room.dto';
-import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
-import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
-import { IsInt } from 'class-validator';
-import { INTParam } from 'src/decorator/decorator';
+import { CreateMessageDto } from '../dto/create-message.dto';
+import { CreateRoomDto } from '../dto/create-room.dto';
+import { JoinRoomDto } from '../dto/join-room.dto';
+import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
+import { UpdateRoomDto } from '../dto/update-room.dto';
+import { RoomService } from '../services/room.service';
 
 
 @Controller('room')

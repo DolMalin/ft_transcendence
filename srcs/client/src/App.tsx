@@ -1,29 +1,28 @@
-import React, {useEffect, useRef, useState, useReducer} from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 
-import Auth from "./auth/Auth"
-import CreateGame from './game/game-creation/CreateGame';
-import { 
-  ChakraProvider, 
-  Text,
-  TabList,
-  Tabs,
-  Tab,
-  TabPanels,
-  TabPanel,
-  useToast,
+import {
   Button,
- } from '@chakra-ui/react'
-import { Socket, io } from 'socket.io-client'
-import * as Constants from './game/globals/const'
-import LeaderBoard from './leaderboard/Leaderboard';
-import './fonts.css'
-import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
-import Profile from './profile/Profile';
-import reducer from './auth/components/reducer'
-import { stateType } from './auth/components/reducer'
+  ChakraProvider,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
+import { Socket, io } from 'socket.io-client';
+import Auth from "./auth/Auth";
 import authService from './auth/auth.service';
+import reducer, { stateType } from './auth/components/reducer';
+import Chat from './chat/Chat';
+import './fonts.css';
+import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
+import CreateGame from './game/game-creation/CreateGame';
+import * as Constants from './game/globals/const';
+import LeaderBoard from './leaderboard/Leaderboard';
+import Profile from './profile/Profile';
 import BasicToast from './toast/BasicToast';
-import ChatTest from './chat/ChatTest';
 
 
 function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
@@ -225,8 +224,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-        {/* {<Chat socket={props.chatSock}/>} */}
-          <ChatTest chatSocket={props.chatSock} gameSocket={props.gameSock}/>  
+          <Chat chatSocket={props.chatSock} gameSocket={props.gameSock}/>  
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

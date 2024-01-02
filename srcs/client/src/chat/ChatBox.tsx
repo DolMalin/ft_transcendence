@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Room } from "./interface";
+import { Room } from "./interfaces/interface";
 import { Socket } from "socket.io-client";
-import DmRoom from "./DmChat";
-import Channel from "./Channel";
+import DmRoom from "./dms/DmChatbox";
+import Channel from "./channels/Channel";
 
 
-function ChatBoxTest(props : {isDm : boolean, room : Room, gameSocket : Socket, chatSocket : Socket, setTargetRoom : Function}) {
+function ChatBox(props : {isDm : boolean, room : Room, gameSocket : Socket, chatSocket : Socket, setTargetRoom : Function}) {
 
     const [channelSwitch, setChannelSwitch] = useState('');
 
@@ -19,4 +19,4 @@ function ChatBoxTest(props : {isDm : boolean, room : Room, gameSocket : Socket, 
     </>)
 }
 
-export default ChatBoxTest
+export default ChatBox

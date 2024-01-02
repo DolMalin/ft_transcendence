@@ -1,16 +1,15 @@
-import React from 'react';
-import { useEffect, useState, useReducer } from 'react';
+import { Box } from '@chakra-ui/react';
+import React, { useEffect, useReducer, useState } from 'react';
 import 'reactjs-popup/dist/index.css';
-import Game from '../game-display/Game';
 import { Socket } from 'socket.io-client';
+import authService from '../../auth/auth.service';
+import Game from '../game-display/Game';
+import * as Constants from '../globals/const';
+import GameMode from './GameMode';
+import LooseScreen from './LooseScreen';
 import PlayBox from './PlayBox';
 import VictoryScreen from './VictoryScreen';
-import LooseScreen from './LooseScreen';
-import GameMode from './GameMode';
 import WaitingScreen from './WaitingScreen';
-import { Box } from '@chakra-ui/react'
-import * as Constants from '../globals/const'
-import authService from '../../auth/auth.service';
 
 export type actionType = 
 | {type : 'SET_PLAY'; payload :boolean}

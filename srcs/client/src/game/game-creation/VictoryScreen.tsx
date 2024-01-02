@@ -1,9 +1,10 @@
-import React from "react";
-import { Box,
-Text,
-Button,
+import {
+    Box,
+    Button,
+    Text,
 } from "@chakra-ui/react";
-import * as Constants from '../globals/const'
+import React from "react";
+import * as Constants from '../globals/const';
 
 
  function VictoryScreen (props : {dispatch : Function}) {

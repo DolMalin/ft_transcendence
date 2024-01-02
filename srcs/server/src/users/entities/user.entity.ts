@@ -1,7 +1,7 @@
 import { Field } from '@nestjs/graphql';
 import { Room } from 'src/chat/entities/room.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, OneToOne, OneToMany} from 'typeorm';
 import { Game } from 'src/game/entities/game-entity';
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Avatar } from './avatar.entity';
 import { FriendRequest } from './friendRequest.entity';
 
