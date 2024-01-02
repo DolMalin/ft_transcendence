@@ -232,6 +232,15 @@ export class MatchmakingService {
       if (game === undefined)
       {
         Logger.error('undefined game in leaveQueue :' + data.roomName)
+
+        try {
+          const user = await this.userService.findOneById(client.handshake.query.userId as string);
+          this.userService.update(user.id, {isAvailable : true});
+          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
+        }
+        catch(e) {
+          Logger.error('in availability change : ', e?.message);
+        }
         return;
       }
 
