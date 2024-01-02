@@ -444,28 +444,40 @@ export class RoomService {
         
         const room = await this.findOneByIdWithRelations(dto.roomId)
         if (!room)
+        {
             throw new NotFoundException("Room not found",
             {cause: new Error(), description: "cannot find any users in database"})
+        }
         
-            if (this.isBanned(room, sender))
-                throw new ConflictException('Banned user', 
-                {cause: new Error(), description: 'you are banned in channel ' + room.name} )
-            if (room?.users) {
-                const userFound = room.users.some((user) => user.id === sender.id)
+        if (this.isBanned(room, sender)) 
+        {
+            throw new ConflictException('Banned user', 
+            {cause: new Error(), description: 'you are banned in channel ' + room.name} )
+        }
+        else if (room.users?.some((user) => user.id === sender.id) === false) 
+        {
+            throw new ConflictException('User not in channel', 
+            {cause: new Error(), description: sender.username + ' is not in channel : ' + room.name} );
+        }
+
+        if (room?.users) 
+        {
+            const userFound = room.users.some((user) => user.id === sender.id)
+            
             if (!userFound) {
-              throw new ForbiddenException(
+                throw new ForbiddenException(
                 "User is not in room",
                 {
-                  cause: new Error(),
-                  description: `Cannot find this user in room ${room?.name} database`,
+                    cause: new Error(),
+                    description: `Cannot find this user in room ${room?.name} database`,
                 }
-              )
+                )
             }
-          }
+        }
           
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
-            {cause: new Error(), description: 'you are muted in channel ' + room.name} )
+            {cause: new Error(), description: 'you are muted in channel ' + room.name})
         //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
