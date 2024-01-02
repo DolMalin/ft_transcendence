@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as argon2 from 'argon2'
 import { AuthService } from 'src/auth/services/auth.service'
@@ -48,6 +48,9 @@ export class RoomService {
             room.whitelist = [];
             room.whitelist.push(user.id);
         }
+        if (!room.users)
+            room.users = []
+        room.users.push(user)
         return await this.roomRepository.save(room)
     }
 
@@ -190,11 +193,11 @@ export class RoomService {
         throw new HttpException('Room not found', HttpStatus.NOT_FOUND)
     }
     
-    async remove(id: number) {
+    // async remove(id: number) {
 
-        const room = await this.findOneById(id)
-        return this.roomRepository.remove(room)
-    }
+    //     const room = await this.findOneById(id)
+    //     return this.roomRepository.remove(room)
+    // }
 
     
     async joinRoom(dto: JoinRoomDto, user: User){
@@ -216,7 +219,6 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this room in the database",
         })}
-        
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
@@ -254,9 +256,12 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        if (!room.users)
-            room.users = []
-        room.users.push(user)
+        // if (!room.users)
+        //     room.users = []
+        if (!room.users.some((userToFind) => userToFind.id === user.id))
+            room.users.push(user)
+        else
+            Logger.error('already in room')
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
@@ -264,7 +269,8 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
-        return room
+        
+        return this.removeProtectedProperties(room)
     }
 
     async getInfoForInvite(roomId: number, invitedUser: string) {
