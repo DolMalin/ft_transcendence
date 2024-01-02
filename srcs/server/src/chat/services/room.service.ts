@@ -468,6 +468,7 @@ export class RoomService {
     }
 
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+        
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})
@@ -826,7 +827,7 @@ export class RoomService {
                 cause: new Error(),
                 description: "You cannot remove a password when there is no password."
             })
-        room.password = undefined
+        room.password = null
         this.save(room)
     }
 
