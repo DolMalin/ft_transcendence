@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
-import { MessageData, Room } from "./interface";
-import { Socket } from "socket.io-client";
-import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisclosure, useToast } from "@chakra-ui/react";
-import * as Constants from '../game/globals/const'
-import ScrollToBottom from "react-scroll-to-bottom";
-import { useForm } from "react-hook-form";
-import authService from "../auth/auth.service";
-import BasicToast from "../toast/BasicToast";
 import { ArrowRightIcon } from "@chakra-ui/icons";
+import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisclosure, useToast } from "@chakra-ui/react";
+import React, { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Socket } from "socket.io-client";
+import authService from "../auth/auth.service";
+import * as Constants from '../game/globals/const';
 import ProfileModal from "../profile/ProfileModal";
+import BasicToast from "../toast/BasicToast";
 import ChannelUsersList from "./ChannelUsersList";
+import { MessageData, Room } from "./interface";
 
-import {decode} from 'html-entities'
+import { decode } from 'html-entities';
 
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)

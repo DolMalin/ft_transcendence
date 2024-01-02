@@ -1,6 +1,4 @@
-import { Transform, TransformFnParams } from 'class-transformer'
-import { IsInt, IsNumber, IsOptional, IsString, MinLength, MaxLength } from 'class-validator'
-import * as sanitizeHtml from 'sanitize-html'
+import { IsInt, IsOptional, IsString, MaxLength, MinLength } from 'class-validator'
 
 export class UpdateRoomDto{
     

@@ -1,24 +1,20 @@
-import React, { useEffect, useState } from "react"
 import {
+    Flex,
     Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalFooter,
     ModalBody,
     ModalCloseButton,
-    Flex,
-    useToast,
-    FormErrorMessage,
+    ModalContent,
+    ModalOverlay,
     Text,
-  } from '@chakra-ui/react'
+    useToast
+} from '@chakra-ui/react'
+import React, { useEffect, useState } from "react"
 
-import { Button, Checkbox, FormControl, Input, Stack } from "@chakra-ui/react"
+import { Button, Checkbox, FormControl, Input } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
-import * as Const from '../game/globals/const'
-import authService from "../auth/auth.service"
-import { Room } from "./interface"
 import { Socket } from "socket.io-client"
+import authService from "../auth/auth.service"
+import * as Const from '../game/globals/const'
 import BasicToast from "../toast/BasicToast"
 
 function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {

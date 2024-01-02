@@ -1,10 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Game } from '../entities/game-entity';
+import { UsersService } from 'src/users/services/users.service';
 import { Repository } from 'typeorm';
 import { CreateGameDto } from '../dto/create.game.dto';
-import { UsersService } from 'src/users/services/users.service';
-import { User } from 'src/users/entities/user.entity';
+import { Game } from '../entities/game-entity';
 import { GameState } from '../globals/interfaces';
 
 

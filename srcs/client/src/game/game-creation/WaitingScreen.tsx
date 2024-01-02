@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from "react";
-import { Box,
-Text,
-Button,
-Flex
- } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Flex,
+  Text
+} from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import * as Constants from '../globals/const'
+import * as Constants from '../globals/const';
 
  function WaitingScreen(props : {dispatch : Function, sock : Socket, roomName : string}) {
     

@@ -1,12 +1,12 @@
-import axios from 'axios'
-import React, { Component, useEffect, useState, useReducer} from 'react'
-import AuthService from './auth.service'
-import { Button, Link, Input, FormControl, Flex, Box, Text, FormErrorMessage, FormHelperText} from '@chakra-ui/react'
+import { Button, Flex, FormControl, FormErrorMessage, Input, Link } from '@chakra-ui/react';
+import axios from 'axios';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useForm } from "react-hook-form";
-import { Socket } from 'socket.io-client'
-import reducer, {stateType} from './components/reducer'
-import * as Constants from '../game/globals/const'
-import { LeftBracket, RightBracket} from '../game/game-creation/Brackets';
+import { Socket } from 'socket.io-client';
+import { LeftBracket, RightBracket } from '../game/game-creation/Brackets';
+import * as Constants from '../game/globals/const';
+import AuthService from './auth.service';
+import reducer, { stateType } from './components/reducer';
 
 
 function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket}) {

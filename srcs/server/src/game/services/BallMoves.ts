@@ -1,10 +1,10 @@
-import { Socket, Server } from 'socket.io';
+import { Server } from 'socket.io';
+import * as Constants from '../globals/const';
 import {
-  GameState,
-  Ball,
-  Paddle,
-} from '../globals/interfaces'
-import * as Constants from '../globals/const'
+    Ball,
+    GameState,
+    Paddle,
+} from '../globals/interfaces';
 
 
 /**

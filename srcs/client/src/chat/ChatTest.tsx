@@ -1,15 +1,14 @@
 import { Divider, Flex, useToast } from "@chakra-ui/react";
-import { constants } from "crypto";
 import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import * as Constants from '../game/globals/const'
+import * as Constants from '../game/globals/const';
+import BasicToast from "../toast/BasicToast";
 import ChannelCreator from "./ChannelCreator";
 import ChannelList from "./ChannelList";
-import UserList from "./UserList";
-import FriendList from "./FriendList";
 import ChatBoxTest from "./ChatBoxTest";
+import FriendList from "./FriendList";
+import UserList from "./UserList";
 import { Room } from "./interface";
-import BasicToast from "../toast/BasicToast";
 
 function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
 

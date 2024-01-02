@@ -1,14 +1,13 @@
-import { Controller, Get, Req,Res, Body, Patch, Param, Delete, UseGuards, Post} from '@nestjs/common';
-import { UsersService } from '../services/users.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
+import { FRIDParam, FRuserIdParam, UUIDParam } from 'src/decorator/decorator';
+import { leaderboardStats } from 'src/game/globals/interfaces';
+import { MatchHistoryService } from 'src/game/services/match.history.services';
+import { GetUser } from '../decorator/user.decorator';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
-import { leaderboardStats } from 'src/game/globals/interfaces';
-import { GetUser } from '../decorator/user.decorator';
-import { MatchHistoryService } from 'src/game/services/match.history.services';
-import { FRIDParam, FRuserIdParam, UUIDParam } from 'src/decorator/decorator';
-import { Request } from 'express';
-import { INTParam } from 'src/decorator/decorator';
+import { UsersService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {

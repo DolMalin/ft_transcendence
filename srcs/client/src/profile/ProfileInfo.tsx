@@ -1,10 +1,9 @@
-import React, {useEffect, useState, useLayoutEffect} from 'react'
-import {Flex, Box,Text, Avatar, Image} from '@chakra-ui/react'
-import * as Constants from '../game/globals/const';
-import authService from '../auth/auth.service'
-import { LeftBracket, RightBracket } from '../game/game-creation/Brackets'
-import PlayerHistoryAccordion from './PlayerHistoryAccordion';
+import { Avatar, Box, Flex, Image, Text } from '@chakra-ui/react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
+import authService from '../auth/auth.service';
+import { LeftBracket, RightBracket } from '../game/game-creation/Brackets';
+import * as Constants from '../game/globals/const';
 import PlayerHistory from './PlayerHistory';
 
 function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {

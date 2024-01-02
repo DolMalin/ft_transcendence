@@ -1,16 +1,15 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, StreamableFile } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm'
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
+import { leaderboardStats } from 'src/game/globals/interfaces';
+import { Readable } from 'stream';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { Repository } from 'typeorm'
-import { User } from '../entities/user.entity'
+import { User } from '../entities/user.entity';
 import { AvatarService } from './avatar.service';
-import { GameState, leaderboardStats } from 'src/game/globals/interfaces';
-import { isUUID } from 'class-validator';
-import { Readable } from 'stream';
 
-import { Server} from 'socket.io';
-import { GameGateway } from 'src/game/gateway/game.gateway';
+import { Server } from 'socket.io';
 import { FriendRequest } from '../entities/friendRequest.entity';
 import { FriendRequestStatus } from '../entities/friendRequestStatus.type';
 

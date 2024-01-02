@@ -1,13 +1,12 @@
-import { HttpException, HttpStatus, Injectable, Logger, Req, Res, UnauthorizedException, InternalServerErrorException, ForbiddenException, BadRequestException, ConflictException } from '@nestjs/common';
-import { UsersService } from 'src/users/services/users.service';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, Res, UnauthorizedException } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/services/users.service';
 
-import axios from 'axios'
-import * as argon2 from 'argon2'
-import { JwtService } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt';
+import * as argon2 from 'argon2';
+import axios from 'axios';
 import { authenticator } from 'otplib';
-import { toDataURL } from 'qrcode'
-import { Avatar } from 'src/users/entities/avatar.entity';
+import { toDataURL } from 'qrcode';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 

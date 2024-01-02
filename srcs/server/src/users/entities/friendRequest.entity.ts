@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "./user.entity";
 import { FriendRequestStatus } from "./friendRequestStatus.type";
+import { User } from "./user.entity";
 
 @Entity('')
 export class FriendRequest {

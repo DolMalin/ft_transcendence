@@ -1,20 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Socket, Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { UsersService } from 'src/users/services/users.service';
+import * as Constants from '../globals/const';
 import {
-  GameState,
   GameInfo,
   GameMetrics,
-  } from '../globals/interfaces'
-import { 
+  GameState,
+} from '../globals/interfaces';
+import {
+  ballRelaunch,
+  ballReset,
+  goal,
   willBallCollideWithWall,
   willBallOverlapPaddleOne,
-  willBallOverlapPaddleTwo,
-  goal,
-  ballReset,
-  ballRelaunch
-  } from './BallMoves';
-import * as Constants from '../globals/const'
-import { UsersService } from 'src/users/services/users.service';
+  willBallOverlapPaddleTwo
+} from './BallMoves';
 
 @Injectable()
 export class GamePlayService {

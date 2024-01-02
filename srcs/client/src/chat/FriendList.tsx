@@ -1,9 +1,9 @@
+import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons";
 import { Box, Flex, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import authService from "../auth/auth.service";
-import * as Constants from '../game/globals/const'
-import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons";
 import { Socket } from "socket.io-client";
+import authService from "../auth/auth.service";
+import * as Constants from '../game/globals/const';
 import ProfileModal from "../profile/ProfileModal";
 
 function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {

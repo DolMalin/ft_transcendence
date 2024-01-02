@@ -1,6 +1,6 @@
+import { Injectable, Req } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt"
-import { Injectable, Req} from "@nestjs/common";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { UsersService } from "src/users/services/users.service";
 
 @Injectable()

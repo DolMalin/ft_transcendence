@@ -1,16 +1,16 @@
 import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons"
-import { 
-    Flex, 
-    Link, 
-    useDisclosure,
+import {
+    Box,
+    Flex,
+    Link,
     Text,
-    Box
- } from "@chakra-ui/react"
+    useDisclosure
+} from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
 import authService from "../auth/auth.service"
-import ProfileModal from "../profile/ProfileModal"
 import * as Constants from '../game/globals/const'
+import ProfileModal from "../profile/ProfileModal"
 
 async function getUserList(me : {username: string, id: string}){
     let userList: {

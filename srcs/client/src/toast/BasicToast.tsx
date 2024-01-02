@@ -1,6 +1,6 @@
+import { Flex, Text } from "@chakra-ui/react";
 import React from "react";
-import { CloseButton, Flex, Text, ToastId } from "@chakra-ui/react";
-import * as Constants from '../game/globals/const'
+import * as Constants from '../game/globals/const';
 
 function BasicToast(props : {text : string,children? : React.ReactNode}) {
     
