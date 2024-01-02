@@ -209,8 +209,10 @@ export class MatchmakingService {
       }
       try {
         this.matchHistoryServices.storeGameResults(game);
-        this.userService.update(game.clientOne.id, {isAvailable : true});
-        this.userService.update(game.clientTwo.id, {isAvailable : true});
+        if (game.clientOne?.id)
+          this.userService.update(game.clientOne.id, {isAvailable : true});
+        if (game.clientTwo?.id)
+          this.userService.update(game.clientTwo.id, {isAvailable : true});
       }
       catch(e) {
         Logger.error('could not store game in DB', e?.message);
