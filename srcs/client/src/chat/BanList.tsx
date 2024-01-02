@@ -1,6 +1,6 @@
 import React from "react"
 import authService from "../auth/auth.service"
-import { Room } from "./Chat"
+import { Room } from "./interface"
 import { Socket } from "socket.io-client"
 import {ListItem, UnorderedList, Text, Flex, Button, useToast} from "@chakra-ui/react"
 import BasicToast from "../toast/BasicToast"
