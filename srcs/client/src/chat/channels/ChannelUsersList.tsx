@@ -1,13 +1,12 @@
+import { Button, Flex, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { Room } from "./interface";
-import authService from "../auth/auth.service";
 import { Socket } from "socket.io-client";
-import BasicToast from "../toast/BasicToast";
-import { Button, Flex, UnorderedList, useToast, Box, Divider } from "@chakra-ui/react";
-import UserInUsersList from "./UserInUsersList";
-import ChannelSettings from "./ChannelSettings";
-import * as Constants from '../game/globals/const';
+import authService from "../../auth/auth.service";
+import BasicToast from "../../toast/BasicToast";
 import BanList from "./BanList";
+import ChannelSettings from "../channels-settings/ChannelSettings";
+import UserInUsersList from "./UserInUsersList";
+import { Room } from "../interfaces/interface";
 
 function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket : Socket, setTargetChannel : Function}) {
 

@@ -1,10 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types'
-import { CreateUserDto } from './create-user.dto'
+import { Type } from 'class-transformer'
+import { IsArray, IsBoolean, IsInt, IsJWT, IsOptional, IsPositive, IsString, Matches, MaxLength, MinLength } from 'class-validator'
 import { Game } from 'src/game/entities/game-entity'
-import { IsString, IsJWT, IsBoolean, IsInt, IsPositive, IsArray, IsOptional, MinLength, MaxLength, NotContains, Matches} from 'class-validator'
-import { Transform, Type } from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
-import { TransformFnParams } from 'class-transformer'
+import { CreateUserDto } from './create-user.dto'
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@IsString()

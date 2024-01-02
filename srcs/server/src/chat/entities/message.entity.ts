@@ -1,7 +1,6 @@
-import { Field } from '@nestjs/graphql'
-import { Entity, CreateDateColumn, Column, PrimaryGeneratedColumn, ManyToOne, OneToOne, JoinColumn } from 'typeorm'
-import { Room } from './room.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Room } from './room.entity';
 
 @Entity()
 export class Message { 

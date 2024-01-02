@@ -1,26 +1,23 @@
-import { 
-    Flex, 
-    Text,
-    Link,
-    useDisclosure,
-    useToast,
-    useColorMode,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    Tooltip,
-    Button
+import { LockIcon, SearchIcon } from "@chakra-ui/icons"
+import {
+  Button,
+  Flex,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Text,
+  Tooltip,
+  useColorMode,
+  useDisclosure,
+  useToast
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
-import authService from "../auth/auth.service"
-import BasicToast from "../toast/BasicToast"
-import ChannelPasswordModal from "./ChannelPasswordModal"
-import { Room } from "./interface"
-import * as Constants from '../game/globals/const'
-import { LockIcon, SearchIcon } from "@chakra-ui/icons"
-import { Chat } from "./Chat"
-import { join } from "path"
+import authService from "../../auth/auth.service"
+import * as Constants from '../../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
+import ChannelPasswordModal from "../channel-creation/ChannelPasswordModal"
+import { Room } from "../interfaces/interface"
 
 
 async function getRoomList(){

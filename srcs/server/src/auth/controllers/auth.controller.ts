@@ -1,19 +1,14 @@
-import { Controller, Get, Post,Res,Headers, Body, UseGuards, UploadedFile, UnauthorizedException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ParseFilePipeBuilder, HttpStatus } from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
-import { UsersService } from 'src/users/services/users.service';
-import { FtAuthGuard } from '../guards/ft.auth.guard';
-import { AccessToken2FAGuard } from '../guards/accessToken2FA.auth.guard';
-import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
-import { RefreshToken2FAGuard } from '../guards/refreshToken2FA.auth.guard';
-import { UseInterceptors} from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { read } from 'fs';
-import { authenticator } from 'otplib';
-import { FileTypeValidationPipe } from '../utils/file.validator';
-import { HttpCode } from '@nestjs/common';
-import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { GetUser } from 'src/users/decorator/user.decorator';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 import { User } from 'src/users/entities/user.entity';
+import { AccessTokenGuard } from '../guards/accessToken.auth.guard';
+import { AccessToken2FAGuard } from '../guards/accessToken2FA.auth.guard';
+import { FtAuthGuard } from '../guards/ft.auth.guard';
+import { RefreshToken2FAGuard } from '../guards/refreshToken2FA.auth.guard';
+import { AuthService } from '../services/auth.service';
+import { FileTypeValidationPipe } from '../utils/file.validator';
 @Controller('auth')
 export class AuthController {
   constructor(

@@ -1,21 +1,20 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/entities/user.entity';
 import { Game } from './game/entities/game-entity';
+import { User } from './users/entities/user.entity';
 
-import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
+import { UsersModule } from './users/users.module';
 
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
-import { Room } from './chat/entities/room.entity';
 import { Message } from './chat/entities/message.entity';
+import { Room } from './chat/entities/room.entity';
 import { Avatar } from './users/entities/avatar.entity';
 import { FriendRequest } from './users/entities/friendRequest.entity';
 
-import { BrowserCheckMiddleware } from './middlewares/BrowserCheck.middlware';
 
 @Module({
   imports: [

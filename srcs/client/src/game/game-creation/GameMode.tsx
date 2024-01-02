@@ -1,13 +1,14 @@
+import {
+    Box,
+    Button,
+    Divider,
+    Flex,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { Box,
-Button,
-Flex,
-Divider,
- } from "@chakra-ui/react"
-import * as Constants from '../globals/const'
-import { LeftBracket, RightBracket } from "./Brackets";
-import authService from "../../auth/auth.service";
 import { Socket } from "socket.io-client";
+import authService from "../../auth/auth.service";
+import * as Constants from '../globals/const';
+import { LeftBracket, RightBracket } from "./Brackets";
 
 function GameMode(props : {dispatch : Function, sock : Socket}) {
 

@@ -1,8 +1,8 @@
-import { Button, Flex, FormControl, FormErrorMessage, FormHelperText, Input} from '@chakra-ui/react'
-import * as Constants from '../game/globals/const'
-import React, {useState} from 'react'
+import { Button, Flex, FormControl, FormErrorMessage, FormHelperText, Input } from '@chakra-ui/react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import authService from '../auth/auth.service';
+import authService from '../../auth/auth.service';
+import * as Constants from '../../game/globals/const';
 
 
 function UsernameChangeForm( props : {setFormVisible : Function}) {

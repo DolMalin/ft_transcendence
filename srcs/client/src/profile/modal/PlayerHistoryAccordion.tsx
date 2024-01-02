@@ -1,26 +1,25 @@
-import React, { useEffect, useState } from "react"
 import {
-    Box,
-    Text,
     Accordion,
     AccordionButton,
+    AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    AccordionIcon,
+    Box,
+    Link,
     Table,
-    Thead,
     Tbody,
-    Tr,
-    Th,
     Td,
-    useDisclosure,
-    Link
-  } from '@chakra-ui/react'
-import * as Constants from '../game/globals/const'
-import authService from "../auth/auth.service";
-import { DBGame } from "../game/globals/interfaces";
-import ProfileModal from "./ProfileModal";
+    Th,
+    Thead,
+    Tr,
+    useDisclosure
+} from '@chakra-ui/react';
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import { DBGame } from "../../game/globals/interfaces";
+import ProfileModal from "./ProfileModal";
 
 
 function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fontSize?: string, gameSocket: Socket, chatSocket : Socket}) {

@@ -12,12 +12,12 @@ import {
     Flex,
     useToast
   } from '@chakra-ui/react'
-import * as Constants from '../game/globals/const'
-import authService from "../auth/auth.service";
-import { LeftBracket, RightBracket } from "../game/game-creation/Brackets";
+import * as Constants from '../../game/globals/const'
+import authService from "../../auth/auth.service";
+import { LeftBracket, RightBracket } from "../../game/game-creation/Brackets";
 import PlayerHistoryAccordion from "./PlayerHistoryAccordion";
 import { Socket } from "socket.io-client";
-import BasicToast from "../toast/BasicToast";
+import BasicToast from "../../toast/BasicToast";
 
 
 

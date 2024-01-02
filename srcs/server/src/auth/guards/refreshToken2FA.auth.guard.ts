@@ -1,8 +1,6 @@
-import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException,} from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport';
-import { TokenExpiredError } from 'jsonwebtoken';
-import { AuthService } from '../services/auth.service';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()

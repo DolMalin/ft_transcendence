@@ -1,4 +1,4 @@
-import { ValidationOptions, ValidateIf } from 'class-validator';
+import { ValidateIf, ValidationOptions } from 'class-validator';
 
 export function IsOptionalWithEmptyStrings(validationOptions?: ValidationOptions) {
   return ValidateIf((obj, value) => {

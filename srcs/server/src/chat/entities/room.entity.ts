@@ -1,6 +1,5 @@
-import { Field } from '@nestjs/graphql'
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, ManyToMany, JoinTable, OneToOne } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Message } from './message.entity';
 
 export enum roomType {

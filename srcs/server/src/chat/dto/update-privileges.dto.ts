@@ -1,7 +1,4 @@
 import { IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, MaxLength } from "class-validator";
-import { TransformFnParams } from 'class-transformer'
-import { Transform} from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
 
 export class UpdatePrivilegesDto {
 

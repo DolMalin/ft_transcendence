@@ -1,24 +1,22 @@
-import { OnGatewayConnection,
-OnGatewayDisconnect,
-SubscribeMessage,
-WebSocketGateway,
-WebSocketServer,
-MessageBody, 
-ConnectedSocket} from '@nestjs/websockets';
-import { Socket, Server } from 'socket.io'
+import { Logger } from '@nestjs/common';
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { AuthService } from 'src/auth/services/auth.service';
+import { UsersService } from 'src/users/services/users.service';
+import {
+  GameInfo,
+  GameState,
+} from '../globals/interfaces';
 import { GamePlayService } from '../services/gameplay.services';
 import { MatchmakingService } from '../services/match-making-services';
-import {
-  GameState,
-  GameInfo,
-} from '../globals/interfaces'
-import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/services/users.service';
-import { type } from 'os';
-import { AuthService } from 'src/auth/services/auth.service';
-import { IsJWT } from 'class-validator';
-import { subscribe } from 'superagent';
-import { Logger, NotFoundException } from '@nestjs/common';
 
 @WebSocketGateway( {cors: {
   // TO DO : remove dat shit

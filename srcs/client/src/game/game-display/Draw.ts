@@ -1,8 +1,8 @@
-import * as Constants from '../globals/const'
-import { 
-    Paddle,
+import * as Constants from '../globals/const';
+import {
     Ball,
-    } from '../globals/interfaces';
+    Paddle,
+} from '../globals/interfaces';
 
 /**
  * @description 

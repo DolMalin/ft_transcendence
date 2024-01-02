@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 @Injectable()
 export class BrowserCheckMiddleware implements NestMiddleware {

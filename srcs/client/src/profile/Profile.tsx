@@ -1,15 +1,13 @@
-import React, { Component, useEffect, useState, useReducer} from 'react'
-import { Button, Flex, Divider} from '@chakra-ui/react'
-import { useForm } from "react-hook-form";
-import AuthService from '../auth/auth.service';
-import { stateType} from '../auth/components/reducer';
-import reducer from '../auth/components/reducer';
+import { Button, Divider, Flex } from '@chakra-ui/react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { Socket } from 'socket.io-client';
+import AuthService from '../auth/auth.service';
+import reducer, { stateType } from '../auth/components/reducer';
 import * as Constants from '../game/globals/const';
-import ProfileInfo from './ProfileInfo';
-import TwoFASettings from './TwoFASettings';
-import UsernameChange from './UsernameChange';
-import AvatarChange from './AvatarChange';
+import AvatarChange from './settings/AvatarChange';
+import ProfileInfo from './infos/ProfileInfo';
+import TwoFASettings from './settings/TwoFASettings';
+import UsernameChange from './settings/UsernameChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSocket : Socket}) {

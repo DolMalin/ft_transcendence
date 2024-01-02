@@ -1,9 +1,6 @@
-import { Field } from "@nestjs/graphql";
+import { Type } from 'class-transformer';
+import { IsArray, IsBoolean, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { User } from "src/users/entities/user.entity";
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
-import { TransformFnParams, Type } from 'class-transformer'
-import { Transform} from 'class-transformer'
-import * as sanitizeHtml from 'sanitize-html'
 
 export class CreateRoomDto {
     
