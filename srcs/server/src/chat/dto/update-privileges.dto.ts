@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, MaxLength } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsUUID } from "class-validator";
 
 export class UpdatePrivilegesDto {
 
