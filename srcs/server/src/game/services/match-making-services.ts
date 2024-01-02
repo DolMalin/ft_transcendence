@@ -188,13 +188,6 @@ export class MatchmakingService {
       }
       clearInterval(game.ballRefreshInterval);
 
-      // WHAT PURPOSE DOES THIS SERVER, WHY DID YOU WRITE THAT YOU CUCK
-      // if (game.gameIsFull === false)
-      // {
-      //   client.leave(data.roomName);
-      //   gamesMap.delete(data.roomName);
-      //   return ;
-      // }
       if (data.playerId === '1')
       {
         if (game.winner === undefined)

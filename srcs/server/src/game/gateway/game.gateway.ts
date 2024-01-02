@@ -19,7 +19,6 @@ import { GamePlayService } from '../services/gameplay.services';
 import { MatchmakingService } from '../services/match-making-services';
 
 @WebSocketGateway( {cors: {
-  // TO DO : remove dat shit
     origin : '*'
   },
 } )
@@ -42,8 +41,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
    try {
      if (client.handshake.query?.userId === undefined)
      {
-       client.disconnect();
-       return ;
+        Logger.error(client.id + 'was disconnected, incomplete query parameters')
+        client.disconnect();
+        return ;
      }
      const payload = await this.authService.validateAccessJwt(client.handshake.query?.token as string);
       if (client.handshake.query.type !== 'game')
@@ -56,6 +56,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.disconnect();
       Logger.error('game gateway handle connection error : ', e)
     }
+    Logger.log(client.id + 'connected succefully in gameGateway')
   }
   
   async handleDisconnect(client: Socket){
@@ -83,6 +84,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     catch(e) {
       Logger.error('game gateway handle disconnection error: ', e?.message);
     }
+    Logger.warn(client.id + 'was disconnected')
   }
 
   @SubscribeMessage('joinGame')
