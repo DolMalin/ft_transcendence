@@ -51,6 +51,9 @@ export class RoomService {
             room.whitelist = [];
             room.whitelist.push(user.id);
         }
+        if (!room.users)
+            room.users = []
+        room.users.push(user)
         return await this.roomRepository.save(room)
     }
 
@@ -197,11 +200,11 @@ export class RoomService {
         throw new HttpException('Room not found', HttpStatus.NOT_FOUND)
     }
     
-    async remove(id: number) {
+    // async remove(id: number) {
 
-        const room = await this.findOneById(id)
-        return this.roomRepository.remove(room)
-    }
+    //     const room = await this.findOneById(id)
+    //     return this.roomRepository.remove(room)
+    // }
 
     
     async joinRoom(dto: JoinRoomDto, user: User){
@@ -223,8 +226,6 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this room in the database",
         })}
-        
-        console.log(`in join room ${room.name}`,room?.owner)
 
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
@@ -250,22 +251,6 @@ export class RoomService {
             })
             }  
         }
-        
-        // if (!room?.whitelist && room?.privChan) 
-        //     room.whitelist = []
-
-        // if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
-        //     room.whitelist.push(user?.id)
-        
-        // if (room.privChan === true)
-        // {
-        //     if (!room?.whitelist?.includes(user.id)){
-                // throw new NotFoundException("Private channel", {
-                //     cause: new Error(),
-                //     description: "You have to be whitelisted to join this channel",
-                // })
-        //     }  
-        // } 
 
         if (room.privChan === true && !room?.whitelist?.includes(user.id))
         {
@@ -279,9 +264,12 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        if (!room.users)
-            room.users = []
-        room.users.push(user)
+        // if (!room.users)
+        //     room.users = []
+        if (!room.users.some((userToFind) => userToFind.id === user.id))
+            room.users.push(user)
+        else
+            Logger.error('already in room')
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
@@ -289,7 +277,8 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
-        return room
+        
+        return this.removeProtectedProperties(room)
     }
 
     async getInfoForInvite(roomId: number, invitedUser: string) {
