@@ -107,7 +107,6 @@ export class RoomController {
     @UseGuards(AccessToken2FAGuard)
     @Post('userPrivileges')
     async hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
-        Logger.debug('TEST')
         return (await this.roomService.userPrivileges(updatePrivilegesDto));
     }
 

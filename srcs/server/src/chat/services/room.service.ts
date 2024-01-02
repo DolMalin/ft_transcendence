@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, Req, Res, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Req, Res, UnauthorizedException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateRoomDto } from '../dto/create-room.dto'
 import { UpdateRoomDto } from '../dto/update-room.dto'
