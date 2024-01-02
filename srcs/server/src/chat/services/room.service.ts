@@ -1,21 +1,18 @@
-import { ConflictException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, Req, Res, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { CreateRoomDto } from '../dto/create-room.dto'
-import { UpdateRoomDto } from '../dto/update-room.dto'
-import { Repository } from 'typeorm'
-import { Room } from '../entities/room.entity'
-import { User } from '../../users/entities/user.entity'
-import { Message } from '../entities/message.entity'
-import { HttpException, HttpStatus } from '@nestjs/common'
 import * as argon2 from 'argon2'
-import { CreateMessageDto } from '../dto/create-message.dto'
-import { UsersService } from 'src/users/services/users.service'
 import { AuthService } from 'src/auth/services/auth.service'
-import { roomType} from '../entities/room.entity'
+import { UsersService } from 'src/users/services/users.service'
+import { Repository } from 'typeorm'
+import * as xss from 'xss'
+import { User } from '../../users/entities/user.entity'
+import { CreateMessageDto } from '../dto/create-message.dto'
+import { CreateRoomDto } from '../dto/create-room.dto'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
-import e from 'express'
-import * as xss from 'xss'
+import { UpdateRoomDto } from '../dto/update-room.dto'
+import { Message } from '../entities/message.entity'
+import { Room, roomType } from '../entities/room.entity'
 
 
 @Injectable()
@@ -469,9 +466,8 @@ export class RoomService {
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name})
-        //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
-            author: {id: sender.id , username: dto.authorName},
+            author: {id: sender.id , username: sender.username},
             content: xss.escapeHtml(dto.content),
             room: {id: dto.roomId}
         })

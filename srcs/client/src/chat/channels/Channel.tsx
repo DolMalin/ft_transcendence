@@ -61,9 +61,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
             {
               roomId: props.room.id, 
-              content: currentMessage, 
-              authorId: me.id, 
-              authorName: me.username
+              content: currentMessage
             })
             const message = res.data;
             props.chatSocket.emit("sendMessage", message)
