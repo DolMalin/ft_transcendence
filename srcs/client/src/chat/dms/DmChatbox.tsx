@@ -65,8 +65,6 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
             {
               roomId: props.room.id, 
               content: currentMessage, 
-              authorId: me.id, 
-              authorName: me.username
             })
             const message = res.data;
             props.chatSocket.emit("sendMessage", message)

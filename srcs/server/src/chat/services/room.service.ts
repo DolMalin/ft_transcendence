@@ -451,7 +451,7 @@ export class RoomService {
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name})
         const msg = this.messageRepository.create({
-            author: {id: sender.id , username: dto.authorName},
+            author: {id: sender.id , username: sender.username},
             content: xss.escapeHtml(dto.content),
             room: {id: dto.roomId}
         })
