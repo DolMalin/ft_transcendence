@@ -16,10 +16,10 @@ function UserInUsersList(props : {username : string, userId : string,
     const toast = useToast();
 
 
-    async function makeThemOp(targetId : string, roomName : string, roomId : number) {
+    async function makeThemOp(targetId : string, roomId : number) {
           try {
               await authService.post(process.env.REACT_APP_SERVER_URL + '/room/giveAdminPrivileges', 
-              {targetId : targetId, roomName : roomName});
+              {targetId : targetId, roomId : roomId});
               setTargetIsOp('isAdmin')
               props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
           }
@@ -39,10 +39,10 @@ function UserInUsersList(props : {username : string, userId : string,
           }
     };
 
-    async function fuckThemOp(targetId : string, roomName : string, roomId : number) {
+    async function fuckThemOp(targetId : string, roomId : number) {
         try {
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removeAdminPrivileges', 
-            {targetId : targetId, roomName : roomName});
+            {targetId : targetId, roomId : roomId});
             setTargetIsOp('no');
             props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
         }
@@ -141,8 +141,7 @@ function UserInUsersList(props : {username : string, userId : string,
         async function asyncWrapper() {
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-                {targetId : props?.userId, roomName : props.room?.name});
-                console.log('privi in wrapper : ', privi.data)
+                {targetId : props?.userId, roomId : props.room.id});
                 
                 if(privi.data === 'isOwner')
                     setTargetIsOp('isOwner')
@@ -168,8 +167,7 @@ function UserInUsersList(props : {username : string, userId : string,
         async function asyncWrapper() {
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-                {targetId : props?.userId, roomName : props.room?.name});
-                console.log('privi in sock ev : ', privi.data)
+                {targetId : props?.userId, roomId : props.room?.id});
                 
                 if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
@@ -267,7 +265,7 @@ function UserInUsersList(props : {username : string, userId : string,
                         className="goma"
                         >
                             {targetIsOp === 'no'  && 
-                            <Button onClick={() => makeThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            <Button onClick={() => makeThemOp(props?.userId, props.room?.id)}
                             borderRadius={'0px'}
                             margin={'10px'}
                             bg={Constants.BG_COLOR}
@@ -279,7 +277,7 @@ function UserInUsersList(props : {username : string, userId : string,
                             </Button>}
 
                             {targetIsOp === 'isAdmin' && 
-                            <Button onClick={() => fuckThemOp(props?.userId, props.room?.name, props.room?.id)}
+                            <Button onClick={() => fuckThemOp(props?.userId, props.room?.id)}
                             borderRadius={'0px'}
                             margin={'10px'}
                             bg={Constants.BG_COLOR}

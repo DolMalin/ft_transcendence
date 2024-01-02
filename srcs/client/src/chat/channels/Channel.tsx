@@ -79,12 +79,12 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                   </>)
                   })
             }
-            if (err.response?.status === 413)
+            if (err.response?.status === 413 || err.response?.status === 400)
             {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                      <BasicToast text='Payload is too large.'/>
+                      <BasicToast text='invalid message'/>
                   </>)
                   })
             }
@@ -167,6 +167,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                             flexDir={'column'}
                             wrap={'wrap'}
                             padding={'10px'}
+                            wordBreak={'break-all'}
                             >   
                                 <Flex
                                 flexDir={'row'}

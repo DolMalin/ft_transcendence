@@ -76,7 +76,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
                 await fetchBanList(props.room?.id);
 
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
-                {targetId : res.data.id, roomName : props.room.name})
+                {targetId : res.data.id, roomId : props.room?.id})
                 if (privi.data === 'isAdmin' || privi.data === 'isOwner')
                   setIsOp(true);
                 else

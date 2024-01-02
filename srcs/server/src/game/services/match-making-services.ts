@@ -188,13 +188,6 @@ export class MatchmakingService {
       }
       clearInterval(game.ballRefreshInterval);
 
-      // WHAT PURPOSE DOES THIS SERVER, WHY DID YOU WRITE THAT YOU CUCK
-      // if (game.gameIsFull === false)
-      // {
-      //   client.leave(data.roomName);
-      //   gamesMap.delete(data.roomName);
-      //   return ;
-      // }
       if (data.playerId === '1')
       {
         if (game.winner === undefined)
@@ -232,6 +225,15 @@ export class MatchmakingService {
       if (game === undefined)
       {
         Logger.error('undefined game in leaveQueue :' + data.roomName)
+
+        try {
+          const user = await this.userService.findOneById(client.handshake.query.userId as string);
+          this.userService.update(user.id, {isAvailable : true});
+          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
+        }
+        catch(e) {
+          Logger.error('in availability change : ', e?.message);
+        }
         return;
       }
 
