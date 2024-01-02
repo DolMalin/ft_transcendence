@@ -219,7 +219,6 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this room in the database",
         })}
-        
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
