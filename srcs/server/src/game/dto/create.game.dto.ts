@@ -1,4 +1,4 @@
-import { IsNumber, IsPositive, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
+import { IsNumber, IsPositive, IsString, IsUUID, Matches, Max, MaxLength, MinLength } from "class-validator";
 export class CreateGameDto {
 	
     @IsUUID()
@@ -21,9 +21,11 @@ export class CreateGameDto {
 
     @IsNumber()
     @IsPositive()
+    @Max(10)
     winnerScore : number;
 
     @IsNumber()
     @IsPositive()
+    @Max(10)
     looserScore : number;
 }
