@@ -466,6 +466,7 @@ export class RoomService {
     }
 
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+        
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})

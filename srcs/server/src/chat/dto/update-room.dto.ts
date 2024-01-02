@@ -3,7 +3,6 @@ import { IsInt, IsOptional, IsString, Max, MaxLength, MinLength } from 'class-va
 export class UpdateRoomDto{
     
     @IsInt()
-    @IsOptional()
     @Max(100000)
     roomId? : number
 

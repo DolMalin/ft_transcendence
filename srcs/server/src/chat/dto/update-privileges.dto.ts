@@ -7,9 +7,8 @@ export class UpdatePrivilegesDto {
 
     @IsInt()
     @IsNumber()
-    @IsOptional()
     @Max(1000000)
-    roomId? : number
+    roomId : number
     
     @IsInt()
     @IsNumber()
