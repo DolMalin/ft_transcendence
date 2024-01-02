@@ -5,6 +5,7 @@ import authService from '../auth/auth.service'
 import { LeftBracket, RightBracket } from '../game/game-creation/Brackets'
 import PlayerHistoryAccordion from './PlayerHistoryAccordion';
 import { Socket } from 'socket.io-client';
+import PlayerHistory from './PlayerHistory';
 
 function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
     const [user, setUser] = useState(undefined);
@@ -71,12 +72,12 @@ function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
             alignItems={'center'}
             justifyContent={'center'}
             marginBottom={'10%'}>
-                {fontSize === '2em' ? <LeftBracket w={'16px'} h={'42px'} girth={'6px'} marginRight="-4px"/> : <LeftBracket w={'12px'} h={'32px'} girth={'4px'} marginRight="-4px"/>}
+                {fontSize === '2em' ? <LeftBracket w={'16px'} h={'44px'} girth={'4px'} marginRight="-5px"/> : <LeftBracket w={'12px'} h={'32px'} girth={'4px'} marginRight="-4px"/>}
                     <Text fontWeight={'normal'} textAlign={'center'} padding={'0px'} fontSize={fontSize}
                     > 
                     {user?.username} 
                     </Text>
-                {fontSize === '2em' ? <RightBracket w={'16px'} h={'42px'} girth={'6px'} marginLeft="-4px"/> : <RightBracket w={'12px'} h={'32px'} girth={'4px'} marginLeft="-4px"/>}
+                {fontSize === '2em' ? <RightBracket w={'16px'} h={'44px'} girth={'4px'} marginLeft="-5px"/> : <RightBracket w={'12px'} h={'32px'} girth={'4px'} marginLeft="-4px"/>}
             </Flex>
 
             <Flex w={'100%'}
@@ -117,8 +118,16 @@ function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
                 <Text textAlign={'center'} fontSize={fontSize}> LOOSES </Text>
                 <Text textAlign={'center'} fontSize={fontSize}> {user?.loosesAmount} </Text>
               </Box>
-              <Box width={'100%'}>
-                <PlayerHistoryAccordion userId={user?.id} isOpen={true} fontSize={accordionFontSize} gameSocket={props.gameSock} chatSocket={props.chatSock}/>
+              <Flex w={'100%'} justifyContent={'center'} padding={'10px'}>
+                <Text fontSize={'1.5em'}> PLAYER HISTORY </Text>
+              </Flex>
+              <Box 
+              width={'100%'} 
+              maxHeight={'600px'}
+              overflow={'auto'}
+              >
+                <PlayerHistory userId={user?.id} gameSocket={props.gameSock} chatSocket={props.chatSock}/>
+                {/* <PlayerHistoryAccordion userId={user?.id} isOpen={true} fontSize={accordionFontSize} gameSocket={props.gameSock} chatSocket={props.chatSock}/> */}
               </Box>
             </Flex>
         </Box>

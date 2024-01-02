@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException, StreamableFile } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, StreamableFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -175,6 +175,9 @@ export class UsersService {
     if (!user)
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
 
+    if (!user.avatarId)
+      throw new NotFoundException('Avatar not found', {cause: new Error(), description: 'the avatar do not exist in database (probably not setup yet)'})
+      
     const avatar = await this.avatarService.getAvatarById(user.avatarId)
 
     if (!avatar)
@@ -211,6 +214,18 @@ export class UsersService {
     catch(err){
       throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
     }
+  }
+
+  async isBlocked(user : User, targetId : string) {
+
+    const currentUser = await this.findOneByIdWithBlockRelation(user.id)
+    if (!currentUser)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+    const target = await this.findOneByIdWithBlockRelation(targetId)
+    if (!target)
+      throw new NotFoundException('User not found', {cause: new Error(), description: 'the user do not exist in database'})
+
+    return (this.isAlreadyBlocked(currentUser, target));
   }
 
   isAlreadyBlocked(user: User, userToVerify: User): boolean {
@@ -410,7 +425,7 @@ export class UsersService {
   async respondToFriendRequest(friendRequestId: number, status: FriendRequestStatus, res: any) {
     const friendRequest = await this.getFriendRequestById(friendRequestId)
     if (!friendRequest)
-      throw new BadRequestException('Database error', {cause: new Error(), description: 'cannot find friend request'})
+      throw new BadRequestException('Bad Request', {cause: new Error(), description: 'cannot find friend request'})
 
     if (friendRequest.status !== "pending")
       throw new ConflictException('Friend request status', {cause: new Error(), description: 'friend request has already been responded'})
@@ -506,19 +521,38 @@ export class UsersService {
         subQuery.where('friendRequest.creator = :creator', {creator: user.id})
         subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
       })
-      .andWhere('friendRequest.status = :status', {status: 'accepted'})
+      .getMany()
+    
+    if (!friends)
+      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
+
+    return res.status(200).send(friends.filter(friendRequest => friendRequest.status === 'accepted').map((friendRequest) => {
+      if (friendRequest.creator.id === user.id)
+        return this.removeProtectedProperties(friendRequest.receiver)
+      else
+        return this.removeProtectedProperties(friendRequest.creator)
+    }))
+  }
+
+  async getRequests(user: User, res:any) {
+    const friends = await this.friendRequestRepository
+      .createQueryBuilder('friendRequest')
+      .leftJoinAndSelect('friendRequest.creator', 'creator')
+      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
+      .where(subQuery => {
+        subQuery.where('friendRequest.creator = :creator', {creator: user.id})
+        subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
+      })
+      .andWhere('friendRequest.status = :status', {status: 'pending'})
       .getMany()
     
     if (!friends)
       throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
 
     return res.status(200).send(friends.map((friendRequest) => {
-      if (friendRequest.creator.id === user.id)
-        return this.removeProtectedProperties(friendRequest.receiver)
-      else
-        return this.removeProtectedProperties(friendRequest.creator)
+      if (friendRequest.creator.id !== user.id)
+        return ({creatorId : friendRequest.creator.id, creatorName : friendRequest.creator.username})
     }))
-
   }
 
 

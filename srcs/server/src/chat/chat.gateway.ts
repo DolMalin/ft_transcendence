@@ -50,7 +50,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         }
         const payload = await this.authService.validateAccessJwt(client.handshake.query.token as string);
         client.join(`user-${payload.id}`)
-        Logger.log(`client ${client.id} joined user ${payload.id}`)
+        const user : User = await this.userService.findOneByIdWithRoomRelation(payload.id);
+        user.room.forEach((room) => {
+          client.join(`room-${room.id}`);
+          // Logger.log(`client ${user.username} joined room ${room.name}`)
+        })
+        // Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(err) {
         client.disconnect();
@@ -70,7 +75,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     client.join(`room-${roomId}`)
-    this.server.to(`room-${roomId}`).emit('userJoined');
+    Logger.debug(`room-${roomId}`);
+    this.server.to(`room-${roomId}`).emit('userJoined', roomId);
     Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   }
 
@@ -85,7 +91,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       const userId =  client.handshake.query?.userId as string
       await this.roomService.leaveRoom(roomId, userId)
       this.server.to(`user-${userId}`).emit('channelLeft')
-      this.server.to(`room-${roomId}`).emit('channelUpdate');
+      this.server.to(`room-${roomId}`).emit('userLeft')
       client.leave(`room-${roomId}`)
     }
     catch(err){
@@ -107,9 +113,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     const userId = client.handshake.query?.userId as string
     try{
       const array = await this.roomService.kick(data.roomId, userId, data.targetId)
+
+      Logger.debug('KICKED')
       this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
-      this.server.to(`user-${userId}`).emit('kicked', array[1])//TODO send le username pas le id
-      this.server.to(`room-${data.roomId}`).emit('userLeft');
+      this.server.to(`user-${userId}`).emit('kicked', array[1])
+      this.server.to(`room-${data.roomId}`).emit('userLeft', data.roomId);
     }
     catch(err){
       this.server.to(`user-${userId}`).emit('kickedError')
@@ -230,6 +238,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         this.server.to(`user-${hostId}`).emit('inviteError', 'You cannot invite yourself')
         return
       }
+      if (info.room?.privChan === false)
+      {
+        Logger.error('You cannot invite in a public channel')
+        return
+      }
       const host = await this.userService.findOneById(hostId)
       this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
       this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
@@ -320,7 +333,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       Logger.error('wrong data passed to channelRightsUpdate event');
       return ;
     }
-      this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate', data.roomId);
   }
 
   @SubscribeMessage('userGotBannedOrMuted')
@@ -331,11 +344,11 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       Logger.error('wrong data passed to userGotBannedOrMuted event');
       return ;
     }
-    this.server.to(`room-${data.roomId}`).emit('channelUpdate');
+    this.server.to(`room-${data.roomId}`).emit('channelUpdate', data.roomId);
 
     setTimeout(() => {
 
-      this.server.to(`room-${data.roomId}`).emit('timeoutEnd');
+      this.server.to(`room-${data.roomId}`).emit('timeoutEnd', data.roomId);
     }, data.timeInMinutes * 60 * 1000 + 2000)
   }
 

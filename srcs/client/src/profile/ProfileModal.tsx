@@ -45,7 +45,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
     async function blockThem(targetId: string){
         try{
-            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block', {targetId})
+            const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/users/block/' + targetId, {})
             setIsBlocked(true)
             const id = 'block-toast'
             if (!toast.isActive(id)){
@@ -196,10 +196,22 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
         }
     }
 
+    const fetchBlockStatus = async (userId: string) => {
+        if (isYourself || !props.userId)
+            return
+
+        try {
+            const res = await authService.get(process.env.REACT_APP_SERVER_URL + `/users/isBlocked/${userId}`);
+            setIsBlocked(res.data);
+        } catch (err) {
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+        }
+    }
+
     useEffect(() => {
         fetchFriendStatus(props.userId);
+        fetchBlockStatus(props.userId);
     })
-
     
     useEffect(function socketEvent() {
 
@@ -228,11 +240,12 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.off('friendRequestAcceptedModal');
             props.chatSocket?.off('friendRemovedModal');
         })
-    }, [props.chatSocket, friendRequestStatus, isFriendRequestCreator])
+    }, [props.chatSocket, friendRequestStatus,isFriendRequestCreator])
 
     if (!props.userId)
         return ;
 
+    console.log(props.userId)
     return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
         <ModalOverlay

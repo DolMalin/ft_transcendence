@@ -13,7 +13,8 @@ import {
     Tr,
     Th,
     Td,
-    useDisclosure
+    useDisclosure,
+    Link
   } from '@chakra-ui/react'
 import * as Constants from '../game/globals/const'
 import authService from "../auth/auth.service";
@@ -42,7 +43,7 @@ function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket
     }
 
     const toggleUserId = (value : DBGame) => {
-        props.userId === value.winnerId ? setAdversaryId(value.looserUsername) : setAdversaryId(value.winnerUsername)
+        props.userId === value.winnerId ? setAdversaryId(value.looserId) : setAdversaryId(value.winnerId)
     }
 
     useEffect(() => {
@@ -72,8 +73,10 @@ function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket
                     {props.userId === value.winnerId ? "WON TO" : "LOST TO"} 
                 </Td>
 
-                <Td onClick={() => {toggleUserId(value)}}> 
-                    {props.userId === value.winnerId ? value.looserUsername : value.winnerUsername} 
+                <Td > 
+                    <Link onClick={() => {toggleUserId(value); onOpen()}}>
+                        {props.userId === value.winnerId ? value.looserUsername : value.winnerUsername} 
+                    </Link>
                 </Td>
             </Tr>)
         })}
@@ -82,3 +85,5 @@ function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket
     <ProfileModal userId={adversaryId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSocket} gameSock={props.gameSocket}/>
     </>)
 }
+
+export default PlayerHistory

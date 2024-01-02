@@ -143,22 +143,24 @@ function UserInUsersList(props : {username : string, userId : string,
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : props?.userId, roomName : props.room?.name});
+                console.log('privi in wrapper : ', privi.data)
                 
                 if(privi.data === 'isOwner')
                     setTargetIsOp('isOwner')
                 else if(privi.data === 'isAdmin')
                     setTargetIsOp('isAdmin')
-                else if (privi.data === 'isMuted')
+                else if (privi.data === 'no')
+                    setTargetIsOp('no');
+                if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
                 else if (privi.data !== 'isMuted')
                     setTargetIsMuted(false);
-                else
-                    setTargetIsOp('no')
             }
             catch (err) {
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
+
         asyncWrapper();
     })
 
@@ -168,6 +170,7 @@ function UserInUsersList(props : {username : string, userId : string,
             try {
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : props?.userId, roomName : props.room?.name});
+                console.log('privi in sock ev : ', privi.data)
                 
                 if (privi.data === 'isMuted')
                     setTargetIsMuted(true);
@@ -186,7 +189,7 @@ function UserInUsersList(props : {username : string, userId : string,
         return(() => {
             props.chatSock?.off('timeoutEnd')
         })
-    }, [props.chatSock])
+    })
 
 
     function MuteBanSlider(props : {targetId : string, roomId : number, roomName : string, actionName : string ,action : Function}) {
@@ -234,6 +237,7 @@ function UserInUsersList(props : {username : string, userId : string,
 
     if (props.userIsOp)
     {
+
     return (<>
         <Link>
             <Popover>
@@ -247,10 +251,9 @@ function UserInUsersList(props : {username : string, userId : string,
                     bg={'white'}
                     _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
                     >
-                        {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
-                        {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
-                        {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
-                        
+                        {targetIsOp === 'isOwner' && <Image boxSize={5} title="https://icons8.com/icon/12566/crown" src={'./icons/crown.png'} marginRight={'3px'}/>}
+                        {targetIsOp === 'isAdmin' && <Image boxSize={5} title="https://icons8.com/icon/5336/sword" src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                        {targetIsMuted && <Image boxSize={5} title="https://icons8.com/icon/644/mute" src={'./icons/blackMute.png'} marginRight={'3px'}/>}
                         {props?.username}
                     </Button>
                 </PopoverTrigger>
@@ -345,9 +348,9 @@ function UserInUsersList(props : {username : string, userId : string,
             bg={'white'}
             _hover={{bg : Constants.WHITE_BUTTON_HOVER}}
             >
-                {targetIsOp === 'isOwner' && <Image boxSize={5} src={'./icons/blackSword.png'} marginRight={'3px'}/>}
-                {targetIsOp === 'isAdmin' && <Image boxSize={5} src={'./icons/blackShield.png'} marginRight={'3px'}/>}
-                {targetIsMuted && <Image boxSize={5} src={'./icons/blackMute.png'} marginRight={'3px'}/>}
+                {targetIsOp === 'isOwner' && <Image boxSize={5} title="https://icons8.com/icon/12566/crown" src={'./icons/crown.png'} marginRight={'3px'}/>}
+                {targetIsOp === 'isAdmin' && <Image boxSize={5} title="https://icons8.com/icon/5336/sword" src={'./icons/blackSword.png'} marginRight={'3px'}/>}
+                {targetIsMuted && <Image boxSize={5} title="https://icons8.com/icon/644/mute" src={'./icons/blackMute.png'} marginRight={'3px'}/>}
                 {props?.username}
             </Button>
             <ProfileModal userId={props.userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSock} gameSock={props.gameSock}/>

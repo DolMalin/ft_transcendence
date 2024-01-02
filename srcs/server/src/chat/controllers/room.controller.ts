@@ -12,7 +12,7 @@ import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { IsInt } from 'class-validator';
-import { INTParam } from 'src/decorator/uuid.decorator';
+import { INTParam } from 'src/decorator/decorator';
 
 
 @Controller('room')
@@ -38,10 +38,18 @@ export class RoomController {
         return await this.roomService.findAll();
     }
 
+    
     @UseGuards(AccessToken2FAGuard)
     @Get('list')
     async getRoomListWithoutDm(){
         return await this.roomService.findAllWithoutDm();
+    }
+    
+    @UseGuards(AccessToken2FAGuard)
+    @Get(':id')
+    async getRoom(@Param('id') @INTParam() id: number){
+
+        return await this.roomService.getRoomById(id);
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -56,6 +64,20 @@ export class RoomController {
     async getBanList(@Param("id") @INTParam() id: number) {
 
         return (await this.roomService.getBanList(id));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Get('isPriv/:id')
+    async isPriv(@Param("id") @INTParam() id: number) {
+
+        return (await this.roomService.isPriv(id));
+    }
+
+    @UseGuards(AccessToken2FAGuard)
+    @Get('isInRoom/:id')
+    async isInRoom(@GetUser() user : User ,@Param("id") @INTParam() id: number) {
+
+        return (await this.roomService.isInRoom(user ,id));
     }
 
     @UseGuards(AccessToken2FAGuard)

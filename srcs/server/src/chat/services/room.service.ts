@@ -14,6 +14,9 @@ import { AuthService } from 'src/auth/services/auth.service'
 import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
+import e from 'express'
+import * as xss from 'xss'
+
 
 @Injectable()
 export class RoomService {
@@ -31,6 +34,10 @@ export class RoomService {
     ) {}
 
     async create(createRoomDto: CreateRoomDto, user: User){
+
+        if(createRoomDto.privChan === true && createRoomDto.password)
+            throw new ConflictException("Channel is private", {cause: new Error(), description: "You cannot have a password protected private channel"})
+
         if (await this.findOneByName(createRoomDto.name))
             throw new ConflictException("Channel already exists", {cause: new Error(), description: "channel name is unique, find another one"})
         const room = this.roomRepository.create({
@@ -40,6 +47,10 @@ export class RoomService {
             type: roomType.groupMessage,
             privChan: createRoomDto.privChan
         })
+        if (room.privChan) {
+            room.whitelist = [];
+            room.whitelist.push(user.id);
+        }
         return await this.roomRepository.save(room)
     }
 
@@ -87,7 +98,14 @@ export class RoomService {
             users: [user, user2]
         })    
         await this.roomRepository.save(directMessage)
-        return this.getRoom(roomName)
+        const room = await this.getRoom(roomName)
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        return (room);
     }
 
     async getRoom(roomName: string){
@@ -100,6 +118,27 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
     }
+
+    async getRoomById(roomId: number){
+
+        const room = await this.roomRepository
+            .createQueryBuilder('room')
+            .leftJoinAndSelect('room.message', 'message')
+            .leftJoinAndSelect('message.author', 'author')
+            .leftJoinAndSelect('room.users', 'user')
+            .where('room.id = :id', { id: roomId })
+            .orderBy('message.id', 'ASC')
+            .getOne()
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
+        this.removeProtectedProperties(room);
+        room.password = null;
+        return(room);
+    }
     
     async findAll(){
         return this.roomRepository.find()
@@ -107,7 +146,23 @@ export class RoomService {
 
     async findAllWithoutDm() {
         let roomList = await this.roomRepository.find()
+
+        // TO DO IS this really necessary ?
+        if (!roomList) {
+            throw new NotFoundException("No rooms", {
+                cause: new Error(),
+                description: "There are no rooms in data base",
+        })}
+        // 
         roomList = roomList.filter(room => room.type !== roomType.directMessage)
+        roomList.forEach((room) => {
+            if (room.password)
+                room.password = 'isPasswordProtected'
+            else
+                room.password = 'none'
+
+            this.removeProtectedProperties(room);
+        })
         return roomList
     }
 
@@ -163,8 +218,11 @@ export class RoomService {
             .orderBy('message.id', 'ASC')
             .getOne()
 
-        if (!room) 
-            throw new ForbiddenException('room does not exist')
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })}
         
         console.log(`in join room ${room.name}`,room?.owner)
 
@@ -193,21 +251,30 @@ export class RoomService {
             }  
         }
         
-        if (!room?.whitelist && room?.privChan) 
-            room.whitelist = []
-        
-        if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
-            room.whitelist.push(user?.id)
-        
-        if (room.privChan === true){
-            if (!room?.whitelist?.includes(user.id)){
-                throw new NotFoundException("Private channel", {
-                    cause: new Error(),
-                    description: "You have to be whitelisted to join this channel",
-            })
-            }  
-        } 
+        // if (!room?.whitelist && room?.privChan) 
+        //     room.whitelist = []
 
+        // if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
+        //     room.whitelist.push(user?.id)
+        
+        // if (room.privChan === true)
+        // {
+        //     if (!room?.whitelist?.includes(user.id)){
+                // throw new NotFoundException("Private channel", {
+                //     cause: new Error(),
+                //     description: "You have to be whitelisted to join this channel",
+                // })
+        //     }  
+        // } 
+
+        if (room.privChan === true && !room?.whitelist?.includes(user.id))
+        {
+            throw new NotFoundException("Private channel", {
+                cause: new Error(),
+                description: "You have to be whitelisted to join this channel",
+            })
+        }
+        
         if (room?.password?.length > 0 && room.password){
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
@@ -269,8 +336,7 @@ export class RoomService {
         }
     }
      
-    async removeUserFromWhiteList(roomName: string, targetId: string){
-        const room = await this.findOneByName(roomName)
+    async removeUserFromWhiteList(room: Room, targetId: string){
         if (!room) {
             throw new NotFoundException("Room not found", {
                 cause: new Error(),
@@ -297,8 +363,9 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             })
-            console.log('before', room?.owner)
-        if (room.users){
+
+        if (room.users)
+        {
             room.users.forEach(user =>  {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
@@ -311,10 +378,6 @@ export class RoomService {
                     }
                 }
             })
-            console.log('after', room?.owner)
-            if (room?.privChan === true)
-                room = await this.removeUserFromWhiteList(room?.name, userId)
-            await this.roomRepository.save(room)
         }
         else{
             throw new NotFoundException("No user was found in this room", 
@@ -323,6 +386,10 @@ export class RoomService {
                 description: `cannot find any users in room ${room?.name} in database`
             })
         }
+        if (room?.privChan === true){
+            room = await this.removeUserFromWhiteList(room, userId)
+        }
+        await this.roomRepository.save(room)
     }
 
     async kick(roomId: number, userId: string, targetId: string){
@@ -404,7 +471,7 @@ export class RoomService {
         //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
-            content: dto.content,
+            content: xss.escapeHtml(dto.content),
             room: {id: dto.roomId}
         })
         return await this.messageRepository.save(msg)
@@ -474,7 +541,10 @@ export class RoomService {
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
         
         if (this.isMuted(room, target))
+        {
+            Logger.debug(target.username + 'IS MUTED in ' + room.name)
             return ('isMuted')
+        }
         return (this.isAdmin(room, target))
     }
 
@@ -737,5 +807,38 @@ export class RoomService {
             })
         room.password = undefined
         this.save(room)
+    }
+
+    async isPriv(roomId : number) {
+
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        return (room.privChan);
+    }
+
+    async isInRoom(user : User, roomId : number) {
+        const room = await this.findOneByIdWithRelations(roomId);
+
+        if (!room)
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (!user)
+            throw new NotFoundException("User not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
+        if (room.users?.some(chanUser => chanUser.id === user.id))
+            return (true)
+        return (false);
     }
 }

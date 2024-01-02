@@ -11,6 +11,8 @@ import { ArrowRightIcon } from "@chakra-ui/icons";
 import ProfileModal from "../profile/ProfileModal";
 import ChannelUsersList from "./ChannelUsersList";
 
+import {decode} from 'html-entities'
+
 function timeOfDay(timestampz: string | Date){
     const dateObj = new Date(timestampz)
     let hour = dateObj.getHours()
@@ -56,6 +58,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
 
     const sendMessage = async (currentMessage: string) => {
         try {
+            console.log('Room in send message : ', props.room)
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/message', 
             {
               roomId: props.room.id, 
@@ -161,7 +164,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                     justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
                             <Flex 
                             maxWidth={'70%'}
-                            bg={Constants.BG_COLOR_FADED}
+                            bg={Constants.BG_COLOR_LESSER_FADE}
                             flexDir={'column'}
                             wrap={'wrap'}
                             padding={'10px'}
@@ -178,7 +181,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                                     src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + messageContent.author.id}
                                     />
                                     
-                                    <Text padding={'10px'} >{messageContent.content}</Text>
+                                    <Text padding={'10px'} >{decode(messageContent.content)}</Text>
                                     
                                 </Flex>
                                 <Link fontSize={'0.6em'}onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Link>

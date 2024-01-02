@@ -73,8 +73,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             try{
                 const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
                 setMe(res.data)
-                fetchUserList(res.data)
-                fetchBanList(props.room?.id);
+                await fetchUserList(res.data)
+                await fetchBanList(props.room?.id);
 
                 const privi = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/userPrivileges',
                 {targetId : res.data.id, roomName : props.room.name})
@@ -88,12 +88,14 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
         }
 
         asyncWrapper();
-    }, [rerender])
+    }, [rerender, props.room])
 
     useEffect(function sockEvents() {
 
-        function forceRender() {
-
+        function forceRender(roomId? : number) {
+          
+          if (roomId && roomId !== props.room.id)
+            return ;
           if (rerender === true)
             setRerender(false)
           else if (rerender === false)
@@ -101,13 +103,14 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
 
           
         };
-        props.chatSocket?.on('channelUpdate', forceRender);
+
+        props.chatSocket?.on('channelUpdate', (roomId) => forceRender(roomId));
   
-        props.chatSocket?.on('userJoined', forceRender);
+        props.chatSocket?.on('userJoined', (roomId) => forceRender(roomId));
 
-        props.chatSocket?.on('userLeft', forceRender);
+        props.chatSocket?.on('userLeft', (roomId) => forceRender(roomId));
 
-        props.chatSocket?.on('timeoutEnd', forceRender);
+        props.chatSocket?.on('timeoutEnd', (roomId) => forceRender(roomId));
   
         props.chatSocket?.on('youGotBanned', (roomName) => {
           
@@ -131,7 +134,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           props.chatSocket?.off('youGotBanned');
           props.chatSocket?.off('timeoutEnd');
         })
-      }, [props.chatSocket, rerender])
+      }, [props.chatSocket, props.room, rerender])
 
     return (<>
         <Flex 
@@ -172,7 +175,7 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
                 BANS
               </Button>
             </Flex>
-            <Flex h={'100%'} w={'80%'} minW={'224px'}
+            <Flex h={'100%'} w={'80%'} minW={'224px'} padding={'10px'}
             overflowY={'auto'} flexDir={'row'} wrap={'wrap'}>
                 {listToDisplay === 'users' && <>
                   {userList.map((user, index) => {
