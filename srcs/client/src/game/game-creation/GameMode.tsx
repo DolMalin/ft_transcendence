@@ -156,7 +156,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (err) {
-                    
+                            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`);
                         }
                     }}
                     >
