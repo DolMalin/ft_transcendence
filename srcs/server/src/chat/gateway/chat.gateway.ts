@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { RoomService } from './services/room.service';
+import { RoomService } from '../services/room.service';
 
 class ChatDTO {
   clientID: string[] = [];
