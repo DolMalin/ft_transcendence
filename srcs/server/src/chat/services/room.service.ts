@@ -345,7 +345,6 @@ export class RoomService {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
                     if (room.owner?.id === userId){
-                        console.log('bizarre cette histoire')
                         room.owner = null
                     }
                     if (this.isAdmin(room, user) === 'isAdmin'){
