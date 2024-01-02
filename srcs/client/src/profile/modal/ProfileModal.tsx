@@ -245,7 +245,6 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
     if (!props.userId)
         return ;
 
-    console.log(props.userId)
     return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered={true}>
         <ModalOverlay

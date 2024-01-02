@@ -63,7 +63,6 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
             try {
                 const isPriv = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isPriv/' + props.room.id)
 
-                console.log(isPriv.data)
                 setIsPrivate(isPriv.data);
             }
             catch(err) {
