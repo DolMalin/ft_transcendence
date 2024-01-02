@@ -364,7 +364,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('channelStatusUpdate')
   channelStatusUpdate(@ConnectedSocket() client : Socket) {
     
-    this.server.sockets.except(client.id).emit('channelStatusUpdate');
-    client.emit('channelStatusUpdate')
+    this.server.sockets.emit('channelStatusUpdate');
   }
 }

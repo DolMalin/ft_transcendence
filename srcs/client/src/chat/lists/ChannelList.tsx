@@ -42,7 +42,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     const [roomName, setRoomName] = useState<string>()
     const [hoveredRoom, setHoveredRoom] = useState<string | null>(null)
     const [roomnamesNarrower, setRoomnamesNarrower] = useState('')
-    const { colorMode } = useColorMode()
     const [roomList, setRoomList] = useState
     <{  id: number
         name: string
@@ -103,6 +102,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
           return (rooms.filter((room) => room.name.toLocaleLowerCase().includes(roomnamesNarrower.toLocaleLowerCase())));
         }))
     }
+    
     useEffect(() => {
         fetchRoom()
     }, [])
@@ -114,6 +114,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       });
 
       props.chatSocket?.on('channelStatusUpdate', () => {
+        console.log('TEST TEST')
 
         fetchRoom();
       })

@@ -750,7 +750,7 @@ export class RoomService {
                 description: "you cannot set a password when there is already one."
             })
         room.password = await this.authService.hash(updateRoomDto.password)
-        this.save(room)
+        await this.save(room);
     }
 
     async changePassword(user: User, updateRoomDto: UpdateRoomDto){
@@ -781,7 +781,7 @@ export class RoomService {
             })
         }
         room.password = await this.authService.hash(updateRoomDto.password)
-        this.save(room)
+        await this.save(room)
     }
 
     async removePassword(user: User, updateRoomDto: UpdateRoomDto){
@@ -804,8 +804,8 @@ export class RoomService {
                 cause: new Error(),
                 description: "You cannot remove a password when there is no password."
             })
-        room.password = undefined
-        this.save(room)
+        room.password = null
+        await this.save(room)
     }
 
     async isPriv(roomId : number) {
