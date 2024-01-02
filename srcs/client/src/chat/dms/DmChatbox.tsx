@@ -82,7 +82,17 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                   </>)
                   })
             }
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.status === 413 || err.response?.status === 400)
+            {
+                toast({
+                    duration: 5000,
+                    render : () => ( <> 
+                      <BasicToast text='Invalid message'/>
+                  </>)
+                  })
+            }
+            else
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -171,6 +181,7 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                                 flexDir={'column'}
                                 wrap={'wrap'}
                                 padding={'10px'}
+                                wordBreak={'break-all'}
                                 >   
                                     <Flex
                                     flexDir={'row'}
