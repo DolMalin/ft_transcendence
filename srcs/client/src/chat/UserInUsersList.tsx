@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from "react"
 import authService from "../auth/auth.service"
 import { Socket } from "socket.io-client";
 import ProfileModal from "../profile/ProfileModal";
-import { Room } from "./Chat";
+import { Room } from "./interface";
 import BasicToast from "../toast/BasicToast";
 import { Image, Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Text, Tooltip, useDisclosure, useToast, Box } from "@chakra-ui/react";
 import * as Constants from '../game/globals/const';
@@ -115,7 +115,6 @@ function UserInUsersList(props : {username : string, userId : string,
 
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/banUser', 
             {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
-            // props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
             props.chatSock?.emit('userGotBanned', {targetId : targetId, roomName : roomName});
             props.chatSock?.emit('userGotBannedOrMuted', {roomId : roomId, timeInMinutes : timeInMinutes});
         }

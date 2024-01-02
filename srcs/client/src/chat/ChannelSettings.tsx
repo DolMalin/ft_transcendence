@@ -5,7 +5,7 @@ import { Socket } from "socket.io-client";
 import authService from "../auth/auth.service";
 import * as Constants from '../game/globals/const';
 import BasicToast from "../toast/BasicToast";
-import { Room } from "./Chat";
+import { Room } from "./interface";
 import InviteModal from "./InviteModal";
 import PasswordSettingsModal from "./PasswordSettingsModal";
 
