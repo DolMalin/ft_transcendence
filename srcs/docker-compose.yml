@@ -53,6 +53,7 @@ services:
     restart: unless-stopped
 
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     depends_on: 
