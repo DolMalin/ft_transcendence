@@ -484,7 +484,7 @@ export class RoomService {
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
         const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
@@ -507,7 +507,7 @@ export class RoomService {
     async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
         const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
@@ -728,7 +728,14 @@ export class RoomService {
     }
 
     async setPassword(user: User, updateRoomDto: UpdateRoomDto){
-        const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
+        if (!updateRoomDto.password){
+            throw new NotFoundException("Invalid parameter", 
+            {
+                cause: new Error(), 
+                description: "cannot find password in dto"
+            })
+        }
+        const room = await this.findOneByIdWithRelations(updateRoomDto?.roomId)
         if (!room)
             throw new NotFoundException("Room not found", 
             {
@@ -747,11 +754,18 @@ export class RoomService {
                 cause: new Error(),
                 description: "you cannot set a password when there is already one."
             })
-        room.password = await this.authService.hash(updateRoomDto.password)
+        room.password = await this.authService.hash(updateRoomDto?.password)
         this.save(room)
     }
 
     async changePassword(user: User, updateRoomDto: UpdateRoomDto){
+        if (!updateRoomDto.password){
+            throw new NotFoundException("Invalid parameter", 
+            {
+                cause: new Error(), 
+                description: "cannot find password in dto"
+            })
+        }
         const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", 

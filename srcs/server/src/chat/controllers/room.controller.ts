@@ -156,7 +156,7 @@ export class RoomController {
     }
 
     @UseGuards(AccessToken2FAGuard)
-    @Get('message')
+    @Get('message')//REMOVE
     async getMessage(){
         return await this.roomService.getMessage()
     }

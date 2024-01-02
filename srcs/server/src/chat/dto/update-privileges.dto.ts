@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, MaxLength } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength } from "class-validator";
 
 export class UpdatePrivilegesDto {
 
@@ -15,12 +15,14 @@ export class UpdatePrivilegesDto {
     roomName? : string
 
     @IsInt()
-    @IsNumber()//a remplacer imo
+    @IsNumber()
     @IsOptional()
+    @Max(1000000)
     roomId? : number
     
     @IsInt()
-    @IsNumber()//a remplacer imo
+    @IsNumber()
     @IsOptional()
+    @Max(120)
     timeInMinutes : number
 }
