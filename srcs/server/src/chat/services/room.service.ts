@@ -224,6 +224,8 @@ export class RoomService {
                 description: "Cannot find this room in the database",
         })}
         
+        console.log(`in join room ${room.name}`,room?.owner)
+
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
@@ -281,7 +283,6 @@ export class RoomService {
             room.users = []
         room.users.push(user)
         await this.roomRepository.save(room)
-
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
         } 
@@ -368,8 +369,10 @@ export class RoomService {
             room.users.forEach(user =>  {
                 if (user.id === userId){
                     room.users = room.users.filter(user => user.id !== userId)
-                    if (room.owner?.id === userId)
+                    if (room.owner?.id === userId){
+                        console.log('bizarre cette histoire')
                         room.owner = null
+                    }
                     if (this.isAdmin(room, user) === 'isAdmin'){
                         room.administrator.splice(room.administrator.indexOf(user), 1)
                     }
@@ -383,8 +386,7 @@ export class RoomService {
                 description: `cannot find any users in room ${room?.name} in database`
             })
         }
-        if (room?.privChan === true)
-        {
+        if (room?.privChan === true){
             room = await this.removeUserFromWhiteList(room, userId)
         }
         await this.roomRepository.save(room)

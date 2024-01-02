@@ -235,7 +235,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const info = await this.roomService.getInfoForInvite(data.roomId, data.guestUsername)
       if (hostId === info.targetId){
-        Logger.error('You cannot invite yourself')
+        this.server.to(`user-${hostId}`).emit('inviteError', 'You cannot invite yourself')
         return
       }
       if (info.room?.privChan === false)
@@ -253,10 +253,9 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         roomId: data.roomId,
         targetId: info?.targetId
       })
-      
     }
     catch(err){
-      
+      this.server.to(`user-${hostId}`).emit('inviteError', err.response?.message)
       Logger.error(err)
     }
   }
