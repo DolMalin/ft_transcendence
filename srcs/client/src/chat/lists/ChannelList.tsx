@@ -13,11 +13,11 @@ import {
 } from "@chakra-ui/react"
 import React, { useEffect, useState } from "react"
 import { Socket } from "socket.io-client"
-import authService from "../auth/auth.service"
-import * as Constants from '../game/globals/const'
-import BasicToast from "../toast/BasicToast"
-import ChannelPasswordModal from "./ChannelPasswordModal"
-import { Room } from "./interface"
+import authService from "../../auth/auth.service"
+import * as Constants from '../../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
+import ChannelPasswordModal from "../channel-creation/ChannelPasswordModal"
+import { Room } from "../interfaces/interface"
 
 
 async function getRoomList(){

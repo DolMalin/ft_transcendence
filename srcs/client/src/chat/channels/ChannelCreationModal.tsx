@@ -13,9 +13,9 @@ import React, { useEffect, useState } from "react"
 import { Button, Checkbox, FormControl, Input } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
-import authService from "../auth/auth.service"
-import * as Const from '../game/globals/const'
-import BasicToast from "../toast/BasicToast"
+import authService from "../../auth/auth.service"
+import * as Const from '../../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
 
 function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , onClose : () => void, chatSocket: Socket, setTargetRoom: Function}) {
     

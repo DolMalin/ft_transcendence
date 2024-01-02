@@ -2,10 +2,10 @@ import { DragHandleIcon } from "@chakra-ui/icons";
 import { Button, Link, Popover, PopoverBody, PopoverContent, PopoverTrigger, Portal, useDisclosure, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import authService from "../auth/auth.service";
-import * as Constants from '../game/globals/const';
-import BasicToast from "../toast/BasicToast";
-import { Room } from "./interface";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import BasicToast from "../../toast/BasicToast";
+import { Room } from "../interfaces/interface";
 import InviteModal from "./InviteModal";
 import PasswordSettingsModal from "./PasswordSettingsModal";
 

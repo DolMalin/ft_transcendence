@@ -2,8 +2,8 @@ import { Button, Flex, FormControl, FormErrorMessage, Input, Modal, ModalBody, M
 import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
-import * as Const from '../game/globals/const'
-import BasicToast from "../toast/BasicToast"
+import * as Const from '../../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
 
 function InviteModal(props : {socket: Socket, roomId: number, isOpen : boolean, onOpen : () => void , onClose : () => void}){
   

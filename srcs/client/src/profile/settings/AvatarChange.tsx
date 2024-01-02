@@ -1,9 +1,9 @@
 import { Box, Button, Flex, FormControl, Input } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import authService from '../auth/auth.service';
-import { LeftBracket, RightBracket } from '../game/game-creation/Brackets';
-import * as Constants from '../game/globals/const';
+import authService from '../../auth/auth.service';
+import { LeftBracket, RightBracket } from '../../game/game-creation/Brackets';
+import * as Constants from '../../game/globals/const';
 
 function AvatarChangeForm( props : {setFormVisible : Function}) {
 	const { register, handleSubmit, formState: { errors } } = useForm();

@@ -3,12 +3,12 @@ import { Avatar, Button, Flex, FormControl, Input, Link, Text, WrapItem, useDisc
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Socket } from "socket.io-client";
-import authService from "../auth/auth.service";
-import * as Constants from '../game/globals/const';
-import ProfileModal from "../profile/ProfileModal";
-import BasicToast from "../toast/BasicToast";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import ProfileModal from "../../profile/modal/ProfileModal";
+import BasicToast from "../../toast/BasicToast";
 import ChannelUsersList from "./ChannelUsersList";
-import { MessageData, Room } from "./interface";
+import { MessageData, Room } from "../interfaces/interface";
 
 import { decode } from 'html-entities';
 

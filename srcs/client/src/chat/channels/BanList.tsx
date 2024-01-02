@@ -1,10 +1,10 @@
 import React from "react"
-import authService from "../auth/auth.service"
-import { Room } from "./interface"
+import authService from "../../auth/auth.service"
+import { Room } from "../interfaces/interface"
 import { Socket } from "socket.io-client"
 import {ListItem, UnorderedList, Text, Flex, Button, useToast} from "@chakra-ui/react"
-import BasicToast from "../toast/BasicToast"
-import * as Constants from '../game/globals/const'
+import BasicToast from "../../toast/BasicToast"
+import * as Constants from '../../game/globals/const'
 
 function BanList(props : {banList :  {username : string, id : string}[], room : Room, chatSock : Socket}) {
 

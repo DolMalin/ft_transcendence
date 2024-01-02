@@ -2,9 +2,9 @@ import { CheckCircleIcon, EmailIcon } from "@chakra-ui/icons";
 import { Box, Flex, Link, Text, useDisclosure } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import authService from "../auth/auth.service";
-import * as Constants from '../game/globals/const';
-import ProfileModal from "../profile/ProfileModal";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import ProfileModal from "../../profile/modal/ProfileModal";
 
 function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     const { isOpen, onOpen, onClose } = useDisclosure()

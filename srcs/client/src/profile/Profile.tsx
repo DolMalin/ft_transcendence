@@ -4,10 +4,10 @@ import { Socket } from 'socket.io-client';
 import AuthService from '../auth/auth.service';
 import reducer, { stateType } from '../auth/components/reducer';
 import * as Constants from '../game/globals/const';
-import AvatarChange from './AvatarChange';
-import ProfileInfo from './ProfileInfo';
-import TwoFASettings from './TwoFASettings';
-import UsernameChange from './UsernameChange';
+import AvatarChange from './settings/AvatarChange';
+import ProfileInfo from './infos/ProfileInfo';
+import TwoFASettings from './settings/TwoFASettings';
+import UsernameChange from './settings/UsernameChange';
 
 
 function Profile(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSocket : Socket}) {

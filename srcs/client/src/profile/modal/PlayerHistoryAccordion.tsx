@@ -16,9 +16,9 @@ import {
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import authService from "../auth/auth.service";
-import * as Constants from '../game/globals/const';
-import { DBGame } from "../game/globals/interfaces";
+import authService from "../../auth/auth.service";
+import * as Constants from '../../game/globals/const';
+import { DBGame } from "../../game/globals/interfaces";
 import ProfileModal from "./ProfileModal";
 
 

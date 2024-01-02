@@ -15,7 +15,7 @@ import { Socket, io } from 'socket.io-client';
 import Auth from "./auth/Auth";
 import authService from './auth/auth.service';
 import reducer, { stateType } from './auth/components/reducer';
-import ChatTest from './chat/ChatTest';
+import Chat from './chat/Chat';
 import './fonts.css';
 import { LeftBracket, RightBracket } from './game/game-creation/Brackets';
 import CreateGame from './game/game-creation/CreateGame';
@@ -224,8 +224,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>
-        {/* {<Chat socket={props.chatSock}/>} */}
-          <ChatTest chatSocket={props.chatSock} gameSocket={props.gameSock}/>  
+          <Chat chatSocket={props.chatSock} gameSocket={props.gameSock}/>  
         </TabPanel>
 
         <TabPanel margin={'0'} padding={'0'}>

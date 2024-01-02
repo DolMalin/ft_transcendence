@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import * as Constants from '../game/globals/const';
 import BasicToast from "../toast/BasicToast";
-import ChannelCreator from "./ChannelCreator";
-import ChannelList from "./ChannelList";
-import ChatBoxTest from "./ChatBoxTest";
-import FriendList from "./FriendList";
-import UserList from "./UserList";
-import { Room } from "./interface";
+import ChannelCreator from "./channel-creation/ChannelCreator";
+import ChannelList from "./lists/ChannelList";
+import ChatBox from "./ChatBox";
+import FriendList from "./lists/FriendList";
+import UserList from "./lists/UserList";
+import { Room } from "./interfaces/interface";
 
-function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
+function Chat(props: {chatSocket: Socket, gameSocket : Socket}) {
 
     type FlexDirection = "column" | "inherit" | "-moz-initial" | "initial" | "revert" | "unset" | "column-reverse" | "row" | "row-reverse" | undefined;
 
@@ -156,7 +156,7 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
         bg={Constants.BG_COLOR_FADED} 
         >
             {targetRoom != undefined && 
-            <ChatBoxTest isDm={targetRoom.type === 'dm' ? true : false}
+            <ChatBox isDm={targetRoom.type === 'dm' ? true : false}
             room={targetRoom}
             gameSocket={props.gameSocket}
             chatSocket={props.chatSocket}
@@ -184,4 +184,4 @@ function ChatTest(props: {chatSocket: Socket, gameSocket : Socket}) {
     </>)
 }
 
-export default ChatTest
+export default Chat

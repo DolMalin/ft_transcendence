@@ -1,12 +1,12 @@
 import React from "react"
-import * as Const from "../game/globals/const"
+import * as Const from "../../game/globals/const"
 
 import {
     Button,
     useDisclosure
 } from "@chakra-ui/react"
 import { Socket } from "socket.io-client"
-import ChannelCreationModal from "./ChannelCreationModal"
+import ChannelCreationModal from "../channels/ChannelCreationModal"
  
 function ChannelCreator (props: {chatSocket: Socket, setTargetRoom: Function}){
     const {isOpen, onOpen, onClose} = useDisclosure()
