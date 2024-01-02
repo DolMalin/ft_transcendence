@@ -14,7 +14,6 @@ import { AuthService } from 'src/auth/services/auth.service'
 import { roomType} from '../entities/room.entity'
 import { JoinRoomDto } from '../dto/join-room.dto'
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto'
-import e from 'express'
 import * as xss from 'xss'
 
 
@@ -56,10 +55,6 @@ export class RoomService {
 
     async findOneByName(name: string){
         return await this.roomRepository.findOneBy({name})
-    }
-    
-    async findOneByNameWithRelations(name: string){
-        return await this.roomRepository.findOne({where : {name : name}, relations : ['owner', 'administrator', 'users', 'message', 'muted', 'banned']})
     }
 
     async findOneByIdWithRelations(roomId: number){
@@ -224,8 +219,6 @@ export class RoomService {
                 description: "Cannot find this room in the database",
         })}
         
-        console.log(`in join room ${room.name}`,room?.owner)
-
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
@@ -250,22 +243,6 @@ export class RoomService {
             })
             }  
         }
-        
-        // if (!room?.whitelist && room?.privChan) 
-        //     room.whitelist = []
-
-        // if (!room?.whitelist?.includes(room.owner?.id) && room.privChan) 
-        //     room.whitelist.push(user?.id)
-        
-        // if (room.privChan === true)
-        // {
-        //     if (!room?.whitelist?.includes(user.id)){
-                // throw new NotFoundException("Private channel", {
-                //     cause: new Error(),
-                //     description: "You have to be whitelisted to join this channel",
-                // })
-        //     }  
-        // } 
 
         if (room.privChan === true && !room?.whitelist?.includes(user.id))
         {
@@ -415,6 +392,11 @@ export class RoomService {
             cause: new Error(), 
             description: "cannot find this user in database"
         })
+
+        if (room.users.some((user) => user.id === user2.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: user2.username + ' is not in channel ' + room.name})
+
         if (this.isAdmin(room, user) === 'isAdmin' && this.isAdmin(room, user2) === 'isAdmin'){
             throw new ConflictException("User are both admins", 
         {
@@ -461,26 +443,10 @@ export class RoomService {
             throw new ConflictException('User not in channel', 
             {cause: new Error(), description: sender.username + ' is not in channel : ' + room.name} );
         }
-
-        if (room?.users) 
-        {
-            const userFound = room.users.some((user) => user.id === sender.id)
-            
-            if (!userFound) {
-                throw new ForbiddenException(
-                "User is not in room",
-                {
-                    cause: new Error(),
-                    description: `Cannot find this user in room ${room?.name} database`,
-                }
-                )
-            }
-        }
           
         if (this.isMuted(room, sender))
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name})
-        //TODO regarder si le user est bien dans le channl
         const msg = this.messageRepository.create({
             author: {id: sender.id , username: dto.authorName},
             content: xss.escapeHtml(dto.content),
@@ -497,18 +463,20 @@ export class RoomService {
     }
 
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
-        if (requestMaker?.id !== room?.owner?.id || this.isAdmin(room, requestMaker) === 'no')
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
+        else if (requestMaker?.id !== room?.owner?.id || this.isAdmin(room, requestMaker) === 'no')
             throw new ConflictException('Privileges conflict', 
             {cause: new Error(), description: 'tried to perform action above your paycheck'} )
-
-        if (this.isAdmin(room, target) !== 'no')
+        else if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Privileges conflict',  
             {cause: new Error(), description: "Target user allready has privileges"} )
 
@@ -520,18 +488,20 @@ export class RoomService {
     }
 
     async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
-        if (requestMaker.id !== room.owner.id)
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
+        else if (requestMaker.id !== room.owner.id)
             throw new ConflictException('Is not room owner', 
             {cause: new Error(), description: 'tried to perform action above your paycheck'} )
-
-        if (this.isAdmin(room, target) === 'no')
+        else if (this.isAdmin(room, target) === 'no')
             throw new ConflictException('Is not admin',  
             {cause: new Error(), description: "Target user allready has no privileges"} )
 
@@ -542,7 +512,7 @@ export class RoomService {
 
     async userPrivileges(updatePrivilegesDto : UpdatePrivilegesDto) {
 
-        const room = await this.findOneByNameWithRelations(updatePrivilegesDto.roomName)
+        const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
         if (room.type === roomType.directMessage){
@@ -552,9 +522,11 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
         
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
         if (this.isMuted(room, target))
         {
-            Logger.debug(target.username + 'IS MUTED in ' + room.name)
             return ('isMuted')
         }
         return (this.isAdmin(room, target))
@@ -598,12 +570,21 @@ export class RoomService {
                 description: 'tried to perform actions above your paycheck'
             } )
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
+        
         if (!target)
             throw new NotFoundException("User not found", 
             {
                 cause: new Error(), 
                 description: "cannot find any users in database"
             })
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
+        else if (this.isMuted(room, target)) 
+        {
+            throw new ConflictException('Is muted', 
+            {cause: new Error(), description: 'This user is allready muted'} )
+        }
         if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Target is admin', 
             {
@@ -642,7 +623,10 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
     
-        if (!this.isMuted(room, target)) {
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
+        else if (!this.isMuted(room, target)) {
             throw new ConflictException('Is not muted', 
             {cause: new Error(), description: 'This user is not muted'} )
         }
@@ -667,10 +651,13 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
-        if (this.isBanned(room, target))
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
+        else if (this.isBanned(room, target))
             throw new ConflictException('Banned already', 
             {cause: new Error(), description: target.username + ' is allready banned from ' + room.name})
-        if (this.isAdmin(room, target) !== 'no')
+        else if (this.isAdmin(room, target) !== 'no')
             throw new ConflictException('Is Admin', 
             {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'})
 
@@ -706,6 +693,9 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
+        if (room.users.some((user) => user.id === target.id) === false)
+            throw new ConflictException('Not in Channel', 
+            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
         if (!this.isBanned(room, target))
             throw new ConflictException('Not banned', 
             {cause: new Error(), description: target.username + ' is not banned from ' + room.name})
