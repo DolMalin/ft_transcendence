@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsPositive, IsUUID, Max } from "class-validator";
 
 export class UpdatePrivilegesDto {
 
@@ -6,12 +6,14 @@ export class UpdatePrivilegesDto {
     targetId: string
 
     @IsInt()
+    @IsPositive()
     @IsNumber()
-    @Max(1000000)
+    @Max(2147483647)
     roomId : number
     
     @IsInt()
     @IsNumber()
+    @IsPositive()
     @IsOptional()
     @Max(120)
     timeInMinutes : number

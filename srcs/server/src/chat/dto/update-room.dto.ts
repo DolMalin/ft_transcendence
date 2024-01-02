@@ -1,9 +1,10 @@
-import { IsInt, IsOptional, IsString, Max, MaxLength, MinLength } from 'class-validator'
+import { IsInt, IsOptional, IsPositive, IsString, Max, MaxLength, MinLength } from 'class-validator'
 
 export class UpdateRoomDto{
     
     @IsInt()
-    @Max(100000)
+    @IsPositive()
+    @Max(2147483647)
     roomId? : number
 
     @IsString()
