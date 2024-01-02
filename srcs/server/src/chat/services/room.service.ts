@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as argon2 from 'argon2'
 import { AuthService } from 'src/auth/services/auth.service'
@@ -48,6 +48,9 @@ export class RoomService {
             room.whitelist = [];
             room.whitelist.push(user.id);
         }
+        if (!room.users)
+            room.users = []
+        room.users.push(user)
         return await this.roomRepository.save(room)
     }
 
@@ -190,11 +193,11 @@ export class RoomService {
         throw new HttpException('Room not found', HttpStatus.NOT_FOUND)
     }
     
-    async remove(id: number) {
+    // async remove(id: number) {
 
-        const room = await this.findOneById(id)
-        return this.roomRepository.remove(room)
-    }
+    //     const room = await this.findOneById(id)
+    //     return this.roomRepository.remove(room)
+    // }
 
     
     async joinRoom(dto: JoinRoomDto, user: User){
@@ -254,9 +257,12 @@ export class RoomService {
             if (! await argon2.verify(room.password, dto.password))
                 throw new ForbiddenException('Password invalid')
         }
-        if (!room.users)
-            room.users = []
-        room.users.push(user)
+        // if (!room.users)
+        //     room.users = []
+        if (!room.users.some((userToFind) => userToFind.id === user.id))
+            room.users.push(user)
+        else
+            Logger.error('already in room')
         await this.roomRepository.save(room)
         if (userRelation.blocked && room.message) {
             room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
@@ -264,7 +270,8 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
-        return room
+        
+        return this.removeProtectedProperties(room)
     }
 
     async getInfoForInvite(roomId: number, invitedUser: string) {
@@ -446,7 +453,7 @@ export class RoomService {
             throw new ConflictException('Muted user', 
             {cause: new Error(), description: 'you are muted in channel ' + room.name})
         const msg = this.messageRepository.create({
-            author: {id: sender.id , username: dto.authorName},
+            author: {id: sender.id , username: sender.username},
             content: xss.escapeHtml(dto.content),
             room: {id: dto.roomId}
         })
@@ -461,9 +468,10 @@ export class RoomService {
     }
 
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
+        
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
@@ -488,7 +496,7 @@ export class RoomService {
     async removeAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
         if (!room)
-            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find any users in database"})
+            throw new NotFoundException("Room not found", {cause: new Error(), description: "cannot find this room in database"})
         const target = await this.userService.findOneById(updatePrivilegesDto.targetId)
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
@@ -731,7 +739,14 @@ export class RoomService {
     }
 
     async setPassword(user: User, updateRoomDto: UpdateRoomDto){
-        const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
+        if (!updateRoomDto.password){
+            throw new NotFoundException("Invalid parameter", 
+            {
+                cause: new Error(), 
+                description: "cannot find password in dto"
+            })
+        }
+        const room = await this.findOneByIdWithRelations(updateRoomDto?.roomId)
         if (!room)
             throw new NotFoundException("Room not found", 
             {
@@ -750,11 +765,18 @@ export class RoomService {
                 cause: new Error(),
                 description: "you cannot set a password when there is already one."
             })
-        room.password = await this.authService.hash(updateRoomDto.password)
+        room.password = await this.authService.hash(updateRoomDto?.password)
         this.save(room)
     }
 
     async changePassword(user: User, updateRoomDto: UpdateRoomDto){
+        if (!updateRoomDto.password){
+            throw new NotFoundException("Invalid parameter", 
+            {
+                cause: new Error(), 
+                description: "cannot find password in dto"
+            })
+        }
         const room = await this.findOneByIdWithRelations(updateRoomDto.roomId)
         if (!room)
             throw new NotFoundException("Room not found", 
@@ -805,7 +827,7 @@ export class RoomService {
                 cause: new Error(),
                 description: "You cannot remove a password when there is no password."
             })
-        room.password = undefined
+        room.password = null
         this.save(room)
     }
 

@@ -44,7 +44,7 @@ export class RoomController {
     }
     
     @UseGuards(AccessToken2FAGuard)
-    @Get(':id')
+    @Get(':id')//REMOVE
     async getRoom(@Param('id') @INTParam() id: number){
 
         return await this.roomService.getRoomById(id);
@@ -156,15 +156,16 @@ export class RoomController {
     }
 
     @UseGuards(AccessToken2FAGuard)
-    @Get('message')
+    @Get('message')//REMOVE
     async getMessage(){
         return await this.roomService.getMessage()
     }
     
-    @UseGuards(AccessToken2FAGuard)
-    @Delete(':id')
-    async removeRoom(@Param("id") @INTParam() id: number){
+    //REMOVE
+    // @UseGuards(AccessToken2FAGuard)
+    // @Delete(':id')
+    // async removeRoom(@Param("id") @INTParam() id: number){
         
-        return await this.roomService.remove(id)
-    }
+    //     return await this.roomService.remove(id)
+    // }
 }
