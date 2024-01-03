@@ -23,6 +23,12 @@ import * as Constants from './game/globals/const';
 import LeaderBoard from './leaderboard/Leaderboard';
 import Profile from './profile/Profile';
 import BasicToast from './toast/BasicToast';
+import * as ReactDOM from "react-dom/client";
+import {
+  Router,
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
 
 
 function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
@@ -302,8 +308,24 @@ function App() {
 
   }, [userId]);
 
+  // const router = createBrowserRouter([
+  //   {
+  //     path: "/",
+  //     element: <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>,
+  //   },
+  //   {
+  //     path: "/App",
+  //     element: <Malaise state={state} dispatch={dispatch} gameSock={gameSock} chatSock={chatSock}/>,
+  //   },
+  //   {
+  //     path: "/",
+  //     element: <div>Hello world!</div>,
+  //   }
+  // ]);
+
   return (<>
     <ChakraProvider>
+      {/* <RouterProvider router={router}/> */}
 
       <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
       
