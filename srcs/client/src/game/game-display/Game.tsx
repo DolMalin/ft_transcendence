@@ -1,27 +1,28 @@
-import {
-    Avatar,
+import React, { Component } from 'react'
+import { useRef, useEffect, useState, useReducer } from 'react'
+import { Socket, io } from 'socket.io-client'
+import * as Constants from '../globals/const'
+import { 
     Box,
-    Flex,
     Text,
+    Avatar,
+    Flex,
     WrapItem
-} from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
-import { Socket } from 'socket.io-client';
-import * as Constants from '../globals/const';
-import {
-    GameInfo,
-    GameMetrics,
-    GameProps,
-    userBasicInfos
-} from '../globals/interfaces';
-import {
-    drawAdversaryPaddle,
+    } from '@chakra-ui/react';
+import { 
+    drawScore,
     drawBall,
-    drawBoard,
-    drawMidPointCt,
     drawPaddle,
-    drawScore
-} from './Draw';
+    drawAdversaryPaddle,
+    drawMidPointCt,
+    drawBoard } from './Draw';
+import { 
+    GameInfo,
+    GameProps,
+    GameMetrics,
+    userBasicInfos
+    } from '../globals/interfaces';
+import authService from '../../auth/auth.service';
 
 /**
  * @description 

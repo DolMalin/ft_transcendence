@@ -108,7 +108,7 @@ export class MatchmakingService {
         if (user.isAvailable === true)
         {
           this.userService.update(user.id, {isAvailable : false});
-          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : false})
+          server.to('game-' + user.id).emit('isAvailable', {bool : false});
         }
         else 
         {
@@ -144,7 +144,7 @@ export class MatchmakingService {
         if (user.isAvailable === true)
         {
           this.userService.update(user.id, {isAvailable : false});
-          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : false})
+          server.to('game-' + user.id).emit('isAvailable', {bool : false});
         }
         else 
         {
@@ -174,7 +174,10 @@ export class MatchmakingService {
 
       let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
+      {
+        Logger.error('player triend to leave a non existing game');
         return ;
+      }
       
       if (data.playerId === '1' && client.id != game.clientOne.socket.id)
       {
@@ -187,6 +190,14 @@ export class MatchmakingService {
         return ;
       }
       clearInterval(game.ballRefreshInterval);
+
+      if (!game.gameIsFull) {
+        gamesMap.delete(data.roomName);
+        client.leave(data.roomName);
+        this.userService.update(game.clientOne?.id, {isAvailable : true});
+        server.to('game-' + game.clientOne?.id).emit('isAvailable', {bool : true});
+        return ;
+      }
 
       if (data.playerId === '1')
       {
@@ -209,14 +220,17 @@ export class MatchmakingService {
       }
       try {
         this.matchHistoryServices.storeGameResults(game);
-        this.userService.update(game.clientOne.id, {isAvailable : true});
-        this.userService.update(game.clientTwo.id, {isAvailable : true});
+        if (game.clientOne?.id)
+          this.userService.update(game.clientOne.id, {isAvailable : true});
+        if (game.clientTwo?.id)
+          this.userService.update(game.clientTwo.id, {isAvailable : true});
       }
       catch(e) {
         Logger.error('could not store game in DB', e?.message);
       }
       gamesMap.delete(data.roomName);
       client.leave(data.roomName);
+      Logger.debug("TEST")
     }
 
       async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {
@@ -229,7 +243,7 @@ export class MatchmakingService {
         try {
           const user = await this.userService.findOneById(client.handshake.query.userId as string);
           this.userService.update(user.id, {isAvailable : true});
-          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
+          server.to('game-' + user.id).emit('isAvailable', {bool : true});
         }
         catch(e) {
           Logger.error('in availability change : ', e?.message);
@@ -245,7 +259,7 @@ export class MatchmakingService {
         try {
           const user = await this.userService.findOneById(client.handshake.query.userId as string);
           this.userService.update(user.id, {isAvailable : true});
-          this.userService.emitToAllSockets(server, user.gameSockets, 'isAvailable', {bool : true})
+          server.to('game-' + user.id).emit('isAvailable', {bool : true});
         }
         catch(e) {
           Logger.error('in availability change : ', e?.message);
@@ -262,7 +276,7 @@ export class MatchmakingService {
 
         try {
             const target : User = await this.userService.findOneByIdWithBlockRelation(targetId);
-            if (target === undefined)
+            if (!target)
             {
                 Logger.error('invite target undefined')
                 return ;
@@ -270,7 +284,7 @@ export class MatchmakingService {
 
             
             const sender : User = await this.userService.findOneByIdWithBlockRelation(senderId);
-            if (sender === undefined)
+            if (!sender)
             {
                 Logger.error('invite sender undefined')
                 return ;
@@ -278,24 +292,25 @@ export class MatchmakingService {
 
             if (sender.isAvailable === false)
             {
-              this.userService.emitToAllSockets(server, sender.gameSockets, 'isBusy', {username : 'You'})
+              server.to('game-' + sender.id).emit('isBusy', {username : 'You'});
               return ;
             }
 
             if (this.userService.isAlreadyBlocked(target, sender) === true)
             {
-              this.userService.emitToAllSockets(server, sender.gameSockets, 'blockedYou', {username : target.username})
+              server.to('game-' + sender.id).emit('blockedYou', {username : target.username});
               return ;
             }
 
             if (target.isAvailable === false)
             {
-              this.userService.emitToAllSockets(server, sender.gameSockets, 'isBusy', {username : target.username})
+              server.to('game-' + sender.id).emit('isBusy', {username : target.username});
               return ;
             }
 
-            this.userService.emitToAllSockets(server, target.gameSockets, 'gotInvited',
-            {senderSocketId : senderSocketId,senderId : sender.id, senderUsername : sender.username, gameType : gameType})
+            server.to('game-' + target.id).emit('gotInvited',
+            {senderSocketId : senderSocketId,senderId : sender.id, senderUsername : sender.username, gameType : gameType});
+
         }
         catch (e) {
           Logger.error('Game Invite Error : ', e?.message)
@@ -317,7 +332,7 @@ export class MatchmakingService {
                 Logger.error('invite sender undefined')
                 return ;
             }
-            this.userService.emitToAllSockets(server, sender.gameSockets, 'inviteDeclined', {username : target.username})
+            server.to('game-' + sender.id).emit('inviteDeclined', {username : target.username});
         }
         catch (e) {
             Logger.error('game invite declined error : ', e.message)
@@ -340,7 +355,7 @@ export class MatchmakingService {
                 return ;
             }
 
-            if (/*sender.isAvailable === false ||*/ target.isAvailable === false) 
+            if (sender.isAvailable === false || target.isAvailable === false) 
             {
                 Logger.error('one of the players is unavailable');
                 return ;

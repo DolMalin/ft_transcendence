@@ -80,6 +80,6 @@ export class User {
 	@Column({nullable: true})
 	avatarId?: string
 
-	@Column({type : 'text', default : null, array : true, nullable : true})
-	gameSockets : string[];
+	// @Column({type : 'text', default : null, array : true, nullable : true})
+	// gameSockets : string[];
 }
