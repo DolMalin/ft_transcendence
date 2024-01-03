@@ -277,38 +277,6 @@ export class UsersService {
     });
   }
 
-  /**
- * @description remove a socket Id from an array of string stored in user entity and update the user
- */
-  async removeSocketId(socketId : string, socketIdArray : string[], user : User) {
-    user.gameSockets = socketIdArray?.filter((value) => value != socketId)
-    const updatedUser = await this.update(user.id, { gameSockets : user.gameSockets})
-    if (!updatedUser)
-      throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot update user'})
-    return updatedUser
-  }
-
-
-  async addGameSocketId(socketId : string, socketIdArray : string[], user : User) {
-
-    if (socketIdArray === null || socketIdArray === undefined)
-      socketIdArray = [];
-    socketIdArray?.push(socketId);
-    user.gameSockets = socketIdArray;
-    const updatedUser = await this.update(user.id, {gameSockets : user.gameSockets});
-    return updatedUser
-  }
-
-   async emitToAllSockets(server : Server, socketIdArray : string[], eventName : string, payload : Object) {
-
-    socketIdArray.forEach((socketId) => {
-      if (payload === undefined) 
-        server.to(socketId).emit(eventName);
-      else
-        server.to(socketId).emit(eventName, payload);
-    });
-   }
-
   returnScoreList(){
 
     function winRatioCalculator(w : number, l : number) {

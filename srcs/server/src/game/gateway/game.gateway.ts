@@ -50,7 +50,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
 
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      await this.userService.addGameSocketId(client.id, user.gameSockets, user);
+      client.join('game-' + user.id);
     }
     catch(e) {
       client.disconnect();
@@ -65,24 +65,24 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       if (client.handshake.query.type !== 'game')
         return ;
-      await this.userService.removeSocketId(client.id, user.gameSockets, user)
-
+      
       this.gamesMap.forEach((game, key) => {
-        if (game.clientOne.socket.id === client.id)
+        if (game.clientOne && game.clientOne.socket.id === client.id)
         {
-          
           this.matchmakingService.leaveGame(this.server, client, this.gamesMap, {gameType : game.gameType, playerId : '1', roomName : key});
           this.userService.update(user.id, {isAvailable : true});
         }
-        else if (game.clientTwo.socket.id === client.id)
+        else if (game.clientTwo && game.clientTwo.socket?.id === client.id)
         {
           this.matchmakingService.leaveGame(this.server, client, this.gamesMap, {gameType : game.gameType, playerId : '2', roomName : key});
           this.userService.update(user.id, {isAvailable : true});
         }
       });
+
+      client.leave('game-' + user.id);
     }
     catch(e) {
-      Logger.error('game gateway handle disconnection error: ', e?.message);
+      Logger.error('Game Gateway handle disconnection error: ', e?.message);
     }
     Logger.warn(client.id + 'was disconnected')
   }
@@ -196,8 +196,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (bool === true) {
         this.userService.update(user.id, {isAvailable : bool});
       }
-      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool :bool})
-      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'isAvailable', {bool})
+      this.server.to('game-' + user.id).emit('isAvailable', {bool : bool});
     }
     catch(e) {
       Logger.error('In availibilityChange : ', e?.message)
@@ -211,8 +210,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.handleDisconnect(client);
     try {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
-      await this.userService.emitToAllSockets(this.server, user.gameSockets, 'logout', undefined);
-      user.gameSockets = [];
+      this.server.to('game-' + user.id).emit('logout', undefined);
       this.userService.save(user);
     }
     catch(e) {
