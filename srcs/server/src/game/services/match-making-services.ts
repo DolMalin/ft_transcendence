@@ -264,7 +264,7 @@ export class MatchmakingService {
 
         try {
             const target : User = await this.userService.findOneByIdWithBlockRelation(targetId);
-            if (target === undefined)
+            if (!target)
             {
                 Logger.error('invite target undefined')
                 return ;
@@ -272,7 +272,7 @@ export class MatchmakingService {
 
             
             const sender : User = await this.userService.findOneByIdWithBlockRelation(senderId);
-            if (sender === undefined)
+            if (!sender)
             {
                 Logger.error('invite sender undefined')
                 return ;
