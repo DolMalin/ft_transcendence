@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { RoomService } from '../services/room.service';
+import { RoomService } from './services/room.service';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -48,9 +48,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         const user : User = await this.userService.findOneByIdWithRoomRelation(payload.id);
         user.room.forEach((room) => {
           client.join(`room-${room.id}`);
-          // Logger.log(`client ${user.username} joined room ${room.name}`)
         })
-        // Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(err) {
         client.disconnect();
@@ -70,7 +68,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     client.join(`room-${roomId}`)
-    Logger.debug(`room-${roomId}`);
     this.server.to(`room-${roomId}`).emit('userJoined', roomId);
     Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   }
@@ -301,7 +298,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRequestAccepted(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
   }
@@ -310,8 +306,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRemoved(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    
-    
     this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
   }
