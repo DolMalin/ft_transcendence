@@ -12,7 +12,7 @@ import * as Constants from '../globals/const';
     
     function leaveQueue() {
 
-      props.sock.emit('leaveQueue', {roomName : props.roomName});
+      props.sock?.emit('leaveQueue', {roomName : props.roomName});
 
       props.dispatch({type : 'SET_LF_GAME', payload : false});
       props.dispatch({type : 'SET_WAITING_SCREEN', payload : false});
