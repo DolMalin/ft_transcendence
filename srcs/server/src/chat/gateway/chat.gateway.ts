@@ -195,7 +195,9 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     if (!room) {
       room = await this.roomService.createDM(user, user2, roomName)
     }
-    server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
+    if (room.users?.length === 2){
+      server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
+    }
 }
 
   generateDMRoomName(user1Id: string, user2Id: string): string {
