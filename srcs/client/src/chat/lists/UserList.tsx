@@ -86,7 +86,6 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
 
     }, [])
     
-    console.log(userList)
     return (<>
     <Flex 
     h={'50%'}
