@@ -8,7 +8,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	@IsString()
 	@MinLength(3)
 	@MaxLength(20)
-	@Matches(/^[^#<>\[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or /'})
+	@Matches(/^[^#<> \[\]|{}\/@:=]*$/, {message: 'username must not contains ^ # < > [ ] | { } : @ or / " " '})
 	@IsOptional()
 	username?: string
 

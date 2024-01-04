@@ -27,13 +27,13 @@ function LooseScreen (props : {dispatch : Function}) {
         >
             <Text fontSize={'5em'}> YOU LOST </Text>
 
-            <Button fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
+            <Button fontWeight={'normal'} textColor={'white'} 
             size={'2em'} bg={Constants.BG_COLOR} fontSize={'2em'}
             borderRadius={'0'}
             textOverflow={'clip'}
             onClick={closeVScreen}
             >
-            GO BACK</Button>
+            GO BACK ?</Button>
         </Box>
     </>)
 }

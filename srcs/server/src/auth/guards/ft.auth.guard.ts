@@ -24,6 +24,7 @@ export class FtAuthGuard implements CanActivate {
 		req.user = await this.authService.validateUser(ftId)
 		if (!req.user)
 			throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'cannot create or validate user'})
+		
 		return true
 	}
 }

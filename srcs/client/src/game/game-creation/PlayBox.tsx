@@ -58,8 +58,7 @@ function PlayBox(props : {dispatch : Function}) {
         flexDirection={'row'}
         alignItems={'center'}
         padding={'10px'}
-        textColor={Constants.HIDDEN_FONT_COLOR}
-        _hover={{textColor: 'white'}}
+        textColor={'white'}
         >
             <Flex w={'95%'} h={'100%'}
             flexDirection={'column'}
@@ -109,7 +108,7 @@ function PlayBox(props : {dispatch : Function}) {
                         textAlign={'center'}
                         >
                         <Kbd textColor={'black'}> A </Kbd>  
-                        <Text letterSpacing={'2px'}> Will make your paddle go <b>Left</b> </Text>
+                        <Text > Will make your paddle go <b>Left</b> </Text>
                     </Box>
 
                     <Box h="100%" w="50%"
@@ -120,7 +119,7 @@ function PlayBox(props : {dispatch : Function}) {
                         textAlign={'center'}
                         >
                         <Kbd textColor={'black'}> D </Kbd>  
-                        <Text letterSpacing={'2px'}> Will make your paddle go <b>Right</b> </Text>
+                        <Text > Will make your paddle go <b>Right</b> </Text>
                     </Box>
                 </Flex>
             </Flex>
@@ -133,8 +132,7 @@ function PlayBox(props : {dispatch : Function}) {
         flexDirection={'row'}
         alignItems={'center'}
         padding={'10px'}
-        textColor={Constants.HIDDEN_FONT_COLOR}
-        _hover={{textColor: 'white'}}
+        textColor={'white'}
         >
             <Flex w={'95%'} h={'100%'}
             flexDirection={'column'}

@@ -59,16 +59,16 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
     useEffect(() => {        
         const asyncWrapper = async () => {
             try {
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate')
 
-                fetchUserList(res.data) 
+                fetchUserList({id: res?.data?.id, username: res?.data?.username}) 
             }
             catch (err) {
                 console.error(`${err.response.data.message} (${err.response?.data?.error})`)
             }
         }
         asyncWrapper();
-        const interval = setInterval(asyncWrapper, 3000);
+        const interval = setInterval(asyncWrapper, 3000000);
     
         return (() => {
             clearInterval(interval);

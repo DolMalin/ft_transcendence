@@ -31,10 +31,10 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
 
         try {
             const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friends/all`)
-            setFriendsList(res.data)
+            setFriendsList(res?.data)
 
             const requests = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/friends/allRequests`)
-            setPendingRequestList(requests.data);
+            setPendingRequestList(requests?.data);
         } catch(err) {
             console.error(`${err?.response?.data?.message} (${err?.response?.data?.error})`)
         }
@@ -74,7 +74,7 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     useEffect(() => {        
 
         fetchFriends();
-        const interval = setInterval(fetchFriends, 3000);
+        const interval = setInterval(fetchFriends, 30000000);
 
         return (() => {
             clearInterval(interval);
