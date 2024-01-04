@@ -9,6 +9,8 @@ import { FtAuthGuard } from '../guards/ft.auth.guard';
 import { RefreshToken2FAGuard } from '../guards/refreshToken2FA.auth.guard';
 import { AuthService } from '../services/auth.service';
 import { FileTypeValidationPipe } from '../utils/file.validator';
+import {ThrottlerGuard} from '@nestjs/throttler'
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
