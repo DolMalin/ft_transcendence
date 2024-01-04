@@ -15,6 +15,10 @@ import { Room } from './chat/entities/room.entity';
 import { Avatar } from './users/entities/avatar.entity';
 import { FriendRequest } from './users/entities/friendRequest.entity';
 
+import {ThrottlerModule, ThrottlerGuard} from '@nestjs/throttler'
+import { APP_GUARD } from '@nestjs/core';
+
+
 
 @Module({
   imports: [
@@ -29,13 +33,24 @@ import { FriendRequest } from './users/entities/friendRequest.entity';
       synchronize: true,
       // dropSchema: true,/*  wipe la db a chaque refresh */
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60,
+      limit: 1000,
+    }]),
     UsersModule,
     GameModule,
     AuthModule,
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    },
+
+  ],
 })
 
 export class AppModule implements NestModule {
