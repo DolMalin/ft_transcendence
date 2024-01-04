@@ -106,6 +106,7 @@ function PlayBox(props : {dispatch : Function}) {
                         alignItems={'center'}
                         justifyContent={'center'}
                         textAlign={'center'}
+                        marginRight={'2px'}
                         >
                         <Kbd textColor={'black'}> A </Kbd>  
                         <Text > Will make your paddle go <b>Left</b> </Text>
@@ -117,6 +118,7 @@ function PlayBox(props : {dispatch : Function}) {
                         alignItems={'center'}
                         justifyContent={'center'}
                         textAlign={'center'}
+                        marginLeft={'2px'}
                         >
                         <Kbd textColor={'black'}> D </Kbd>  
                         <Text > Will make your paddle go <b>Right</b> </Text>

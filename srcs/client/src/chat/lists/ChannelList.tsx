@@ -98,7 +98,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       });
 
       props.chatSocket?.on('channelStatusUpdate', () => {
-        console.log('TEST TEST')
 
         fetchRoom();
       })

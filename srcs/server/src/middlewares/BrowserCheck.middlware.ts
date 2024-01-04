@@ -7,7 +7,7 @@ export class BrowserCheckMiddleware implements NestMiddleware {
     const userAgent = req.headers['user-agent'];
 
     if (!userAgent.includes('Mozilla') && !userAgent.includes('Chrome')) {
-		throw new BadRequestException("Request blocked", {cause: new Error(), description: "request must come from a browser"})
+		  throw new BadRequestException("Request blocked", {cause: new Error(), description: "request must come from one of those browers : Brave, Chrome, Mozilla"})
     }
 
     next();

@@ -11,6 +11,7 @@ import { Socket } from "socket.io-client"
 import authService from "../../auth/auth.service"
 import * as Constants from '../../game/globals/const'
 import ProfileModal from "../../profile/modal/ProfileModal"
+import FriendList from "./FriendList"
 
 async function getUserList(me : {username: string, id: string}){
     let userList: {
@@ -45,36 +46,46 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
         isLogged: boolean,
         isAvailable: boolean
     }[]>([])
-    
-    const fetchUserList = async (me : {username: string, id: string}) => {
+
+    const fetchUserList = async () => {
         try {
-            const tab = await getUserList(me)
-            setUserList(tab)
+            const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate')
+            const list = await getUserList({id: res?.data?.id, username: res?.data?.username});
+            setUserList(list);
         }
-        catch(err){
-            console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+        catch (err) {
+            console.error(`${err?.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
-    useEffect(() => {        
-        const asyncWrapper = async () => {
-            try {
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate')
+    useEffect(function socketEvents() {
 
-                fetchUserList({id: res?.data?.id, username: res?.data?.username}) 
-            }
-            catch (err) {
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
-            }
-        }
-        asyncWrapper();
-        const interval = setInterval(asyncWrapper, 3000000);
+        function debounce(func : Function, ms : number) {
+        let timer : string | number | NodeJS.Timeout;
     
-        return (() => {
-            clearInterval(interval);
-        })
-    }, [])
+        return ( function(...args : any) {
+            clearTimeout(timer);
+            timer = setTimeout( () => {
+                timer = null;
+                func.apply(this, args)
+            }, ms);
+        });
+        };
 
+        const debouncedFetchUserList = debounce(fetchUserList, 500);
+
+        props.gameSocket?.on('userListUpdate', debouncedFetchUserList);
+
+        return(() => {
+            props.gameSocket?.off('userListUpdate');
+        });
+    })
+
+    useEffect(() => {
+        fetchUserList();
+
+    }, [])
+    
     return (<>
     <Flex 
     h={'50%'}

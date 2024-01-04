@@ -11,8 +11,10 @@ import { JoinRoomDto } from '../dto/join-room.dto';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @UseGuards(AccessToken2FAGuard)
+@UseGuards(ThrottlerGuard)
 @Controller('room')
 export class RoomController {
     constructor(

@@ -8,8 +8,9 @@ import { GetUser } from '../decorator/user.decorator';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
-
+import { ThrottlerGuard } from '@nestjs/throttler';
 @Controller('users')
+@UseGuards(ThrottlerGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -52,13 +53,6 @@ export class UsersController {
   updateIsAvailable(@GetUser() user : User, @Body() updateDto : UpdateUserDto) {
     return (this.usersService.update(user.id, updateDto));
   }
-
-  // @UseGuards(AccessToken2FAGuard)
-  // @Get('me')
-  // getUserInfo(@GetUser() user: User){
-  //   console.log('me: ', user)
-  //   return {username: user?.username, id: user?.id}
-  // }
 
   @Get(':id')
   async findOne(@Param('id') @UUIDParam() id: string) {
