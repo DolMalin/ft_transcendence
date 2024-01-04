@@ -72,7 +72,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
             alignItems={'center'}
             justifyContent={'center'}
         >
-            <Box h={'lg'} w={boxWidth}
+            <Box h={'380px'} w={boxWidth}
             display={'flex'}
             alignItems={'center'}
             justifyContent={'center'}
@@ -128,7 +128,7 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                 <Divider variant={'dashed'} w={'35%'}/>
             </Flex>
 
-            <Box h={'lg'} w={boxWidth}
+            <Box h={'380px'} w={boxWidth}
             display={'flex'}
             alignItems={'center'}
             justifyContent={'center'}
