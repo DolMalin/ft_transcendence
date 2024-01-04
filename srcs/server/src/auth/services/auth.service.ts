@@ -159,7 +159,11 @@ export class AuthService {
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot updatefetchUuser' })
 
-    fetchUser = await this.usersService.update(fetchUser.id, { isLogged: true })
+    if (fetchUser.isTwoFactorAuthenticationEnabled)
+      fetchUser = await this.usersService.update(fetchUser.id, { isLogged: true})
+    else
+      fetchUser = await this.usersService.update(fetchUser.id, { isLogged: true, isAvailable : true})
+
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
@@ -230,7 +234,7 @@ export class AuthService {
     if (!fetchUser)
       throw new ForbiddenException('Access denied', { cause: new Error(), description: `Cannot find user` })
 
-    const updatedUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: false, isLogged: false })
+    const updatedUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: false, isLogged: false, isAvailable : false})
     if (!updatedUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
@@ -309,7 +313,7 @@ export class AuthService {
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
       throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
-    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: true })
+    const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: true, isAvailable : true})
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
 
