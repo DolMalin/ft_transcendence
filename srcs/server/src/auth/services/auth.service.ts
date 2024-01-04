@@ -169,17 +169,17 @@ export class AuthService {
     
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
-      sameSite: "Strict",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
-      sameSite: "Strict",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
@@ -206,16 +206,16 @@ export class AuthService {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
+      secure: false,
+      domain: process.env.SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
+      secure: false,
+      domain: process.env.SERVER_IP,
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -311,7 +311,7 @@ export class AuthService {
       throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
-      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
+      throw new ForbiddenException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
     const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticated: true, isAvailable : true})
     if (!fetchUser)
@@ -341,7 +341,7 @@ export class AuthService {
         throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
   
       if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
-        throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
+        throw new ForbiddenException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
   
       const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: true, isTwoFactorAuthenticated: true })
       if (!fetchUser)
@@ -360,7 +360,7 @@ export class AuthService {
       throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
     if (!authenticator.verify({ secret: user.twoFactorAuthenticationSecret, token: body.twoFactorAuthenticationCode }))
-      throw new UnauthorizedException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
+      throw new ForbiddenException('Wrong authentication code', { cause: new Error(), description: 'The 2fa code do not match' })
 
     const fetchUser = await this.usersService.update(user.id, { isTwoFactorAuthenticationEnabled: false })
     if (!fetchUser)

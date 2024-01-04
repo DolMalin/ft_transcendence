@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-// import { GameServDTO} from './game.gateway';
 import { Server, Socket } from 'socket.io';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
@@ -108,7 +107,7 @@ export class MatchmakingService {
         if (user.isAvailable === true)
         {
           this.userService.update(user.id, {isAvailable : false});
-          server.to('game-' + user.id).emit('isAvailable', {bool : false});
+          this.availabilityHandler(server, user.id, false);
         }
         else 
         {
@@ -144,7 +143,7 @@ export class MatchmakingService {
         if (user.isAvailable === true)
         {
           this.userService.update(user.id, {isAvailable : false});
-          server.to('game-' + user.id).emit('isAvailable', {bool : false});
+          this.availabilityHandler(server, user.id, false);
         }
         else 
         {
@@ -175,7 +174,6 @@ export class MatchmakingService {
       let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
       {
-        Logger.error('player triend to leave a non existing game');
         return ;
       }
       
@@ -195,7 +193,7 @@ export class MatchmakingService {
         gamesMap.delete(data.roomName);
         client.leave(data.roomName);
         this.userService.update(game.clientOne?.id, {isAvailable : true});
-        server.to('game-' + game.clientOne?.id).emit('isAvailable', {bool : true});
+        this.availabilityHandler(server, game.clientOne?.id, true);
         return ;
       }
 
@@ -243,7 +241,7 @@ export class MatchmakingService {
         try {
           const user = await this.userService.findOneById(client.handshake.query.userId as string);
           this.userService.update(user.id, {isAvailable : true});
-          server.to('game-' + user.id).emit('isAvailable', {bool : true});
+          this.availabilityHandler(server, user.id, true);
         }
         catch(e) {
           Logger.error('in availability change : ', e?.message);
@@ -259,7 +257,8 @@ export class MatchmakingService {
         try {
           const user = await this.userService.findOneById(client.handshake.query.userId as string);
           this.userService.update(user.id, {isAvailable : true});
-          server.to('game-' + user.id).emit('isAvailable', {bool : true});
+          this.availabilityHandler(server, user.id, true);
+
         }
         catch(e) {
           Logger.error('in availability change : ', e?.message);
@@ -421,5 +420,12 @@ export class MatchmakingService {
         }
         
         gamesMap.set(data.roomName, game);
+    }
+
+    availabilityHandler(server : Server, userId : string, bool : boolean) {
+
+      server.to('game-' + userId).emit('isAvailable', {bool : bool});
+      server.sockets.emit('userListUpdate');
+      server.sockets.emit('friendListUpdate');
     }
 }

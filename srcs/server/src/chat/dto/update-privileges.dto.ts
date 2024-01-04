@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsOptional, IsPositive, IsUUID, Max } from "class-validator";
+import { IsInt, IsNumber, IsOptional, IsPositive, IsUUID, Max, Min } from "class-validator";
 
 export class UpdatePrivilegesDto {
 
@@ -7,14 +7,12 @@ export class UpdatePrivilegesDto {
 
     @IsInt()
     @IsPositive()
-    @IsNumber()
     @Max(2147483647)
     roomId : number
     
     @IsInt()
-    @IsNumber()
-    @IsPositive()
     @IsOptional()
+    @Min(0)
     @Max(120)
     timeInMinutes : number
 }

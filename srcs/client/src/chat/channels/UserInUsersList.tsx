@@ -97,6 +97,8 @@ function UserInUsersList(props : {username : string, userId : string,
         catch (err) {
             if (err.response?.status === 409)
             {
+                const id = 'muteId'
+                if(!toast.isActive(id)) {
                 toast({
                     duration: 2000,
                     isClosable: true,
@@ -104,6 +106,7 @@ function UserInUsersList(props : {username : string, userId : string,
                         <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
+                }
             }
             else
               console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -121,12 +124,15 @@ function UserInUsersList(props : {username : string, userId : string,
         catch (err) {
             if (err.response?.status === 409)
             {
+                const id = 'banId'
+                if(!toast.isActive(id)) {
                 toast({
                     duration: 5000,
                     render : () => ( <> 
                         <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
+                }
             }
             else
               console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
@@ -179,12 +185,23 @@ function UserInUsersList(props : {username : string, userId : string,
             }
         }
         props.chatSock?.on('timeoutEnd', () => {
-
-            asyncWrapper();
+            asyncWrapper()
         })
-
+        props.chatSock?.on('kickedError', (err) => {
+            const id = 'kickedErrorId'
+            if(!toast.isActive(id)) {
+            toast({
+                id,
+                duration: 5000,
+                render : () => ( <> 
+                    <BasicToast text={err.response?.message}/>
+                </>)
+              })
+            }
+        })
         return(() => {
             props.chatSock?.off('timeoutEnd')
+            props.chatSock?.off('kickedError')
         })
     })
 

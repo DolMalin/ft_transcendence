@@ -1,5 +1,5 @@
-import { Button, Flex, FormControl, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
-import React from "react"
+import { Button, Flex, FormControl, FormErrorMessage, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, useToast } from "@chakra-ui/react"
+import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
 import authService from "../../auth/auth.service"
@@ -11,14 +11,14 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
     const { register: registerSetPass, 
         handleSubmit: handleSubmitSetPass, 
         reset: resetSetPass, 
-        formState: { errors: errorSetPass }
-    } = useForm()
+        formState: { errors: errorSetPass } } = useForm()
     const { register: registerChangePass, 
         handleSubmit: handleSubmitChangePass, 
         reset: resetChangePass, 
-        formState: { errors: errorChangePass }
-    } = useForm()
+        formState: { errors: errorChangePass } } = useForm()
     const toast = useToast();
+    const [errorMsg, setErrorMsg] = useState('')
+    const [formError, setFormError] = useState(false)
 
     async function changePassword(roomId: number, password: string){
         try{
@@ -27,6 +27,8 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 roomId: roomId, 
                 password: password
             })
+            props.onClose()
+            setFormError(false)
             toast({
                 duration: 5000,
                 render : () => ( <> 
@@ -35,26 +37,9 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
               })
         }
         catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            setFormError(true)
+            setErrorMsg(err.response?.data?.message)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -65,7 +50,9 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 roomId: roomId, 
                 password: password
             })
+            setFormError(false)
             props.chatSocket?.emit('channelStatusUpdate');
+            props.onClose()
             toast({
                 duration: 5000,
                 render : () => ( <> 
@@ -74,39 +61,19 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
               })
         }
         catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            setFormError(true)
+            setErrorMsg(err.response?.data?.message)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
-
     const onSubmitSetPass = (data: {password: string}) => {
         setPassword(props.roomId, data.password)
-        props.onClose()
         resetSetPass()
     }
 
     const onSubmitChangePass = (data: {password: string}) => {
         changePassword(props.roomId, data.password)
-        props.onClose()
         resetChangePass()
     }
 
@@ -139,7 +106,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                             flexWrap:"wrap",
                             
                         }}>
-                        <FormControl isRequired>
+                        <FormControl isRequired isInvalid={formError}>
                             <Input
                                 marginBottom="10px"
                                 type="password"
@@ -150,6 +117,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                                     })
                                 }
                             />
+                            <FormErrorMessage>{errorMsg}</FormErrorMessage>
                         </FormControl>
                         <Button
                         fontWeight={'normal'}
@@ -172,7 +140,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                             flexWrap:"wrap",
                             
                         }}>
-                        <FormControl isRequired>
+                        <FormControl isRequired isInvalid={formError}>
                             <Input
                                 marginBottom="10px"
                                 type="password"
@@ -183,6 +151,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                                     })
                                 }
                             />
+                            <FormErrorMessage>{errorMsg}</FormErrorMessage>
                         </FormControl>
                         <Button
                         fontWeight={'normal'}

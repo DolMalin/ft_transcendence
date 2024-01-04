@@ -192,14 +192,7 @@ export class RoomService {
           return newRoom
         throw new HttpException('Room not found', HttpStatus.NOT_FOUND)
     }
-    
-    // async remove(id: number) {
 
-    //     const room = await this.findOneById(id)
-    //     return this.roomRepository.remove(room)
-    // }
-
-    
     async joinRoom(dto: JoinRoomDto, user: User){
 
         const room = await this.roomRepository
@@ -219,6 +212,12 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this room in the database",
         })}
+        
+        if (room.type === roomType.directMessage){
+            throw new ConflictException('dm room', 
+            {cause: new Error(), description: 'You cannot join a direct message room'})
+        }
+
         if (room?.password && dto?.password === null){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
@@ -269,7 +268,6 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
-        
         return this.removeProtectedProperties(room)
     }
 
@@ -457,14 +455,7 @@ export class RoomService {
         })
         return await this.messageRepository.save(msg)
     }
-
-    async getMessage(){
-
-        const msgList = await this.messageRepository.find()
-        msgList.reverse()
-        return msgList
-    }
-
+    
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
         
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
