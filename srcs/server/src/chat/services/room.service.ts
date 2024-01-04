@@ -192,14 +192,7 @@ export class RoomService {
           return newRoom
         throw new HttpException('Room not found', HttpStatus.NOT_FOUND)
     }
-    
-    // async remove(id: number) {
 
-    //     const room = await this.findOneById(id)
-    //     return this.roomRepository.remove(room)
-    // }
-
-    
     async joinRoom(dto: JoinRoomDto, user: User){
 
         const room = await this.roomRepository
@@ -462,14 +455,7 @@ export class RoomService {
         })
         return await this.messageRepository.save(msg)
     }
-
-    async getMessage(){
-
-        const msgList = await this.messageRepository.find()
-        msgList.reverse()
-        return msgList
-    }
-
+    
     async giveAdminPrivileges(requestMaker : User, updatePrivilegesDto : UpdatePrivilegesDto) {
         
         const room = await this.findOneByIdWithRelations(updatePrivilegesDto.roomId)
