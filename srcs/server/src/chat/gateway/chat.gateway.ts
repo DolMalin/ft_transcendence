@@ -180,7 +180,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       }
   }
 
-
   async createOrJoinDMRoom(user: User, user2: User, server: Server, client: Socket) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
     let room = await this.roomService.getRoom(roomName)

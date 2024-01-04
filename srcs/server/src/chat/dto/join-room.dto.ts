@@ -1,5 +1,4 @@
-import { IsString, Matches, MaxLength, MinLength } from "class-validator";
-import { IsOptionalWithEmptyStrings } from "../decorators/isOptionnalWithEmptyStrings.decorator";
+import { IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
 export class JoinRoomDto {
     
@@ -13,6 +12,6 @@ export class JoinRoomDto {
     @IsString()
     @MinLength(6)
     @MaxLength(20)
-    @IsOptionalWithEmptyStrings()
+    @IsOptional()
     password: string | null
 }

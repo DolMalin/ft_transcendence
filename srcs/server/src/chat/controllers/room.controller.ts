@@ -13,8 +13,9 @@ import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
-@Controller('room')
+@UseGuards(AccessToken2FAGuard)
 @UseGuards(ThrottlerGuard)
+@Controller('room')
 export class RoomController {
     constructor(
         private readonly roomService: RoomService,
@@ -22,138 +23,114 @@ export class RoomController {
         private readonly userService: UsersService
     ){}
 
-    @UseGuards(AccessToken2FAGuard)
     @Post()
-    async createRoom(@GetUser() user: User, @Body() createRoomDto: CreateRoomDto){
-        if (createRoomDto.password?.length > 0)
-            createRoomDto.password = await this.authService.hash(createRoomDto.password)
-        
-        return await this.roomService.create(createRoomDto, user)
+    createRoom(@GetUser() user: User, @Body() createRoomDto: CreateRoomDto){
+        return this.roomService.create(createRoomDto, user)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Get()
-    async getRoomList(){
-        return await this.roomService.findAll();
+    getRoomList(){
+        return this.roomService.findAll();
     }
 
-    
-    @UseGuards(AccessToken2FAGuard)
     @Get('list')
-    async getRoomListWithoutDm(){
-        return await this.roomService.findAllWithoutDm();
+    getRoomListWithoutDm(){
+        return this.roomService.findAllWithoutDm();
     }
-    
-    @UseGuards(AccessToken2FAGuard)
+
     @Get(':id')//REMOVE
-    async getRoom(@Param('id') @INTParam() id: number){
+    getRoom(@Param('id') @INTParam() id: number){
 
-        return await this.roomService.getRoomById(id);
+        return this.roomService.getRoomById(id);
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Get('userlist/:id')
-    async getUserList(@Param("id") @INTParam() id: number){
-        
-        return await this.roomService.findAllUsersInRoom(id)
+    getUserList(@Param("id") @INTParam() id: number){
+        return this.roomService.findAllUsersInRoom(id)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Get('bannedList/:id')
-    async getBanList(@Param("id") @INTParam() id: number) {
-
-        return (await this.roomService.getBanList(id));
+    getBanList(@Param("id") @INTParam() id: number) {
+        return  this.roomService.getBanList(id)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Get('isPriv/:id')
-    async isPriv(@Param("id") @INTParam() id: number) {
-
-        return (await this.roomService.isPriv(id));
+    isPriv(@Param("id") @INTParam() id: number) {
+        return  this.roomService.isPriv(id)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Get('isInRoom/:id')
-    async isInRoom(@GetUser() user : User ,@Param("id") @INTParam() id: number) {
-
-        return (await this.roomService.isInRoom(user ,id));
+    isInRoom(@GetUser() user : User ,@Param("id") @INTParam() id: number) {
+        return  this.roomService.isInRoom(user ,id)
     }
 
-    @UseGuards(AccessToken2FAGuard)
+    @Get('messageInRoom/:id')
+    messageInRoom(@GetUser() user: User, @Param("id") @INTParam() id: number) {
+        return  this.roomService.messageInRoom(id, user?.id)
+    }
+
     @Post('joinRoom')
-    async joinRoom(@GetUser() user: User, @Body() dto: JoinRoomDto){
-        return await this.roomService.joinRoom(dto, user);
+    joinRoom(@GetUser() user: User, @Body() dto: JoinRoomDto){
+        return this.roomService.joinRoom(dto, user);
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('message')
-    async postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
-        return await this.roomService.postMessage(user, dto)
+    postMessage(@GetUser() user: User, @Body() dto: CreateMessageDto){
+        return this.roomService.postMessage(user, dto)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('giveAdminPrivileges')
-    async giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
-        
-        return (await this.roomService.giveAdminPrivileges(user, updatePrivilegesDto));
+    giveAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
+        return  this.roomService.giveAdminPrivileges(user, updatePrivilegesDto)
 
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('removeAdminPrivileges')
-    async removeAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
-        return (await this.roomService.removeAdminPrivileges(user, updatePrivilegesDto));
+    removeAdminPrivileges(@GetUser() user: User, @Body() updatePrivilegesDto : UpdatePrivilegesDto){
+        return  this.roomService.removeAdminPrivileges(user, updatePrivilegesDto)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('userPrivileges')
-    async hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
-        return (await this.roomService.userPrivileges(updatePrivilegesDto));
+    hasAdminPrivileges(@Body() updatePrivilegesDto : UpdatePrivilegesDto){
+        return  this.roomService.userPrivileges(updatePrivilegesDto)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('muteUser')
-    async muteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
-
-        return (await this.roomService.muteUser(user, updatePrivilegesDto, updatePrivilegesDto.timeInMinutes));
+    muteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+        return  this.roomService.muteUser(user, updatePrivilegesDto, updatePrivilegesDto.timeInMinutes)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('banUser')
-    async banUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
-
-        return (await this.roomService.banUser(user, updatePrivilegesDto))
+    banUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+        return  this.roomService.banUser(user, updatePrivilegesDto)
     }
-    @UseGuards(AccessToken2FAGuard)
+
     @Post('unbanUser')
-    async unbanUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
-
-        return (await this.roomService.unbanUser(user, updatePrivilegesDto));
+    unbanUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+        return  this.roomService.unbanUser(user, updatePrivilegesDto)
     }
 
-    @UseGuards(AccessToken2FAGuard)
     @Post('unmuteUser')
-    async unmuteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+    unmuteUser(@GetUser() user : User, @Body() updatePrivilegesDto : UpdatePrivilegesDto) {
+        return  this.roomService.unmuteUser(user, updatePrivilegesDto)
+    }
+    
 
-        return (await this.roomService.unmuteUser(user, updatePrivilegesDto));
-    }
-    
-    @UseGuards(AccessToken2FAGuard)
     @Post('setPassword')
-    async setPassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
-        return await this.roomService.setPassword(user, updateRoomDto)
+    setPassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return this.roomService.setPassword(user, updateRoomDto)
     }
     
-    @UseGuards(AccessToken2FAGuard)
+
     @Post('changePassword')
-    async changePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
-        return await this.roomService.changePassword(user, updateRoomDto)
+    changePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return this.roomService.changePassword(user, updateRoomDto)
     }
     
-    @UseGuards(AccessToken2FAGuard)
+
     @Post('removePassword')
-    async removePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
-        return await this.roomService.removePassword(user, updateRoomDto)
+    removePassword(@GetUser() user: User, @Body() updateRoomDto: UpdateRoomDto){
+        return this.roomService.removePassword(user, updateRoomDto)
     }
 
 }
