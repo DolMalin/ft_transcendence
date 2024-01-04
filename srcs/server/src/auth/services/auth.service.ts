@@ -169,16 +169,16 @@ export class AuthService {
     
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
+      secure: false,
+      domain: process.env.SERVER_IP,
       sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
+      secure: false,
+      domain: process.env.SERVER_IP,
       sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -206,19 +206,20 @@ export class AuthService {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
-      sameSite: "none",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: true,
-      // domain: process.env.SERVER_IP + ":4343",
-      sameSite: "none",
+      secure: false,
+      domain: process.env.SERVER_IP,
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
+
 
     res.send()
   }
