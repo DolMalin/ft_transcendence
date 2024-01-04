@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/services/users.service';
 import { Repository } from 'typeorm';
@@ -21,7 +21,11 @@ export class MatchHistoryService {
             const looser = await this.usersService.findOneById(game.looser)
     
             if (!winner || !looser)
-                throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'});
+                throw new NotFoundException("User not found", 
+                {
+                    cause: new Error(), 
+                    description: "cannot find user in database"
+                });
     
             const createDto : CreateGameDto = {
                 winnerId : game.winner,
@@ -59,7 +63,11 @@ export class MatchHistoryService {
 
         const winner = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : game.winnerId }})
         if (!winner)
-            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
         
         if (winner.playedGames === undefined)
             winner.playedGames = [];
@@ -76,7 +84,11 @@ export class MatchHistoryService {
         
         const looser = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : game.looserId }})
         if (!looser)
-            throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
+            throw new NotFoundException("Room not found", 
+            {
+                cause: new Error(), 
+                description: "cannot find this room in database"
+            });
         
         if (looser.playedGames === undefined)
             looser.playedGames = [];
@@ -92,7 +104,11 @@ export class MatchHistoryService {
 
       const user = await this.usersService.findOneWitOptions({relations : {playedGames: true},where: {id : userId}})
       if (!user)
-        throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot find user'})
+        throw new NotFoundException("Room not found", 
+        {
+            cause: new Error(), 
+            description: "cannot find this room in database"
+        });
 
       return (user.playedGames.reverse());
     }

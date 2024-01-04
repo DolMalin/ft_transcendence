@@ -8,7 +8,7 @@ import { FriendRequest } from "src/users/entities/friendRequest.entity";
 import { User } from "src/users/entities/user.entity";
 import { AvatarService } from "src/users/services/avatar.service";
 import { UsersService } from "src/users/services/users.service";
-import { ChatGateway } from "./chat.gateway";
+import { ChatGateway } from "./gateway/chat.gateway";
 import { MessageController } from "./controllers/message.controller";
 import { RoomController } from "./controllers/room.controller";
 import { Message } from "./entities/message.entity";

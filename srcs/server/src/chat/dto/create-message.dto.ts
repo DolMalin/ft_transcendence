@@ -1,4 +1,4 @@
-import { IsNumber, IsString, Matches, Max, MaxLength, MinLength } from "class-validator";
+import { IsNumber, IsPositive, IsString, Matches, Max, MaxLength, MinLength } from "class-validator";
 
 export class CreateMessageDto {
 
@@ -9,7 +9,8 @@ export class CreateMessageDto {
     content : string
 
     @IsNumber()
-    @Max(1000000)
+    @IsPositive()
+    @Max(2147483647)
     roomId : number
 }
 

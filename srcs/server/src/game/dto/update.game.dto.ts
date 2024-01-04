@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
+import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, Matches, Max, MaxLength, MinLength } from "class-validator";
 import { CreateGameDto } from "./create.game.dto";
 export class UpdateGameDto extends PartialType(CreateGameDto){
 	
@@ -27,10 +27,12 @@ export class UpdateGameDto extends PartialType(CreateGameDto){
 
     @IsNumber()
     @IsPositive()
+    @Max(10)
     @IsOptional()
     winnerScore : number;
     
     @IsNumber()
+    @Max(10)
     @IsPositive()
     @IsOptional()
     looserScore : number;

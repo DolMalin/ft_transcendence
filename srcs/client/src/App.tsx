@@ -2,7 +2,6 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 
 import {
   Button,
-  ChakraProvider,
   Tab,
   TabList,
   TabPanel,
@@ -11,6 +10,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { Socket, io } from 'socket.io-client';
 import Auth from "./auth/Auth";
 import authService from './auth/auth.service';
@@ -71,6 +71,7 @@ function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socke
     }, Constants.DEBOUNCE_TIME)
 
     window.addEventListener('resize', debouncedHandleResize)
+
 
     return(() => {
       window.removeEventListener('resize', debouncedHandleResize)
@@ -302,15 +303,32 @@ function App() {
 
   }, [userId]);
 
-  return (<>
-    <ChakraProvider>
-
-      <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
-      
-      {state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) 
-      && <Malaise state={state} dispatch={dispatch} gameSock={gameSock} chatSock={chatSock}/>}
-    </ChakraProvider>
-  </>
+  return (
+    <Routes>
+      <Route path='/App' 
+      element={
+        state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) ? 
+          (
+            <Malaise state={state} dispatch={dispatch} gameSock={gameSock} chatSock={chatSock}/>
+          ) : 
+          (
+            <Navigate replace to={'/'} />
+          )
+        }
+      />
+      <Route path={'/'} 
+      element={
+        state.isAuthenticated && state.isRegistered && (state.isTwoFactorAuthenticated || !state.isTwoFactorAuthenticationEnabled) ?
+        (
+          <Navigate replace to={'/App'} />
+        ) 
+        : 
+        (
+          <Auth dispatch={dispatch} state={state} gameSock={gameSock}/>
+        )
+      }
+      />
+    </Routes>
   );
 }
 

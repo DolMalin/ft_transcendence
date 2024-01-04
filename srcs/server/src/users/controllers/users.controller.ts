@@ -80,12 +80,6 @@ export class UsersController {
   }
 
   @UseGuards(AccessToken2FAGuard)
-  @Patch('removeGameSocket')
-  async removeSocket(@GetUser() user : User, @Body() gameSocketId : string) {
-    return await this.usersService.removeSocketId(gameSocketId, user.gameSockets, user);
-  }
-
-  @UseGuards(AccessToken2FAGuard)
   @Post('block/:id')
   async blockTarget(@GetUser() user: User, @Param('id') @UUIDParam() targetId: string){
     return await this.usersService.blockTarget(user.id, targetId)

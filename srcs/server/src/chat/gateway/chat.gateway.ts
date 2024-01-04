@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { RoomService } from './services/room.service';
+import { RoomService } from '../services/room.service';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -364,7 +364,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   @SubscribeMessage('channelStatusUpdate')
   channelStatusUpdate(@ConnectedSocket() client : Socket) {
     
-    this.server.sockets.except(client.id).emit('channelStatusUpdate');
-    client.emit('channelStatusUpdate')
+    this.server.sockets.emit('channelStatusUpdate');
   }
 }

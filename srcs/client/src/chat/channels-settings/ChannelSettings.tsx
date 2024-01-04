@@ -20,6 +20,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
     async function removePassword(roomId: number){
         try{
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/removePassword', {roomId: roomId})
+            props.chatSocket?.emit('channelStatusUpdate');
             toast({
                 duration: 5000,
                 render : () => ( <> 
@@ -63,7 +64,6 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
             try {
                 const isPriv = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isPriv/' + props.room.id)
 
-                console.log(isPriv.data)
                 setIsPrivate(isPriv.data);
             }
             catch(err) {

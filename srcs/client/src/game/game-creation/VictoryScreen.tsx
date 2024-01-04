@@ -28,14 +28,14 @@ import * as Constants from '../globals/const';
             <Text fontSize={'5em'}> YOU WON </Text>
 
             <Button 
-            fontWeight={'normal'} textColor={Constants.HIDDEN_FONT_COLOR} 
+            fontWeight={'normal'} textColor={'white'} 
             size={'2em'} bg={Constants.BG_COLOR} fontSize={'2em'}
             borderRadius={'0'}
             display={'flex'}
             _hover={{background : 'white', textColor: 'black'}}
             onClick={closeVScreen}
             >
-            GO BACK</Button>
+            GO BACK ?</Button>
         </Box>
     </>)
 }
