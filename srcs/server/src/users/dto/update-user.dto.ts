@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types'
 import { Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsInt, IsJWT, IsOptional, IsPositive, IsString, Matches, Max, MaxLength, MinLength } from 'class-validator'
+import { IsArray, IsBoolean, IsInt, IsJWT, IsOptional, IsPositive, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator'
 import { Game } from 'src/game/entities/game-entity'
 import { CreateUserDto } from './create-user.dto'
 
@@ -37,13 +37,13 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 	isTwoFactorAuthenticated?: boolean
 
 	@IsInt()
-	@IsPositive()
+	@Min(0)
 	@Max(2147483647)
 	@IsOptional()
 	winsAmount?: number
 
 	@IsInt()
-	@IsPositive()
+	@Min(0)
 	@Max(2147483647)
 	@IsOptional()
 	loosesAmount?: number
