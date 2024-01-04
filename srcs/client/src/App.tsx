@@ -269,7 +269,7 @@ function App() {
   async function getUserId() {
 
     try {
-      const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/users/me`);
+      const res = await authService.get(`${process.env.REACT_APP_SERVER_URL}/auth/validate`);
       setUserId(res.data.id)
     }
     catch(err) {

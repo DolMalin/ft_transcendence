@@ -70,8 +70,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
         
         async function asyncWrapper() {
             try{
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
-                setMe(res.data)
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate')
+                setMe({id: res?.data?.id, username: res?.data?.username})
                 await fetchUserList(res.data)
                 await fetchBanList(props.room?.id);
 
