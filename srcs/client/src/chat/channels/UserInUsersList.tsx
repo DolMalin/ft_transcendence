@@ -162,12 +162,13 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsMuted(false);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err)
+                    console.error(`${err?.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
         asyncWrapper();
-    })
+    }, [props.room, props.userId])
 
     useEffect( function socketEvent() {
 
