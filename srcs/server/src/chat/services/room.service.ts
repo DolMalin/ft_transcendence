@@ -32,6 +32,9 @@ export class RoomService {
 
     async create(createRoomDto: CreateRoomDto, user: User){
 
+        if (createRoomDto?.password && createRoomDto.password?.length > 0)
+            createRoomDto.password = await this.authService.hash(createRoomDto.password)    
+    
         if(createRoomDto.privChan === true && createRoomDto.password)
             throw new ConflictException("Channel is private", {cause: new Error(), description: "You cannot have a password protected private channel"})
 
@@ -51,6 +54,7 @@ export class RoomService {
         if (!room.users)
             room.users = []
         room.users.push(user)
+        console.log(room)
         return await this.roomRepository.save(room)
     }
 
@@ -218,7 +222,7 @@ export class RoomService {
             {cause: new Error(), description: 'You cannot join a direct message room'})
         }
 
-        if (room?.password && dto?.password === null){
+        if (room?.password && dto?.password === null || dto.hasOwnProperty('password') && dto?.password === undefined){
             throw new NotFoundException('You need a password', 
             {cause: new Error(), description: 'This channel is protected by a password.'})
         }
@@ -236,7 +240,7 @@ export class RoomService {
         
         if (room?.privChan && room?.owner?.id === user.id) {
             if (room?.whitelist && !room?.whitelist?.includes(user.id)) {
-                throw new NotFoundException("Private channel", {
+                throw new ForbiddenException("Private channel", {
                     cause: new Error(),
                     description: "You have to be whitelisted to join this channel",
             })
@@ -245,18 +249,20 @@ export class RoomService {
 
         if (room.privChan === true && !room?.whitelist?.includes(user.id))
         {
-            throw new NotFoundException("Private channel", {
+            throw new ForbiddenException("Private channel", {
                 cause: new Error(),
                 description: "You have to be whitelisted to join this channel",
             })
         }
         
-        if (room?.password?.length > 0 && room.password){
-            if (! await argon2.verify(room.password, dto.password))
+        if (room?.password?.length > 0 && room?.password && dto?.password){
+            if (! await argon2.verify(room.password, dto?.password))
                 throw new ForbiddenException('Password invalid')
         }
-        // if (!room.users)
-        //     room.users = []
+        
+        if (!room.users)
+            room.users = []
+        
         if (!room.users.some((userToFind) => userToFind.id === user.id))
             room.users.push(user)
         else
@@ -268,6 +274,40 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
+        return this.removeProtectedProperties(room)
+    }
+
+    async messageInRoom(roomId: number, userId: string){
+        const room = await this.roomRepository
+        .createQueryBuilder('room')
+        .leftJoinAndSelect('room.message', 'message')
+        .leftJoinAndSelect('room.banned', 'banned')
+        .leftJoinAndSelect('room.owner','owner')
+        .leftJoinAndSelect('message.author', 'author')
+        .leftJoinAndSelect('room.users', 'user')
+        .leftJoinAndSelect('user.blocked', 'blocked')
+        .where('room.id = :id', { id: roomId })
+        .orderBy('message.id', 'ASC')
+        .getOne()
+
+        if (!room) {
+            throw new NotFoundException("Room not found", {
+                cause: new Error(),
+                description: "Cannot find this room in the database",
+        })
+        }
+
+        const userRelation = await this.userService.findOneByIdWithBlockRelation(userId)
+        if (!userRelation){
+            throw new NotFoundException('User not found', 
+            {cause: new Error(), description: 'User does not exist in database'})
+        }
+
+        if (userRelation.blocked && room.message)
+            room.message = room.message.filter(msg => !userRelation.blocked.some(blockedUser => blockedUser.id === msg.author.id))
+        
+        if (room?.password)
+            room.password = undefined
         return this.removeProtectedProperties(room)
     }
 
