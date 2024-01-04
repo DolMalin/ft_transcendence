@@ -175,7 +175,6 @@ export class MatchmakingService {
       let game : GameState = gamesMap.get(data.roomName);
       if (game === undefined)
       {
-        Logger.error('player triend to leave a non existing game');
         return ;
       }
       

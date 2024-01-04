@@ -1,4 +1,4 @@
-import { Button, Flex, FormControl, Image, Input } from '@chakra-ui/react';
+import { Button, Flex, FormControl, FormErrorMessage, Image, Input } from '@chakra-ui/react';
 import React, { useEffect, useReducer, useState } from 'react';
 import { useForm } from "react-hook-form";
 import AuthService from '../../auth/auth.service';
@@ -45,33 +45,37 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		}
 	}
 
-	const onActivate2fa = async (data:any) => {
+	const onActivate2fa = async (twoFactorAuthenticationCode: string, setErrorMsg: Function, setFormError: Function) => {
 
 		try {
-			await AuthService.twoFactorAuthenticationTurnOn({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
+			await AuthService.twoFactorAuthenticationTurnOn({twoFactorAuthenticationCode: twoFactorAuthenticationCode})
 
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATED', payload:true})
 
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:true})
-
+			setFormError(false)
 			setDisplayActivate2FA(false)
 		} catch(err) {
+			setFormError(true)
+			setErrorMsg(err.response?.data?.message)
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
-	const onDeactivate2fa = async (data:any) => {
+	const onDeactivate2fa = async (twoFactorAuthenticationCode: string, setErrorMsg: Function, setFormError: Function) => {
 
 		try {
-			await AuthService.twoFactorAuthenticationTurnOff({twoFactorAuthenticationCode:data.twoFactorAuthenticationCode})
+			await AuthService.twoFactorAuthenticationTurnOff({twoFactorAuthenticationCode: twoFactorAuthenticationCode})
 
 			props.dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
 			dispatch({type:'SET_IS_TWO_FACTOR_AUTHENTICATION_ENABLED', payload:false})
-
+			setFormError(false)
 			setDisplayDeactivate2FA(false)
 		} catch(err) {
+			setFormError(true)
+			setErrorMsg(err.response?.data?.message)
 			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
@@ -147,15 +151,21 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 	function ActivateTwoFactorAuthenticationForm() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
+		const [errorMsg, setErrorMsg] = useState('')
+		const [formError, setFormError] = useState(false)
 		
+		const onSubmit = (data: {twoFactorAuthenticationCode: string}) => {
+			onActivate2fa(data.twoFactorAuthenticationCode, setErrorMsg, setFormError)
+		}
+
 		return (
 			<>
 				<Image src={qrCode}
 				boxSize={'180px'}
 				marginBottom={'10px'}
 				></Image>
-					<form onSubmit={handleSubmit(onActivate2fa)} style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
-						<FormControl isRequired>
+					<form onSubmit={handleSubmit(onSubmit)} style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
+						<FormControl isRequired isInvalid={formError}>
 							<Input
 								type="text"
 								placeholder="2fa code"
@@ -164,12 +174,11 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 								{
 									...register("twoFactorAuthenticationCode", {
 										required: "enter 2facode",
-										minLength: 3,
 										maxLength: 80
 									})
 								}
 								/>
-
+							<FormErrorMessage>{errorMsg}</FormErrorMessage>
 						</FormControl>
 
 						<Button
@@ -191,22 +200,28 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 
 	function DeactivateTwoFactorAuthenticationForm() {
 		const { register, handleSubmit, formState: { errors } } = useForm();
+		const [errorMsg, setErrorMsg] = useState('')
+		const [formError, setFormError] = useState(false)
+
+		const onSubmit = (data: {twoFactorAuthenticationCode: string}) => {
+			onDeactivate2fa(data.twoFactorAuthenticationCode, setErrorMsg, setFormError)
+		}
+
 
 		return (
-			<form onSubmit={handleSubmit(onDeactivate2fa)}  style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
-				<FormControl isRequired margin={'10px'}>
+			<form onSubmit={handleSubmit(onSubmit)}  style={{display: 'flex', flexDirection : 'column', justifyContent : 'center', alignItems: 'center'}}>
+				<FormControl isRequired margin={'10px'} isInvalid={formError}>
 					<Input
 						type="text"
 						placeholder="2fa code"
 						{
 							...register("twoFactorAuthenticationCode", {
 								required: "enter 2facode",
-								minLength: 3,
 								maxLength: 80
 							})
 						}
 					/>
-
+					<FormErrorMessage>{errorMsg}</FormErrorMessage>
 				</FormControl>
 
 				<Button

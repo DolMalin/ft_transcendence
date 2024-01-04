@@ -48,9 +48,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         const user : User = await this.userService.findOneByIdWithRoomRelation(payload.id);
         user.room.forEach((room) => {
           client.join(`room-${room.id}`);
-          // Logger.log(`client ${user.username} joined room ${room.name}`)
         })
-        // Logger.log(`client ${client.id} joined user ${payload.id}`)
     }
     catch(err) {
         client.disconnect();
@@ -70,7 +68,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return 
     }
     client.join(`room-${roomId}`)
-    Logger.debug(`room-${roomId}`);
     this.server.to(`room-${roomId}`).emit('userJoined', roomId);
     Logger.log(`User with ID: ${client.id} joined room ${roomId}`)
   }
@@ -109,13 +106,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const array = await this.roomService.kick(data.roomId, userId, data.targetId)
 
-      Logger.debug('KICKED')
       this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
       this.server.to(`user-${userId}`).emit('kicked', array[1])
       this.server.to(`room-${data.roomId}`).emit('userLeft', data.roomId);
     }
     catch(err){
-      this.server.to(`user-${userId}`).emit('kickedError')
+      this.server.to(`user-${userId}`).emit('kickedError', err)
       Logger.error(err)
     }
   }
@@ -190,16 +186,15 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     let room = await this.roomService.getRoom(roomName)
     if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
       server.to(`user-${user.id}`).emit("userBlocked", 
-      {
-        title: 'You cannot direct message this user',
-        desc: 'you cannot send or receive direct message from someone you have blocked or have been blocked by'
-      })
+        'you cannot send or receive direct message from someone you have blocked or have been blocked by')
       return
     }
     if (!room) {
       room = await this.roomService.createDM(user, user2, roomName)
     }
-    server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
+    if (room.users?.length === 2){
+      server.to(`user-${user.id}`).to(`user-${user2.id}`).emit("dmRoom", room)
+    }
 }
 
   generateDMRoomName(user1Id: string, user2Id: string): string {
@@ -301,7 +296,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRequestAccepted(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRequestAcceptedChat')
   }
@@ -310,8 +304,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   async friendRemoved(@MessageBody() data: {creatorId: string}, @ConnectedSocket() client: Socket) {
     if (!data || typeof data.creatorId !== 'string')
       return
-    
-    
     this.server.to('user-' + data.creatorId).emit('friendRemovedModal', data)
     this.server.to('user-' + data.creatorId).emit('friendRemovedChat')
   }

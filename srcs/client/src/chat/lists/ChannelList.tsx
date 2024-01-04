@@ -48,6 +48,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         password: 'isPasswordProtected' | 'none',
         privChan: string | null }[]>([])
 
+    //TO CHANGE
     const  joinRoom = async (dt: {room: string, password: string}) => {
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',

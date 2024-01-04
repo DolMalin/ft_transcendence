@@ -155,17 +155,4 @@ export class RoomController {
         return await this.roomService.removePassword(user, updateRoomDto)
     }
 
-    @UseGuards(AccessToken2FAGuard)
-    @Get('message')//REMOVE
-    async getMessage(){
-        return await this.roomService.getMessage()
-    }
-    
-    //REMOVE
-    // @UseGuards(AccessToken2FAGuard)
-    // @Delete(':id')
-    // async removeRoom(@Param("id") @INTParam() id: number){
-        
-    //     return await this.roomService.remove(id)
-    // }
 }

@@ -59,15 +59,18 @@ function Chat(props: {chatSocket: Socket, gameSocket : Socket}) {
 
     useEffect(function sockEvent() {
     
-        props.chatSocket?.on('userBlocked', (err) => {
-            toast({
-                title: err.title,
-                description:  err.desc,
-                colorScheme: 'red',
-                status: 'info',
-                duration: 5000,
-                isClosable: true
-              })
+        props.chatSocket?.on('userBlocked', (err: string) => {
+            const id = 'blocked-toast';
+            if(!toast.isActive(id)) {
+                toast({
+                id,
+                isClosable: true,
+                duration : 5000,
+                render : () => ( <> 
+                    <BasicToast text={err}/>
+                </>)
+                })
+            }
         });
 
         props.chatSocket?.on('dmRoom', (dm : Room) => {
@@ -83,7 +86,7 @@ function Chat(props: {chatSocket: Socket, gameSocket : Socket}) {
             setTargetRoom(undefined);
         }
         
-        const id = 'test-toast';
+        const id = 'kickby-toast';
         if(!toast.isActive(id)) {
             toast({
             id,

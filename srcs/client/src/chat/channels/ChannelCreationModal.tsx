@@ -9,7 +9,6 @@ import {
     useToast
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from "react"
-
 import { Button, Checkbox, FormControl, Input } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { Socket } from "socket.io-client"
@@ -65,6 +64,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                 name: dt.room,
                 password: dt.password
             })
+            console.log(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.chatSocket.emit('channelCreation');
             props.setTargetRoom(res.data)
