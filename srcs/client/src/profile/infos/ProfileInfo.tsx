@@ -15,7 +15,7 @@ function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
     useLayoutEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
+                const me = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate');
                 const user = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/profile/' + me?.data?.id);
                 setUser(user.data)
     
@@ -23,7 +23,7 @@ function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
                 console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
-    
+     
         fetchUserProfile();
     }, []);
 

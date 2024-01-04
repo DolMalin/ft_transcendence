@@ -115,8 +115,8 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
       
         const asyncWrapper = async () => {
             try{
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me')
-                setMe(res.data)
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate')
+                setMe({id: res?.data?.id, username: res?.data?.username})
                 const themRes = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/' + trimDashes(props.room?.name.replace(res.data.id, '')))
                 setThem(themRes.data);
             }

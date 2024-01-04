@@ -153,8 +153,8 @@ export class AuthService {
     const refreshToken = await this.createRefreshToken({ id: user.id })
     const accessToken = await this.createAccessToken({ id: user.id })
     if (!refreshToken || !accessToken)
-      throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
-
+    throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
+    
     let fetchUser = await this.updateRefreshToken(user.id, refreshToken)
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot updatefetchUuser' })
@@ -166,20 +166,19 @@ export class AuthService {
 
     if (!fetchUser)
       throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
-
-
+    
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false,
-      domain: process.env.SERVER_IP,
+      secure: true,
+      // domain: process.env.SERVER_IP + ":4343",
       sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
-      secure: false,
-      domain: process.env.SERVER_IP,
+      secure: true,
+      // domain: process.env.SERVER_IP + ":4343",
       sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -208,7 +207,7 @@ export class AuthService {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain: process.env.SERVER_IP,
+      // domain: process.env.SERVER_IP + ":4343",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -216,7 +215,7 @@ export class AuthService {
     res.cookie('accessToken', accessToken, {
       httpOnly: false,
       secure: true,
-      domain: process.env.SERVER_IP,
+      // domain: process.env.SERVER_IP + ":4343",
       sameSite: "none",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
@@ -247,6 +246,7 @@ export class AuthService {
     const fetchUser = await this.usersService.findOneById(user?.id)
     if (!fetchUser)
       throw new UnauthorizedException('Access denied', { cause: new Error(), description: `Cannot find user` })
+    
 
     return res.status(200).send(this.usersService.removeProtectedProperties(user))
   }
@@ -306,7 +306,7 @@ export class AuthService {
   async twoFactorAuthenticationLogin(user: User, res: any, body: any) {
     if (!user.isTwoFactorAuthenticationEnabled)
       throw new BadRequestException('User error', { cause: new Error(), description: 'user is not 2fa enabled' })
-      
+    
     if (!body.twoFactorAuthenticationCode)
       throw new BadRequestException('Wrong authentication code', { cause: new Error(), description: 'no 2fa code given' })
 
@@ -348,7 +348,6 @@ export class AuthService {
         throw new InternalServerErrorException('Database error', { cause: new Error(), description: 'Cannot update user' })
      }
 
-
     return res.status(200).send()
   }
 
@@ -369,9 +368,5 @@ export class AuthService {
 
     return res.status(200).send()
   }
-
-
-
-
 
 }

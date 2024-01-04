@@ -53,11 +53,12 @@ export class UsersController {
     return (this.usersService.update(user.id, updateDto));
   }
 
-  @UseGuards(AccessToken2FAGuard)
-  @Get('me')
-  getUserInfo(@GetUser() user: User){
-    return {username: user?.username, id: user?.id}
-  }
+  // @UseGuards(AccessToken2FAGuard)
+  // @Get('me')
+  // getUserInfo(@GetUser() user: User){
+  //   console.log('me: ', user)
+  //   return {username: user?.username, id: user?.id}
+  // }
 
   @Get(':id')
   async findOne(@Param('id') @UUIDParam() id: string) {

@@ -74,7 +74,7 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
     useEffect(() => {        
 
         fetchFriends();
-        const interval = setInterval(fetchFriends, 3000);
+        const interval = setInterval(fetchFriends, 30000000);
 
         return (() => {
             clearInterval(interval);

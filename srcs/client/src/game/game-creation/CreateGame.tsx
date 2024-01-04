@@ -123,7 +123,7 @@ function CreateGame(props : {sock : Socket}) {
     useEffect(() => {
         sock?.on('gameOver', async ({winner}) => {
             try {
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate');
                 if (res.data.id === winner)
                     dispatch({type : 'SET_V_SCREEN', payload : true});
                 else
