@@ -64,6 +64,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                 name: dt.room,
                 password: dt.password
             })
+            console.log(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id)
             props.chatSocket.emit('channelCreation');
             props.setTargetRoom(res.data)

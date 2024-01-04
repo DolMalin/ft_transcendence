@@ -1,4 +1,4 @@
-import { Box, Button, Flex, FormControl, Input } from '@chakra-ui/react';
+import { Box, Button, Flex, FormControl, FormErrorMessage, Input } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import authService from '../../auth/auth.service';
@@ -8,6 +8,8 @@ import * as Constants from '../../game/globals/const';
 function AvatarChangeForm( props : {setFormVisible : Function}) {
 	const { register, handleSubmit, formState: { errors } } = useForm();
     const [inputText, setInputText] = useState("choose an image");
+    const [errorMsg, setErrorMsg] = useState('')
+    const [formError, setFormError] = useState(false)
 
     const onSubmit = async (data: {avatar : any}) => {
 		try {
@@ -16,7 +18,10 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 				formData.append("file", data.avatar[0]);
 			await authService.register(formData);
             props.setFormVisible(false);
+            setFormError(false)
 		} catch(err) {
+            setErrorMsg(err.response?.data?.error)
+            setFormError(true)
             console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
@@ -28,7 +33,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
     return (
         <form onSubmit={handleSubmit(onSubmit)} style={{display: 'flex', flexDirection : 'column', justifyContent : 'center',alignItems: 'center', flexWrap : 'wrap'}}>
 
-            <FormControl isRequired>
+            <FormControl isRequired isInvalid={formError}>
                 <Box display={'flex'} flexDir={'row'} alignItems={'center'} justifyContent={'center'}>
                     <LeftBracket w='12px' h='54px' girth='5px' marginRight='-5px'/>
                     
@@ -63,6 +68,7 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
                     }
                     accept="image/*"
                     />
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
             </FormControl>
             <Button
             fontWeight={'normal'}

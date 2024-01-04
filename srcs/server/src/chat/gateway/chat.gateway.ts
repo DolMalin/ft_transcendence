@@ -186,10 +186,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     let room = await this.roomService.getRoom(roomName)
     if (this.userService.isAlreadyBlocked(user, user2) || this.userService.isAlreadyBlocked(user2, user)){
       server.to(`user-${user.id}`).emit("userBlocked", 
-      {
-        title: 'You cannot direct message this user',
-        desc: 'you cannot send or receive direct message from someone you have blocked or have been blocked by'
-      })
+        'you cannot send or receive direct message from someone you have blocked or have been blocked by')
       return
     }
     if (!room) {
