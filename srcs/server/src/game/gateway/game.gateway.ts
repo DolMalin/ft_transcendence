@@ -51,6 +51,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       client.join('game-' + user.id);
+      // Logger.debug('in connec : ' +  this.server.sockets.adapter.rooms.has('game-' + user.id));
     }
     catch(e) {
       client.disconnect();
@@ -78,8 +79,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.userService.update(user.id, {isAvailable : true});
         }
       });
-
       client.leave('game-' + user.id);
+      Logger.debug('in discconnec : ' + this.server.sockets.adapter.rooms.has('game-' + user.id));
+      if (this.server.sockets.adapter.rooms.has('game-' + user.id) === false)
+        this.server.sockets.emit('userDisconnected');
     }
     catch(e) {
       Logger.error('Game Gateway handle disconnection error: ', e?.message);
