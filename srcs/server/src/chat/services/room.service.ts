@@ -688,9 +688,6 @@ export class RoomService {
         if (!target)
             throw new NotFoundException("User not found", {cause: new Error(), description: "cannot find any users in database"})
 
-        if (room.users.some((user) => user.id === target.id) === false)
-            throw new ConflictException('Not in Channel', 
-            {cause: new Error(), description: target.username + ' is not in channel ' + room.name})
         if (!this.isBanned(room, target))
             throw new ConflictException('Not banned', 
             {cause: new Error(), description: target.username + ' is not banned from ' + room.name})
