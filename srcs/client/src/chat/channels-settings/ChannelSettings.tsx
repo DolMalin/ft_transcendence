@@ -79,7 +79,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
 
         return <>
             <Link>
-                <Popover>
+                <Popover closeOnBlur>
                 <PopoverTrigger>
                     <Button 
                     bg={'none'}
