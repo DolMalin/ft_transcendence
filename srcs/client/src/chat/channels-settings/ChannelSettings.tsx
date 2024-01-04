@@ -54,7 +54,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
 
     function leaveChan(roomId: number){
         
-        props.setTargetChannel(undefined);
+        props.setTargetChannel(undefined)
         props.chatSocket?.emit('leaveRoom', roomId)
     }
 
