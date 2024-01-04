@@ -150,7 +150,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             return ;
         const checkIfYourself = async (userId : string) => {
             try {
-                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/users/me');
+                const res = await authService.get(process.env.REACT_APP_SERVER_URL + '/auth/validate');
                 if (userId == res?.data?.id)
                 {
                     setIsYoursellf(true);
