@@ -71,14 +71,32 @@ function FriendList(props: {chatSocket: Socket, gameSocket : Socket}) {
         fetchFriends()
     }, [props.chatSocket])
 
-    useEffect(() => {        
+    useEffect(function socketEvents() {
 
+        function debounce(func : Function, ms : number) {
+        let timer : string | number | NodeJS.Timeout;
+    
+        return ( function(...args : any) {
+            clearTimeout(timer);
+            timer = setTimeout( () => {
+                timer = null;
+                func.apply(this, args)
+            }, ms);
+        });
+        };
+
+        const debouncedFetchFriend = debounce(fetchFriends, 500);
+
+        props.gameSocket?.on('friendListUpdate', debouncedFetchFriend);
+
+        return(() => {
+            props.gameSocket?.off('friendListUpdate');
+        });
+    }, [props.gameSocket])
+
+    useEffect(() => {
         fetchFriends();
-        const interval = setInterval(fetchFriends, 30000000);
 
-        return (() => {
-            clearInterval(interval);
-        })
     }, [])
 
 

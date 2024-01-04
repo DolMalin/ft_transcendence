@@ -50,8 +50,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
 
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
+
+      if (this.server.sockets.adapter.rooms.has('game-' + user.id) === false)
+      {
+        this.server.sockets.emit('userListUpdate');
+        this.server.sockets.emit('friendListUpdate');
+        this.userService.update(user.id, {isLogged : true, isAvailable : true})
+      }
       client.join('game-' + user.id);
-      // Logger.debug('in connec : ' +  this.server.sockets.adapter.rooms.has('game-' + user.id));
     }
     catch(e) {
       client.disconnect();
@@ -80,9 +86,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       });
       client.leave('game-' + user.id);
-      Logger.debug('in discconnec : ' + this.server.sockets.adapter.rooms.has('game-' + user.id));
       if (this.server.sockets.adapter.rooms.has('game-' + user.id) === false)
-        this.server.sockets.emit('userDisconnected');
+      {
+        this.server.sockets.emit('userListUpdate');
+        this.server.sockets.emit('friendListUpdate');
+        this.userService.update(user.id, {isAvailable : false, isLogged : false})
+      }
     }
     catch(e) {
       Logger.error('Game Gateway handle disconnection error: ', e?.message);
@@ -199,7 +208,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (bool === true) {
         this.userService.update(user.id, {isAvailable : bool});
       }
-      this.server.to('game-' + user.id).emit('isAvailable', {bool : bool});
+      // this.server.to('game-' + user.id).emit('isAvailable', {bool : bool});
+      this.matchmakingService.availabilityHandler(this.server, user.id, bool)
     }
     catch(e) {
       Logger.error('In availibilityChange : ', e?.message)
