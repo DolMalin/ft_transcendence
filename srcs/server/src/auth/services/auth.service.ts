@@ -208,7 +208,7 @@ export class AuthService {
       httpOnly: true,
       secure: false,
       domain: process.env.SERVER_IP,
-      sameSite: "none",
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
@@ -216,7 +216,7 @@ export class AuthService {
       httpOnly: false,
       secure: false,
       domain: process.env.SERVER_IP,
-      sameSite: "none",
+      sameSite: "Strict",
       maxAge: 1000 * 60 * 60 * 24, path: '/'
     })
 
