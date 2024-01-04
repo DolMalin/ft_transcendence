@@ -23,7 +23,6 @@ import * as Constants from './game/globals/const';
 import LeaderBoard from './leaderboard/Leaderboard';
 import Profile from './profile/Profile';
 import BasicToast from './toast/BasicToast';
-// import { HashRouter as Routes, Navigate } from 'react-router-dom';
 
 
 function Malaise(props : {state: stateType, dispatch: Function, gameSock : Socket, chatSock : Socket}) {
