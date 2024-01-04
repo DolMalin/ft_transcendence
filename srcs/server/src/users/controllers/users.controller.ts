@@ -8,8 +8,9 @@ import { GetUser } from '../decorator/user.decorator';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { UsersService } from '../services/users.service';
-
+import { ThrottlerGuard } from '@nestjs/throttler';
 @Controller('users')
+@UseGuards(ThrottlerGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,

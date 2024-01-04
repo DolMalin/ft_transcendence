@@ -10,6 +10,7 @@ import { RefreshToken2FAGuard } from '../guards/refreshToken2FA.auth.guard';
 import { AuthService } from '../services/auth.service';
 import { FileTypeValidationPipe } from '../utils/file.validator';
 import {ThrottlerGuard} from '@nestjs/throttler'
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -17,34 +18,29 @@ export class AuthController {
   ) { }
 
     @Get('redirect')
-    @UseGuards(ThrottlerGuard)
     redirect(): object {
       return this.authService.buildRedirectUrl()
     }
 
     @UseGuards(FtAuthGuard)
-    @UseGuards(ThrottlerGuard)
     @Get('login')
     async login(@GetUser() user: User, @Res() res: any) {
       return await this.authService.login(user, res)
     }
 
     @UseGuards(RefreshToken2FAGuard)
-    @UseGuards(ThrottlerGuard)
     @Get('refresh')
     refresh(@GetUser() user: User, @Res() res: any) {
       return this.authService.refresh(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('logout')
     logout(@GetUser() user: User, @Res() res: any) {
       return this.authService.logout(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Get('validate')
     async validate(@GetUser() user: User, @Res() res: any) {
       return await this.authService.validate(user, res)
@@ -52,7 +48,6 @@ export class AuthController {
 
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('register')
     async register(
       @UploadedFile(
@@ -67,35 +62,30 @@ export class AuthController {
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Get('2fa/generate')
     async generateTwoFactorAuthenticationQRCode(@GetUser() user:User) {
       return await this.authService.generateTwoFactorAuthenticationQRCode(user)
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('2fa/login')
     async twoFactorAuthenticationLogin(@GetUser() user: User, @Res() res:any, @Body() body:any) {
       return await this.authService.twoFactorAuthenticationLogin(user, res, body)
     }
 
     @UseGuards(AccessToken2FAGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('2fa/logout')
     logout2fa(@GetUser() user: User, @Res() res: any) {
       return this.authService.logout(user, res)
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('2fa/turn-on')
     async turnOnTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
       return await this.authService.turnOnTwoFactorAuthentication(user, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('2fa/turn-off')
     async turnOffTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
       return await this.authService.turnOffTwoFactorAuthentication(user, res, body)
