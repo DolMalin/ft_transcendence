@@ -27,6 +27,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 roomId: roomId, 
                 password: password
             })
+            props.onClose()
             toast({
                 duration: 5000,
                 render : () => ( <> 
@@ -35,26 +36,13 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
               })
         }
         catch(err){
-            if (err.response.status === 409)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            if (err.response.status === 404)
-            {
-                toast({
-                    duration: 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
-                    </>)
-                  })
-            }
-            else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            toast({
+                duration: 5000,
+                render : () => ( <> 
+                    <BasicToast text={err.response?.data?.error}/>
+                </>)
+            })
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -66,6 +54,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 password: password
             })
             props.chatSocket?.emit('channelStatusUpdate');
+            props.onClose()
             toast({
                 duration: 5000,
                 render : () => ( <> 
@@ -79,7 +68,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -88,7 +77,7 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
                 toast({
                     duration: 5000,
                     render : () => ( <> 
-                        <BasicToast text={err.response.data.error}/>
+                        <BasicToast text={err.response?.data?.error}/>
                     </>)
                   })
             }
@@ -100,13 +89,11 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
 
     const onSubmitSetPass = (data: {password: string}) => {
         setPassword(props.roomId, data.password)
-        props.onClose()
         resetSetPass()
     }
 
     const onSubmitChangePass = (data: {password: string}) => {
         changePassword(props.roomId, data.password)
-        props.onClose()
         resetChangePass()
     }
 

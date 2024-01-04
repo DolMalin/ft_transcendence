@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from 'src/auth/services/auth.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/services/users.service';
-import { RoomService } from './services/room.service';
+import { RoomService } from '../services/room.service';
 
 class ChatDTO {
   clientID: string[] = [];
@@ -106,13 +106,12 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const array = await this.roomService.kick(data.roomId, userId, data.targetId)
 
-      Logger.debug('KICKED')
       this.server.to(`user-${data.targetId}`).emit('kickBy', array[0],  array[2])
       this.server.to(`user-${userId}`).emit('kicked', array[1])
       this.server.to(`room-${data.roomId}`).emit('userLeft', data.roomId);
     }
     catch(err){
-      this.server.to(`user-${userId}`).emit('kickedError')
+      this.server.to(`user-${userId}`).emit('kickedError', err)
       Logger.error(err)
     }
   }

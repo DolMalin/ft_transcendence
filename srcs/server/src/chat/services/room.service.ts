@@ -269,7 +269,6 @@ export class RoomService {
         if (room?.password){
             room.password = undefined
         }
-        
         return this.removeProtectedProperties(room)
     }
 
