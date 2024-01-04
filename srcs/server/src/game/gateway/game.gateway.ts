@@ -206,12 +206,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('logout')
   async logout(@ConnectedSocket() client: Socket) {
     
-    this.availabilityChange(true, client);
+    this.availabilityChange(false, client);
     this.handleDisconnect(client);
     try {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
       this.server.to('game-' + user.id).emit('logout', undefined);
-      this.userService.save(user);
     }
     catch(e) {
       Logger.error('In logout : ', e?.message)
