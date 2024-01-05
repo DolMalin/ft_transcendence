@@ -54,7 +54,6 @@ export class RoomService {
         if (!room.users)
             room.users = []
         room.users.push(user)
-        console.log(room)
         return await this.roomRepository.save(room)
     }
 
@@ -879,6 +878,7 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             });
+
         if (!user)
             throw new NotFoundException("User not found", 
             {
