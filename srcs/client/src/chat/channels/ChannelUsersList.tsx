@@ -41,7 +41,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             userlist = userlist.filter(user => user.id !== me?.id)
         }
         catch(err){
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
         return (userlist);
     }
@@ -52,7 +53,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
             setUserList(array)
         }
         catch(err){
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -62,7 +64,8 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
           setBanList(bannedUsersArray.data);
         }
         catch(err) {
-          console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+          if (err.response?.data)
+            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -83,7 +86,9 @@ function ChannelUsersList(props : {room : Room, chatSocket : Socket, gameSocket 
                   setIsOp(false);
             }
             catch(err){
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)}
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
         }
 
         asyncWrapper();

@@ -39,7 +39,8 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
         catch(err){
             setFormError(true)
             setErrorMsg(err.response?.data?.message)
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -63,7 +64,8 @@ function PasswordSettingsModal(props : {action: string, roomId: number, chatSock
         catch(err){
             setFormError(true)
             setErrorMsg(err.response?.data?.message)
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

@@ -95,7 +95,8 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
         }
         catch(err){
             if (err){
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
     }
@@ -131,7 +132,8 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                 setMe({id: res?.data?.id, username: res?.data?.username})
             }
             catch(err){
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
         }
 
         asyncWrapper();

@@ -46,7 +46,8 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
 
                 setFormError(true)
                 setErrorMsg(err.response?.data?.message)
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
         else {
@@ -85,7 +86,8 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

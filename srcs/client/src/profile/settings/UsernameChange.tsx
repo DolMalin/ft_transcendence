@@ -23,7 +23,8 @@ function UsernameChangeForm( props : {setFormVisible : Function}) {
             setFormError(false);
         }
         catch(err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             setFormError(true);
             setFormErrorMsg(err.response?.data?.message);
         }
