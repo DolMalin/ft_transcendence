@@ -123,6 +123,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			dispatch({type:'SET_IS_REGISTERED', payload:true})
 
 			setFormError(false);
+			props.gameSock.emit('registered');
 		} catch(err) {
 			if (err.response?.data)
 				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)

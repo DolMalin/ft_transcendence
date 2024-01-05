@@ -28,20 +28,9 @@ export class RoomController {
         return this.roomService.create(createRoomDto, user)
     }
 
-    @Get()
-    getRoomList(){
-        return this.roomService.findAll();
-    }
-
     @Get('list')
     getRoomListWithoutDm(){
         return this.roomService.findAllWithoutDm();
-    }
-
-    @Get(':id')//REMOVE
-    getRoom(@Param('id') @INTParam() id: number){
-
-        return this.roomService.getRoomById(id);
     }
 
     @Get('userlist/:id')

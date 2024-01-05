@@ -24,8 +24,8 @@ export class AuthController {
 
     @UseGuards(FtAuthGuard)
     @Get('login')
-    async login(@GetUser() user: User, @Res() res: any) {
-      return await this.authService.login(user, res)
+    login(@GetUser() user: User, @Res() res: any) {
+      return this.authService.login(user, res)
     }
 
     @UseGuards(RefreshToken2FAGuard)
@@ -42,14 +42,14 @@ export class AuthController {
 
     @UseGuards(AccessTokenGuard)
     @Get('validate')
-    async validate(@GetUser() user: User, @Res() res: any) {
-      return await this.authService.validate(user, res)
+    validate(@GetUser() user: User, @Res() res: any) {
+      return this.authService.validate(user, res)
     }
 
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AccessTokenGuard)
     @Post('register')
-    async register(
+    register(
       @UploadedFile(
         new FileTypeValidationPipe()
       ) file: Express.Multer.File,
@@ -58,19 +58,19 @@ export class AuthController {
       @GetUser() user : User
       )
     {
-      return await this.authService.register(file, dto, res, user)
+      return this.authService.register(file, dto, res, user)
     }
 
     @UseGuards(AccessTokenGuard)
     @Get('2fa/generate')
-    async generateTwoFactorAuthenticationQRCode(@GetUser() user:User) {
-      return await this.authService.generateTwoFactorAuthenticationQRCode(user)
+    generateTwoFactorAuthenticationQRCode(@GetUser() user:User) {
+      return this.authService.generateTwoFactorAuthenticationQRCode(user)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/login')
-    async twoFactorAuthenticationLogin(@GetUser() user: User, @Res() res:any, @Body() body:any) {
-      return await this.authService.twoFactorAuthenticationLogin(user, res, body)
+    twoFactorAuthenticationLogin(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return this.authService.twoFactorAuthenticationLogin(user, res, body)
     }
 
     @UseGuards(AccessToken2FAGuard)
@@ -81,13 +81,13 @@ export class AuthController {
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-on')
-    async turnOnTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
-      return await this.authService.turnOnTwoFactorAuthentication(user, res, body)
+    turnOnTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return this.authService.turnOnTwoFactorAuthentication(user, res, body)
     }
 
     @UseGuards(AccessTokenGuard)
     @Post('2fa/turn-off')
-    async turnOffTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
-      return await this.authService.turnOffTwoFactorAuthentication(user, res, body)
+    turnOffTwoFactorAuthentication(@GetUser() user: User, @Res() res:any, @Body() body:any) {
+      return this.authService.turnOffTwoFactorAuthentication(user, res, body)
     }
 }
