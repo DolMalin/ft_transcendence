@@ -29,7 +29,8 @@ function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket
                 setHistory(res.data);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 
             }
         }

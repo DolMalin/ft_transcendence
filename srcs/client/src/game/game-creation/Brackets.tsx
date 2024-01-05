@@ -14,7 +14,6 @@ export function LeftBracket(props : {w : string, h : string, girth : string, mar
             borderWidth={props.girth}
             borderRight={'none'}
             marginRight={m}
-            // padding={ p + '0px' + p + '0px'}
         ></Box>
     )
 }
@@ -32,7 +31,6 @@ export function RightBracket(props : {w : string, h : string, girth : string, ma
             borderWidth={props.girth}
             borderLeft={'none'}
             marginLeft={m}
-            // padding={ p + '4px' + p + '4px'}
         ></Box>
     )
 }

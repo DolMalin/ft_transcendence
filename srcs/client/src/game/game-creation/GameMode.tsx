@@ -50,7 +50,8 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
             setPlayerAvalaible(res.data);
         }
         catch (err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 
         }
     }
@@ -100,7 +101,8 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (err) {
-                            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                            if (err.response?.data)
+                                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
                         }
                     }}> 
                         {Constants.GAME_TYPE_ONE.toLocaleUpperCase()} 
@@ -156,7 +158,8 @@ function GameMode(props : {dispatch : Function, sock : Socket}) {
                             props.sock.emit('availabilityChange', false);
                         }
                         catch (err) {
-                            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`);
+                            if (err.response?.data)
+                                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`);
                         }
                     }}
                     >

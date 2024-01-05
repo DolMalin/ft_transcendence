@@ -273,7 +273,8 @@ function App() {
       setUserId(res.data.id)
     }
     catch(err) {
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
   }
 

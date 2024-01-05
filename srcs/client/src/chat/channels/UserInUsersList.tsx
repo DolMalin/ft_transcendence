@@ -37,7 +37,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
           }
     };
 
@@ -60,7 +61,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -84,7 +86,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -110,7 +113,8 @@ function UserInUsersList(props : {username : string, userId : string,
                 }
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -136,7 +140,8 @@ function UserInUsersList(props : {username : string, userId : string,
                 }
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -162,8 +167,8 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsMuted(false);
             }
             catch (err) {
-                if (err)
-                    console.error(`${err?.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
@@ -183,7 +188,8 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsMuted(false);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
         props.chatSock?.on('timeoutEnd', () => {

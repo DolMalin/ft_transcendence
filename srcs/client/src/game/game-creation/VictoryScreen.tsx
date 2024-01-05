@@ -8,7 +8,6 @@ import * as Constants from '../globals/const';
 
 
  function VictoryScreen (props : {dispatch : Function}) {
-// Display new ladder placement
     function closeVScreen() {
         props.dispatch({type : 'SET_V_SCREEN', payload : false})
         props.dispatch({type : 'SET_PLAY', payload : true})

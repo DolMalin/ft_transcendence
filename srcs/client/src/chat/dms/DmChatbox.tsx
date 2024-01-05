@@ -90,7 +90,8 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                   })
             }
             else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -121,7 +122,8 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                 setThem(themRes.data);
             }
             catch(err){
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
         }
 
         setMessageList(props.room.message ? props.room.message : []);

@@ -31,7 +31,8 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err?.response?.data.message} (${err?.response?.data?.error})`)
+      if (err.response?.data)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
     return roomList
 }
@@ -71,7 +72,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                 })
             }
             else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                  console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -196,7 +198,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         }
       }
       catch(err) {
-        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+        if (err.response?.data)
+          console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
       }
     }
 

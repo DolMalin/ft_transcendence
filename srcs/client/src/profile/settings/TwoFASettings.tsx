@@ -60,7 +60,8 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		} catch(err) {
 			setFormError(true)
 			setErrorMsg(err.response?.data?.message)
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -76,7 +77,8 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 		} catch(err) {
 			setFormError(true)
 			setErrorMsg(err.response?.data?.message)
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -88,7 +90,8 @@ function TwoFASettings (props : {state: stateType, dispatch: Function}) {
 				setDisplayActivate2FA(true)
 			}
 			catch(err) {
-				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+				if (err.response?.data)
+					console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 			}
 		}
 		else
