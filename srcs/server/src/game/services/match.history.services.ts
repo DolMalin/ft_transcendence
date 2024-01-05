@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateGameDto } from '../dto/create.game.dto';
 import { Game } from '../entities/game-entity';
 import { GameState } from '../globals/interfaces';
+import { Server } from 'socket.io';
 
 
 @Injectable()
@@ -16,7 +17,7 @@ export class MatchHistoryService {
         private readonly usersService : UsersService
     ) {}
 
-    async storeGameResults(game : GameState): Promise<Game> {
+    async storeGameResults(game : GameState, server : Server): Promise<Game> {
             const winner = await this.usersService.findOneById(game.winner)
             const looser = await this.usersService.findOneById(game.looser)
     
@@ -45,6 +46,7 @@ export class MatchHistoryService {
                 throw new InternalServerErrorException('Database error', {cause: new Error(), description: 'Cannot create game'});
                 
             await this.addGameToUsersPlayedGames(newGame);
+            server.to('game-' + winner.id).to('game-' + looser.id).emit('updateHistory')
             return (newGame);
     }
 

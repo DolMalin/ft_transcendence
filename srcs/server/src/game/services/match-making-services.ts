@@ -217,7 +217,7 @@ export class MatchmakingService {
         server.to(data.roomName).emit('gameOver', {winner : game.winner});
       }
       try {
-        this.matchHistoryServices.storeGameResults(game);
+        this.matchHistoryServices.storeGameResults(game, server);
         if (game.clientOne?.id)
           this.userService.update(game.clientOne.id, {isAvailable : true});
         if (game.clientTwo?.id)
@@ -228,7 +228,6 @@ export class MatchmakingService {
       }
       gamesMap.delete(data.roomName);
       client.leave(data.roomName);
-      Logger.debug("TEST")
     }
 
       async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {

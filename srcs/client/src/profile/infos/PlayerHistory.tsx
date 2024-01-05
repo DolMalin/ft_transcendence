@@ -42,6 +42,18 @@ function PlayerHistory(props : {userId : string, chatSocket : Socket, gameSocket
     useEffect(() => {
         getHistory(props.userId);
     }, [props.userId])
+
+    useEffect(() => {
+
+        props.gameSocket?.on('updateHistory', () => {
+            getHistory(props.userId);
+        })
+
+        return (() => {
+            props.gameSocket?.off('updateHistory');
+        })
+    })
+
     return (<>
     <Table>
         <Thead>
