@@ -47,6 +47,7 @@ export class MatchHistoryService {
                 
             await this.addGameToUsersPlayedGames(newGame);
             server.to('game-' + winner.id).to('game-' + looser.id).emit('updateHistory')
+            server.sockets.emit('leaderBoardUpdate');
             return (newGame);
     }
 
