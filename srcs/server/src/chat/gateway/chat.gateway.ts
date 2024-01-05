@@ -18,7 +18,6 @@ interface liveMessage {
   sendAt: Date | string
 };
 
-//TODO changer cors true ?
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
@@ -206,22 +205,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
   }
   
-
-  // TO DELETE ?
-  // @SubscribeMessage('block')
-  // async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
-  //   if (!data || typeof data.targetId !== "string"){
-  //     Logger.error("Wrong type for parameter")
-  //     return 
-  //   }
-  //   try {
-  //     this.userService.blockTarget(client.handshake.query?.userId as string, data.targetId)
-  //   } 
-  //   catch (err) {
-  //     Logger.error(err)
-  //   } 
-  // }
-
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){

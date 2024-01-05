@@ -228,7 +228,6 @@ export class MatchmakingService {
       }
       gamesMap.delete(data.roomName);
       client.leave(data.roomName);
-      Logger.debug("TEST")
     }
 
       async leaveQueue(data : {roomName : string}, gamesMap : Map<string, GameState>, client : Socket, server : Server) {

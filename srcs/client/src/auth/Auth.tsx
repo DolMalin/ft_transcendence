@@ -326,7 +326,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 											})
 										}
 										/>
-									<FormErrorMessage> {formErrorMsg} test</FormErrorMessage>
+									<FormErrorMessage> {formErrorMsg} </FormErrorMessage>
 
 							</FormControl>
 
