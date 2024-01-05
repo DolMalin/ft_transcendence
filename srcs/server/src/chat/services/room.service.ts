@@ -54,7 +54,10 @@ export class RoomService {
         if (!room.users)
             room.users = []
         room.users.push(user)
-        return await this.roomRepository.save(room)
+        await this.save(room)
+        if (room?.password)
+            room.password = undefined;
+        return this.removeProtectedProperties(room)
     }
 
     async findOneByName(name: string){

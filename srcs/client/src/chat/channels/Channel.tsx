@@ -179,7 +179,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                     textColor={'white'}
                     padding={'10px'}
                     wrap={'wrap'}
-                    justifyContent={messageContent.author.id === me?.id ? "right" : "left"}>
+                    justifyContent={messageContent.author?.id === me?.id ? "right" : "left"}>
                             <Flex 
                             maxWidth={'70%'}
                             bg={Constants.BG_COLOR_LESSER_FADE}
@@ -196,24 +196,24 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                                 >
                                     <Avatar 
                                     size='sm'
-                                    name={messageContent.author.username}
-                                    src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + messageContent.author.id}
+                                    name={messageContent.author?.username}
+                                    src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + messageContent.author?.id}
                                     />
                                     
                                     <Text padding={'10px'} >{decode(messageContent.content)}</Text>
                                     
                                 </Flex>
-                                <Link fontSize={'0.6em'}onClick={() => { onOpen(); setId(messageContent.author.id) }}>{messageContent.author.username}</Link>
+                                <Link fontSize={'0.6em'}onClick={() => { onOpen(); setId(messageContent.author?.id) }}>{messageContent.author?.username}</Link>
                             
                             </Flex>
                             <WrapItem
                             padding={'5px'}
                             fontSize={'0.6em'}
                             flexDir={'row'}
-                            justifyContent={messageContent.author.id === me?.id ? "right" : "left"}
+                            justifyContent={messageContent?.author.id === me?.id ? "right" : "left"}
                             width={'100%'}                            
                             >
-                                <Text>{timeOfDay(messageContent.sendAt)} </Text>
+                                <Text>{timeOfDay(messageContent?.sendAt)} </Text>
                             </WrapItem>
                     </Flex>)
                 })}
