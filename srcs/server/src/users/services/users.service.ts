@@ -446,47 +446,6 @@ export class UsersService {
       }))
   }
 
-  async getFriendRequestFromSender(user: User, res:any) {
-    const friendRequests = await this.friendRequestRepository
-      .createQueryBuilder('friendRequest')
-      .leftJoinAndSelect('friendRequest.creator', 'creator')
-      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
-      .where('friendRequest.creator = :creator', {creator: user.id})
-      .getMany()
-
-    if (!friendRequests)
-      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friend requests for user ${user.id}`})
-    
-    return res.status(200).send(friendRequests.map((friendRequest) => {
-      friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
-      friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
-      return friendRequest
-    }))
-  }
-
-
-  async getAllFriendRequests(user: User, res:any) {
-    const friends = await this.friendRequestRepository
-      .createQueryBuilder('friendRequest')
-      .leftJoinAndSelect('friendRequest.creator', 'creator')
-      .leftJoinAndSelect('friendRequest.receiver', 'receiver')
-      .where(subQuery => {
-        subQuery.where('friendRequest.creator = :creator', {creator: user.id})
-        subQuery.orWhere('friendRequest.receiver = :receiver', {receiver: user.id})
-      })
-      .andWhere('friendRequest.status = :status', {status: 'accepted'})
-      .getMany()
-    
-    if (!friends)
-      throw new NotFoundException('Friend requests', {cause: new Error(), description: `cannot find any friends for user ${user.id}`})
-
-    return res.status(200).send(friends.map((friendRequest) => {
-      friendRequest.creator = this.removeProtectedProperties(friendRequest.creator)
-      friendRequest.receiver = this.removeProtectedProperties(friendRequest.receiver)
-      return friendRequest
-    }))
-  }
-
   async getFriends(user: User, res:any) {
     const friends = await this.friendRequestRepository
       .createQueryBuilder('friendRequest')
