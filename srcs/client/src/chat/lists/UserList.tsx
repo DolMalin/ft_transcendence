@@ -54,7 +54,8 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
             setUserList(list);
         }
         catch (err) {
-            console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -86,7 +87,6 @@ function UserList(props: {chatSocket: Socket, gameSocket : Socket}){
 
     }, [])
     
-    console.log(userList)
     return (<>
     <Flex 
     h={'50%'}

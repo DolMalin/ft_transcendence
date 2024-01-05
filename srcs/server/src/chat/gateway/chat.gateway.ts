@@ -18,7 +18,6 @@ interface liveMessage {
   sendAt: Date | string
 };
 
-//TODO changer cors true ?
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
@@ -157,11 +156,17 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const res = await this.userService.unblockTarget(client.handshake.query?.userId as string, data.targetId)
       this.server.to(`user-${res.user.id}`).emit("unblocked", {username: res.user.username, username2: res.user2.username})
+      this.server.to(`user-${res.user.id}`).emit("rerenderMessage")
       this.server.to(`user-${res.user2.id}`).emit("unblocked2", {username: res.user.username, username2: res.user2.username})
     }
     catch(err){
       Logger.error(err)
     }
+  }
+
+  @SubscribeMessage('triggerRerenderMessage')
+  async triggerRerenderMessage(@ConnectedSocket() client: Socket){
+    this.server.to(`user-${client.handshake.query.userId as string}`).emit('rerenderMessage')
   }
 
   @SubscribeMessage('DM')
@@ -179,7 +184,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         Logger.error(err)
       }
   }
-
 
   async createOrJoinDMRoom(user: User, user2: User, server: Server, client: Socket) {
     const roomName = this.generateDMRoomName(user.id, user2.id)
@@ -201,22 +205,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
   }
   
-
-  // TO DELETE ?
-  // @SubscribeMessage('block')
-  // async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
-  //   if (!data || typeof data.targetId !== "string"){
-  //     Logger.error("Wrong type for parameter")
-  //     return 
-  //   }
-  //   try {
-  //     this.userService.blockTarget(client.handshake.query?.userId as string, data.targetId)
-  //   } 
-  //   catch (err) {
-  //     Logger.error(err)
-  //   } 
-  // }
-
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){

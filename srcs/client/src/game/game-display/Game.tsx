@@ -46,14 +46,8 @@ function Game(props : GameProps) {
     const [playerOneScore, setPlayerOneScore] = useState(0);
     const [playerTwoScore, setPlayerTwoScore] = useState(0);
 
-    const [userOne, setUserOne] = useState<userBasicInfos>({
-        id : undefined,
-        username : undefined
-    })
-    const [userTwo, setUserTwo] = useState<userBasicInfos>({
-        id : undefined,
-        username : undefined
-    })
+    const [userOne, setUserOne] = useState<userBasicInfos>()
+    const [userTwo, setUserTwo] = useState<userBasicInfos>()
     const [gameMetrics, setGameMetrics] = useState<GameMetrics>({
         paddleOne : {
             x : 0.5 - Constants.PADDLE_WIDTH / 2,
@@ -102,7 +96,7 @@ function Game(props : GameProps) {
         return (() => {
             sock?.off('gameStarted');
         })
-    }, [userOne, userTwo])
+    }, [userOne, userTwo, props.sock])
 
     useEffect(function resizeEvents() {
 
@@ -227,7 +221,6 @@ function Game(props : GameProps) {
                 setGameMetrics(pOneMetrics);
             else if(props.playerId === '2')
                 setGameMetrics(pTwoMetrics);
-            // setCtSizeModifier((prevState) => {return (prevState - 1 / Constants.FPS)});
         });
 
         sock?.on('midPointCt', (ct : number) => {
@@ -296,7 +289,7 @@ function Game(props : GameProps) {
                     width={'100%'}
                     name={userTwo?.username}
                     src={userTwo?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + userTwo?.id : ''}
-                    />{' '}
+                    />
                 </WrapItem>
                 <Text
                 size='xs'
@@ -318,7 +311,7 @@ function Game(props : GameProps) {
                     width={'100%'}
                     name={userOne?.username}
                     src={userOne?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + userOne?.id : ""}
-                    />{' '}
+                    />
                 </WrapItem>
                 <Text> {userOne?.username} </Text>
             </Box>

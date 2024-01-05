@@ -6,7 +6,7 @@ import {
     useDisclosure
 } from "@chakra-ui/react"
 import { Socket } from "socket.io-client"
-import ChannelCreationModal from "../channels/ChannelCreationModal"
+import ChannelCreationModal from "./ChannelCreationModal"
  
 function ChannelCreator (props: {chatSocket: Socket, setTargetRoom: Function}){
     const {isOpen, onOpen, onClose} = useDisclosure()

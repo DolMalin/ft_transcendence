@@ -31,7 +31,8 @@ async function getRoomList(){
         roomList = res.data
     }
     catch(err){
-        console.error(`${err?.response?.data.message} (${err?.response?.data?.error})`)
+      if (err.response?.data)
+        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
     }
     return roomList
 }
@@ -48,8 +49,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         password: 'isPasswordProtected' | 'none',
         privChan: string | null }[]>([])
 
-    //TO CHANGE
-    const  joinRoom = async (dt: {room: string, password: string}) => {
+      const  joinRoom = async (dt: {room: string, password: string}) => {
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
@@ -61,7 +61,7 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         }
         catch(err){
 
-            if (err.response?.status === 409)
+            if (err.response?.status === 409 || err.response?.status === 403 || err.response?.status === 404)
             {
                 toast({
                     isClosable: true,
@@ -71,26 +71,9 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
                     </>)
                 })
             }
-            else if (err.response?.status === 403){
-                toast({
-                    isClosable: true,
-                    duration : 5000,
-                    render : () => ( <> 
-                        <BasicToast text={err.response?.data?.message}/>
-                    </>)
-                })
-            }
-            else if (err.response?.status === 404){
-              toast({
-                  isClosable: true,
-                  duration : 5000,
-                  render : () => ( <> 
-                      <BasicToast text={err.response?.data?.error}/>
-                  </>)
-              })
-          }
             else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                  console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -115,7 +98,6 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
       });
 
       props.chatSocket?.on('channelStatusUpdate', () => {
-        console.log('TEST TEST')
 
         fetchRoom();
       })
@@ -200,23 +182,24 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     }
 
     async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none', isPrivChan : string) {
-
       try {
-        const isHe = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
-        const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
-        if (isHe.data === false && password === 'isPasswordProtected') {
+        const isInRoom = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
+        if (isInRoom.data === false && password === 'isPasswordProtected') {
           onOpen()
           setRoomName(roomName)
         }
-        else if (isHe.data === false && !isPrivChan && password === 'none')
-          joinRoom({room : roomName, password : null});
-        else if (isHe.data === false && isPrivChan)
-          joinRoom({room : roomName, password : null});
-        else
-          props.setTargetRoom(room.data);
+        else if (isInRoom.data === false && !isPrivChan && password === 'none')
+          joinRoom({room : roomName, password : null})
+        else if (isInRoom.data === false && isPrivChan)
+          joinRoom({room : roomName, password : null})
+        else{
+          const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/messageInRoom/' + roomId)
+          props.setTargetRoom(room.data)
+        }
       }
       catch(err) {
-        console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+        if (err.response?.data)
+          console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
       }
     }
 

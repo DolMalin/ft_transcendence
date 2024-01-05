@@ -15,6 +15,10 @@ import { Room } from './chat/entities/room.entity';
 import { Avatar } from './users/entities/avatar.entity';
 import { FriendRequest } from './users/entities/friendRequest.entity';
 
+import {ThrottlerModule, ThrottlerGuard} from '@nestjs/throttler'
+import { APP_GUARD } from '@nestjs/core';
+
+import { BrowserCheckMiddleware } from './middlewares/BrowserCheck.middlware';
 
 @Module({
   imports: [
@@ -27,20 +31,29 @@ import { FriendRequest } from './users/entities/friendRequest.entity';
       password: process.env.DATABASE_PASSWORD,
       entities: [User, Room, Message, Avatar, Game, FriendRequest],
       synchronize: true,
-      // dropSchema: true,/*  wipe la db a chaque refresh */
     }),
+    ThrottlerModule.forRoot([{
+      ttl: Number(process.env.THROTTLER_TTL) || 60,
+      limit: Number(process.env.THROTTLER_LIMIT) || 1000,
+    }]),
     UsersModule,
     GameModule,
     AuthModule,
     ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    },
+  ],
 })
 
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // consumer.apply(BrowserCheckMiddleware).forRoutes('*');
+    consumer.apply(BrowserCheckMiddleware).forRoutes('*');
   }
 }
 

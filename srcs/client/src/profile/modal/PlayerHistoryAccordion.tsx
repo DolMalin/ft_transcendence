@@ -35,7 +35,8 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
                 setHistory(res.data);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)}  
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)}  
         }
     }
 
@@ -48,6 +49,17 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
     useEffect(() => {
         getHistory(props.userId);
     }, [props.userId])
+
+    useEffect(() => {
+
+        props.gameSocket?.on('updateHistory', () => {
+            getHistory(props.userId);
+        })
+
+        return (() => {
+            props.gameSocket?.off('updateHistory');
+        })
+    })
 
     return (<>
         <Accordion allowToggle defaultIndex={props.isOpen ? [0] : undefined}  

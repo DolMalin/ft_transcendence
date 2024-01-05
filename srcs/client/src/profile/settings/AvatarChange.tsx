@@ -22,7 +22,8 @@ function AvatarChangeForm( props : {setFormVisible : Function}) {
 		} catch(err) {
             setErrorMsg(err.response?.data?.error)
             setFormError(true)
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 

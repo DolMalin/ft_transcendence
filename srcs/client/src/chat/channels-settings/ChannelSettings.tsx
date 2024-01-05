@@ -48,7 +48,8 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
                   })
             }
             else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -68,7 +69,8 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
             }
             catch(err) {
                 setIsPrivate(false);
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         };
 
@@ -79,7 +81,7 @@ function ChannelSettings(props : {chatSocket : Socket, room : Room, isOp : boole
 
         return <>
             <Link>
-                <Popover>
+                <Popover closeOnBlur>
                 <PopoverTrigger>
                     <Button 
                     bg={'none'}

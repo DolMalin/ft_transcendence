@@ -13,6 +13,8 @@ function UserInUsersList(props : {username : string, userId : string,
     const [targetIsOp, setTargetIsOp] = useState<"isAdmin" | "isOwner" | "no">("no");
     const [targetIsMuted, setTargetIsMuted] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [popOpen, setPopOpen] = useState(false);
     const toast = useToast();
 
 
@@ -35,7 +37,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
           }
     };
 
@@ -58,7 +61,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -68,7 +72,6 @@ function UserInUsersList(props : {username : string, userId : string,
             await authService.post(process.env.REACT_APP_SERVER_URL + '/room/muteUser', 
             {targetId : targetId, roomId : roomId, timeInMinutes : timeInMinutes});
             setTargetIsMuted(true);
-            // props.chatSock?.emit('channelRightsUpdate', {roomId : roomId});
             props.chatSock?.emit('userGotBannedOrMuted', {roomId : roomId, timeInMinutes : timeInMinutes});
         }
         catch (err) {
@@ -83,7 +86,8 @@ function UserInUsersList(props : {username : string, userId : string,
                   })
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -109,7 +113,8 @@ function UserInUsersList(props : {username : string, userId : string,
                 }
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -135,7 +140,8 @@ function UserInUsersList(props : {username : string, userId : string,
                 }
             }
             else
-              console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+              if (err.response?.data)
+console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -161,12 +167,13 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsMuted(false);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
         asyncWrapper();
-    })
+    }, [props.room, props.userId])
 
     useEffect( function socketEvent() {
 
@@ -181,7 +188,8 @@ function UserInUsersList(props : {username : string, userId : string,
                     setTargetIsMuted(false);
             }
             catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
         props.chatSock?.on('timeoutEnd', () => {
@@ -205,6 +213,11 @@ function UserInUsersList(props : {username : string, userId : string,
         })
     })
 
+    useEffect(() => {
+
+        if (buttonRef && popOpen === true)
+            buttonRef?.current?.click();
+    }, [targetIsMuted, targetIsOp])
 
     function MuteBanSlider(props : {targetId : string, roomId : number, roomName : string, actionName : string ,action : Function}) {
         const [sliderValue, setSliderValue] = React.useState(5)
@@ -253,10 +266,11 @@ function UserInUsersList(props : {username : string, userId : string,
     {
 
     return (<>
-        <Link>
-            <Popover>
-                <PopoverTrigger>
-                    <Button 
+            <Popover closeOnBlur>
+                <PopoverTrigger >
+                    <Button
+                    onClick={() => setPopOpen(curr => !curr)}
+                    ref={buttonRef}
                     borderRadius={'0px'}
                     fontWeight={'normal'}
                     textColor={'black'}
@@ -346,8 +360,6 @@ function UserInUsersList(props : {username : string, userId : string,
                     </PopoverContent>
                 </Portal>
             </Popover>
-        </Link>
-
         <ProfileModal userId={props.userId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} chatSocket={props.chatSock} gameSock={props.gameSock}/>
     </>)
     }
