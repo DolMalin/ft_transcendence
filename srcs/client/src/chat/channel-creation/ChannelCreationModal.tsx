@@ -174,19 +174,30 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
                         colorScheme='green'
                         isChecked={checked}
                         onChange={(event) => {
-                            setChecked(event.target.checked)
-                            setPrivate(event.target.checked ? false : true)
-                            setValue('password', '')
+
+                            if (checked === false) {
+                                setChecked(event.target.checked)
+                                setPrivate(event.target.checked ? false : true)
+                                setValue('password', '')
+                            }
+                            else
+                                setChecked(false);
                         }}
                         > password 
                     </Checkbox>
                     <Checkbox 
                         colorScheme='green'
                         isChecked={privateChan}
-                        onChange={(event) => { 
-                            setPrivate((event.target as HTMLInputElement).checked)
-                            setChecked(event.target.checked ? false : true)
-                            setValue('password', null)
+                        onChange={(event) => {
+                            
+                            if (privateChan === false)
+                            {
+                                setPrivate((event.target as HTMLInputElement).checked)
+                                setChecked(event.target.checked ? false : true)
+                                setValue('password', null)
+                            }
+                            else
+                                setPrivate(false)
                         }
                         }> private channel 
                     </Checkbox>
