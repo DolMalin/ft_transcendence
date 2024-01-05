@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
+import { RouterModule } from '@nestjs/core'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as argon2 from 'argon2'
 import { AuthService } from 'src/auth/services/auth.service'
@@ -149,11 +150,13 @@ export class RoomService {
     async findAllWithoutDm() {
         let roomList = await this.roomRepository.find()
 
+        // TO DO IS this really necessary ?
         if (!roomList) {
             throw new NotFoundException("No rooms", {
                 cause: new Error(),
                 description: "There are no rooms in data base",
         })}
+        // 
         roomList = roomList.filter(room => room.type !== roomType.directMessage)
         roomList.forEach((room) => {
             if (room.password)
@@ -620,7 +623,7 @@ export class RoomService {
             throw new ConflictException('Is muted', 
             {cause: new Error(), description: 'This user is allready muted'} )
         }
-        if (this.isAdmin(room, target) !== 'no')
+        if (this.isAdmin(room, target) !== 'no' && requestMaker?.id !== room.owner?.id)
             throw new ConflictException('Target is admin', 
             {
                 cause: new Error(), 
@@ -692,7 +695,7 @@ export class RoomService {
         else if (this.isBanned(room, target))
             throw new ConflictException('Banned already', 
             {cause: new Error(), description: target.username + ' is allready banned from ' + room.name})
-        else if (this.isAdmin(room, target) !== 'no')
+        else if (this.isAdmin(room, target) !== 'no' && requestMaker?.id !== room.owner?.id)
             throw new ConflictException('Is Admin', 
             {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'})
 
@@ -710,7 +713,7 @@ export class RoomService {
             room.banned = []
         room.banned.push(target)
         room.users = room.users.filter((user) => user.id != target.id)
-
+        room.administrator = room.administrator?.filter((user) => user.id != target.id)
         const newRoom = this.removeProtectedProperties(await this.save(room))
         return (newRoom)
     }

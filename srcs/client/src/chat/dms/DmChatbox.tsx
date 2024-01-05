@@ -34,6 +34,7 @@ function timeOfDay(timestampz: string | Date){
 
 function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket}) {
     const [messageList, setMessageList] = useState<MessageData[]>([]);
+    const [rerenderMsg, setRerenderMsg] = useState('')
     const scrollToBottomRef = useRef<HTMLDivElement>(null);
     const [id, setId] = useState("");
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -94,6 +95,30 @@ function DmRoom(props : {room : Room, chatSocket : Socket, gameSocket : Socket})
                     console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
+
+
+    const rerenderMessage = async () => {
+        try{
+            const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/messageInRoom/' + props.room.id)
+            setMessageList(room.data.message)
+        }
+        catch(err){
+            if (err){
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
+        }
+    }
+
+    useEffect(() => {
+        props.chatSocket?.on('rerenderMessage', () => {
+            rerenderMessage()
+        })
+        
+        return (() => {
+            props.chatSocket?.off('rerenderMessage')
+        })
+    })
 
     useEffect(() => {
         props.chatSocket?.on("receiveMessage", (data: MessageData) => {

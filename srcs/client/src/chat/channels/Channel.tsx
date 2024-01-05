@@ -91,7 +91,7 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
     const rerenderMessage = async () => {
         try{
             const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/messageInRoom/' + props.room.id)
-            props.setTargetChannel(room.data)
+            setMessageList(room.data.message)
         }
         catch(err){
             if (err){
