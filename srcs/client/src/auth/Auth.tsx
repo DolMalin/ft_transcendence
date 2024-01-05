@@ -103,7 +103,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 		} catch(err) {
 			if (err.response?.data)
 				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response?.data?.error);
+			setFormErrorMsg(err.response?.data?.message);
 			setFormError(true);
 		}
 	}
@@ -127,7 +127,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 		} catch(err) {
 			if (err.response?.data)
 				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response?.data?.error);
+			setFormErrorMsg(err.response?.data?.message);
 			setFormError(true);
 		}
 	}
@@ -208,7 +208,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 										})
 										}
 									/>
-									<FormErrorMessage> {formErrorMsg}</FormErrorMessage>
+									<FormErrorMessage>{formErrorMsg}</FormErrorMessage>
 								</FormControl>
 
 								<FormControl isRequired>
