@@ -49,6 +49,17 @@ function PlayerHistoryAccordion(props : {userId : string, isOpen? : boolean, fon
         getHistory(props.userId);
     }, [props.userId])
 
+    useEffect(() => {
+
+        props.gameSocket?.on('updateHistory', () => {
+            getHistory(props.userId);
+        })
+
+        return (() => {
+            props.gameSocket?.off('updateHistory');
+        })
+    })
+
     return (<>
         <Accordion allowToggle defaultIndex={props.isOpen ? [0] : undefined}  
         marginTop={'40px'}> 

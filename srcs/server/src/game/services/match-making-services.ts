@@ -217,7 +217,7 @@ export class MatchmakingService {
         server.to(data.roomName).emit('gameOver', {winner : game.winner});
       }
       try {
-        this.matchHistoryServices.storeGameResults(game);
+        this.matchHistoryServices.storeGameResults(game, server);
         if (game.clientOne?.id)
           this.userService.update(game.clientOne.id, {isAvailable : true});
         if (game.clientTwo?.id)

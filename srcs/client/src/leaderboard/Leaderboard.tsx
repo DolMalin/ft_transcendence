@@ -75,6 +75,17 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
         getScoreList();
     }, [])
 
+    useEffect(() => {
+
+        props.gameSock?.on('leaderBoardUpdate', () => {
+            getScoreList()
+        })
+
+        return (() => {
+            props.gameSock?.off('leaderBoardUpdate');
+        })
+    })
+
     function openProfileModal(userId : string) {
 
         setUserId(userId);
@@ -97,14 +108,6 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
                 <Thead>
                     <Tr textColor={'white'}>
                         <Th textColor={'white'} >
-                            <Button onClick={getScoreList}
-                            size={'sm'}
-                            bg={Constants.BG_COLOR}
-                            _hover={{background : Constants.BG_COLOR}}>
-                                <RepeatIcon width={'100%'} height={'100%'} color={'white'}
-                                _hover={{color : 'rgba(255, 255, 255, 0.6)'}}
-                                _active={{color : 'white'}}/>
-                            </Button>
                             <Link href={'https://r.mtdv.me/KF9vP1hDTg'} isExternal>
                                 Username
                             </Link>
