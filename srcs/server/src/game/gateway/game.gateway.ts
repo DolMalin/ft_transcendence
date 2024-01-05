@@ -96,7 +96,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     catch(e) {
       Logger.error('Game Gateway handle disconnection error: ', e?.message);
     }
-    Logger.warn(client.id + 'was disconnected')
+    Logger.log(client.id + 'was disconnected')
   }
 
   @SubscribeMessage('joinGame')
