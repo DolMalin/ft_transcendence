@@ -87,6 +87,7 @@ function ProfileInfo( props : {gameSock : Socket, chatSock : Socket}) {
                 {!secretImage && <Avatar
                 boxSize={'160px'}
                 borderRadius={'full'}
+                name={user?.username}
                 src={user?.id != undefined ? process.env.REACT_APP_SERVER_URL + '/users/avatar/' + user?.id : ""}
                 onClick={() => setSecretImage(true)}
                 ></Avatar>}

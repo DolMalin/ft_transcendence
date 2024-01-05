@@ -128,7 +128,7 @@ function LeaderBoard(props : {gameSock : Socket, chatSocket: Socket}) {
                                     marginRight={'10px'}
                                 ></Avatar>
 
-                                <Link fontWeight={'bold'} textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value.id)} }> 
+                                <Link fontWeight={'bold'} textAlign={'center'} justifyContent={'center'} onClick={ () => {openProfileModal(value?.id)} }> 
                                     {value?.username} 
                                 </Link>
                             </Td>
