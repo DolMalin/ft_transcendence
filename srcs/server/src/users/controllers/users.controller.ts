@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { FRIDParam, FRuserIdParam, UUIDParam } from 'src/decorator/decorator';
@@ -23,6 +23,15 @@ export class UsersController {
   findAll(@GetUser() user: User) {
     return this.usersService.findAllUsers(user);
   }
+
+  @Get(':id')
+  async findOne(@Param('id') @UUIDParam() id: string) {
+    const user = await this.usersService.findOneById(id)
+    if (!user)
+      throw new NotFoundException("Users not found", 
+      {cause: new Error(), description: "cannot find any users in database"})
+    return this.usersService.removeProtectedProperties(user)
+  } 
 
   @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
