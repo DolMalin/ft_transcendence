@@ -52,11 +52,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.findOneById(client.handshake.query?.userId as string);
 
       if (this.server.sockets.adapter.rooms.has('game-' + user.id) === false)
-      {
-        this.server.sockets.emit('userListUpdate');
-        this.server.sockets.emit('friendListUpdate');
         this.userService.update(user.id, {isLogged : true, isAvailable : true})
-      }
+      this.server.sockets.emit('userListUpdate');
+      this.server.sockets.emit('friendListUpdate');
       client.join('game-' + user.id);
     }
     catch(e) {
@@ -87,16 +85,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
       client.leave('game-' + user.id);
       if (this.server.sockets.adapter.rooms.has('game-' + user.id) === false)
-      {
-        this.server.sockets.emit('userListUpdate');
-        this.server.sockets.emit('friendListUpdate');
         this.userService.update(user.id, {isAvailable : false, isLogged : false})
-      }
+      this.server.sockets.emit('userListUpdate');
+      this.server.sockets.emit('friendListUpdate');
     }
     catch(e) {
       Logger.error('Game Gateway handle disconnection error: ', e?.message);
     }
     Logger.log(client.id + 'was disconnected')
+  }
+
+  @SubscribeMessage('registered') 
+  registered() {
+
+    this.server.sockets.emit('userListUpdate');
   }
 
   @SubscribeMessage('joinGame')
