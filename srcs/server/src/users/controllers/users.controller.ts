@@ -24,15 +24,6 @@ export class UsersController {
     return this.usersService.findAllUsers(user);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') @UUIDParam() id: string) {
-    const user = await this.usersService.findOneById(id)
-    if (!user)
-      throw new NotFoundException("Users not found", 
-      {cause: new Error(), description: "cannot find any users in database"})
-    return this.usersService.removeProtectedProperties(user)
-  } 
-
   @UseGuards(AccessToken2FAGuard)
   @Get('scoreList')
   scoreList(): Promise<leaderboardStats[]> {
@@ -95,6 +86,15 @@ export class UsersController {
   remove(@Param('id') @UUIDParam() userId: string) {
     return this.usersService.remove(userId);
   }
+
+  @Get(':id')
+  async findOne(@Param('id') @UUIDParam() id: string) {
+    const user = await this.usersService.findOneById(id)
+    if (!user)
+      throw new NotFoundException("Users not found", 
+      {cause: new Error(), description: "cannot find any users in database"})
+    return this.usersService.removeProtectedProperties(user)
+  } 
 
   // ==================================================================== //
   // ======================== FRIENDS REQUEST =========================== //
