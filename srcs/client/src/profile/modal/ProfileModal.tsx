@@ -58,6 +58,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     </>)
                     })
             }
+            props.chatSocket?.emit('triggerRerenderMessage')
+            props.onClose()
         }
         catch(err){
             if (err.response?.status === 409)
@@ -92,6 +94,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
       
     function unBlockThem(targetId: string){
         props.chatSocket?.emit('unblock', { targetId })
+        props.onClose()
         props.chatSocket?.on('unblocked', (data) => {        
             handleUnblocked(data)
         })

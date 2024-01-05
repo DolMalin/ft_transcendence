@@ -881,6 +881,7 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             });
+
         if (!user)
             throw new NotFoundException("User not found", 
             {

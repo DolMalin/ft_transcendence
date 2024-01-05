@@ -48,15 +48,13 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
         password: 'isPasswordProtected' | 'none',
         privChan: string | null }[]>([])
 
-    //TO CHANGE
-    const  joinRoom = async (dt: {room: string, password: string}) => {
+      const  joinRoom = async (dt: {room: string, password: string}) => {
         try{
             const res = await authService.post(process.env.REACT_APP_SERVER_URL + '/room/joinRoom',
             {
                 name: dt.room,
                 password: dt.password
             })
-            console.log(res.data)
             props.chatSocket?.emit("joinRoom", res.data.id);
             props.setTargetRoom(res.data);
         }
@@ -182,10 +180,8 @@ function ChannelList(props: {chatSocket: Socket, setTargetRoom : Function, targe
     }
 
     async function isUserInRoom(roomId : number, roomName : string, password: 'isPasswordProtected' | 'none', isPrivChan : string) {
-
       try {
         const isInRoom = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/isInRoom/' + roomId);
-        const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/' + roomId)
         if (isInRoom.data === false && password === 'isPasswordProtected') {
           onOpen()
           setRoomName(roomName)

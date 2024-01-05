@@ -157,11 +157,17 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const res = await this.userService.unblockTarget(client.handshake.query?.userId as string, data.targetId)
       this.server.to(`user-${res.user.id}`).emit("unblocked", {username: res.user.username, username2: res.user2.username})
+      this.server.to(`user-${res.user.id}`).emit("rerenderMessage")
       this.server.to(`user-${res.user2.id}`).emit("unblocked2", {username: res.user.username, username2: res.user2.username})
     }
     catch(err){
       Logger.error(err)
     }
+  }
+
+  @SubscribeMessage('triggerRerenderMessage')
+  async triggerRerenderMessage(@ConnectedSocket() client: Socket){
+    this.server.to(`user-${client.handshake.query.userId as string}`).emit('rerenderMessage')
   }
 
   @SubscribeMessage('DM')
