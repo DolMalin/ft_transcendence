@@ -122,7 +122,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.matchmakingService.joinDuel(this.server, client, this.gamesMap, data);
   }
 
-  @SubscribeMessage('leaveGame') // Protected against socket meddling
+  @SubscribeMessage('leaveGame')
   leaveGame(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
 
     if (data === null || data === undefined || typeof data?.gameType !== 'string' || typeof data?.playerId !== 'string' || typeof data?.roomName !== 'string')
@@ -134,7 +134,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.matchmakingService.leaveGame(this.server, client, this.gamesMap, data);
   }
 
-  @SubscribeMessage('leaveQueue') // Protected against socket meddling
+  @SubscribeMessage('leaveQueue')
   leaveQueue(@MessageBody() data : {roomName : string}, @ConnectedSocket() client: Socket) {
 
     if (data === null || data === undefined || typeof data?.roomName !== 'string')
@@ -146,7 +146,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.matchmakingService.leaveQueue(data, this.gamesMap, client, this.server);
   }
 
-  @SubscribeMessage('playerMove') // Protected against socket meddling
+  @SubscribeMessage('playerMove')
   playerMove(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
     
     if (typeof data?.key !== 'string' || typeof data?.playerId !== 'string' || typeof data?.room !== 'string' )
@@ -158,7 +158,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.gamePlayService.movingStarted(this.gamesMap.get(data.room), data, client.id)
   }
 
-  @SubscribeMessage('playerMoveStopped') // Protected against socket meddling
+  @SubscribeMessage('playerMoveStopped')
   playerMoveStopped(@MessageBody() data: {key : string, playerId : string, room : string}, @ConnectedSocket() client: Socket) {
     
     if (typeof data.key !== 'string' || typeof data.playerId !== 'string' || typeof data.room !== 'string' )
@@ -170,7 +170,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.gamePlayService.movingStopped(this.gamesMap.get(data.room), data, client.id)
   }
 
-  @SubscribeMessage('startGameLoop') // Protected against socket meddling
+  @SubscribeMessage('startGameLoop')
   async startGameLoop(@MessageBody() data : GameInfo, @ConnectedSocket() client: Socket) {
     
     if (data === undefined || data === null || 
@@ -208,7 +208,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (bool === true) {
         this.userService.update(user.id, {isAvailable : bool});
       }
-      // this.server.to('game-' + user.id).emit('isAvailable', {bool : bool});
       this.matchmakingService.availabilityHandler(this.server, user.id, bool)
     }
     catch(e) {

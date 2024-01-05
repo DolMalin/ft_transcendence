@@ -149,13 +149,11 @@ export class RoomService {
     async findAllWithoutDm() {
         let roomList = await this.roomRepository.find()
 
-        // TO DO IS this really necessary ?
         if (!roomList) {
             throw new NotFoundException("No rooms", {
                 cause: new Error(),
                 description: "There are no rooms in data base",
         })}
-        // 
         roomList = roomList.filter(room => room.type !== roomType.directMessage)
         roomList.forEach((room) => {
             if (room.password)
