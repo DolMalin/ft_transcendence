@@ -273,7 +273,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     <Box width={'128px'} height={'128px'} marginBottom={'15px'}>
                         <Avatar
                         size='2xl'
-                        name={'avatar'}
+                        name={user?.username}
                         src={process.env.REACT_APP_SERVER_URL + '/users/avatar/' + props.userId}
                         marginRight={'10px'}
                         >

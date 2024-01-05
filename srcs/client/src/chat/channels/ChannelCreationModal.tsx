@@ -101,7 +101,7 @@ function ChannelCreationModal(props : {isOpen : boolean, onOpen : () => void , o
 
     return (
       <>
-        <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered>
+        <Modal isOpen={props.isOpen} onClose={() => {props.onClose(); setChecked(false); setPrivate(false)}} isCentered>
           <ModalOverlay  
             bg='blackAlpha.300'
             backdropFilter='blur(10px)'
