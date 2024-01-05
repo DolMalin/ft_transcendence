@@ -214,25 +214,35 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     let hostId = client.handshake.query?.userId as string
     try{
       const info = await this.roomService.getInfoForInvite(data.roomId, data.guestUsername)
-      if (hostId === info.targetId){
+      if (hostId === info.target?.id){
         this.server.to(`user-${hostId}`).emit('inviteError', 'You cannot invite yourself')
         return
       }
-      if (info.room?.privChan === false)
-      {
+      if (info.room?.privChan === false){
         Logger.error('You cannot invite in a public channel')
         return
       }
       const host = await this.userService.findOneById(hostId)
-      this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
-      this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
-      {
-        senderId: host?.id, 
-        senderUsername: host?.username, 
-        roomName: info?.room?.name,
-        roomId: data.roomId,
-        targetId: info?.targetId
-      })
+      if (this.roomService.isInRoom(info.target, info.room.id)){
+        this.server.to(`user-${hostId}`).emit('inviteError', `${info.target.username} is already in this channel`)
+        return
+      }
+      if ((this.roomService.isAdmin(info.room, host) === 'isOwner' || 
+          this.roomService.isAdmin(info.room, host) === 'isAdmin')){
+        this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
+        this.server.to(`user-${info.target?.id}`).emit('chanInvitedNotification', 
+        {
+          senderId: host?.id, 
+          senderUsername: host?.username, 
+          roomName: info?.room?.name,
+          roomId: data.roomId,
+          targetId: info?.target?.id
+        })
+      }
+      else{
+        this.server.to(`user-${hostId}`).emit('inviteError', `suspect activities detected`)
+        return 
+      }
     }
     catch(err){
       this.server.to(`user-${hostId}`).emit('inviteError', err.response?.message)
