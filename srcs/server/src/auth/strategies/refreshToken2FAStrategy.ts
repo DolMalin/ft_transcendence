@@ -18,15 +18,15 @@ export class RefreshToken2FAStrategy extends PassportStrategy(Strategy, 'jwt-ref
 		if (
 		  req.cookies &&
 		  'refreshToken' in req.cookies &&
-		  req.cookies.refreshToken?.length > 0
+		  req.cookies?.refreshToken?.length > 0
 		) {
-		  return req.cookies.refreshToken;
+		  return req.cookies?.refreshToken;
 		}
 		return null;
 	  }
 
 	async validate(@Req() req: any, payload: any) {
-		const user = await this.userService.findOneById(payload.id)
+		const user = await this.userService.findOneById(payload?.id)
 		if (!user?.isTwoFactorAuthenticationEnabled)
 			return user
 		

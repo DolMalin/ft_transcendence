@@ -18,7 +18,6 @@ interface liveMessage {
   sendAt: Date | string
 };
 
-//TODO changer cors true ?
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
@@ -205,7 +204,7 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   generateDMRoomName(user1Id: string, user2Id: string): string {
       return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
   }
-
+  
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){

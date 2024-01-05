@@ -20,15 +20,15 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 		if (
 		  req.cookies &&
 		  'accessToken' in req.cookies &&
-		  req.cookies.accessToken?.length > 0
+		  req.cookies?.accessToken?.length > 0
 		) {
-		  return req.cookies.accessToken;
+		  return req.cookies?.accessToken;
 		}
 		return null;
 	  }
 
 	async validate(payload: any) {
-		const user = await this.userService.findOneById(payload.id)
+		const user = await this.userService.findOneById(payload?.id)
 		if (user)
 			return user
 		throw new ForbiddenException('Access denied', {cause: new Error(), description: `Cannot find user`})
