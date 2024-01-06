@@ -262,7 +262,7 @@ export class AuthService {
     }
 
     if (dto.username?.length > 0 && await this.usersService.findOneByUsername(dto.username))
-      throw new ConflictException('Database error', { cause: new Error(), description: 'username already exists' })
+      throw new ConflictException('username already exists', { cause: new Error(), description: 'Database error' })
 
     const newUser = await this.usersService.update(user.id, { username: dto.username, isRegistered: true })
     if (!newUser)
