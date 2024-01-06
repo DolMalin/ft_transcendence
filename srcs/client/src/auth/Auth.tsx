@@ -69,7 +69,8 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 			setFormErrorMsg(err.response?.data?.error);
 			setFormError(true);
 			return err.response?.status
@@ -86,7 +87,8 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 
@@ -99,8 +101,9 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 
 			setFormError(false);
 		} catch(err) {
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response?.data?.error);
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			setFormErrorMsg(err.response?.data?.message);
 			setFormError(true);
 		}
 	}
@@ -120,9 +123,11 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 			dispatch({type:'SET_IS_REGISTERED', payload:true})
 
 			setFormError(false);
+			props.gameSock.emit('registered');
 		} catch(err) {
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
-			setFormErrorMsg(err.response?.data?.error);
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			setFormErrorMsg(err.response?.data?.message);
 			setFormError(true);
 		}
 	}
@@ -203,7 +208,7 @@ function Auth(props : {state: stateType, dispatch: Function, gameSock : Socket})
 										})
 										}
 									/>
-									<FormErrorMessage> {formErrorMsg}</FormErrorMessage>
+									<FormErrorMessage>{formErrorMsg}</FormErrorMessage>
 								</FormControl>
 
 								<FormControl isRequired>

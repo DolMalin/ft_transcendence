@@ -21,15 +21,15 @@ export class AccessToken2FAStrategy extends PassportStrategy(Strategy, 'jwt-2fa'
 		if (
 		  req.cookies &&
 		  'accessToken' in req.cookies &&
-		  req.cookies.accessToken?.length > 0
+		  req.cookies?.accessToken?.length > 0
 		) {
-		  return req.cookies.accessToken;
+		  return req.cookies?.accessToken;
 		}
 		return null;
 	  }
 
 	async validate(payload: any) {
-		const user = await this.userService.findOneById(payload.id)
+		const user = await this.userService.findOneById(payload?.id)
 		
 		if (!user?.isTwoFactorAuthenticationEnabled)
 			return user

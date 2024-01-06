@@ -1,14 +1,22 @@
-FROM node:buster
+FROM node:latest
 
 ARG SERVER_PORT
+ARG SERVER_URL
+ARG SERVER_IP
 
 WORKDIR /usr/src/app
-ENV PATH /usr/src/server/node_modules/.bin:$PATH
+# ENV PATH /usr/src/server/node_modules/.bin:$PATH
 
-# COPY package*.json ./
-# RUN npm install -g @nestjs/cli
+COPY package.json .
+COPY package-lock.json .
 
-# COPY . .
+COPY . .
+
 EXPOSE ${SERVER_PORT}
 ENV PORT=${SERVER_PORT}
-CMD npm install ; npm i @nestjs/websockets socket.io @nestjs/platform-socket.io socket.io-client ; npm run start:dev
+RUN npm install
+CMD ['npm' 'run' 'build']
+
+ENTRYPOINT [ "npm", "run" ,"start:prod" ]
+
+# CMD [ "tail", "-f", "/dev/null" ]

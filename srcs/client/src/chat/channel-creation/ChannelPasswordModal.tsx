@@ -49,7 +49,8 @@ function ChannelPasswordModal(props : {setTargetRoom: Function, roomName: string
                 })
             }
             else
-                console.error(`${err.response.data.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

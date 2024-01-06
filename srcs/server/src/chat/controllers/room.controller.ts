@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AccessToken2FAGuard } from 'src/auth/guards/accessToken2FA.auth.guard';
 import { AuthService } from 'src/auth/services/auth.service';
 import { INTParam } from 'src/decorator/decorator';
@@ -11,7 +12,6 @@ import { JoinRoomDto } from '../dto/join-room.dto';
 import { UpdatePrivilegesDto } from '../dto/update-privileges.dto';
 import { UpdateRoomDto } from '../dto/update-room.dto';
 import { RoomService } from '../services/room.service';
-import { ThrottlerGuard } from '@nestjs/throttler';
 
 @UseGuards(AccessToken2FAGuard)
 @UseGuards(ThrottlerGuard)
@@ -28,20 +28,9 @@ export class RoomController {
         return this.roomService.create(createRoomDto, user)
     }
 
-    @Get()
-    getRoomList(){
-        return this.roomService.findAll();
-    }
-
     @Get('list')
     getRoomListWithoutDm(){
         return this.roomService.findAllWithoutDm();
-    }
-
-    @Get(':id')//REMOVE
-    getRoom(@Param('id') @INTParam() id: number){
-
-        return this.roomService.getRoomById(id);
     }
 
     @Get('userlist/:id')

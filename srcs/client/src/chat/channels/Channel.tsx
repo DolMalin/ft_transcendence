@@ -88,6 +88,29 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
         }
     }
 
+    const rerenderMessage = async () => {
+        try{
+            const room = await authService.get(process.env.REACT_APP_SERVER_URL + '/room/messageInRoom/' + props.room.id)
+            setMessageList(room.data.message)
+        }
+        catch(err){
+            if (err){
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            }
+        }
+    }
+
+    useEffect(() => {
+        props.chatSocket?.on('rerenderMessage', () => {
+            rerenderMessage()
+        })
+        
+        return (() => {
+            props.chatSocket?.off('rerenderMessage')
+        })
+    })
+
     useEffect(() => {
         props.chatSocket?.on("receiveMessage", (data: MessageData) => {
 
@@ -109,7 +132,8 @@ function Channel(props : {room : Room, gameSocket : Socket, chatSocket : Socket,
                 setMe({id: res?.data?.id, username: res?.data?.username})
             }
             catch(err){
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)} 
         }
 
         asyncWrapper();

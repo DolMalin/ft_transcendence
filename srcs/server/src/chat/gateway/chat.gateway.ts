@@ -18,7 +18,6 @@ interface liveMessage {
   sendAt: Date | string
 };
 
-//TODO changer cors true ?
 @WebSocketGateway({ cors: true }) 
 export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
   constructor(
@@ -157,11 +156,17 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     try{
       const res = await this.userService.unblockTarget(client.handshake.query?.userId as string, data.targetId)
       this.server.to(`user-${res.user.id}`).emit("unblocked", {username: res.user.username, username2: res.user2.username})
+      this.server.to(`user-${res.user.id}`).emit("rerenderMessage")
       this.server.to(`user-${res.user2.id}`).emit("unblocked2", {username: res.user.username, username2: res.user2.username})
     }
     catch(err){
       Logger.error(err)
     }
+  }
+
+  @SubscribeMessage('triggerRerenderMessage')
+  async triggerRerenderMessage(@ConnectedSocket() client: Socket){
+    this.server.to(`user-${client.handshake.query.userId as string}`).emit('rerenderMessage')
   }
 
   @SubscribeMessage('DM')
@@ -200,22 +205,6 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
       return user1Id < user2Id ? `${user1Id}-${user2Id}` : `${user2Id}-${user1Id}`
   }
   
-
-  // TO DELETE ?
-  // @SubscribeMessage('block')
-  // async blockTarget(@MessageBody() data: { targetId: string }, @ConnectedSocket() client: Socket){
-  //   if (!data || typeof data.targetId !== "string"){
-  //     Logger.error("Wrong type for parameter")
-  //     return 
-  //   }
-  //   try {
-  //     this.userService.blockTarget(client.handshake.query?.userId as string, data.targetId)
-  //   } 
-  //   catch (err) {
-  //     Logger.error(err)
-  //   } 
-  // }
-
   @SubscribeMessage('invitePrivateChannel')
   async invitePrivateChannel(@MessageBody() data: {roomId: number, guestUsername: string }, @ConnectedSocket() client: Socket){
     if (!data || typeof data.roomId !== "number" || typeof data.guestUsername !== "string"){
@@ -225,25 +214,35 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
     let hostId = client.handshake.query?.userId as string
     try{
       const info = await this.roomService.getInfoForInvite(data.roomId, data.guestUsername)
-      if (hostId === info.targetId){
+      if (hostId === info.target?.id){
         this.server.to(`user-${hostId}`).emit('inviteError', 'You cannot invite yourself')
         return
       }
-      if (info.room?.privChan === false)
-      {
+      if (info.room?.privChan === false){
         Logger.error('You cannot invite in a public channel')
         return
       }
       const host = await this.userService.findOneById(hostId)
-      this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
-      this.server.to(`user-${info.targetId}`).emit('chanInvitedNotification', 
-      {
-        senderId: host?.id, 
-        senderUsername: host?.username, 
-        roomName: info?.room?.name,
-        roomId: data.roomId,
-        targetId: info?.targetId
-      })
+      if (this.roomService.isInRoom(info.target, info.room.id)){
+        this.server.to(`user-${hostId}`).emit('inviteError', `${info.target.username} is already in this channel`)
+        return
+      }
+      if ((this.roomService.isAdmin(info.room, host) === 'isOwner' || 
+          this.roomService.isAdmin(info.room, host) === 'isAdmin')){
+        this.server.to(`user-${hostId}`).emit('chanInvite', data.guestUsername)
+        this.server.to(`user-${info.target?.id}`).emit('chanInvitedNotification', 
+        {
+          senderId: host?.id, 
+          senderUsername: host?.username, 
+          roomName: info?.room?.name,
+          roomId: data.roomId,
+          targetId: info?.target?.id
+        })
+      }
+      else{
+        this.server.to(`user-${hostId}`).emit('inviteError', `suspect activities detected`)
+        return 
+      }
     }
     catch(err){
       this.server.to(`user-${hostId}`).emit('inviteError', err.response?.message)

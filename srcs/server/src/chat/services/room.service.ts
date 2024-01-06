@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common'
+import { RouterModule } from '@nestjs/core'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as argon2 from 'argon2'
 import { AuthService } from 'src/auth/services/auth.service'
@@ -54,8 +55,10 @@ export class RoomService {
         if (!room.users)
             room.users = []
         room.users.push(user)
-        console.log(room)
-        return await this.roomRepository.save(room)
+        await this.save(room)
+        if (room?.password)
+            room.password = undefined;
+        return this.removeProtectedProperties(room)
     }
 
     async findOneByName(name: string){
@@ -312,8 +315,7 @@ export class RoomService {
     }
 
     async getInfoForInvite(roomId: number, invitedUser: string) {
-        const room = await this.findOneById(roomId)
-    
+        const room = await this.findOneByIdWithRelations(roomId)
         if (!room) {
             throw new NotFoundException("Room not found", {
                 cause: new Error(),
@@ -325,7 +327,7 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this user in the database",
         })}
-        return {room: room, targetId: target.id}
+        return {room: room, target: target}
     }
 
     async addTargetInWhiteList(roomId: number, invitedUser: string) {
@@ -620,7 +622,7 @@ export class RoomService {
             throw new ConflictException('Is muted', 
             {cause: new Error(), description: 'This user is allready muted'} )
         }
-        if (this.isAdmin(room, target) !== 'no')
+        if (this.isAdmin(room, target) !== 'no' && requestMaker?.id !== room.owner?.id)
             throw new ConflictException('Target is admin', 
             {
                 cause: new Error(), 
@@ -692,7 +694,7 @@ export class RoomService {
         else if (this.isBanned(room, target))
             throw new ConflictException('Banned already', 
             {cause: new Error(), description: target.username + ' is allready banned from ' + room.name})
-        else if (this.isAdmin(room, target) !== 'no')
+        else if (this.isAdmin(room, target) !== 'no' && requestMaker?.id !== room.owner?.id)
             throw new ConflictException('Is Admin', 
             {cause: new Error(), description: target.username + ' has admin privileges in ' + room.name + 'you cannot ban them'})
 
@@ -710,7 +712,7 @@ export class RoomService {
             room.banned = []
         room.banned.push(target)
         room.users = room.users.filter((user) => user.id != target.id)
-
+        room.administrator = room.administrator?.filter((user) => user.id != target.id)
         const newRoom = this.removeProtectedProperties(await this.save(room))
         return (newRoom)
     }
@@ -879,6 +881,7 @@ export class RoomService {
                 cause: new Error(), 
                 description: "cannot find this room in database"
             });
+
         if (!user)
             throw new NotFoundException("User not found", 
             {

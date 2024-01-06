@@ -106,7 +106,7 @@ function Chat(props: {chatSocket: Socket, gameSocket : Socket}) {
                 setTargetRoom(undefined);
             }
         });
-    
+
         return (() => {
             props.chatSocket?.off('kickBy');            
             props.chatSocket?.off('userBlocked')

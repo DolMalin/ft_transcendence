@@ -58,6 +58,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     </>)
                     })
             }
+            props.chatSocket?.emit('triggerRerenderMessage')
+            props.onClose()
         }
         catch(err){
             if (err.response?.status === 409)
@@ -70,9 +72,9 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                 })
             }
             else
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
-        // props.onClose()
     }
     
     const handleUnblocked = (data : {username: string, username2: string}) => {
@@ -92,6 +94,7 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
       
     function unBlockThem(targetId: string){
         props.chatSocket?.emit('unblock', { targetId })
+        props.onClose()
         props.chatSocket?.on('unblocked', (data) => {        
             handleUnblocked(data)
         })
@@ -107,9 +110,9 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestSended', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('pending')
             setIsFriendRequestCreator(true)
-            // props.onClose();
         } catch(err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -120,10 +123,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             props.chatSocket?.emit('friendRequestAccepted', {creatorId: res.data.receiver.id})
             setFriendRequestStatus('accepted')
             setIsFriendRequestCreator(false)
-            // props.onClose();
 
         } catch(err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -136,10 +139,10 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
             setFriendRequestStatus('undefined')
             setIsFriendRequestCreator(false)
-            // props.onClose();
 
         } catch(err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -159,7 +162,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
                     setIsYoursellf(false)
             }
             catch(error) {
-                console.error('Error checking if profile is my own:', error);
+                if (error)
+                    console.error('Error checking if profile is my own:', error);
             }
         }
         const fetchUserProfile = async () => {
@@ -169,7 +173,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
 
                 return (res?.data?.id)
             } catch (err) {
-                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+                if (err.response?.data)
+                    console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
             }
         }
 
@@ -192,7 +197,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             setIsFriendRequestCreator(res.data?.isCreator)
             setFriendRequestId(res.data?.id)
         } catch (err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 
@@ -204,7 +210,8 @@ function ProfileModal(props : {userId : string, isOpen : boolean, onOpen : () =>
             const res = await authService.get(process.env.REACT_APP_SERVER_URL + `/users/isBlocked/${userId}`);
             setIsBlocked(res.data);
         } catch (err) {
-            console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+            if (err.response?.data)
+                console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
         }
     }
 

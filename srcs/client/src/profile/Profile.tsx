@@ -46,7 +46,8 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			props.dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 			dispatch({type: 'SET_IS_TWO_FACTOR_AUTHENTICATED', payload: false})
 
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 			return err.response?.status
 		}
 	}
@@ -61,7 +62,8 @@ function Profile(props : {state: stateType, dispatch: Function, gameSock : Socke
 			await AuthService.logout(state.isTwoFactorAuthenticated, props.gameSock)
 			window.location.reload()
 		} catch(err) {
-			console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
+			if (err.response?.data)
+				console.error(`${err.response?.data?.message} (${err.response?.data?.error})`)
 		}
 	}
 

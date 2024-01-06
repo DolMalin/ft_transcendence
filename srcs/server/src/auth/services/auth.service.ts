@@ -152,6 +152,7 @@ export class AuthService {
   async login(user: User, res: any) {
     const refreshToken = await this.createRefreshToken({ id: user.id })
     const accessToken = await this.createAccessToken({ id: user.id })
+    
     if (!refreshToken || !accessToken)
     throw new InternalServerErrorException('JWT error', { cause: new Error(), description: 'Cannot create JWT' })
     
