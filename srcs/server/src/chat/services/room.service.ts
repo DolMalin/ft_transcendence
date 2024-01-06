@@ -315,8 +315,7 @@ export class RoomService {
     }
 
     async getInfoForInvite(roomId: number, invitedUser: string) {
-        const room = await this.findOneById(roomId)
-    
+        const room = await this.findOneByIdWithRelations(roomId)
         if (!room) {
             throw new NotFoundException("Room not found", {
                 cause: new Error(),
@@ -328,7 +327,7 @@ export class RoomService {
                 cause: new Error(),
                 description: "Cannot find this user in the database",
         })}
-        return {room: room, targetId: target.id}
+        return {room: room, target: target}
     }
 
     async addTargetInWhiteList(roomId: number, invitedUser: string) {

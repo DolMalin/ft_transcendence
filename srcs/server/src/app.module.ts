@@ -31,6 +31,7 @@ import { BrowserCheckMiddleware } from './middlewares/BrowserCheck.middlware';
       password: process.env.DATABASE_PASSWORD,
       entities: [User, Room, Message, Avatar, Game, FriendRequest],
       synchronize: true,
+      // dropSchema: true
     }),
     ThrottlerModule.forRoot([{
       ttl: Number(process.env.THROTTLER_TTL) || 60,
