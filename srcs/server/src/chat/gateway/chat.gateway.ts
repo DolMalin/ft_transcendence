@@ -223,7 +223,8 @@ export class ChatGateway implements OnGatewayConnection,  OnGatewayDisconnect {
         return
       }
       const host = await this.userService.findOneById(hostId)
-      if (this.roomService.isInRoom(info.target, info.room.id)){
+      const isInRoom = await this.roomService.isInRoom(info.target, info.room.id)
+      if (isInRoom === true){
         this.server.to(`user-${hostId}`).emit('inviteError', `${info.target.username} is already in this channel`)
         return
       }
