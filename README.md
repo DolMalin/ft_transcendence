@@ -1,14 +1,15 @@
-# ft_malaise
-bienvenue les cucks
+ft_transcendence is a web application that combines real-time multiplayer gaming, social features, and instant messaging.
 
-# Contributing
-## Commits
-`<keyword>: <commit message>`
-- **cicd**: Changes to the CI/CD
-- **docs**: Changes to the documentation
-- **feat**: Creation of a new feature
-- **fix**: Fix a bug
-- **perf**: Changes that only improve performance
-- **refactor**: A code change that do not add features or fix a bug
-- **style**: Changes that does not affect the code (white-space, formatting, etc...)
-- **test**: Creating a test
+## Features
+
+- **Authentication System**: Secure user 2fa using JWT.
+- **Friends System**: Add, remove, and manage friends.
+- **Real-Time Game**: Play an exciting real-time game with a global leaderboard.
+- **Instant Messaging**: Chat with friends in real time.
+
+## Tech Stack
+
+- **Frontend**: React
+- **Backend**: Nest.js
+- **WebSockets**: Socket.io
+- **Database**: PostgreSQL
